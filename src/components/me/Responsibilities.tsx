@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { deleteResponsibility, saveResponsibility, startOfficialVerification } from "@/lib/actions/responsible";
 import { searchPlaces, type Place } from "@/app/onboarding/actions";
@@ -82,6 +83,7 @@ export function Responsibilities({ items, homeRegion }: { items: MyResp[]; homeR
   return (
     <div className="flex max-w-[760px] flex-col gap-4">
       <p className="m-0">{t("intro")}</p>
+      {items.length > 0 && <Link href="/responsible?view=intake" className="self-start font-bold">{t("openIntake")}</Link>}
       {items.map((r) => editing === r.id ? <Form key={r.id} initial={r} onDone={() => setEditing(null)} homeRegion={homeRegion} /> : (
         <article key={r.id} className="flex flex-col gap-2 border-t border-line pt-3">
           <strong className="flex items-center gap-2 text-lg">{r.organization_name ? `${r.organization_name} · ${r.title}` : r.title}

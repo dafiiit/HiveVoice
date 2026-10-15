@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { addDomain, grantAdmin, purgeDemo, removeDomain, setVerificationMode } from "@/lib/actions/admin";
+import { addDomain, grantAdmin, purgeDemo, removeDomain, setDemoChats, setVerificationMode } from "@/lib/actions/admin";
 import { btn, chip, field } from "../ui/styles";
 
 type Overview = {
@@ -25,6 +25,7 @@ export function AdminPanel({ o, me }: { o: Overview; me: string }) {
     router.refresh();
   });
   const mode = String(o.settings.verification_mode ?? "login");
+  const demoChats = o.settings.demo_chats === true;
   const stats: [string, number][] = [["profiles", o.profiles], ["demo_profiles", o.demo_profiles], ["groups", o.groups], ["initiatives", o.initiatives],
     ["listings", o.listings], ["open_ballots", o.open_ballots], ["open_cases", o.open_cases], ["regions", o.regions]];
   return (
@@ -74,6 +75,11 @@ export function AdminPanel({ o, me }: { o: Overview; me: string }) {
       <section className="flex flex-col gap-3">
         <h2 className="m-0 text-2xl font-bold">{t("demo")}</h2>
         <p className="m-0 max-w-[720px]">{t("demoText", { n: o.demo_profiles })}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <strong>{t("demoChats")}</strong>
+          <button type="button" role="switch" aria-checked={demoChats} disabled={pending} onClick={() => act(() => setDemoChats(!demoChats))} className={chip(demoChats)}>{demoChats ? t("on") : t("off")}</button>
+        </div>
+        <p className="m-0 max-w-[720px] text-sm text-muted">{t("demoChatsText")}</p>
         <button type="button" disabled={pending || o.demo_profiles === 0} onClick={() => { if (confirm(t("demoConfirm"))) act(() => purgeDemo(), t("demoRemoved")); }} className={`${btn.red} self-start`}>{t("demoRemove")}</button>
       </section>
     </div>

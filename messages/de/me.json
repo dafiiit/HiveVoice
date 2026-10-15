@@ -3,7 +3,10 @@
   "stats": "In {groups, plural, one {1 Gruppe} other {# Gruppen}} · {helped, plural, one {1 Mensch sagt „hat mir geholfen“} other {# Menschen sagen „hat mir geholfen“}}",
   "publicProfile": "So sehen andere dein Profil",
   "appear": "Du trittst auf",
-  "modes": { "real": "mit Klarnamen", "alias": "anonym" },
+  "modes": {
+    "real": "mit Klarnamen",
+    "alias": "anonym"
+  },
   "aliasNote": "Andere sehen nur dein Pseudonym und den Hinweis „verifiziert“.",
   "realNote": "Dein Name steht an Beiträgen und in Gruppen.",
   "realName": "Vor- und Nachname",
@@ -12,7 +15,13 @@
   "headlinePlaceholder": "z. B. Architekt · 3D und Ton",
   "bio": "Über mich",
   "sections": "Bereiche",
-  "tabs": { "profile": "Profil", "notes": "Notizbuch", "reports": "Meldungen und Jury", "resp": "Zuständigkeiten", "settings": "Einstellungen" },
+  "tabs": {
+    "profile": "Profil",
+    "notes": "Notizbuch",
+    "reports": "Meldungen und Jury",
+    "resp": "Zuständigkeiten",
+    "settings": "Einstellungen"
+  },
   "offers": "Was ich anbiete",
   "needs": "Was ich suche",
   "tagsHint": "Damit werden dir passende Gesuche und Angebote vorgeschlagen. Genaueres stellst du hier ein:",
@@ -34,8 +43,18 @@
   "noReports": "Keine Meldungen.",
   "reportedBy": "Du hast gemeldet: {rule}",
   "reportedAbout": "Ein Beitrag von dir wurde gemeldet: {rule}",
-  "rules": { "insult": "Beleidigung", "threat": "Bedrohung", "spam": "Spam", "misinformation": "Falschinformation", "personal_data": "Persönliche Daten" },
-  "caseStatus": { "open": "In Prüfung durch die Bürgerjury", "upheld": "Entschieden: Verstoß, ausgeblendet", "dismissed": "Entschieden: kein Verstoß" },
+  "rules": {
+    "insult": "Beleidigung",
+    "threat": "Bedrohung",
+    "spam": "Spam",
+    "misinformation": "Falschinformation",
+    "personal_data": "Persönliche Daten"
+  },
+  "caseStatus": {
+    "open": "In Prüfung durch die Bürgerjury",
+    "upheld": "Entschieden: Verstoß, ausgeblendet",
+    "dismissed": "Entschieden: kein Verstoß"
+  },
   "notes": {
     "private": "Nur du siehst dein Notizbuch.",
     "placeholder": "Gedanken, Entwürfe, Links …",
@@ -63,7 +82,8 @@
     "officialEmail": "Dienstliche E-Mail",
     "sendLink": "Link senden",
     "verifySent": "Link an {email} gesendet. Er ist 48 Stunden gültig.",
-    "deleteConfirm": "Zuständigkeit wirklich löschen? Offene Anfragen gehen verloren."
+    "deleteConfirm": "Zuständigkeit wirklich löschen? Offene Anfragen gehen verloren.",
+    "openIntake": "Eingang öffnen und Anfragen beantworten"
   },
   "settings": {
     "places": "Orte",
@@ -73,13 +93,20 @@
     "interests": "Interessen",
     "saved": "Gespeichert.",
     "language": "Sprache",
-    "languages": { "de": "Deutsch", "en": "English" },
+    "languages": {
+      "de": "Deutsch",
+      "en": "English"
+    },
     "easy": "Leichte Sprache",
     "easyHint": "Einfachere Texte, wo vorhanden.",
     "on": "An",
     "off": "Aus",
     "theme": "Darstellung",
-    "themes": { "system": "Wie Gerät", "light": "Hell", "dark": "Dunkel" },
+    "themes": {
+      "system": "Wie Gerät",
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
     "security": "Anmeldung",
     "addPasskey": "Passkey hinzufügen",
     "passkeyAdded": "Passkey gespeichert.",

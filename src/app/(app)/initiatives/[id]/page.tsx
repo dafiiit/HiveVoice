@@ -61,8 +61,8 @@ export default async function InitiativePage({ params, searchParams }: PageProps
       left join public.groups g on g.id = i.group_id
       where i.id = ${id}`;
     if (!ini) return null;
-    const authors = await tx<{ id: string; display_name: string; avatar_seed: number; display_mode: string }[]>`
-      select p.id, p.display_name, p.avatar_seed, p.display_mode from public.initiative_authors a join public.profiles p on p.id = a.profile_id
+    const authors = await tx<{ id: string; display_name: string; avatar_seed: number; avatar_path: string | null; display_mode: string }[]>`
+      select p.id, p.display_name, p.avatar_seed, p.avatar_path, p.display_mode from public.initiative_authors a join public.profiles p on p.id = a.profile_id
       where a.initiative_id = ${id} order by p.display_name`;
     const tags = await tx<{ slug: string }[]>`select t.slug::text from public.initiative_tags it join public.tags t on t.id = it.tag_id where it.initiative_id = ${id}`;
     const supported = me ? (await tx`select 1 from public.initiative_supports where initiative_id = ${id} and profile_id = ${me}`).length > 0 : false;
@@ -74,7 +74,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
     const affected = me ? (await tx`select 1 from public.user_regions where profile_id = ${me} and region_id = ${ini.region_id}`).length > 0 : false;
     const args = await tx<ArgumentView[]>`
       select a.id, a.side::text, a.body, coalesce((select array_agg(x) from jsonb_array_elements_text(a.sources) x), '{}') as sources,
-             a.author_id, p.display_name as author_name, p.avatar_seed as author_seed, p.display_mode as author_mode,
+             a.author_id, p.display_name as author_name, p.avatar_seed as author_seed, p.avatar_path as author_path, p.display_mode as author_mode,
              a.created_at, a.support_count, a.bridge_score::float as bridge_score,
              ${me ? tx`exists (select 1 from public.argument_supports s where s.argument_id = a.id and s.profile_id = ${me})` : tx`false`} as supported,
              coalesce((select jsonb_agg(jsonb_build_object('id', r.id, 'body', r.body, 'author_name', rp.display_name, 'author_seed', rp.avatar_seed) order by r.created_at)
@@ -138,7 +138,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
             {t("by")}
             {authors.map((a) => (
               <Link key={a.id} href={`/profile/${a.id}`} className="inline-flex items-center gap-1.5 font-bold text-ink no-underline">
-                <Avatar name={a.display_name} seed={a.avatar_seed} size={28} /> {a.display_name}
+                <Avatar name={a.display_name} seed={a.avatar_seed} path={a.avatar_path} size={28} /> {a.display_name}
                 {a.display_mode === "real" && <span aria-label={t("verified")}><IconCheck size={12} /></span>}
               </Link>
             ))}
@@ -189,7 +189,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
         {active === "threads" && (
           <section className="flex max-w-[760px] flex-col gap-4">
             {canWrite
-              ? <Composer ctx={{ initiativeId: id }} path={path} placeholder={t("threadPlaceholder")} viewerName={session!.profile.display_name} viewerSeed={session!.profile.avatar_seed} />
+              ? <Composer ctx={{ initiativeId: id }} path={path} placeholder={t("threadPlaceholder")} viewerName={session!.profile.display_name} viewerSeed={session!.profile.avatar_seed} viewerPath={session!.profile.avatar_path} />
               : <p className="m-0 text-muted"><Link href={`/login?next=${path}`}>{t("signInToJoin")}</Link></p>}
             <PostList posts={data.posts} path={`${path}?tab=threads`} canWrite={canWrite} viewerId={me} empty={t("noThreads")} />
           </section>

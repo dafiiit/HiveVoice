@@ -8,6 +8,7 @@ export type PostView = {
   author_id: string;
   author_name: string;
   author_seed: number;
+  author_path: string | null;
   author_mode: "real" | "alias";
   author_region: string | null;
   score: number;
@@ -57,7 +58,7 @@ export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, o
 
 const postColumns = (tx: Tx, viewerId: string | null) => tx`
   p.id, p.body, p.created_at, p.author_id, p.score, p.reply_count, p.is_pinned, p.listing_id, p.initiative_id,
-  a.display_name as author_name, a.avatar_seed as author_seed, a.display_mode as author_mode, ar.name as author_region,
+  a.display_name as author_name, a.avatar_seed as author_seed, a.avatar_path as author_path, a.display_mode as author_mode, ar.name as author_region,
   l.title as listing_title, l.kind::text as listing_kind, i.title as initiative_title,
   ${viewerId ? tx`coalesce((select v.value from public.post_votes v where v.post_id = p.id and v.profile_id = ${viewerId}), 0)` : tx`0`}::int as my_vote,
   '[]'::jsonb as replies`;

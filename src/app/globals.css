@@ -16,8 +16,9 @@
   color-scheme: light;
 }
 
+/* Light is the default. Dark only when chosen, or when "system" follows the device. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root[data-theme="system"] {
     --paper: #111111;
     --surface: #1b1b1b;
     --ink: #f1f1f1;

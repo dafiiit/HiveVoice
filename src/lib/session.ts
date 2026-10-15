@@ -11,6 +11,7 @@ export type SessionProfile = {
   real_name: string | null;
   display_mode: "real" | "alias";
   avatar_seed: number;
+  avatar_path: string | null;
   onboarded: boolean;
   verified: boolean;
   home_region_id: string | null;

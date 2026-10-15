@@ -18,6 +18,7 @@ export type ArgumentView = {
   author_id: string;
   author_name: string;
   author_seed: number;
+  author_path: string | null;
   author_mode: "real" | "alias";
   created_at: string;
   support_count: number;
@@ -47,7 +48,7 @@ function Argument({ a, initiativeId, canWrite, viewerId }: { a: ArgumentView; in
       {bridging && <span className="text-[13px] font-bold text-red">{t("bridging")}</span>}
       <p className="m-0 text-lg leading-snug">{a.body}</p>
       <span className="flex flex-wrap items-center gap-2 text-sm">
-        <Avatar name={a.author_name} seed={a.author_seed} size={24} />
+        <Avatar name={a.author_name} seed={a.author_seed} path={a.author_path} size={24} />
         <Link href={`/profile/${a.author_id}`} className="font-bold text-ink no-underline">{a.author_name}</Link>
         {a.author_mode === "real" && <IconCheck size={12} />}
         <span className="text-muted">· {relTime(a.created_at, locale)}</span>

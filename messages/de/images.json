@@ -1,0 +1,18 @@
+{
+  "photos": "Fotos",
+  "photosHint": "bis zu {max}, das erste ist das Titelbild",
+  "photoN": "Foto {n}",
+  "cover": "Titelbild",
+  "remove": "Foto {n} entfernen",
+  "add": "Foto hinzufügen",
+  "uploading": "Lädt …",
+  "addPhoto": "Foto hochladen",
+  "change": "Foto ändern",
+  "removePhoto": "Foto entfernen",
+  "errors": {
+    "type": "Das ist kein Bild. Bitte wähle ein Foto.",
+    "decode": "Das Bild konnte nicht gelesen werden. Bitte nimm ein JPG oder PNG.",
+    "auth": "Bitte melde dich zuerst an.",
+    "upload": "Das Hochladen hat nicht geklappt. Bitte versuche es noch einmal."
+  }
+}

@@ -16,21 +16,26 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f4f4" },
-    { media: "(prefers-color-scheme: dark)", color: "#111111" },
-  ],
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-};
+const themeOf = (value?: string) => (value === "dark" || value === "system" ? value : "light");
+
+export async function generateViewport(): Promise<Viewport> {
+  const theme = themeOf((await cookies()).get(THEME_COOKIE)?.value);
+  return {
+    themeColor:
+      theme === "system"
+        ? [{ media: "(prefers-color-scheme: light)", color: "#f4f4f4" }, { media: "(prefers-color-scheme: dark)", color: "#111111" }]
+        : theme === "dark" ? "#111111" : "#f4f4f4",
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+  };
+}
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
-  const theme = (await cookies()).get(THEME_COOKIE)?.value;
+  const theme = themeOf((await cookies()).get(THEME_COOKIE)?.value);
   return (
-    <html lang={locale} data-theme={theme === "light" || theme === "dark" ? theme : undefined}>
+    <html lang={locale} data-theme={theme}>
       <body className="min-h-dvh">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
         <ServiceWorker />

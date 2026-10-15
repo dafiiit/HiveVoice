@@ -22,6 +22,9 @@
     "post_reply": "Someone replied to your post.",
     "jury_invite": "You were drawn for the citizen jury (case {case_no}).",
     "report_decided": "Your report (case {case_no}) was decided.",
-    "content_hidden": "A post of yours was hidden after review by the citizen jury (case {case_no})."
+    "content_hidden": "A post of yours was hidden after review by the citizen jury (case {case_no}).",
+    "contact_request_direct": "Someone wants to write to you.",
+    "contact_accepted_direct": "Your message was accepted. You can chat now.",
+    "contact_declined_direct": "Your message was not accepted."
   }
 }

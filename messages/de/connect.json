@@ -1,7 +1,10 @@
 {
   "title": "Verbinden",
   "order": "Reihenfolge",
-  "mode": { "chrono": "Chronologisch", "suggested": "Vorgeschlagen" },
+  "mode": {
+    "chrono": "Chronologisch",
+    "suggested": "Vorgeschlagen"
+  },
   "guestTitle": "Du liest als Gast.",
   "guestText": "Öffentliche Gruppen und den Marktplatz kannst du lesen. Schreiben kannst du nach der Anmeldung.",
   "signIn": "Anmelden",
@@ -26,9 +29,64 @@
   "unread": "{n} ungelesen",
   "back": "Zurück zur Liste",
   "pick": "Wähle links eine Unterhaltung.",
-  "sort": { "top": "Für dich", "new": "Neueste" },
+  "sort": {
+    "top": "Für dich",
+    "new": "Neueste"
+  },
   "you": "Du",
   "messageTo": "Nachricht an {name} …",
   "write": "Nachricht schreiben",
-  "send": "Senden"
+  "send": "Senden",
+  "filter": {
+    "label": "Anzeigen",
+    "all": "Alles",
+    "chats": "Chats",
+    "groups": "Gruppen",
+    "requests": "Anfragen"
+  },
+  "newGroup": "Gruppe gründen",
+  "newGroupHint": "Du hast eine Idee für eine Gruppe? Gründe sie hier.",
+  "emptyList": "Noch keine Gespräche. Schreib jemandem über ein Angebot, eine Anfrage oder ein Profil, oder tritt einer Gruppe bei.",
+  "emptyFilter": "Hier ist gerade nichts.",
+  "read": "Gelesen",
+  "today": "Heute",
+  "yesterday": "Gestern",
+  "sending": "Wird gesendet …",
+  "sendFailed": "Die Nachricht ist nicht angekommen. Bitte versuche es noch einmal.",
+  "about": "Zu: {title}",
+  "openProfile": "Profil ansehen",
+  "openListing": "Eintrag ansehen",
+  "req": {
+    "outContact": "Du hast angefragt: {title}",
+    "outDirect": "Du hast eine Nachricht gesendet",
+    "inContact": "Fragt an: {title}",
+    "inDirect": "Möchte dir schreiben",
+    "outJoin": "Beitritt angefragt",
+    "inJoin": "Möchte der Gruppe beitreten",
+    "pending": "Wartet",
+    "declined": "Abgelehnt",
+    "newTag": "Neu",
+    "waitingFor": "Wartet auf die Antwort von {name}.",
+    "waitingForGroup": "Wartet auf die Verwalter:innen von „{group}“.",
+    "yourMessage": "Deine Nachricht",
+    "theirMessage": "Nachricht von {name}",
+    "accept": "Annehmen und Chat öffnen",
+    "decline": "Ablehnen",
+    "withdraw": "Anfrage zurückziehen",
+    "acceptJoin": "Aufnehmen",
+    "declineJoin": "Ablehnen",
+    "declinedBy": "{name} hat abgelehnt.",
+    "declinedGroup": "Die Gruppe hat abgelehnt.",
+    "openGroup": "Zur Gruppe",
+    "answerHint": "Wenn du annimmst, öffnet sich ein Chat. Erst dann sehen sich beide Seiten die Kontaktdetails.",
+    "done": "Erledigt."
+  },
+  "dm": {
+    "button": "Nachricht schreiben",
+    "title": "Nachricht an {name}",
+    "placeholder": "Hallo, ich habe dein Profil gesehen und …",
+    "privacy": "{name} sieht deine Nachricht als Anfrage und entscheidet, ob ein Chat entsteht.",
+    "sent": "Anfrage gesendet.",
+    "seeInConnect": "In Verbinden ansehen"
+  }
 }

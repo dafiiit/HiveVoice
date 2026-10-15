@@ -1,0 +1,18 @@
+{
+  "photos": "Photos",
+  "photosHint": "up to {max}, the first one is the cover",
+  "photoN": "Photo {n}",
+  "cover": "Cover",
+  "remove": "Remove photo {n}",
+  "add": "Add photo",
+  "uploading": "Uploading …",
+  "addPhoto": "Upload photo",
+  "change": "Change photo",
+  "removePhoto": "Remove photo",
+  "errors": {
+    "type": "That is not an image. Please choose a photo.",
+    "decode": "The image could not be read. Please use a JPG or PNG.",
+    "auth": "Please sign in first.",
+    "upload": "The upload failed. Please try again."
+  }
+}

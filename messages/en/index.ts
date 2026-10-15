@@ -8,6 +8,7 @@ import ns_connect from "./connect.json";
 import ns_errorPage from "./errorPage.json";
 import ns_explore from "./explore.json";
 import ns_group from "./group.json";
+import ns_images from "./images.json";
 import ns_initiative from "./initiative.json";
 import ns_jury from "./jury.json";
 import ns_legal from "./legal.json";
@@ -37,6 +38,7 @@ const messages = {
   "errorPage": ns_errorPage,
   "explore": ns_explore,
   "group": ns_group,
+  "images": ns_images,
   "initiative": ns_initiative,
   "jury": ns_jury,
   "legal": ns_legal,

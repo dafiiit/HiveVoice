@@ -11,8 +11,8 @@ const HOLDERS = ["maintainer", "contributor", "guest", "public"] as const;
 
 export function Team({ slug, groupId, visibility, joinPolicy, members, requests, perms, myRole, canManage, viewerId }: {
   slug: string; groupId: string; visibility: string; joinPolicy: string;
-  members: { id: string; name: string; seed: number; role: string; focus: string | null }[];
-  requests: { id: string; profile_id: string; name: string; seed: number; message: string | null }[];
+  members: { id: string; name: string; seed: number; path: string | null; role: string; focus: string | null }[];
+  requests: { id: string; profile_id: string; name: string; seed: number; path: string | null; message: string | null }[];
   perms: Record<string, Record<string, boolean>>;
   myRole: string | null; canManage: boolean; viewerId?: string;
 }) {
@@ -50,7 +50,7 @@ export function Team({ slug, groupId, visibility, joinPolicy, members, requests,
           return (
             <div key={m.id} className="flex flex-wrap items-center gap-3 border-b border-line py-3">
               <Link href={`/profile/${m.id}`} className="flex min-w-[220px] flex-1 items-center gap-3 text-ink no-underline">
-                <Avatar name={m.name} seed={m.seed} size={36} />
+                <Avatar name={m.name} seed={m.seed} path={m.path} size={36} />
                 <span className="flex flex-col"><strong>{m.name}</strong><span className="text-sm text-muted">{t(`roles.${m.role}`)}{m.focus ? ` · ${m.focus}` : ""}</span></span>
               </Link>
               {canManage && (
@@ -76,7 +76,7 @@ export function Team({ slug, groupId, visibility, joinPolicy, members, requests,
           <h2 className="m-0 mb-3 text-2xl font-bold">{t("wantToJoin")}</h2>
           {requests.map((r) => (
             <div key={r.id} className="flex flex-wrap items-center gap-3 border-b border-line py-3">
-              <span className="flex min-w-[220px] flex-1 items-center gap-3"><Avatar name={r.name} seed={r.seed} size={36} />
+              <span className="flex min-w-[220px] flex-1 items-center gap-3"><Avatar name={r.name} seed={r.seed} path={r.path} size={36} />
                 <span className="flex flex-col"><strong>{r.name}</strong>{r.message && <span className="text-sm">{r.message}</span>}</span></span>
               <button type="button" disabled={pending} onClick={() => start(async () => { await decideJoin(slug, r.id, true); })} className={btn.primary}>{t("accept")}</button>
               <button type="button" disabled={pending} onClick={() => start(async () => { await decideJoin(slug, r.id, false); })} className={btn.secondary}>{t("decline")}</button>

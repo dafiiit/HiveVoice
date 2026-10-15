@@ -7,6 +7,8 @@ import { slugify } from "@/lib/slug";
 import { Avatar } from "../ui/Avatar";
 import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
+import { ImagePicker } from "../ImageUpload";
+import { imageUrl } from "@/lib/images";
 import { btn, chip, field } from "../ui/styles";
 
 // Simple keyword hints so new listings get findable tags right away.
@@ -38,6 +40,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
   const [swap, setSwap] = useState("");
   const [allies, setAllies] = useState(!give);
   const [tags, setTags] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
   const [ideaPage, setIdeaPage] = useState(0);
   const [finder, setFinder] = useState(false);
   const [fq, setFq] = useState("");
@@ -54,13 +57,13 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
     return () => clearTimeout(h);
   }, [finder, fq, title]);
 
-  const reset = () => { setTitle(""); setDescription(""); setDetails(""); setSchedule(""); setSeats(""); setPay("free"); setTags([]); setResp([]); setFinder(false); setOpen(false); };
+  const reset = () => { setTitle(""); setDescription(""); setDetails(""); setSchedule(""); setSeats(""); setPay("free"); setTags([]); setImages([]); setResp([]); setFinder(false); setOpen(false); };
   const submit = (status: "active" | "draft") => start(async () => {
     const allTags = Array.from(new Set([...tags, ...auto, ...(tags.length || auto.length ? [] : [slugify(title.split(/\s+/)[0] ?? "")])])).filter(Boolean);
     const res = await saveListing({
       kind, title, description, detailsPrivate: details, payMode: pay, rateEuro: rate, fixedEuro: fixed, swapText: swap,
       locationText: location, scheduleText: (schedule + (recurring ? "" : "")).trim(), isRecurring: recurring, seats, seekingAllies: !give && allies,
-      tags: allTags, regionId, responsibilityIds: resp.map((r) => r.id),
+      tags: allTags, regionId, responsibilityIds: resp.map((r) => r.id), images,
     });
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
     void status;
@@ -88,12 +91,12 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
         </div>
       )}
       {edOpen && (
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-4">
             <label className={field.label}>{t("description")}
               <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t(give ? "descOffer" : "descNeed")} className={field.textarea} />
             </label>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <label className={field.label}>{t("location")}<input value={location} onChange={(e) => setLocation(e.target.value)} className={field.inputSm} /></label>
               <label className={field.label}>{t("schedule")}<input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder={t("schedulePlaceholder")} className={field.inputSm} /></label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={() => setRecurring(!recurring)} className="h-5 w-5 accent-[var(--ink)]" />{t("recurring")}</label>
@@ -108,10 +111,11 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
               {pay === "fixed" && <label className={field.label}>{t("amount")}<input type="number" min={0} value={fixed} onChange={(e) => setFixed(e.target.value)} className={`${field.inputSm} w-32`} /></label>}
               {pay === "swap" && <label className={field.label}>{t("swapFor")}<input value={swap} onChange={(e) => setSwap(e.target.value)} placeholder={t("swapPlaceholder")} className={field.inputSm} /></label>}
             </div>
+            <ImagePicker value={images} onChange={setImages} />
             <label className={field.label}>{t("details")} <span className={field.hint}>{t("detailsHint")}</span>
               <textarea rows={2} value={details} onChange={(e) => setDetails(e.target.value)} className={field.textarea} />
             </label>
-            <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={Array.from(new Set([...auto, ...popular])).slice(0, 14)} placeholder={t("tagPlaceholder")} />
+            <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={Array.from(new Set([...auto, ...popular]))} placeholder={t("tagPlaceholder")} />
             {!give && (
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-bold">{t("responsible")} <span className={field.hint}>{t("responsibleHint")}</span></span>
@@ -156,6 +160,10 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
           <aside aria-label={t("preview")} className="flex flex-col gap-2">
             <span className="text-sm text-muted">{t("preview")}</span>
             <article className={`flex flex-col gap-2 bg-paper p-4 ${give ? "border border-ink" : "border border-ink border-t-[6px]"}`}>
+              {images[0] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={imageUrl(images[0]) ?? ""} alt="" className="aspect-video w-full object-cover" />
+              )}
               <span className="text-sm">{t(give ? "gives" : "needs")}</span>
               <strong className="text-lg leading-tight">{title || t(give ? "titleOffer" : "titleNeed")}</strong>
               {description && <span className="text-sm">{description.length > 120 ? description.slice(0, 117) + " …" : description}</span>}

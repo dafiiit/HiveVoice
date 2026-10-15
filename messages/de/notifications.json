@@ -22,6 +22,9 @@
     "post_reply": "Jemand hat auf deinen Beitrag geantwortet.",
     "jury_invite": "Du wurdest für die Bürgerjury ausgelost (Fall {case_no}).",
     "report_decided": "Deine Meldung (Fall {case_no}) wurde entschieden.",
-    "content_hidden": "Ein Beitrag von dir wurde nach Prüfung durch die Bürgerjury ausgeblendet (Fall {case_no})."
+    "content_hidden": "Ein Beitrag von dir wurde nach Prüfung durch die Bürgerjury ausgeblendet (Fall {case_no}).",
+    "contact_request_direct": "Jemand möchte dir schreiben.",
+    "contact_accepted_direct": "Deine Nachricht wurde angenommen. Ihr könnt jetzt schreiben.",
+    "contact_declined_direct": "Deine Nachricht wurde nicht angenommen."
   }
 }

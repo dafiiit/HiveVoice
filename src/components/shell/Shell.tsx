@@ -14,23 +14,29 @@ export async function Shell({ session, children }: { session: Session | null; ch
   const t = await getTranslations("nav");
   const tl = await getTranslations("levels");
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
-  const [groups, pending] = session
+  // Verbinden carries what waits for an answer: unread chats, requests to me, people asking to join my groups.
+  const [groups, waiting] = session
     ? await asViewer(viewer, async (tx) => [
         await tx<MyGroup[]>`
           select g.slug, g.name from public.group_members m join public.groups g on g.id = m.group_id
           where m.profile_id = ${session.profile.id} and g.archived_at is null order by m.joined_at desc limit 6`,
-        Number((await tx`select count(*)::int n from public.contact_requests where to_profile_id = ${session.profile.id} and status = 'pending'`)[0].n),
+        Number((await tx`
+          select (
+            (select count(*) from public.conversation_participants cp where cp.profile_id = ${session.profile.id}
+               and exists (select 1 from public.messages m where m.conversation_id = cp.conversation_id and m.sender_id <> ${session.profile.id} and m.created_at > cp.last_read_at))
+            + (select count(*) from public.contact_requests r where r.to_profile_id = ${session.profile.id} and r.status = 'pending')
+            + (select count(*) from public.group_join_requests j where j.status = 'pending' and j.profile_id <> ${session.profile.id} and app.has_group_permission(j.group_id, 'manage_members'))
+          )::int as n`)[0].n),
       ] as const)
     : [[] as MyGroup[], 0];
 
+  // "Für mich" lives in the avatar at the top right, so the side navigation stays short.
   const items: NavItem[] = [
     { href: "/explore", label: t("explore") },
     { href: "/needs", label: t("needs") },
-    { href: "/offers", label: t("offers"), badge: pending },
-    { href: "/connect", label: t("connect") },
-    { href: "/me", label: t("me") },
+    { href: "/offers", label: t("offers") },
+    { href: "/connect", label: t("connect"), badge: waiting },
   ];
-  const mobileItems = [items[1], items[2], items[3], items[4]];
   const place = session?.profile.home_region;
 
   return (
@@ -55,7 +61,6 @@ export async function Shell({ session, children }: { session: Session | null; ch
             ))}
           </div>
         )}
-        <Link href="/responsible" className="text-sm text-muted">{t("responsible")}</Link>
       </nav>
 
       <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
@@ -91,7 +96,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
                   )}
                 </Link>
                 <Link href="/me" aria-label={t("profileOf", { name: session.profile.display_name })} className="inline-flex">
-                  <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} size={44} />
+                  <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={44} />
                 </Link>
               </>
             ) : (
@@ -106,7 +111,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
         </header>
         <main id="main" className="flex-1">{children}</main>
       </div>
-      <BottomNav items={mobileItems} newLabel={t("new")} />
+      <BottomNav items={items} newLabel={t("new")} />
     </div>
   );
 }

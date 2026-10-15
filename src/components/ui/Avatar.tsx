@@ -1,4 +1,5 @@
 import { Glyph } from "./Glyph";
+import { imageUrl } from "@/lib/images";
 
 const SHAPES = ["circle", "ring", "diamond", "pill", "leaf", "keyhole", "quarter", "arch", "triangle", "split", "dots", "stripes", "flower", "bowl"];
 
@@ -8,8 +9,16 @@ function hash(s: string) {
   return h;
 }
 
-/** Square avatar with a glyph. Photos follow later; the glyph is stable per person. */
-export function Avatar({ name, seed, size = 40, group = false }: { name: string; seed?: number; size?: number; group?: boolean }) {
+/** Square avatar: the uploaded photo, or a glyph that is stable per person. */
+export function Avatar({ name, seed, size = 40, group = false, path }: { name: string; seed?: number; size?: number; group?: boolean; path?: string | null }) {
+  const photo = imageUrl(path);
+  if (photo) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={photo} alt={name} title={name} width={size} height={size} loading="lazy" decoding="async"
+        className="inline-block flex-none bg-chip object-cover" style={{ width: size, height: size }} />
+    );
+  }
   const n = seed ?? hash(name);
   const shape = SHAPES[n % SHAPES.length];
   const bg = group ? "var(--red)" : "var(--ink)";

@@ -7,18 +7,27 @@ import { Avatar } from "../ui/Avatar";
 import { btn, field } from "../ui/styles";
 
 /** Opens a short message to the owner. Contact details are only shared once they accept. */
-export function ContactButton({ listingId, ownerName, ownerSeed, title, price, label, signedIn, sent: initiallySent, className }: {
-  listingId: string; ownerName: string; ownerSeed?: number; title: string; price: string; label: string; signedIn: boolean; sent?: boolean; className?: string;
+export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, title, price, label, signedIn, sent: initiallySent, className }: {
+  listingId: string; ownerName: string; ownerSeed?: number; ownerPath?: string | null; title: string; price: string; label: string; signedIn: boolean; sent?: boolean; className?: string;
 }) {
   const t = useTranslations("listings");
   const tc = useTranslations("common");
+  const tcn = useTranslations("connect");
+  const [requestId, setRequestId] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(!!initiallySent);
   const [msg, setMsg] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   if (!signedIn) return <Link href="/login" className={className ?? btn.primary}>{label}</Link>;
-  if (sent) return <span role="status" className="text-sm font-bold">{t("requested")}</span>;
+  if (sent) {
+    return (
+      <span role="status" className="flex flex-wrap items-center gap-x-3 text-sm">
+        <strong>{t("requested")}</strong>
+        <Link href={requestId ? `/connect?c=c:${requestId}` : "/connect?f=requests"} className="text-ink">{tcn("dm.seeInConnect")}</Link>
+      </span>
+    );
+  }
   return (
     <>
       <button type="button" onClick={() => { setMsg(t("defaultMessage")); setOpen(true); }} className={className ?? btn.primary}>{label}</button>
@@ -26,7 +35,7 @@ export function ContactButton({ listingId, ownerName, ownerSeed, title, price, l
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center" onClick={() => setOpen(false)}>
           <div role="dialog" aria-modal="true" aria-label={t("contactTitle")} onClick={(e) => e.stopPropagation()} className="flex w-full max-w-[520px] flex-col gap-4 bg-surface p-6">
             <div className="flex items-center gap-3">
-              <Avatar name={ownerName} seed={ownerSeed} size={44} />
+              <Avatar name={ownerName} seed={ownerSeed} path={ownerPath} size={44} />
               <div className="flex min-w-0 flex-col">
                 <strong>{t("to", { name: ownerName })}</strong>
                 <span className="text-sm text-muted">{title} · {price}</span>
@@ -39,7 +48,7 @@ export function ContactButton({ listingId, ownerName, ownerSeed, title, price, l
               <button type="button" disabled={pending || !msg.trim()} onClick={() => start(async () => {
                 const res = await requestContact(listingId, msg);
                 if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
-                setSent(true); setOpen(false);
+                setRequestId(res.data); setSent(true); setOpen(false);
               })} className={btn.primaryLg}>{tc("send")}</button>
               <button type="button" onClick={() => setOpen(false)} className={btn.secondaryLg}>{tc("cancel")}</button>
             </div>

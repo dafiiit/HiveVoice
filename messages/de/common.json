@@ -47,7 +47,8 @@
     "domain_not_official": "Diese E-Mail-Domain ist nicht als offiziell hinterlegt.",
     "invalid_token": "Der Link ist ungültig oder abgelaufen.",
     "not_found": "Nicht gefunden.",
-    "unknown": "Das hat nicht geklappt. Bitte versuche es noch einmal."
+    "unknown": "Das hat nicht geklappt. Bitte versuche es noch einmal.",
+    "own_profile": "Das bist du selbst."
   },
   "phase": {
     "idea": "Idee",
@@ -61,5 +62,13 @@
     "rejected_vote": "In der Abstimmung abgelehnt",
     "rejected_addressee": "Vom Adressaten abgelehnt",
     "withdrawn": "Zurückgezogen"
+  },
+  "tags": {
+    "ideas": "Ideen zum Antippen",
+    "prev": "Zurück blättern",
+    "next": "Weiter blättern",
+    "add": "Hashtag hinzufügen",
+    "remove": "{tag} entfernen",
+    "none": "Noch nichts gewählt."
   }
 }

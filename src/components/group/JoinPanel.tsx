@@ -10,6 +10,7 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
 }) {
   const t = useTranslations("group");
   const tc = useTranslations("common");
+  const tcn = useTranslations("connect");
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState("");
   const [state, setState] = useState<string | null>(requested ? "requested" : null);
@@ -26,7 +27,14 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
       </div>
     );
   }
-  if (state === "requested") return <span role="status" className="text-sm font-bold">{t("requested")}</span>;
+  if (state === "requested") {
+    return (
+      <span role="status" className="flex flex-wrap items-center gap-x-3 text-sm">
+        <strong>{t("requested")}</strong>
+        <Link href="/connect?f=requests" className="text-ink">{tcn("dm.seeInConnect")}</Link>
+      </span>
+    );
+  }
   const join = () => start(async () => {
     const res = await joinGroup(slug, id, msg);
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));

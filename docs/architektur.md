@@ -66,4 +66,29 @@ kleine Zahlen werden nicht überbewertet. Ab 0,15 zeigt die App „Findet Zustim
 - Dateien mit Versionen und Änderungsvorschlägen (`files`, `file_versions`, `change_requests`)
 - eID-Verifizierung (`private.identities`, `private.rejoin_blocks`)
 - LLM-basiertes Matching (heute: Stichwörter und Region)
-- Bilder-Upload (heute: Platzhalter)
+- Bildmoderation (Fotos werden heute nur über „Melden“ geprüft), Zuschnitt und weitere Größen
+
+## Fotos
+
+Fotos liegen im Objektspeicher (Supabase Storage, Bucket `images`, öffentlich lesbar). Die Datenbank kennt nur den
+Pfad `<auth-user-id>/<datei>.jpg` (`profiles.avatar_path`, `listing_images`). Der Browser verkleinert jedes Bild
+(lange Seite höchstens 1280 px, Profilfoto 640 px, JPEG) und lädt es direkt in den eigenen Ordner hoch. Die Policies auf
+`storage.objects` erlauben Schreiben nur dort, die Datenbankfunktionen `app.set_avatar` und `app.set_listing_images`
+prüfen Ordner, Endung und Anzahl (höchstens vier je Eintrag). Auf einem eigenen Server genügt jeder S3-kompatible
+Speicher: `NEXT_PUBLIC_IMAGE_BASE_URL` zeigt auf seine öffentliche Adresse, nur `src/lib/upload.ts` ändert sich.
+Nicht mehr verwendete Dateien werden noch nicht automatisch gelöscht.
+
+## Verbinden: Anfragen und Chats
+
+Erste Kontakte laufen immer über eine Anfrage, damit niemand ungefragt zugeschrieben wird:
+
+- `contact_requests` mit Eintrag (Angebot oder Gesuch) oder ohne (erste Nachricht über ein Profil, `app.request_direct`)
+- `group_join_requests` für Gruppen mit Beitritt auf Anfrage
+
+Verbinden zeigt beides als Zeilen mit Status („Wartet“, „Neu“, „Abgelehnt“). Nimmt die empfangende Person an,
+entsteht eine `conversation`; die erste Nachricht wandert hinein. Chats nutzen Polling (4 s bei offenem Tab), keine
+Echtzeit-Verbindung. Der „Gelesen“-Hinweis kommt aus `conversation_participants.last_read_at`.
+
+Im Testbetrieb gibt `app.ensure_demo_chats()` jedem Konto beim ersten Öffnen von Verbinden drei Beispiel-Chats und
+drei Anfragen von Demo-Profilen (Schalter „Demo-Chats“ auf der Admin-Seite, Einstellung `demo_chats`). „Alle
+Demo-Daten löschen“ entfernt sie wieder.

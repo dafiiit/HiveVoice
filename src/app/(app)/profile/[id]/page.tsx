@@ -11,9 +11,10 @@ import { tag } from "@/components/ui/styles";
 import { FollowButton } from "@/components/FollowButton";
 import { EndorseButton } from "@/components/EndorseButton";
 import { ContactButton } from "@/components/listings/ContactButton";
+import { MessageButton } from "@/components/connect/MessageButton";
 import { priceLabel } from "@/components/listings/price";
 
-type Profile = { id: string; display_name: string; display_mode: string; avatar_seed: number; headline: string | null; bio: string | null; helped_count: number; region: string | null; onboarded_at: string | null };
+type Profile = { id: string; display_name: string; display_mode: string; avatar_seed: number; avatar_path: string | null; headline: string | null; bio: string | null; helped_count: number; region: string | null; onboarded_at: string | null };
 
 export default async function ProfilePage({ params }: PageProps<"/profile/[id]">) {
   const { id } = await params;
@@ -26,7 +27,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
   const locale = await getLocale();
   const d = await asViewer(viewer, async (tx) => {
     const [p] = await tx<Profile[]>`
-      select p.id, p.display_name, p.display_mode, p.avatar_seed, p.headline, p.bio, p.helped_count, p.onboarded_at, r.name as region
+      select p.id, p.display_name, p.display_mode, p.avatar_seed, p.avatar_path, p.headline, p.bio, p.helped_count, p.onboarded_at, r.name as region
       from public.profiles p left join public.regions r on r.id = p.home_region_id where p.id = ${id}`;
     if (!p) return null;
     const tags = await tx<{ slug: string; relation: string }[]>`select t.slug::text, ui.relation from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = ${id}`;
@@ -50,16 +51,21 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-8">
         <section className="flex flex-wrap items-start gap-6">
-          <Avatar name={p.display_name} seed={p.avatar_seed} size={120} />
+          <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={120} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <h1 className="display m-0 flex items-center gap-3">{p.display_name}{p.display_mode === "real" && <span aria-label={tc("verified")}><IconCheck size={28} /></span>}</h1>
             {p.display_mode === "alias" && <span className="text-sm text-muted">{t("alias")}</span>}
             {p.headline && <span className="text-lg">{p.headline}</span>}
             <span className="text-muted">{[p.region, t("helped", { n: p.helped_count })].filter(Boolean).join(" · ")}</span>
-            {session && !self && (
+            {!self && p.onboarded_at && (
               <div className="flex flex-wrap gap-2">
-                <FollowButton type="profile" id={id} following={d.following} />
-                <EndorseButton id={id} on={d.endorsed} />
+                <MessageButton toId={id} name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} signedIn={!!session} />
+                {session && (
+                  <>
+                    <FollowButton type="profile" id={id} following={d.following} />
+                    <EndorseButton id={id} on={d.endorsed} />
+                  </>
+                )}
               </div>
             )}
             {self && <Link href="/me" className="text-sm">{t("edit")}</Link>}
@@ -77,7 +83,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
                 {o.description && <span className="text-sm">{o.description}</span>}
               </Link>
               <span className="text-sm font-bold">{priceLabel(o, tc, locale)}</span>
-              {!self && <ContactButton listingId={o.id} ownerName={p.display_name} ownerSeed={p.avatar_seed} title={o.title} price={priceLabel(o, tc, locale)}
+              {!self && <ContactButton listingId={o.id} ownerName={p.display_name} ownerSeed={p.avatar_seed} ownerPath={p.avatar_path} title={o.title} price={priceLabel(o, tc, locale)}
                 label={o.kind === "offer" ? t("ask") : t("help")} signedIn={!!session} sent={d.sentTo.includes(o.id)} />}
             </div>
           ))}

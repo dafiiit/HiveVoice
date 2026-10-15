@@ -37,9 +37,20 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
       <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
         <Link href={kind === "offer" ? "/needs?tab=near" : "/offers?tab=near"} className="text-ink">{t(kind === "offer" ? "allOffers" : "allNeeds")}</Link>
       </nav>
-      {l.cover_seed != null && <Cover seed={l.cover_seed} ratio="21 / 9" />}
+      {l.images.length > 0
+        ? (
+          <div className="flex flex-col gap-2">
+            <Cover src={l.images[0]} ratio="16 / 9" label={l.title} />
+            {l.images.length > 1 && (
+              <div className="grid grid-cols-3 gap-2">
+                {l.images.slice(1).map((p) => <Cover key={p} src={p} ratio="4 / 3" />)}
+              </div>
+            )}
+          </div>
+        )
+        : l.cover_seed != null && <Cover seed={l.cover_seed} ratio="21 / 9" />}
       <span className="flex items-center gap-2 text-sm">
-        <Avatar name={l.group_name ?? l.owner_name} seed={l.group_name ? undefined : l.owner_seed} size={36} group={!!l.group_name} />
+        <Avatar name={l.group_name ?? l.owner_name} seed={l.group_name ? undefined : l.owner_seed} path={l.group_name ? null : l.owner_path} size={36} group={!!l.group_name} />
         <span>
           {l.group_slug ? <Link href={`/groups/${l.group_slug}`} className="font-bold text-ink">{l.group_name}</Link> : <Link href={`/profile/${l.owner_id}`} className="font-bold text-ink">{l.owner_name}</Link>}{" "}
           {t(kind === "need" ? "needs" : "gives")}
@@ -65,7 +76,7 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
       {l.status !== "active" && <p className="m-0 font-bold">{t(`state.${l.status}`)}</p>}
       <div className="flex flex-wrap items-center gap-4">
         {!own && l.status === "active" && (
-          <ContactButton listingId={l.id} ownerName={l.group_name ?? l.owner_name} ownerSeed={l.owner_seed} title={l.title} price={priceLabel(l, tc, locale)}
+          <ContactButton listingId={l.id} ownerName={l.group_name ?? l.owner_name} ownerSeed={l.owner_seed} ownerPath={l.group_name ? null : l.owner_path} title={l.title} price={priceLabel(l, tc, locale)}
             label={t(kind === "offer" ? "ask" : "help")} signedIn={!!session} sent={data.sent} />
         )}
         {kind === "need" && l.seeking_allies && session && !own && <AllyButton id={l.id} on={data.allied} count={l.ally_count} />}

@@ -51,8 +51,8 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       select app.group_role(${g.id})::text as role, app.has_group_permission(${g.id}, 'post') as can_post,
              app.has_group_permission(${g.id}, 'propose_goals') as can_propose, app.has_group_permission(${g.id}, 'vote_goals') as can_vote,
              app.has_group_permission(${g.id}, 'edit_tasks') as can_tasks, app.has_group_permission(${g.id}, 'manage_members') as can_manage`;
-    const members = await tx<{ id: string; name: string; seed: number; role: string; focus: string | null }[]>`
-      select p.id, p.display_name as name, p.avatar_seed as seed, m.role::text, m.focus from public.group_members m join public.profiles p on p.id = m.profile_id
+    const members = await tx<{ id: string; name: string; seed: number; path: string | null; role: string; focus: string | null }[]>`
+      select p.id, p.display_name as name, p.avatar_seed as seed, p.avatar_path as path, m.role::text, m.focus from public.group_members m join public.profiles p on p.id = m.profile_id
       where m.group_id = ${g.id} order by array_position(array['admin','maintainer','contributor','guest'], m.role::text), p.display_name`;
     const tags = await tx<{ slug: string }[]>`select t.slug::text from public.group_tags gt join public.tags t on t.id = gt.tag_id where gt.group_id = ${g.id}`;
     const requested = me ? (await tx`select 1 from public.group_join_requests where group_id = ${g.id} and profile_id = ${me} and status = 'pending'`).length > 0 : false;
@@ -87,8 +87,8 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       select tk.id, tk.title, tk.status::text, tk.hourly_rate_cents,
         coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'name', p.display_name, 'seed', p.avatar_seed)) from public.task_assignees a join public.profiles p on p.id = a.profile_id where a.task_id = tk.id), '[]') as assignees
       from public.tasks tk where tk.group_id = ${g.id} order by tk.position, tk.created_at` : [];
-    const requests = active === "team" && can_manage ? await tx<{ id: string; profile_id: string; name: string; seed: number; message: string | null }[]>`
-      select r.id, r.profile_id, p.display_name as name, p.avatar_seed as seed, r.message from public.group_join_requests r join public.profiles p on p.id = r.profile_id
+    const requests = active === "team" && can_manage ? await tx<{ id: string; profile_id: string; name: string; seed: number; path: string | null; message: string | null }[]>`
+      select r.id, r.profile_id, p.display_name as name, p.avatar_seed as seed, p.avatar_path as path, r.message from public.group_join_requests r join public.profiles p on p.id = r.profile_id
       where r.group_id = ${g.id} and r.status = 'pending' order by r.created_at` : [];
     const permRows = active === "team" ? await tx<{ holder: string; permission: string; allowed: boolean }[]>`
       select holder::text, permission::text, allowed from public.group_role_permissions where group_id = ${g.id}` : [];
@@ -155,7 +155,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         {active === "talk" && (
           <section className="flex max-w-[760px] flex-col gap-4">
             {data.can_post
-              ? <Composer ctx={{ groupId: g.id }} path={`${path}?tab=talk`} placeholder={t("talkPlaceholder", { name: g.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} />
+              ? <Composer ctx={{ groupId: g.id }} path={`${path}?tab=talk`} placeholder={t("talkPlaceholder", { name: g.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} />
               : <p className="m-0 text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</p>}
             <PostList posts={data.posts} path={`${path}?tab=talk`} canWrite={data.can_post} viewerId={me} empty={t("noPosts")} />
           </section>

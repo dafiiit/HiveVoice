@@ -15,16 +15,16 @@ dem Online-Ausweis (eID) folgt.
 | Bereich | Inhalt |
 | --- | --- |
 | Entdecken | Initiativen, Gruppen, Menschen und Zuständige, gefiltert nach Ebene (Stadtteil bis Bund) |
-| Anfragen · Anbieten | Einträge mit Gegenwert (kostenlos, Stundenlohn, Festpreis, Tausch), Matching über Stichwörter und Region, „Ich auch“, Kontakt erst nach Zustimmung, privater Chat danach |
-| Verbinden | Marktplatz deines Orts, Gruppengespräche, private Nachrichten (Polling) |
+| Anfragen · Anbieten | Einträge mit bis zu vier Fotos und Gegenwert (kostenlos, Stundenlohn, Festpreis, Tausch), Matching über Stichwörter und Region (Ideen als Karussell), „Ich auch“, Kontakt erst nach Zustimmung, privater Chat danach. In „Anfragen“ lässt sich eine zuständige Stelle eintragen (Suche „Wer ist zuständig?“) |
+| Verbinden | Marktplatz deines Orts, Gruppengespräche, private Chats (Polling, „Gelesen“-Anzeige) und alles, was du gesendet hast oder beantworten musst: Anfragen aus Angeboten und Gesuchen, erste Nachrichten, Beitrittswünsche. Gruppen gründen |
 | Gruppen | Ziele mit Unterzielen und geheimer Zielabstimmung, Gespräch, Bedarf, Aufgaben-Board, Rollen und Rechte-Matrix, Beitritt offen oder auf Anfrage |
 | Initiativen | Idee → Debatte (sobald zwei Personen mitreden) → Abstimmung → Adressat (6 Wochen Frist) → Umsetzung → umgesetzt; Argumente mit Bridge-Score, Threads, Verlauf, Leichte Sprache |
-| Wer ist zuständig? | Jede:r trägt eigene Zuständigkeiten ein; Behörden bestätigen sie per dienstlicher E-Mail (Domain-Liste in der Admin-Seite) |
+| Wer ist zuständig? | Jede:r trägt eigene Zuständigkeiten ein; Behörden bestätigen sie per dienstlicher E-Mail (Domain-Liste in der Admin-Seite). Gefunden wird sie im Formular „Anfragen“; ihren Eingang öffnet man unter „Für mich → Zuständigkeiten“ |
 | Moderation | Melden → zufällig geloste Jury aus der Region → Mehrheit entscheidet |
-| Für mich | Profil (Klarname oder Pseudonym), Notizbuch, Meldungen und Jury, Zuständigkeiten, Einstellungen (Sprache, Leichte Sprache, Dark Mode, Wohnort, Passkey, Konto löschen) |
+| Für mich (Profilbild oben rechts) | Profil mit Foto (Klarname oder Pseudonym), Notizbuch, Meldungen und Jury, Zuständigkeiten, Einstellungen (Sprache, Leichte Sprache, Dark Mode, Wohnort, Passkey, Konto löschen) |
 | Verwaltung | Versteckte Admin-Seite unter `ADMIN_PATH` |
 
-Sprachen: Deutsch, Englisch, Leichte Sprache. Darstellung: hell, dunkel oder wie das Gerät.
+Sprachen: Deutsch, Englisch, Leichte Sprache. Darstellung: standardmäßig hell, dunkel oder wie das Gerät auf Wunsch.
 Installierbar als PWA.
 
 ## Technik in Kürze
@@ -48,7 +48,7 @@ npm install
 cp .env.example .env.local   # Werte eintragen
 npm run db:migrate           # Schema und Logik
 npm run db:regions           # Länder, Kreise, Gemeinden, PLZ (OpenPLZ API)
-npm run db:seed              # optional: Demo-Daten aus dem Prototyp
+npm run db:seed              # optional: Demo-Daten aus dem Prototyp (inkl. Beispiel-Chats, siehe Admin-Seite)
 npm run dev
 ```
 

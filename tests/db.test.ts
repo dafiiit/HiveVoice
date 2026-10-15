@@ -18,8 +18,12 @@ async function scenario(fn: (tx: postgres.TransactionSql) => Promise<void>) {
   }).catch((e) => { if (!(e instanceof Rollback)) throw e; });
 }
 
+const authIds = new Map<string, string>();
+
 async function person(tx: postgres.TransactionSql, name: string) {
-  const [{ id }] = await tx<{ id: string }[]>`select app.ensure_profile(${randomUUID()}, ${name}) as id`;
+  const authId = randomUUID();
+  const [{ id }] = await tx<{ id: string }[]>`select app.ensure_profile(${authId}, ${name}) as id`;
+  authIds.set(id, authId);
   await as(tx, id, () => tx`select app.complete_onboarding('{}'::jsonb)`);
   return id;
 }
@@ -170,5 +174,91 @@ describe("citizen jury", () => {
     expect(status).toBe("upheld");
     const visible = await as(tx, a, () => tx`select id from public.posts where id = ${pid}`);
     expect(visible.length).toBe(0);
+  }));
+});
+
+describe("direct messages and requests", () => {
+  it("turns a first message into a request, opens a chat on accept and reuses it afterwards", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const first = await as(tx, a, () => tx<{ r: { request_id?: string; conversation_id?: string } }[]>`select app.request_direct(${b}, 'Hallo Ben, hast du Zeit?') as r`);
+    const rid = first[0].r.request_id!;
+    expect(rid).toBeTruthy();
+    // Asking twice does not create a second request.
+    const again = await as(tx, a, () => tx<{ r: { request_id?: string } }[]>`select app.request_direct(${b}, 'Noch einmal') as r`);
+    expect(again[0].r.request_id).toBe(rid);
+    // Only the two people involved can see it.
+    const c = await person(tx, "Cem");
+    expect((await as(tx, c, () => tx`select id from public.contact_requests`)).length).toBe(0);
+    // Only the receiver can accept.
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.decide_contact(${rid}, true)`));
+    const [{ conv }] = await as(tx, b, () => tx<{ conv: string }[]>`select app.decide_contact(${rid}, true) as conv`);
+    const msgs = await as(tx, a, () => tx<{ body: string }[]>`select body from public.messages where conversation_id = ${conv}`);
+    expect(msgs.map((m) => m.body)).toEqual(["Hallo Ben, hast du Zeit?"]);
+    const reused = await as(tx, b, () => tx<{ r: { conversation_id?: string } }[]>`select app.request_direct(${a}, 'Und jetzt') as r`);
+    expect(reused[0].r.conversation_id).toBe(conv);
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.request_direct(${a}, 'ich selbst')`));
+  }));
+
+  it("lets a person withdraw a group join request", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Geschlossene Gruppe","join_policy":"request"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, 'Darf ich mit?')`);
+    const [req] = await as(tx, b, () => tx<{ id: string; status: string }[]>`select id, status::text from public.group_join_requests where group_id = ${gid}`);
+    expect(req.status).toBe("pending");
+    // Somebody else cannot withdraw it.
+    await as(tx, a, () => tx`select app.withdraw_join_request(${req.id})`);
+    const statusOf = async () => (await as(tx, b, () => tx<{ status: string }[]>`select status::text from public.group_join_requests where id = ${req.id}`))[0].status;
+    expect(await statusOf()).toBe("pending");
+    await as(tx, b, () => tx`select app.withdraw_join_request(${req.id})`);
+    expect(await statusOf()).toBe("withdrawn");
+  }));
+});
+
+describe("photos", () => {
+  const authOf = async (_tx: postgres.TransactionSql, id: string) => authIds.get(id)!;
+  const avatarOf = (tx: postgres.TransactionSql, who: string) => as(tx, who, () => tx<{ p: string | null }[]>`select avatar_path as p from public.profiles where id = ${who}`).then((r) => r[0].p);
+
+  it("accepts only files from the member's own folder as profile photo", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const own = `${await authOf(tx, a)}/abc123.jpg`;
+    await as(tx, a, () => tx`select app.set_avatar(${own})`);
+    expect(await avatarOf(tx, a)).toBe(own);
+    const foreign = `${await authOf(tx, b)}/abc123.jpg`;
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.set_avatar(${foreign})`));
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.set_avatar('../x.jpg')`));
+    await as(tx, a, () => tx`select app.set_avatar(null)`);
+    expect(await avatarOf(tx, a)).toBeNull();
+  }));
+
+  it("keeps at most four photos per listing and only for the owner", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const uid = await authOf(tx, a);
+    const [{ id }] = await as(tx, a, () => tx<{ id: string }[]>`select app.save_listing('{"kind":"offer","title":"Kuchen backen"}'::jsonb) as id`);
+    const paths = [1, 2, 3, 4].map((n) => `${uid}/p${n}.jpg`);
+    await as(tx, a, () => tx`select app.set_listing_images(${id}, ${paths}::text[])`);
+    expect((await as(tx, a, () => tx<{ path: string }[]>`select path from public.listing_images where listing_id = ${id} order by position`)).map((r) => r.path)).toEqual(paths);
+    await as(tx, a, () => tx`select app.set_listing_images(${id}, ${[paths[2]]}::text[])`);
+    expect((await as(tx, a, () => tx`select 1 from public.listing_images where listing_id = ${id}`)).length).toBe(1);
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.set_listing_images(${id}, ${[...paths, `${uid}/p5.jpg`]}::text[])`));
+    await as(tx, b, () => fails(tx, (sp) => sp`select app.set_listing_images(${id}, ${[`${uid}/p1.jpg`]}::text[])`));
+    // Photos of public listings are readable by guests.
+    expect((await as(tx, null, () => tx`select 1 from public.listing_images where listing_id = ${id}`)).length).toBe(1);
+  }));
+});
+
+describe("demo chats", () => {
+  it("fills Verbinden once and never twice", () => scenario(async (tx) => {
+    const [{ n }] = await tx<{ n: number }[]>`select count(*)::int as n from public.profiles where is_demo and display_name = 'Lea Hofmann'`;
+    if (!n) return; // no demo content loaded in this database
+    const a = await person(tx, "Ada");
+    expect((await as(tx, a, () => tx<{ r: boolean }[]>`select app.ensure_demo_chats() as r`))[0].r).toBe(true);
+    const rooms = await as(tx, a, () => tx`select id from public.conversations`);
+    expect(rooms.length).toBe(3);
+    const unread = await as(tx, a, () => tx<{ n: number }[]>`
+      select count(*)::int as n from public.messages m join public.conversation_participants cp on cp.conversation_id = m.conversation_id and cp.profile_id = ${a}
+      where m.sender_id <> ${a} and m.created_at > cp.last_read_at`);
+    expect(unread[0].n).toBeGreaterThan(0);
+    expect((await as(tx, a, () => tx<{ r: boolean }[]>`select app.ensure_demo_chats() as r`))[0].r).toBe(false);
+    expect((await as(tx, a, () => tx`select id from public.conversations`)).length).toBe(3);
   }));
 });

@@ -6,7 +6,7 @@ import { TagPicker } from "../TagPicker";
 import { RegionPicker } from "./RegionPicker";
 import { btn, chip, field } from "../ui/styles";
 
-export function GroupForm({ chain }: { chain: { id: string; name: string; level: string }[] }) {
+export function GroupForm({ chain, ideas }: { chain: { id: string; name: string; level: string }[]; ideas: string[] }) {
   const t = useTranslations("group.form");
   const tg = useTranslations("group");
   const tc = useTranslations("common");
@@ -50,7 +50,7 @@ export function GroupForm({ chain }: { chain: { id: string; name: string; level:
         <span className={field.hint}>{tg(`policyText.${joinPolicy}`)}</span>
       </div>
       <div className="flex flex-col gap-2"><span className="text-sm font-bold">{t("place")}</span><RegionPicker chain={chain} value={region} onChange={setRegion} /></div>
-      <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={["sport", "musik", "garten", "film", "verkehr", "umwelt", "bildung", "nachbarschaft"]} />
+      <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={ideas} />
       <label className={field.label}>{t("focus")}<input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder={t("focusPlaceholder")} className={field.inputSm} /></label>
       <label className="flex items-center gap-2"><input type="checkbox" checked={modTasks} onChange={() => setModTasks(!modTasks)} className="h-5 w-5 accent-[var(--ink)]" />{t("modTasks")}</label>
       {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}

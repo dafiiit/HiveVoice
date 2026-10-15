@@ -20,6 +20,7 @@ export type ListingInput = {
   regionId: string | null;
   responsibilityIds: string[];
   groupId?: string;
+  images?: string[];
 };
 
 const cents = (s: string) => (s ? String(Math.round(Number(s.replace(",", ".")) * 100) || "") : "");
@@ -33,6 +34,7 @@ export async function saveListing(input: ListingInput) {
       location_text: input.locationText, schedule_text: input.scheduleText, is_recurring: input.isRecurring, seats: input.seats,
       seeking_allies: input.seekingAllies, tags: input.tags, region_id: input.regionId ?? "", group_id: input.groupId ?? "",
     })}) as id`;
+    if (input.images?.length) await tx`select app.set_listing_images(${id}, ${input.images.slice(0, 4)}::text[])`;
     for (const rid of input.responsibilityIds.slice(0, 3)) {
       await tx`select app.create_request(${tx.json({ responsibility_id: rid, listing_id: id, body: [input.title, input.description].filter(Boolean).join("\n\n") })})`;
     }
@@ -53,11 +55,12 @@ export async function setListingStatus(id: string, status: "active" | "paused" |
 
 export async function requestContact(listingId: string, message: string) {
   const res = await run(async (tx) => {
-    await tx`select app.request_contact(${listingId}, ${message})`;
-    return null;
+    const [{ id }] = await tx<{ id: string }[]>`select app.request_contact(${listingId}, ${message}) as id`;
+    return id;
   });
   revalidatePath("/offers");
   revalidatePath("/needs");
+  revalidatePath("/connect");
   return res;
 }
 
@@ -68,6 +71,7 @@ export async function decideContact(requestId: string, accept: boolean) {
   });
   revalidatePath("/offers");
   revalidatePath("/needs");
+  revalidatePath("/connect");
   return res;
 }
 
@@ -78,6 +82,7 @@ export async function withdrawContact(requestId: string) {
   });
   revalidatePath("/offers");
   revalidatePath("/needs");
+  revalidatePath("/connect");
   return res;
 }
 

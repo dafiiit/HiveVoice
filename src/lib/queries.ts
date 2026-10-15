@@ -54,6 +54,8 @@ export type ListingCard = {
   owner_id: string;
   owner_name: string;
   owner_seed: number;
+  owner_path: string | null;
+  images: string[];
   group_name: string | null;
   group_slug: string | null;
   goal_title: string | null;
@@ -65,10 +67,11 @@ export type ListingCard = {
 export const listingCardColumns = (tx: Tx) => tx`
   l.id, l.kind, l.title, l.description, l.pay_mode, l.hourly_rate_cents, l.fixed_price_cents, l.swap_text,
   l.location_text, l.schedule_text, l.seats, l.is_recurring, l.seeking_allies, l.ally_count, l.cover_seed, l.status,
-  l.owner_id, l.created_at, p.display_name as owner_name, p.avatar_seed as owner_seed, g.name as group_name, g.slug as group_slug,
+  l.owner_id, l.created_at, p.display_name as owner_name, p.avatar_seed as owner_seed, p.avatar_path as owner_path, g.name as group_name, g.slug as group_slug,
   go.title as goal_title, r.name as region_name,
   coalesce((select array_agg(t.slug::text order by t.slug) from public.listing_tags lt join public.tags t on t.id = lt.tag_id
-            where lt.listing_id = l.id), '{}') as tags`;
+            where lt.listing_id = l.id), '{}') as tags,
+  coalesce((select array_agg(li.path order by li.position) from public.listing_images li where li.listing_id = l.id), '{}') as images`;
 
 export const listingCardFrom = (tx: Tx) => tx`
   public.listings l
@@ -91,4 +94,14 @@ export async function myMunicipality(tx: Tx, profileId: string | undefined) {
     select r.id, r.name from public.user_regions ur join public.regions r on r.id = ur.region_id
     where ur.profile_id = ${profileId} and r.level = 'municipality' limit 1`;
   return row ?? null;
+}
+
+/** Tags people use most, then the rest alphabetically: the ideas shown in the tag carousels. */
+export async function popularTags(tx: Tx, limit = 80) {
+  const rows = await tx<{ slug: string }[]>`
+    select t.slug::text from public.tags t
+    left join public.listing_tags lt on lt.tag_id = t.id
+    left join public.user_interests ui on ui.tag_id = t.id
+    group by t.slug order by count(distinct lt.listing_id) + count(distinct ui.profile_id) desc, t.slug limit ${limit}`;
+  return rows.map((r) => r.slug);
 }

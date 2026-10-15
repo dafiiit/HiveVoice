@@ -12,8 +12,8 @@ import { btn, field } from "./ui/styles";
 
 type Ctx = { groupId?: string; initiativeId?: string; regionId?: string };
 
-export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, onPosted }: {
-  ctx: Ctx & { parentId?: string }; path: string; placeholder: string; viewerName?: string; viewerSeed?: number; onPosted?: () => void;
+export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewerPath, onPosted }: {
+  ctx: Ctx & { parentId?: string }; path: string; placeholder: string; viewerName?: string; viewerSeed?: number; viewerPath?: string | null; onPosted?: () => void;
 }) {
   const tc = useTranslations("common");
   const [body, setBody] = useState("");
@@ -33,7 +33,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, onPos
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
       <div className="flex items-start gap-3">
-        {viewerName && <Avatar name={viewerName} seed={viewerSeed} size={36} />}
+        {viewerName && <Avatar name={viewerName} seed={viewerSeed} path={viewerPath} size={36} />}
         <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={body.length > 80 ? 3 : 1} aria-label={placeholder}
           placeholder={placeholder} className={`${field.textarea} min-h-11 flex-1 resize-y border-line py-2.5`} />
         <button type="submit" disabled={pending || !body.trim()} className={btn.primary}>{ctx.parentId ? tc("reply") : tc("post")}</button>
@@ -60,7 +60,7 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
   return (
     <article className="flex gap-3 py-4">
       <Link href={`/profile/${p.author_id}`} aria-hidden="true" tabIndex={-1} className="flex-none">
-        <Avatar name={p.author_name} seed={p.author_seed} size={compact ? 28 : 36} />
+        <Avatar name={p.author_name} seed={p.author_seed} path={p.author_path} size={compact ? 28 : 36} />
       </Link>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-baseline gap-x-2 text-sm">

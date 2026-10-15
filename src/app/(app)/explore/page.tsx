@@ -19,7 +19,7 @@ const LEVELS = ["all", "borough", "municipality", "district", "state", "country"
 const SORTS = ["relevant", "new", "soon", "support"] as const;
 
 type Group = { id: string; slug: string; name: string; summary: string | null; member_count: number; join_policy: string; region_name: string | null; tags: string[]; is_member: boolean };
-type Person = { id: string; display_name: string; avatar_seed: number; headline: string | null; region_name: string | null; offers: string[]; needs: string[]; following: boolean };
+type Person = { id: string; display_name: string; avatar_seed: number; avatar_path: string | null; headline: string | null; region_name: string | null; offers: string[]; needs: string[]; following: boolean };
 type Resp = { id: string; title: string; organization_name: string | null; description: string; is_official: boolean; holder_name: string; holder_seed: number; region_name: string | null; avg_response_days: number | null };
 
 export default async function Explore({ searchParams }: PageProps<"/explore">) {
@@ -71,7 +71,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
     if (kind === "people") {
       return {
         people: await tx<Person[]>`
-          select p.id, p.display_name, p.avatar_seed, p.headline, r.name as region_name,
+          select p.id, p.display_name, p.avatar_seed, p.avatar_path, p.headline, r.name as region_name,
             coalesce((select array_agg(t.slug::text) from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = p.id and ui.relation = 'offers'), '{}') as offers,
             coalesce((select array_agg(t.slug::text) from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = p.id and ui.relation = 'needs'), '{}') as needs,
             ${viewer ? tx`exists (select 1 from public.follows f where f.follower_id = ${viewer.profileId} and f.target_type = 'profile' and f.target_id = p.id)` : tx`false`} as following
@@ -179,7 +179,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           {data.people.map((p) => (
             <div key={p.id} className="flex flex-wrap items-center gap-4 border-b border-line py-4">
               <Link href={`/profile/${p.id}`} className="flex min-w-[240px] flex-1 items-center gap-3 text-ink no-underline">
-                <Avatar name={p.display_name} seed={p.avatar_seed} size={56} />
+                <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={56} />
                 <span className="flex min-w-0 flex-col">
                   <strong className="text-lg">{p.display_name}</strong>
                   <span className="text-sm text-muted">{[p.headline, p.region_name].filter(Boolean).join(" · ")}</span>

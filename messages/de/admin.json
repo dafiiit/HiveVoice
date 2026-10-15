@@ -5,10 +5,22 @@
   "bootstrap": "Für diese Instanz ist noch niemand als Admin eingetragen. Wer diesen Pfad kennt, betreibt den Server. Trag dich als ersten Admin ein.",
   "claim": "Mich als Admin eintragen",
   "done": "Gespeichert.",
-  "stats": { "profiles": "Konten", "demo_profiles": "Demo-Profile", "groups": "Gruppen", "initiatives": "Initiativen", "listings": "Anfragen und Angebote", "open_ballots": "Laufende Abstimmungen", "open_cases": "Offene Jury-Fälle", "regions": "Regionen" },
+  "stats": {
+    "profiles": "Konten",
+    "demo_profiles": "Demo-Profile",
+    "groups": "Gruppen",
+    "initiatives": "Initiativen",
+    "listings": "Anfragen und Angebote",
+    "open_ballots": "Laufende Abstimmungen",
+    "open_cases": "Offene Jury-Fälle",
+    "regions": "Regionen"
+  },
   "verification": "Bestätigung",
   "verificationText": "Im Testbetrieb gilt eine Anmeldung als bestätigt. Sobald die Bestätigung mit dem Online-Ausweis angebunden ist, zählt nur noch diese.",
-  "modes": { "login": "Login reicht (Testbetrieb)", "eid": "Nur Online-Ausweis" },
+  "modes": {
+    "login": "Login reicht (Testbetrieb)",
+    "eid": "Nur Online-Ausweis"
+  },
   "domains": "Offizielle E-Mail-Domains",
   "domainsText": "Wer eine Adresse mit einer dieser Domains (oder einer Subdomain) bestätigt, bekommt das offizielle Häkchen für seine Zuständigkeit.",
   "noDomains": "Noch keine Domains hinterlegt.",
@@ -25,5 +37,9 @@
   "demoText": "{n} Demo-Profile mit ihren Gruppen, Initiativen, Beiträgen und Angeboten aus dem Prototyp.",
   "demoRemove": "Alle Demo-Daten löschen",
   "demoConfirm": "Alle Demo-Daten endgültig löschen?",
-  "demoRemoved": "Demo-Daten gelöscht."
+  "demoRemoved": "Demo-Daten gelöscht.",
+  "demoChats": "Demo-Chats für neue Konten",
+  "on": "An",
+  "off": "Aus",
+  "demoChatsText": "An: Wer Verbinden zum ersten Mal öffnet, bekommt ein paar Beispiel-Chats und -Anfragen von Demo-Profilen. Vor dem echten Start ausschalten und die Demo-Daten löschen."
 }

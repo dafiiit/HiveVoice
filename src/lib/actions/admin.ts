@@ -48,6 +48,10 @@ export async function grantAdmin(profileRef: string, on: boolean) {
   return guard(() => sql`select app.admin_grant(${id}, ${on})`);
 }
 
+export async function setDemoChats(on: boolean) {
+  return guard(() => sql`select app.admin_set_setting('demo_chats', ${sql.json(on)})`);
+}
+
 export async function purgeDemo() {
   return guard(async () => {
     const [{ n }] = await sql<{ n: number }[]>`select app.admin_purge_demo() as n`;

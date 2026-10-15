@@ -15,7 +15,7 @@ const STEPS = ["idea", "text", "place", "addressee", "review"] as const;
 
 type Initial = { id: string; title: string; summary: string; body: string; bodyEasy: string; addresseeId: string; addresseeLabel: string; addresseeText: string; costEuro: string };
 
-export function InitiativeWizard({ chain, initial }: { chain: { id: string; name: string; level: string }[]; initial?: Initial }) {
+export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: string; name: string; level: string }[]; initial?: Initial; ideas?: string[] }) {
   const t = useTranslations("new.initiative");
   const tc = useTranslations("common");
   const tl = useTranslations("levels");
@@ -67,7 +67,7 @@ export function InitiativeWizard({ chain, initial }: { chain: { id: string; name
   });
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-8">
         <ol aria-label={t("steps")} className="m-0 grid list-none gap-1 p-0" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
           {steps.map((s, i) => (
@@ -82,7 +82,7 @@ export function InitiativeWizard({ chain, initial }: { chain: { id: string; name
             <h2 className="m-0 text-3xl font-bold">{t("ideaTitle")}</h2>
             <label className={field.label}>{t("title")}<input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("titlePlaceholder")} className={field.input} /></label>
             <label className={field.label}>{t("summary")}<input value={summary} onChange={(e) => setSummary(e.target.value)} placeholder={t("summaryPlaceholder")} className={field.input} /></label>
-            {!editing && <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={["verkehr", "umwelt", "bildung", "sport", "wasser", "gesundheit", "kultur", "wohnen"]} />}
+            {!editing && <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={ideas} />}
             {similar.length > 0 && !dismissed && (
               <div role="status" className="flex flex-col gap-2 border-l-4 border-red bg-surface p-4">
                 <strong>{t("similarTitle")}</strong>

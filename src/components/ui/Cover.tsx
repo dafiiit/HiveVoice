@@ -1,3 +1,4 @@
+import { imageUrl } from "@/lib/images";
 const TONES = [
   { bg: "var(--chip)", ink: "var(--ink)", sun: "var(--red)", border: "transparent" },
   { bg: "var(--ink)", ink: "var(--on-ink)", sun: "var(--red)", border: "transparent" },
@@ -5,8 +6,20 @@ const TONES = [
   { bg: "var(--surface)", ink: "var(--ink)", sun: "var(--red)", border: "var(--ink)" },
 ];
 
-/** Image placeholder until real photos can be uploaded. */
-export function Cover({ seed = 0, ratio = "3 / 2", label, className }: { seed?: number; ratio?: string; label?: string; className?: string }) {
+/** The first uploaded photo, or a neutral placeholder. */
+export function Cover({ seed = 0, ratio = "3 / 2", label, className, src }: { seed?: number; ratio?: string; label?: string; className?: string; src?: string | null }) {
+  const photo = imageUrl(src);
+  if (photo) {
+    return (
+      <div className={`relative w-full overflow-hidden bg-chip ${className ?? ""}`} style={{ aspectRatio: ratio }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photo} alt={label ?? ""} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        {label && (
+          <span className="absolute bottom-3 left-3 inline-flex h-7 items-center border border-ink bg-surface px-2.5 text-xs font-bold">{label}</span>
+        )}
+      </div>
+    );
+  }
   const t = TONES[Math.abs(seed) % TONES.length];
   return (
     <div

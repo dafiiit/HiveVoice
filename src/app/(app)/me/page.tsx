@@ -2,8 +2,10 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
+import { popularTags } from "@/lib/queries";
 import { relTime } from "@/lib/format";
 import { Avatar } from "@/components/ui/Avatar";
+import { AvatarUpload } from "@/components/ImageUpload";
 import { IconCheck } from "@/components/ui/Icons";
 import { tab } from "@/components/ui/styles";
 import { PhaseRail } from "@/components/InitiativeCard";
@@ -35,7 +37,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       select r.name from public.user_regions ur join public.regions r on r.id = ur.region_id where ur.profile_id = ${me}
       order by array_position(array['borough','municipality','district','state','country'], r.level::text)`).map((r) => r.name).join(" · ");
     const tags = await tx<{ slug: string; relation: string }[]>`select t.slug::text, ui.relation from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = ${me} order by t.slug`;
-    const suggestions = (await tx<{ slug: string }[]>`select t.slug::text from public.tags t left join public.listing_tags lt on lt.tag_id = t.id group by t.slug order by count(lt.listing_id) desc limit 16`).map((r) => r.slug);
+    const suggestions = await popularTags(tx);
     const inis = active === "profile" ? await tx<{ id: string; title: string; phase: "idea"; outcome: null; region_name: string }[]>`
       select i.id, i.title, i.phase, i.outcome, r.name as region_name from public.initiative_authors a join public.initiatives i on i.id = a.initiative_id
       join public.regions r on r.id = i.region_id where a.profile_id = ${me} order by i.created_at desc` : [];
@@ -68,7 +70,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   return (
     <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
       <section className="flex flex-wrap items-start gap-6">
-        <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} size={120} />
+        <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <h1 className="display m-0 flex items-center gap-3">{session.profile.display_name}{session.profile.verified && <span aria-label={t("verified")} title={t("verified")}><IconCheck size={28} /></span>}</h1>
           <span>{t("stats", { groups: d.p.group_count, helped: d.p.helped_count })}</span>
@@ -82,7 +84,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       </div>
 
       {active === "profile" && (
-        <div className="grid gap-10 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-8">
             <TagEditor relation="offers" label={t("offers")} initial={offers} suggestions={d.suggestions} />
             <TagEditor relation="needs" label={t("needs")} initial={needs} suggestions={d.suggestions} />
@@ -122,7 +124,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       )}
       {active === "notes" && <Notes notes={d.notes} />}
       {active === "reports" && (
-        <div className="grid gap-10 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <section className="flex flex-col">
             <h2 className="m-0 mb-2 text-xl font-bold">{t("jury")}</h2>
             {d.seats.length === 0 && <p className="m-0 text-muted">{t("noJury")}</p>}
@@ -147,7 +149,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       )}
       {active === "resp" && <Responsibilities items={d.resps} homeRegion={d.home} />}
       {active === "settings" && (
-        <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "system"} places={d.places} interests={interests} suggestions={d.suggestions} />
+        <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} places={d.places} interests={interests} suggestions={d.suggestions} />
       )}
     </div>
   );

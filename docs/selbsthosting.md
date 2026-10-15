@@ -7,6 +7,7 @@ Das MVP läuft auf Vercel + Supabase. Die Architektur ist so gebaut, dass ein ei
 - PostgreSQL 15 oder neuer
 - Supabase Auth (GoTrue) als Login-Dienst, z. B. als einzelnen Container `supabase/auth`
   (alternativ das komplette Supabase-Selfhosting)
+- Einen S3-kompatiblen Objektspeicher für Fotos (z. B. MinIO). Auf Supabase ist Storage schon dabei
 - Den App-Container aus dem `Dockerfile`
 
 ## Datenbank einrichten
@@ -38,3 +39,10 @@ docker run --env-file .env -p 3000:3000 hivevoice
 
 Danach den geheimen Admin-Pfad (`ADMIN_PATH`) öffnen und dich als ersten Admin eintragen.
 Dort trägst du auch die offiziellen E-Mail-Domains ein und schaltest später auf „Nur Online-Ausweis“ um.
+
+## Fotos
+
+`20261015000007_images_chats.sql` legt den Bucket `images` und seine Policies nur an, wenn das Schema `storage` existiert.
+Ohne Supabase Storage: Bucket in deinem Speicher anlegen (öffentlich lesbar, Schreiben nur im Ordner der
+eingeloggten Person), `NEXT_PUBLIC_IMAGE_BASE_URL` als Build-Argument auf die öffentliche Adresse setzen und
+`src/lib/upload.ts` auf deinen Speicher umstellen (heute: `supabase.storage.from("images").upload`).

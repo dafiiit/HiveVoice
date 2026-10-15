@@ -49,6 +49,15 @@ export async function joinGroup(slug: string, id: string, message: string) {
   return res;
 }
 
+export async function withdrawJoin(requestId: string) {
+  const res = await run(async (tx) => {
+    await tx`select app.withdraw_join_request(${requestId})`;
+    return null;
+  });
+  revalidatePath("/connect");
+  return res;
+}
+
 export async function leaveGroup(slug: string, id: string) {
   const res = await run(async (tx, s) => {
     await tx`select app.remove_member(${id}, ${s.profile.id})`;
@@ -65,6 +74,7 @@ export async function decideJoin(slug: string, requestId: string, accept: boolea
     return null;
   });
   revalidatePath(path(slug));
+  revalidatePath("/connect");
   return res;
 }
 

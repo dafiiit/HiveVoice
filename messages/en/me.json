@@ -3,7 +3,10 @@
   "stats": "In {groups, plural, one {1 group} other {# groups}} · {helped, plural, one {1 person says “helped me”} other {# people say “helped me”}}",
   "publicProfile": "How others see your profile",
   "appear": "You appear",
-  "modes": { "real": "with real name", "alias": "anonymously" },
+  "modes": {
+    "real": "with real name",
+    "alias": "anonymously"
+  },
   "aliasNote": "Others only see your pseudonym marked “verified”.",
   "realNote": "Your name appears on posts and in groups.",
   "realName": "First and last name",
@@ -12,7 +15,13 @@
   "headlinePlaceholder": "e.g. architect · 3D and sound",
   "bio": "About me",
   "sections": "Sections",
-  "tabs": { "profile": "Profile", "notes": "Notebook", "reports": "Reports and jury", "resp": "Responsibilities", "settings": "Settings" },
+  "tabs": {
+    "profile": "Profile",
+    "notes": "Notebook",
+    "reports": "Reports and jury",
+    "resp": "Responsibilities",
+    "settings": "Settings"
+  },
   "offers": "What I offer",
   "needs": "What I am looking for",
   "tagsHint": "We use this to suggest matching requests and offers. Set details here:",
@@ -34,8 +43,18 @@
   "noReports": "No reports.",
   "reportedBy": "You reported: {rule}",
   "reportedAbout": "A post of yours was reported: {rule}",
-  "rules": { "insult": "Insult", "threat": "Threat", "spam": "Spam", "misinformation": "Misinformation", "personal_data": "Personal data" },
-  "caseStatus": { "open": "Under review by the citizen jury", "upheld": "Decided: violation, hidden", "dismissed": "Decided: no violation" },
+  "rules": {
+    "insult": "Insult",
+    "threat": "Threat",
+    "spam": "Spam",
+    "misinformation": "Misinformation",
+    "personal_data": "Personal data"
+  },
+  "caseStatus": {
+    "open": "Under review by the citizen jury",
+    "upheld": "Decided: violation, hidden",
+    "dismissed": "Decided: no violation"
+  },
   "notes": {
     "private": "Only you can see your notebook.",
     "placeholder": "Thoughts, drafts, links …",
@@ -63,7 +82,8 @@
     "officialEmail": "Official email",
     "sendLink": "Send link",
     "verifySent": "Link sent to {email}. It is valid for 48 hours.",
-    "deleteConfirm": "Really delete this responsibility? Open requests will be lost."
+    "deleteConfirm": "Really delete this responsibility? Open requests will be lost.",
+    "openIntake": "Open the inbox and answer requests"
   },
   "settings": {
     "places": "Places",
@@ -73,13 +93,20 @@
     "interests": "Interests",
     "saved": "Saved.",
     "language": "Language",
-    "languages": { "de": "Deutsch", "en": "English" },
+    "languages": {
+      "de": "Deutsch",
+      "en": "English"
+    },
     "easy": "Easy German",
     "easyHint": "Simpler texts where available.",
     "on": "On",
     "off": "Off",
     "theme": "Appearance",
-    "themes": { "system": "Like device", "light": "Light", "dark": "Dark" },
+    "themes": {
+      "system": "Like device",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "security": "Sign-in",
     "addPasskey": "Add passkey",
     "passkeyAdded": "Passkey saved.",

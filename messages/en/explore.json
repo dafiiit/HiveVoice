@@ -40,5 +40,6 @@
   "responds": "responds in {days, plural, one {1 day} other {# days}} on average",
   "filter": "Filter",
   "removeFilter": "Remove {what}",
-  "inPlace": "In {name}"
+  "inPlace": "In {name}",
+  "searchChip": "Search: “{q}”"
 }

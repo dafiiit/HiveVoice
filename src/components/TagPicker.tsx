@@ -40,7 +40,7 @@ export function TagPicker({ label, value, onChange, suggestions, placeholder, ma
       {ideas.length > 0 && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] text-muted">{t("ideas")}</span>
-          <Carousel items={ideas} keyOf={(s) => s} rows={2} label={`${label} · ${t("ideas")}`}
+          <Carousel items={ideas} keyOf={(s) => s} rows={2} loop label={`${label} · ${t("ideas")}`}
             render={(s, hidden) => (
               <button type="button" tabIndex={hidden ? -1 : 0} disabled={value.length >= max} onClick={() => add(s)} className={`${chip(false)} whitespace-nowrap disabled:opacity-45`}>#{s}</button>
             )} />

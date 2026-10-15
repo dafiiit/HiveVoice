@@ -11,7 +11,7 @@ declare
     'Hanna Vogt','Klaus Meier','Mehmet Aydın','Miriam Okafor','Peter Lang','Sophie Wagner','Lukas Becker','Aylin Demir',
     'Paul Schneider','Nora Fischer','Ben Koch','Clara Neumann','Julia Hartmann','Felix Wolf','Lena Schmid','Anna Lehmann',
     'Moritz Huber','Katrin Albers'];
-  aliases text[] := array['Möwe-2290','Fuchs-4417','Kiesel-7310'];
+  aliases text[] := array['Stille Möwe','Flinker Fuchs','Glatter Kiesel'];
   n text; pid uuid; i int := 0;
   r_garten uuid; r_ba uuid; r_mobil uuid; r_swm uuid; r_kvr uuid; r_bildung uuid; r_stmb uuid; r_petition uuid; r_klima uuid;
   g_film uuid; g_volley uuid; g_rad uuid; g_garten uuid; g_band uuid; g_repair uuid;
@@ -134,7 +134,7 @@ begin
     (g_volley,'Lea Hofmann','admin',null), (g_volley,'Ali Rahimi','maintainer',null), (g_volley,'Mia Schuster','contributor',null),
     (g_volley,'Jonas Brandl','contributor',null),
     (g_rad,'Sabine Krüger','admin',null), (g_rad,'Emre Yıldız','maintainer',null), (g_rad,'Hanna Vogt','contributor',null),
-    (g_rad,'Möwe-2290','contributor',null),
+    (g_rad,'Stille Möwe','contributor',null),
     (g_garten,'Anna Lehmann','admin',null), (g_garten,'Aylin Demir','contributor',null), (g_garten,'Lena Schmid','contributor',null),
     (g_band,'Moritz Huber','admin',null), (g_band,'Julia Hartmann','contributor',null),
     (g_repair,'Ben Koch','admin',null), (g_repair,'Lukas Becker','contributor',null)
@@ -212,10 +212,10 @@ begin
   -- Marketplace in Munich
   insert into public.posts (author_id, region_id, body, created_at) values
     ((p ->> 'Hanna Vogt')::uuid, muc, 'Wer hat noch Platz im Hof für ein Nachbarschaftsfest im Juni? Wir hätten Bierbänke, Musik und zwei Grills.', now() - interval '12 minutes'),
-    ((p ->> 'Möwe-2290')::uuid, muc, 'Ehrliche Frage: Bringt die Radspur auf der Lindwurmstraße wirklich weniger Verkehr, oder verlagert sie ihn nur in die Seitenstraßen?', now() - interval '34 minutes'),
+    ((p ->> 'Stille Möwe')::uuid, muc, 'Ehrliche Frage: Bringt die Radspur auf der Lindwurmstraße wirklich weniger Verkehr, oder verlagert sie ihn nur in die Seitenstraßen?', now() - interval '34 minutes'),
     ((p ->> 'Aylin Demir')::uuid, muc, 'Yoga im Garten diesen Sonntag um 9 Uhr, noch zwei Plätze frei. Matten habe ich.', now() - interval '1 hour'),
     ((p ->> 'Moritz Huber')::uuid, muc, 'Gibt es in Sendling eigentlich irgendwo einen offenen Proberaum? Das Jugendzentrum ist dienstags ausgebucht.', now() - interval '3 hours'),
-    ((p ->> 'Fuchs-4417')::uuid, muc, 'Kleiner Hinweis: Die Bank am Harras ist seit Wochen kaputt. Habe es unter „Wer ist zuständig?“ gemeldet.', now() - interval '5 hours');
+    ((p ->> 'Flinker Fuchs')::uuid, muc, 'Kleiner Hinweis: Die Bank am Harras ist seit Wochen kaputt. Habe es unter „Wer ist zuständig?“ gemeldet.', now() - interval '5 hours');
   select id into post from public.posts where region_id = muc and body like 'Wer hat noch Platz im Hof%';
   insert into public.posts (author_id, region_id, parent_id, body, created_at) values
     ((p ->> 'Mehmet Aydın')::uuid, muc, post, 'Unser Innenhof in der Daiserstraße ist groß genug. Schreib mir!', now() - interval '8 minutes'),
@@ -332,7 +332,7 @@ begin
   -- Threads
   insert into public.posts (author_id, initiative_id, body, created_at) values
     ((p ->> 'Sabine Krüger')::uuid, i_rad, 'Noch drei Tage. Neu: ein Kompromiss für Ladezonen in den Seitenstraßen. Lest ihn, bevor ihr abstimmt.', now() - interval '2 hours'),
-    ((p ->> 'Möwe-2290')::uuid, i_rad, 'Guter Kompromiss. Ich bleibe bei Contra, aber diese Lösung würde ich mittragen.', now() - interval '90 minutes'),
+    ((p ->> 'Stille Möwe')::uuid, i_rad, 'Guter Kompromiss. Ich bleibe bei Contra, aber diese Lösung würde ich mittragen.', now() - interval '90 minutes'),
     ((p ->> 'Miriam Okafor')::uuid, i_brunnen, 'Die Stadtwerke haben bestätigt: Am Harras liegt eine Leitung in 20 Metern. Das macht es deutlich günstiger.', now() - interval '3 hours'),
     ((p ->> 'Peter Lang')::uuid, i_brunnen, 'Ich habe am Samstag gezählt: 340 Menschen haben zwischen 12 und 14 Uhr an der Tram gewartet.', now() - interval '1 day');
 

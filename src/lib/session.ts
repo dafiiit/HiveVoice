@@ -3,6 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { sql, type Viewer } from "./db";
 import { createSupabaseServer } from "./supabase/server";
+import { verifiedClaims } from "./supabase/claims";
 
 export type SessionProfile = {
   id: string;
@@ -26,8 +27,7 @@ export type Session = { authId: string; email: string | null; profile: SessionPr
 /** The signed-in person, or null for guests. Cached per request. */
 export const getSession = cache(async (): Promise<Session | null> => {
   const supabase = await createSupabaseServer();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims as { sub?: string; email?: string; user_metadata?: Record<string, string> } | undefined;
+  const claims = await verifiedClaims(supabase);
   if (!claims?.sub) return null;
   let [row] = await sql<{ p: SessionProfile | null }[]>`select app.session_profile(${claims.sub}) as p`;
   if (!row.p) {

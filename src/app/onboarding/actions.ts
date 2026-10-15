@@ -1,6 +1,7 @@
 "use server";
 import { asViewer } from "@/lib/db";
 import { run } from "@/lib/action";
+import { getViewer } from "@/lib/session";
 
 export type Place = { id: string; name: string; level: string; context: string | null; boroughs: number; locality: string | null };
 
@@ -59,6 +60,8 @@ export async function finishOnboarding(input: {
 }
 
 export async function randomAlias() {
-  const [{ a }] = await asViewer(null, (tx) => tx<{ a: string }[]>`select app.random_alias() as a`);
+  const viewer = await getViewer();
+  if (!viewer) return "";
+  const [{ a }] = await asViewer(viewer, (tx) => tx<{ a: string }[]>`select app.random_alias() as a`);
   return a;
 }

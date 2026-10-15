@@ -40,5 +40,6 @@
   "responds": "antwortet im Schnitt in {days, plural, one {1 Tag} other {# Tagen}}",
   "filter": "Filter",
   "removeFilter": "{what} entfernen",
-  "inPlace": "In {name}"
+  "inPlace": "In {name}",
+  "searchChip": "Suche: „{q}“"
 }

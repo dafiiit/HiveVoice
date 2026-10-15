@@ -9,7 +9,7 @@ function hash(s: string) {
   return h;
 }
 
-/** First letter or digit of a name, upper case: "Möwe-2290" gives "M", "Ärztin" gives "Ä". */
+/** First letter or digit of a name, upper case: "Möwe" or "Grüne Wiese" gives "M" or "G", "Ärztin" gives "Ä". */
 export function initialOf(name: string) {
   const m = name.trim().match(/[\p{L}\p{N}]/u);
   return (m ? m[0] : "?").toLocaleUpperCase("de");

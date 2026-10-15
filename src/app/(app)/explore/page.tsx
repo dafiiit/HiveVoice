@@ -6,7 +6,6 @@ import { initiativeCardColumns, initiativeCardFrom, myRegionIds, regionTree, typ
 import { getPlace } from "@/lib/place";
 import { InitiativeCard } from "@/components/InitiativeCard";
 import { Avatar } from "@/components/ui/Avatar";
-import { Glyph } from "@/components/ui/Glyph";
 import { IconCheck } from "@/components/ui/Icons";
 import { chip, tab, tag } from "@/components/ui/styles";
 import { FollowButton } from "@/components/FollowButton";
@@ -113,17 +112,8 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
 
   return (
     <div className="flex flex-col gap-5 px-6 pb-12 pt-6 md:px-10 md:pb-20 md:pt-8">
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <h1 className="display m-0">{t("title")}</h1>
-        <form action="/explore" className="flex h-11 w-full items-center gap-2.5 border border-ink bg-surface px-3.5 md:max-w-[420px]" role="search">
-          <Glyph shape="lupe" size={18} />
-          <label htmlFor="explore-q" className="sr-only">{t("search")}</label>
-          <input id="explore-q" type="search" name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink" />
-          {kind !== "initiatives" && <input type="hidden" name="kind" value={kind} />}
-          {filterPlace && <input type="hidden" name="place" value={filterPlace.id} />}
-        </form>
-      </div>
-      <div role="tablist" aria-label={t("what")} className="-mt-1 flex overflow-x-auto border-b border-line">
+      <h1 className="display m-0">{t("title")}</h1>
+      <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
         {KINDS.map((k) => (
           <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all", sort: "relevant" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
         ))}
@@ -162,6 +152,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           </Popover>
         )}
         {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
+        {q && <Link href={href({ q: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
         {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
         <span className="ml-auto text-muted">{t(`count.${kind}`, { n: count })}</span>

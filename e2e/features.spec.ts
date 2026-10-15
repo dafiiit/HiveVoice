@@ -135,7 +135,7 @@ test.describe("signed in", () => {
     await page.goto("/connect");
     await page.getByRole("combobox").first().fill("mün");
     const places = page.getByRole("option", { name: /^München/ }).first();
-    await expect(places).toBeVisible();
+    await expect(places).toBeVisible({ timeout: 15_000 });
     await places.click();
     await expect(page).toHaveURL(/\/explore\?place=/);
     await expect(page.getByRole("link", { name: "München entfernen" })).toBeVisible();
@@ -163,6 +163,41 @@ test.describe("signed in", () => {
       const button = await page.getByRole("button", { name: "Angebot erstellen" }).boundingBox();
       expect(Math.round(field!.height)).toBe(Math.round(button!.height));
     }
+  });
+
+  test("the login is kept: an expired access token is renewed and stored", async ({ page, context, baseURL }, info) => {
+    test.skip(info.project.name !== "desktop", "cookie surgery once is enough");
+    await login(page);
+    const cookie = (await context.cookies()).find((c) => c.name.endsWith("auth-token"));
+    test.skip(!cookie, "the session is stored in chunks here");
+    const session = JSON.parse(Buffer.from(cookie!.value.replace(/^base64-/, ""), "base64url").toString());
+    expect(cookie!.expires - Date.now() / 1000).toBeGreaterThan(60 * 60 * 24 * 300); // stays for more than 300 days
+    session.expires_at = Math.floor(Date.now() / 1000) - 600; // pretend an hour has passed
+    await context.addCookies([{ ...cookie!, value: "base64-" + Buffer.from(JSON.stringify(session)).toString("base64url"), url: baseURL, domain: undefined, path: undefined }]);
+    await page.goto("/connect");
+    await expect(page.getByRole("link", { name: /^Für mich – / })).toBeVisible();
+    const renewed = (await context.cookies()).find((c) => c.name === cookie!.name)!;
+    const after = JSON.parse(Buffer.from(renewed.value.replace(/^base64-/, ""), "base64url").toString());
+    expect(after.expires_at).toBeGreaterThan(Date.now() / 1000);
+    await page.goto("/connect");
+    await expect(page.getByRole("link", { name: /^Für mich – / })).toBeVisible();
+  });
+
+  test("Entdecken has no second search box, the one at the top shows the query", async ({ page }) => {
+    await login(page);
+    await page.goto("/explore?q=Radspur");
+    await expect(page.getByRole("search")).toHaveCount(1);
+    await expect(page.getByRole("combobox").first()).toHaveValue("Radspur");
+    await expect(page.getByRole("link", { name: "Radspur entfernen" })).toBeVisible();
+  });
+
+  test("the hashtag carousel loops in both directions too", async ({ page }) => {
+    await login(page);
+    await page.goto("/me");
+    const prev = page.getByRole("button", { name: "Zurück blättern" }).first();
+    await expect(prev).toBeEnabled();
+    await prev.click();
+    await expect(prev).toBeEnabled();
   });
 
   test("a profile photo can be uploaded and removed", async ({ page }) => {

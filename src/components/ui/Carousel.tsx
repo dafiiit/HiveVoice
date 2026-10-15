@@ -10,7 +10,7 @@ const COPIES = 5;
  * hidden = true for the repeated copies, which must stay out of the tab order
  * and the accessibility tree.
  */
-export function Carousel<T>({ items, render, label, rows = 1, loop = false, keyOf }: {
+export function Carousel<T>({ items: all, render, label, rows = 1, loop = false, keyOf }: {
   items: T[];
   render: (item: T, hidden: boolean) => React.ReactNode;
   label: string;
@@ -19,6 +19,8 @@ export function Carousel<T>({ items, render, label, rows = 1, loop = false, keyO
   keyOf: (item: T) => string;
 }) {
   const t = useTranslations("common.tags");
+  // Two rows only repeat cleanly with an even number of items per copy.
+  const items = loop && rows === 2 && all.length % 2 === 1 ? all.slice(0, -1) : all;
   const track = useRef<HTMLDivElement>(null);
   const idle = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [edge, setEdge] = useState({ start: true, end: false });
@@ -45,10 +47,16 @@ export function Carousel<T>({ items, render, label, rows = 1, loop = false, keyO
     if (el && !loop) setEdge({ start: el.scrollLeft <= 2, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 2 });
   }, [loop]);
 
+  // Start in the middle copy once; when the list changes later, keep the position and only re-centre.
+  const started = useRef(false);
   useLayoutEffect(() => {
     const el = track.current;
-    if (loop && el) { const w = period(); if (w) el.scrollTo({ left: 2 * w, behavior: "instant" }); }
-  }, [loop, period]);
+    if (!loop || !el) return;
+    const w = period();
+    if (!w) return;
+    if (!started.current) { started.current = true; el.scrollTo({ left: 2 * w, behavior: "instant" }); }
+    else normalize();
+  }, [loop, period, normalize]);
 
   useEffect(() => {
     const el = track.current;

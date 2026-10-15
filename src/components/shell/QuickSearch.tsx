@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { quickSearch, type Hit } from "@/lib/actions/search";
 import { IconSearch } from "../ui/Icons";
@@ -14,9 +15,25 @@ const TAB: Record<string, string> = { initiative: "initiatives", group: "groups"
  * on the tab that has the most hits.
  */
 export function QuickSearch({ className = "" }: { className?: string }) {
+  return (
+    <Suspense fallback={<SearchBox initial="" className={className} />}>
+      <SearchWithUrl className={className} />
+    </Suspense>
+  );
+}
+
+/** On the results page the box shows what was searched; elsewhere it starts empty. */
+function SearchWithUrl({ className }: { className: string }) {
+  const params = useSearchParams();
+  const onResults = usePathname().startsWith("/explore");
+  const urlQuery = onResults ? params.get("q") ?? "" : "";
+  return <SearchBox key={urlQuery} initial={urlQuery} className={className} />;
+}
+
+function SearchBox({ initial, className }: { initial: string; className: string }) {
   const t = useTranslations("nav");
   const router = useRouter();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initial);
   const [hits, setHits] = useState<Hit[]>([]);
   const [settled, setSettled] = useState("");
   const [open, setOpen] = useState(false);

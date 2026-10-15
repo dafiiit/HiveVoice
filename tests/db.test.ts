@@ -262,3 +262,14 @@ describe("demo chats", () => {
     expect((await as(tx, a, () => tx`select id from public.conversations`)).length).toBe(3);
   }));
 });
+
+describe("pseudonyms", () => {
+  it("read like an adjective with a noun, never with a number", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    const names = await as(tx, a, async () => (await tx<{ a: string }[]>`select app.random_alias() as a from generate_series(1, 200)`).map((r) => r.a));
+    for (const n of names) expect(n).toMatch(/^[A-ZÄÖÜ][a-zäöüß]+(e|er|es) [A-ZÄÖÜ][A-Za-zäöüß]+$/);
+    expect(new Set(names).size).toBeGreaterThan(100);
+    const [{ alias }] = await as(tx, a, () => tx<{ alias: string }[]>`select alias::text from public.profiles where id = ${a}`);
+    expect(alias).not.toMatch(/\d/);
+  }));
+});

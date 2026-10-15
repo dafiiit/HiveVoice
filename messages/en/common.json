@@ -70,5 +70,11 @@
     "add": "Add hashtag",
     "remove": "Remove {tag}",
     "none": "Nothing chosen yet."
+  },
+  "lang": {
+    "label": "Choose language",
+    "de": "Deutsch",
+    "easy": "Leichte Sprache",
+    "en": "English"
   }
 }

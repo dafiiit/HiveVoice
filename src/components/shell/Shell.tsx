@@ -7,6 +7,7 @@ import { Avatar } from "../ui/Avatar";
 import { IconInbox, IconPlus, IconSearch, IconSquare } from "../ui/Icons";
 import { BottomNav, SideLinks, type NavItem } from "./NavLinks";
 import { btn } from "../ui/styles";
+import { LanguageMenu } from "../LanguageMenu";
 
 type MyGroup = { slug: string; name: string };
 
@@ -100,7 +101,10 @@ export async function Shell({ session, children }: { session: Session | null; ch
                 </Link>
               </>
             ) : (
-              <Link href="/login" className={btn.primary}>{t("login")}</Link>
+              <>
+                <LanguageMenu />
+                <Link href="/login" className={btn.primary}>{t("login")}</Link>
+              </>
             )}
           </div>
           {place && (

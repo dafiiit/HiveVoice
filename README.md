@@ -24,7 +24,7 @@ dem Online-Ausweis (eID) folgt.
 | Für mich (Profilbild oben rechts) | Profil mit Foto (Klarname oder Pseudonym), Notizbuch, Meldungen und Jury, Zuständigkeiten, Einstellungen (Sprache, Leichte Sprache, Dark Mode, Wohnort, Passkey, Konto löschen) |
 | Verwaltung | Versteckte Admin-Seite unter `ADMIN_PATH` |
 
-Sprachen: Deutsch, Englisch, Leichte Sprache. Darstellung: standardmäßig hell, dunkel oder wie das Gerät auf Wunsch.
+Sprachen: Deutsch (Standard für alle, unabhängig vom Browser), Englisch, Leichte Sprache. Die Auswahl „DE ▾“ steht auch für Gäste oben auf Willkommens-, Anmelde- und Lese-Seiten und wird in einem Cookie gemerkt. Darstellung: standardmäßig hell, dunkel oder wie das Gerät auf Wunsch.
 Installierbar als PWA.
 
 ## Technik in Kürze

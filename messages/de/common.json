@@ -70,5 +70,11 @@
     "add": "Hashtag hinzufügen",
     "remove": "{tag} entfernen",
     "none": "Noch nichts gewählt."
+  },
+  "lang": {
+    "label": "Sprache wählen",
+    "de": "Deutsch",
+    "easy": "Leichte Sprache",
+    "en": "English"
   }
 }

@@ -9,6 +9,7 @@ import { Logo } from "@/components/ui/Logo";
 import { Glyph } from "@/components/ui/Glyph";
 import { Cover } from "@/components/ui/Cover";
 import { btn } from "@/components/ui/styles";
+import { LanguageMenu } from "@/components/LanguageMenu";
 
 type Pair = { need: string; project: string | null; offer: string; who: string };
 
@@ -47,6 +48,7 @@ export default async function Welcome() {
       <header className="flex items-center justify-between gap-4 border-b border-line px-6 py-4 md:px-10">
         <Logo size={40} />
         <div className="flex items-center gap-2">
+          <LanguageMenu />
           <Link href="/explore" className="hidden h-11 items-center px-4 font-bold text-ink no-underline md:inline-flex">{t("guest")}</Link>
           <Link href="/login" className={btn.primary}>{t("login")}</Link>
         </div>

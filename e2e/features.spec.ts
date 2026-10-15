@@ -85,3 +85,30 @@ test.describe("signed in", () => {
     await sb.storage.from("images").remove([src!.split("/images/")[1]]);
   });
 });
+
+test.describe("language without signing in", () => {
+  test.use({ locale: "en-US", extraHTTPHeaders: { "Accept-Language": "en-US,en;q=0.9" } });
+
+  test("German is the default, even for an English browser", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("lang", "de");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Von der Idee");
+  });
+
+  test("guests can switch the language on the welcome page and keep it while reading the app", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: /Sprache wählen/ }).click();
+    await page.getByRole("menuitemradio", { name: "English" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("From an idea");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    // The choice survives navigation and reloads, also without an account.
+    await page.goto("/explore");
+    await expect(page.getByRole("heading", { name: "Explore" })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole("heading", { name: "Explore" })).toBeVisible();
+    // And back to German from inside the app.
+    await page.getByRole("button", { name: /Choose language/ }).click();
+    await page.getByRole("menuitemradio", { name: "Deutsch" }).click();
+    await expect(page.getByRole("heading", { name: "Entdecken" })).toBeVisible();
+  });
+});

@@ -6,8 +6,8 @@ import { useTranslations } from "next-intl";
 import { quickSearch, type Hit } from "@/lib/actions/search";
 import { IconSearch } from "../ui/Icons";
 
-const ORDER = ["initiative", "group", "person", "responsible", "place"] as const;
-const TAB: Record<string, string> = { initiative: "initiatives", group: "groups", person: "people", responsible: "responsible" };
+const ORDER = ["initiative", "group", "person", "link", "responsible", "place"] as const;
+const TAB: Record<string, string> = { initiative: "initiatives", group: "groups", person: "people", responsible: "responsible", link: "links" };
 
 /**
  * Search at the top. While typing it offers a few direct hits per kind (initiatives, groups,
@@ -61,7 +61,7 @@ function SearchBox({ initial, className }: { initial: string; className: string 
 
   const go = (href: string) => { setOpen(false); setQ(""); router.push(href); };
   const full = () => {
-    const best = (["initiative", "group", "person", "responsible"] as const)
+    const best = (["initiative", "group", "person", "responsible", "link"] as const)
       .map((k) => [k, hits.filter((h) => h.kind === k).length] as const).sort((a, b) => b[1] - a[1])[0];
     const kind = ready && best && best[1] > 0 ? TAB[best[0]] : "initiatives";
     go(`/explore?q=${encodeURIComponent(query)}${kind !== "initiatives" ? `&kind=${kind}` : ""}`);

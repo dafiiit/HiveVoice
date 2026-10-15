@@ -18,7 +18,8 @@
     "group": "Groups",
     "person": "People",
     "responsible": "Responsible",
-    "place": "Places"
+    "place": "Places",
+    "link": "Knowledge"
   },
   "searchAll": "All results for “{q}”",
   "searchBusy": "Searching …",

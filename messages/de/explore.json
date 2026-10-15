@@ -8,7 +8,8 @@
     "initiatives": "Initiativen",
     "groups": "Gruppen",
     "people": "Menschen",
-    "responsible": "Zuständige"
+    "responsible": "Zuständige",
+    "links": "Wissen"
   },
   "level": "Ebene",
   "sort": "Sortieren:",
@@ -24,7 +25,8 @@
     "initiatives": "{n, plural, one {1 Initiative} other {# Initiativen}}",
     "groups": "{n, plural, one {1 Gruppe} other {# Gruppen}}",
     "people": "{n, plural, one {1 Mensch} other {# Menschen}}",
-    "responsible": "{n, plural, one {1 Zuständigkeit} other {# Zuständigkeiten}}"
+    "responsible": "{n, plural, one {1 Zuständigkeit} other {# Zuständigkeiten}}",
+    "links": "{n, plural, one {1 Link} other {# Links}}"
   },
   "nothing": "Nichts gefunden. Versuch einen anderen Begriff oder eine andere Ebene.",
   "groupMeta": "{n, plural, one {1 Mitglied} other {# Mitglieder}} · {place}",

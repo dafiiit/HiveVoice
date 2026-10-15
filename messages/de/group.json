@@ -6,11 +6,29 @@
   "nearby": "Vorschläge in deiner Nähe",
   "noneYet": "Du bist noch in keiner Gruppe.",
   "memberCount": "{n, plural, one {1 Mitglied} other {# Mitglieder}}",
-  "kinds": { "project": "Projekt", "club": "Verein", "initiative": "Initiativgruppe", "community": "Gemeinschaft", "other": "Gruppe" },
-  "policy": { "open": "Offen für alle", "request": "Beitritt auf Anfrage" },
-  "policyText": { "open": "Jede:r kann beitreten und mitbestimmen.", "request": "Mitglieder entscheiden über neue Mitglieder, weil Mitglieder über Ziele abstimmen." },
-  "vis": { "public": "Öffentlich", "members": "Nur Mitglieder" },
-  "visText": { "public": "Alle können Gespräch, Ziele und Verlauf lesen.", "members": "Nur Mitglieder sehen Inhalte. Die Gruppe erscheint nicht in der Suche." },
+  "kinds": {
+    "project": "Projekt",
+    "club": "Verein",
+    "initiative": "Initiativgruppe",
+    "community": "Gemeinschaft",
+    "other": "Gruppe"
+  },
+  "policy": {
+    "open": "Offen für alle",
+    "request": "Beitritt auf Anfrage"
+  },
+  "policyText": {
+    "open": "Jede:r kann beitreten und mitbestimmen.",
+    "request": "Mitglieder entscheiden über neue Mitglieder, weil Mitglieder über Ziele abstimmen."
+  },
+  "vis": {
+    "public": "Öffentlich",
+    "members": "Nur Mitglieder"
+  },
+  "visText": {
+    "public": "Alle können Gespräch, Ziele und Verlauf lesen.",
+    "members": "Nur Mitglieder sehen Inhalte. Die Gruppe erscheint nicht in der Suche."
+  },
   "visibility": "Sichtbarkeit",
   "joining": "Beitritt",
   "join": "Beitreten",
@@ -21,10 +39,29 @@
   "youAre": "Du bist {role}",
   "leave": "Gruppe verlassen",
   "leaveConfirm": "Gruppe wirklich verlassen?",
-  "roles": { "admin": "Admin", "maintainer": "Maintainer", "contributor": "Mitwirkend", "guest": "Gast" },
-  "holders": { "maintainer": "Maintainer", "contributor": "Mitwirkend", "guest": "Gast", "public": "Öffentlich" },
+  "roles": {
+    "admin": "Admin",
+    "maintainer": "Maintainer",
+    "contributor": "Mitwirkend",
+    "guest": "Gast"
+  },
+  "holders": {
+    "maintainer": "Maintainer",
+    "contributor": "Mitwirkend",
+    "guest": "Gast",
+    "public": "Öffentlich"
+  },
   "sections": "Bereiche der Gruppe",
-  "tabs": { "goals": "Ziele", "goalsVoting": "Ziele · {n} Abstimmung", "talk": "Gespräch", "needs": "Bedarf · {n}", "tasks": "Aufgaben", "team": "Mitglieder und Rechte", "about": "Über" },
+  "tabs": {
+    "goals": "Ziele",
+    "goalsVoting": "Ziele · {n} Abstimmung",
+    "talk": "Gespräch",
+    "needs": "Bedarf · {n}",
+    "tasks": "Aufgaben",
+    "team": "Mitglieder und Rechte",
+    "about": "Über",
+    "links": "Links"
+  },
   "talkPlaceholder": "In „{name}“ schreiben …",
   "joinToPost": "Tritt der Gruppe bei, um mitzuschreiben.",
   "noPosts": "Noch kein Beitrag.",

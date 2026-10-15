@@ -134,7 +134,7 @@ test.describe("signed in", () => {
     await login(page);
     await page.goto("/connect");
     await page.getByRole("combobox").first().fill("mün");
-    const places = page.getByRole("option", { name: /^München/ }).first();
+    const places = page.getByRole("option", { name: /^München\s+München$/ }).first();
     await expect(places).toBeVisible({ timeout: 15_000 });
     await places.click();
     await expect(page).toHaveURL(/\/explore\?place=/);
@@ -200,6 +200,53 @@ test.describe("signed in", () => {
     await expect(prev).toBeEnabled();
   });
 
+  test("a link is checked, previewed, shared, voted on and removed again", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "one pass is enough, it writes data");
+    await login(page);
+    await page.goto("/new/link");
+    const url = page.getByLabel("Adresse des Links");
+    // What must never be shared is refused with a reason.
+    await url.fill("http://127.0.0.1/admin");
+    await page.getByRole("button", { name: "Prüfen" }).click();
+    await expect(page.getByText(/Zahlenadresse/)).toBeVisible();
+    await url.fill("javascript:alert(1)");
+    await page.getByRole("button", { name: "Prüfen" }).click();
+    await expect(page.getByText(/sieht nicht wie ein Link aus/)).toBeVisible();
+    await url.fill("https://example.org/setup.exe");
+    await page.getByRole("button", { name: "Prüfen" }).click();
+    await expect(page.getByText(/Programme und Installationsdateien/)).toBeVisible();
+    // A good one shows what it is and how far we trust it.
+    const mine = `https://github.com/supabase/supabase?e2e=${Date.now()}`;
+    await url.fill(mine);
+    await page.getByRole("button", { name: "Prüfen" }).click();
+    await expect(page.getByText("Bekannter Dienst").first()).toBeVisible({ timeout: 20_000 });
+    await page.getByLabel("Titel", { exact: true }).fill("E2E Testlink (wird gleich gelöscht)");
+    await page.getByRole("button", { name: "Teilen", exact: true }).click();
+    await page.waitForURL(/\/links\/[0-9a-f-]{36}/);
+    await expect(page.getByRole("heading", { name: /E2E Testlink/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Link öffnen/ })).toHaveAttribute("rel", /noopener/);
+    await page.getByRole("button", { name: "Nützlich", exact: true }).click();
+    await expect(page.getByRole("group", { name: "Bewertung" }).getByText("1", { exact: true })).toBeVisible();
+    page.once("dialog", (d) => d.accept());
+    await page.getByRole("button", { name: "Löschen" }).click();
+    await page.waitForURL(/kind=links/);
+    await expect(page.getByRole("tab", { name: "Wissen" })).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByText("E2E Testlink")).toHaveCount(0);
+  });
+
+  test("Wissen lists shared links with previews, votes and a search that finds them", async ({ page }) => {
+    await login(page);
+    await page.goto("/explore?kind=links");
+    await expect(page.getByRole("tab", { name: "Wissen" })).toHaveAttribute("aria-selected", "true");
+    const card = page.locator("article").filter({ hasText: "supabase/supabase" }).first();
+    await expect(card).toBeVisible();
+    await expect(card.getByRole("group", { name: "Bewertung" })).toBeVisible();
+    await expect(card.getByText("Bekannter Dienst")).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await page.getByRole("combobox").first().fill("supabase");
+    await expect(page.getByRole("option", { name: /supabase\/supabase/ }).first()).toBeVisible({ timeout: 15_000 });
+  });
+
   test("a profile photo can be uploaded and removed", async ({ page }) => {
     await login(page);
     await page.goto("/me");
@@ -258,4 +305,13 @@ test.describe("a guest can pick a place", () => {
     await page.goto("/connect?c=market");
     await expect(page.getByText(/Offen für alle in München · jede/)).toBeVisible();
   });
+});
+
+test("guests can read shared links but need an account to share or vote", async ({ page }) => {
+  await page.goto("/explore?kind=links");
+  const card = page.locator("article").filter({ hasText: "supabase/supabase" }).first();
+  await expect(card).toBeVisible();
+  await expect(card.getByRole("button", { name: "Nützlich", exact: true })).toBeDisabled();
+  await page.getByRole("link", { name: /Link teilen/ }).click();
+  await expect(page).toHaveURL(/\/login/);
 });

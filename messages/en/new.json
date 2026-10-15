@@ -1,17 +1,31 @@
 {
   "title": "New",
   "post": "Or just write a post on the marketplace",
-  "need": { "title": "Make a request", "text": "Big or small. You’ll find others with the same concern there." },
-  "offer": { "title": "Make an offer", "text": "Skills, time, knowledge, things." },
-  "group": { "title": "Start a group", "text": "With goals, responsibilities and votes." },
+  "need": {
+    "title": "Make a request",
+    "text": "Big or small. You’ll find others with the same concern there."
+  },
+  "offer": {
+    "title": "Make an offer",
+    "text": "Skills, time, knowledge, things."
+  },
+  "group": {
+    "title": "Start a group",
+    "text": "With goals, responsibilities and votes."
+  },
   "initiative": {
-    "title": "Start an initiative",
+    "title": "Title",
     "editTitle": "Edit initiative",
     "text": "A demand to a responsible office: with debate, secret ballot and a duty to answer.",
     "steps": "Steps",
-    "stepNames": { "idea": "Idea", "text": "Description", "place": "Place and level", "addressee": "Addressee", "review": "Review" },
+    "stepNames": {
+      "idea": "Idea",
+      "text": "Description",
+      "place": "Place and level",
+      "addressee": "Addressee",
+      "review": "Review"
+    },
     "ideaTitle": "What should change?",
-    "title": "Title",
     "titlePlaceholder": "e.g. drinking fountain at Harras",
     "summary": "In one sentence",
     "summaryPlaceholder": "What exactly, where, for whom?",
@@ -44,11 +58,31 @@
     "to": "To: {who}",
     "goodGoal": "A good initiative is …",
     "checks": {
-      "concrete": { "name": "concrete", "hint": "A clear title says what should change." },
-      "place": { "name": "located", "hint": "Place and level decide who is affected." },
-      "addressee": { "name": "addressed", "hint": "Someone has to be able to decide." },
-      "why": { "name": "justified", "hint": "A few sentences on why it matters." }
+      "concrete": {
+        "name": "concrete",
+        "hint": "A clear title says what should change."
+      },
+      "place": {
+        "name": "located",
+        "hint": "Place and level decide who is affected."
+      },
+      "addressee": {
+        "name": "addressed",
+        "hint": "Someone has to be able to decide."
+      },
+      "why": {
+        "name": "justified",
+        "hint": "A few sentences on why it matters."
+      }
     }
   },
-  "region": { "level": "Level", "other": "Other place", "placeholder": "Postcode or place" }
+  "region": {
+    "level": "Level",
+    "other": "Other place",
+    "placeholder": "Postcode or place"
+  },
+  "link": {
+    "title": "Share a link",
+    "text": "Knowledge, files and places from Drive, Dropbox, GitHub, Figma, maps … Only the link is stored."
+  }
 }

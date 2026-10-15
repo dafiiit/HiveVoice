@@ -6,10 +6,10 @@ import { createReport } from "@/lib/actions/reports";
 import { IconClose } from "./ui/Icons";
 import { btn, field } from "./ui/styles";
 
-const RULES = ["insult", "threat", "spam", "misinformation", "personal_data"] as const;
+const RULES = ["insult", "threat", "spam", "misinformation", "personal_data", "unsafe_link"] as const;
 
 /** "Melden": a three-step dialog that hands the content to a citizen jury. */
-export function ReportButton({ type, id, className }: { type: "post" | "argument" | "argument_reply" | "listing" | "message"; id: string; className?: string }) {
+export function ReportButton({ type, id, className }: { type: "post" | "argument" | "argument_reply" | "listing" | "message" | "resource"; id: string; className?: string }) {
   const t = useTranslations("report");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -46,7 +46,7 @@ export function ReportButton({ type, id, className }: { type: "post" | "argument
               <>
                 <span className="font-bold">{t("which")}</span>
                 <div role="radiogroup" aria-label={t("which")} className="flex flex-col border-t border-line">
-                  {RULES.map((r) => (
+                  {RULES.filter((r) => r !== "unsafe_link" || type === "resource").map((r) => (
                     <button key={r} type="button" role="radio" aria-checked={rule === r} onClick={() => setRule(r)}
                       className="flex items-start gap-3 border-0 border-b border-line bg-transparent py-3 text-left text-ink">
                       <span aria-hidden="true" className={`mt-1 h-4 w-4 flex-none border border-ink ${rule === r ? "bg-ink" : ""}`} />

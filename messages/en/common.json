@@ -32,7 +32,7 @@
     "forbidden": "You do not have permission for this.",
     "duplicate": "This already exists.",
     "invalid": "Please check your input.",
-    "title_required": "Please enter a title (at least 5 characters).",
+    "title_required": "Please enter a title (at least 3 characters).",
     "name_required": "Please enter a name.",
     "region_required": "Please choose a place.",
     "body_required": "Please write a few more sentences.",
@@ -48,7 +48,8 @@
     "invalid_token": "The link is invalid or has expired.",
     "not_found": "Not found.",
     "unknown": "That did not work. Please try again.",
-    "own_profile": "That is you."
+    "own_profile": "That is you.",
+    "rate_limited": "You have shared a lot of links today. Try again tomorrow."
   },
   "phase": {
     "idea": "Idea",

@@ -273,3 +273,63 @@ describe("pseudonyms", () => {
     expect(alias).not.toMatch(/\d/);
   }));
 });
+
+describe("shared links", () => {
+  const share = (tx: postgres.TransactionSql, who: string, url: string, extra: Record<string, unknown> = {}) =>
+    as(tx, who, () => tx<{ id: string }[]>`select app.share_resource(${tx.json({
+      url, host: new URL(url).hostname, provider: "web", kind: "page", title: "Ein guter Link", description: "Worum es geht", safety: "checked", notes: [], tags: ["rezept"], ...extra,
+    })}) as id`).then((r) => r[0].id);
+
+  it("keeps a link once per person, with tags, and shows it to guests", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    const id = await share(tx, a, "https://example.org/linsen");
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.share_resource(${sp.json({ url: "https://example.org/linsen", host: "example.org", title: "Nochmal" })})`));
+    const rows = await as(tx, null, () => tx<{ title: string; tags: number }[]>`select title, (select count(*)::int from public.resource_tags t where t.resource_id = r.id) as tags from public.resources r where id = ${id}`);
+    expect(rows).toEqual([{ title: "Ein guter Link", tags: 1 }]);
+  }));
+
+  it("counts up and down votes, one per person, and only members vote", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const id = await share(tx, a, "https://example.org/rezept");
+    await as(tx, b, () => tx`insert into public.resource_votes (resource_id, profile_id, value) values (${id}, ${b}, 1)`);
+    await as(tx, c, () => tx`insert into public.resource_votes (resource_id, profile_id, value) values (${id}, ${c}, 1)`);
+    const score = () => as(tx, a, () => tx<{ score: number }[]>`select score from public.resources where id = ${id}`).then((r) => r[0].score);
+    expect(await score()).toBe(2);
+    await as(tx, c, () => tx`update public.resource_votes set value = -1 where resource_id = ${id} and profile_id = ${c}`);
+    expect(await score()).toBe(0);
+    await as(tx, b, () => fails(tx, (sp) => sp`insert into public.resource_votes (resource_id, profile_id, value) values (${id}, ${b}, 1)`));
+    await as(tx, null, () => fails(tx, (sp) => sp`insert into public.resource_votes (resource_id, profile_id, value) values (${id}, ${b}, 1)`));
+    // Nobody can vote in someone else's name.
+    await as(tx, b, () => fails(tx, (sp) => sp`insert into public.resource_votes (resource_id, profile_id, value) values (${id}, ${c}, 1)`));
+  }));
+
+  it("keeps links of members-only groups private and needs the right to post", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Geheime Gruppe","visibility":"members","join_policy":"request"}'::jsonb) as gid`);
+    const id = await share(tx, a, "https://example.org/intern", { group_id: gid });
+    expect((await as(tx, a, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(1);
+    expect((await as(tx, b, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(0);
+    expect((await as(tx, null, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(0);
+    await as(tx, b, () => fails(tx, (sp) => sp`select app.share_resource(${sp.json({ url: "https://example.org/x", host: "example.org", title: "Fremder Link", group_id: gid })})`));
+  }));
+
+  it("lets only the owner or a group admin remove it, and limits sharing to 30 a day", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const id = await share(tx, a, "https://example.org/mein-link");
+    await as(tx, b, () => tx`delete from public.resources where id = ${id}`);
+    expect((await as(tx, a, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(1);
+    await as(tx, a, () => tx`delete from public.resources where id = ${id}`);
+    expect((await as(tx, a, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(0);
+    for (let i = 0; i < 30; i++) await share(tx, a, `https://example.org/seite-${i}`);
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.share_resource(${sp.json({ url: "https://example.org/zu-viel", host: "example.org", title: "Einer zu viel" })})`));
+  }));
+
+  it("hands a reported link to the citizen jury and never to its own author", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    for (const n of ["Cem", "Dora", "Emil"]) await person(tx, n);
+    const id = await share(tx, a, "https://example.org/betrug");
+    await as(tx, a, () => fails(tx, (sp) => sp`select app.create_report('resource', ${id}, 'unsafe_link', 'x')`));
+    const [{ caseNo }] = await as(tx, b, () => tx<{ caseNo: string }[]>`select app.create_report('resource', ${id}, 'unsafe_link', 'sieht nach Phishing aus') as "caseNo"`);
+    expect(caseNo).toMatch(/^\d{4}-\d{4}$/);
+  }));
+});

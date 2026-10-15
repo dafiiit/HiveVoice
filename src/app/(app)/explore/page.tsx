@@ -9,13 +9,17 @@ import { Avatar } from "@/components/ui/Avatar";
 import { IconCheck } from "@/components/ui/Icons";
 import { chip, tab, tag } from "@/components/ui/styles";
 import { FollowButton } from "@/components/FollowButton";
+import { LinkCard } from "@/components/links/LinkCard";
+import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
+import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("explore"))("title") };
 }
 
-const KINDS = ["initiatives", "groups", "people", "responsible"] as const;
+const KINDS = ["initiatives", "groups", "people", "responsible", "links"] as const;
+const RKINDS = ["document", "sheet", "slides", "form", "folder", "file", "pdf", "image", "video", "code", "design", "map", "dataset", "page"] as const;
 const LEVELS = ["all", "borough", "municipality", "district", "state", "country"] as const;
 const SORTS = ["relevant", "new", "soon", "support"] as const;
 
@@ -31,19 +35,36 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const sort = (SORTS as readonly string[]).includes(str("sort")) ? str("sort") : "relevant";
   const mine = str("mine") === "1";
   const q = str("q").trim();
+  const rk = (RKINDS as readonly string[]).includes(str("rk")) ? str("rk") : "";
   const placeId = /^[0-9a-f-]{36}$/.test(str("place")) ? str("place") : "";
-  const like = `%${q.toLowerCase()}%`;
+  const qq = q.replace(/^#/, "").toLowerCase();
+  const like = `%${qq}%`;
 
   const session = await getSession();
   const home = await getPlace();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const t = await getTranslations("explore");
   const tl = await getTranslations("levels");
+  const tk = await getTranslations("links");
 
   const [filterPlace] = placeId ? await asViewer(null, (tx) => tx<{ id: string; name: string }[]>`select id, name from public.regions where id = ${placeId}`) : [];
   const data = await asViewer(viewer, async (tx) => {
     const regions = session ? await myRegionIds(tx, session.profile.id) : (home?.chain.map((r) => r.id) ?? []);
     const inPlace = (column: ReturnType<typeof tx>) => filterPlace ? tx`and ${column} in ${regionTree(tx, filterPlace.id)}` : tx``;
+    if (kind === "links") {
+      const order = sort === "new" ? tx`r.created_at desc` : tx`r.score desc, r.created_at desc`;
+      return {
+        links: await tx<ResourceRow[]>`
+          select ${resourceColumns(tx, session?.profile.id ?? null)} from ${resourceFrom(tx)}
+          where r.hidden_at is null
+            ${rk ? tx`and r.kind = ${rk}` : tx``}
+            ${q ? tx`and (lower(r.title) like ${like} or lower(coalesce(r.description, '')) like ${like} or r.host like ${like}
+                     or exists (select 1 from public.resource_tags rt join public.tags t on t.id = rt.tag_id where rt.resource_id = r.id and t.slug like ${qq + "%"}))` : tx``}
+            ${mine ? tx`and r.region_id = any(${regions}::uuid[])` : tx``}
+            ${inPlace(tx`r.region_id`)}
+          order by ${order} limit 60`,
+      };
+    }
     if (kind === "initiatives") {
       const order =
         sort === "new" ? tx`i.created_at desc`
@@ -103,24 +124,24 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   });
 
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ kind, level, sort, q, mine: mine ? "1" : "", place: filterPlace?.id ?? "", ...patch });
+    const p = new URLSearchParams({ kind, level, sort, q, rk, mine: mine ? "1" : "", place: filterPlace?.id ?? "", ...patch });
     for (const [k, v] of [...p.entries()]) if (!v || (k === "level" && v === "all") || (k === "sort" && v === "relevant") || (k === "kind" && v === "initiatives")) p.delete(k);
     const s = p.toString();
     return `/explore${s ? `?${s}` : ""}`;
   };
-  const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.responsible?.length ?? 0;
+  const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.responsible?.length ?? data.links?.length ?? 0;
 
   return (
     <div className="flex flex-col gap-5 px-6 pb-12 pt-6 md:px-10 md:pb-20 md:pt-8">
       <h1 className="display m-0">{t("title")}</h1>
       <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
         {KINDS.map((k) => (
-          <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all", sort: "relevant" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
+          <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all", sort: "relevant", rk: "" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
         ))}
       </div>
       <div className="-mt-2 flex flex-wrap items-center gap-2 text-sm">
-        {(kind === "initiatives" || session) && (
-          <Popover label={t("filter")} badge={(level !== "all" ? 1 : 0) + (mine ? 1 : 0)}>
+        {(kind === "initiatives" || kind === "links" || session) && (
+          <Popover label={t("filter")} badge={(level !== "all" ? 1 : 0) + (mine ? 1 : 0) + (rk ? 1 : 0)}>
             {kind === "initiatives" && (
               <div className="flex flex-col gap-1.5" role="group" aria-label={t("level")}>
                 <span className="text-[13px] font-bold">{t("level")}</span>
@@ -128,6 +149,15 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
                   {LEVELS.map((l) => (
                     <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={`${chip(level === l)} h-8 px-3 no-underline`}>{tl(l)}</Link>
                   ))}
+                </div>
+              </div>
+            )}
+            {kind === "links" && (
+              <div className="flex flex-col gap-1.5" role="group" aria-label={tk("kindFilter")}>
+                <span className="text-[13px] font-bold">{tk("kindFilter")}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <Link href={href({ rk: "" })} aria-pressed={!rk} className={`${chip(!rk)} h-8 px-3 no-underline`}>{tk("allKinds")}</Link>
+                  {RKINDS.map((k) => <Link key={k} href={href({ rk: k })} aria-pressed={rk === k} className={`${chip(rk === k)} h-8 px-3 no-underline`}>{tk(`kinds.${k}`)}</Link>)}
                 </div>
               </div>
             )}
@@ -151,14 +181,43 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
             </div>
           </Popover>
         )}
+        {kind === "links" && (
+          <Popover label={<>{t("sort")} <span className="font-normal">{tk(`sort.${sort === "new" ? "new" : "popular"}`)}</span></>}>
+            <div className="flex flex-col" role="group" aria-label={t("sort")}>
+              {(["relevant", "new"] as const).map((s) => (
+                <Link key={s} href={href({ sort: s })} aria-current={(sort === "new" ? "new" : "relevant") === s ? "true" : undefined}
+                  className={`flex h-10 items-center justify-between border-b border-line text-ink no-underline last:border-b-0 ${(sort === "new" ? "new" : "relevant") === s ? "font-bold" : ""}`}>
+                  {tk(`sort.${s === "new" ? "new" : "popular"}`)}{(sort === "new" ? "new" : "relevant") === s && <IconCheck size={12} />}
+                </Link>
+              ))}
+            </div>
+          </Popover>
+        )}
+        {rk && kind === "links" && <Link href={href({ rk: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tk(`kinds.${rk as "page"}`) })}>{tk(`kinds.${rk as "page"}`)} <span aria-hidden="true">✕</span></Link>}
         {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
         {q && <Link href={href({ q: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
         {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
+        {kind === "links" && (
+          <Link href={session ? "/new/link" : "/login?next=/new/link"} className={`${btn.primary} h-9 text-sm`}>+ {tk("share")}</Link>
+        )}
         <span className="ml-auto text-muted">{t(`count.${kind}`, { n: count })}</span>
       </div>
 
-      {count === 0 && <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>}
+      {count === 0 && kind !== "links" && <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>}
+      {count === 0 && kind === "links" && (
+        <div className="flex flex-col items-start gap-3 border-t border-line pt-6">
+          <p className="m-0 text-muted">{q || rk ? tk("emptySearch") : tk("empty")}</p>
+          {q && <Link href={`/needs?title=${encodeURIComponent(q)}`} className="font-bold">{tk("ask")}</Link>}
+          {q && <span className="text-sm text-muted">{tk("askText")}</span>}
+        </div>
+      )}
+
+      {data.links && data.links.length > 0 && (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {data.links.map((r) => <LinkCard key={r.id} r={r} me={session?.profile.id ?? null} canVote={!!session?.profile.verified} />)}
+        </div>
+      )}
 
       {data.initiatives && (
         <div className="grid gap-x-5 gap-y-10 md:grid-cols-2 xl:grid-cols-3">

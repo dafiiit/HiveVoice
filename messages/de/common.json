@@ -32,7 +32,7 @@
     "forbidden": "Dafür fehlen dir die Rechte.",
     "duplicate": "Das gibt es schon.",
     "invalid": "Bitte prüfe deine Eingaben.",
-    "title_required": "Bitte gib einen Titel ein (mindestens 5 Zeichen).",
+    "title_required": "Bitte gib einen Titel ein (mindestens 3 Zeichen).",
     "name_required": "Bitte gib einen Namen ein.",
     "region_required": "Bitte wähle einen Ort.",
     "body_required": "Bitte schreib ein paar Sätze mehr.",
@@ -48,7 +48,8 @@
     "invalid_token": "Der Link ist ungültig oder abgelaufen.",
     "not_found": "Nicht gefunden.",
     "unknown": "Das hat nicht geklappt. Bitte versuche es noch einmal.",
-    "own_profile": "Das bist du selbst."
+    "own_profile": "Das bist du selbst.",
+    "rate_limited": "Du hast heute schon sehr viele Links geteilt. Versuche es morgen wieder."
   },
   "phase": {
     "idea": "Idee",

@@ -91,8 +91,9 @@ export async function MarketPage({ kind, searchParams }: { kind: "offer" | "need
       <div className="flex flex-col gap-2">
         <h1 className="display m-0">{t(give ? "offerTitle" : "needTitle")}</h1>
         <p className="m-0 max-w-[640px]">{t(give ? "offerLead" : "needLead")}</p>
+        {give && <Link href="/new/link" className="self-start font-bold">{t("shareLinkCta")} →</Link>}
       </div>
-      {session ? <ListingEditor kind={kind} ideas={ideas} regionId={data.region?.id ?? null} regionName={data.region?.name ?? null} popular={data.popular} />
+      {session ? <ListingEditor kind={kind} initialTitle={typeof searchParams.title === "string" ? searchParams.title.slice(0, 120) : ""} ideas={ideas} regionId={data.region?.id ?? null} regionName={data.region?.name ?? null} popular={data.popular} />
         : <p className="m-0"><Link href={`/login?next=${base}`} className="font-bold">{tc("signInToWrite")}</Link></p>}
       <MyListings kind={kind} items={mine} />
       <div role="tablist" aria-label={t("view")} className="flex overflow-x-auto border-b border-line">

@@ -13,6 +13,7 @@ import ns_initiative from "./initiative.json";
 import ns_jury from "./jury.json";
 import ns_legal from "./legal.json";
 import ns_levels from "./levels.json";
+import ns_links from "./links.json";
 import ns_listings from "./listings.json";
 import ns_market from "./market.json";
 import ns_me from "./me.json";
@@ -43,6 +44,7 @@ const messages = {
   "jury": ns_jury,
   "legal": ns_legal,
   "levels": ns_levels,
+  "links": ns_links,
   "listings": ns_listings,
   "market": ns_market,
   "me": ns_me,

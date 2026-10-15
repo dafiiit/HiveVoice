@@ -8,7 +8,8 @@
     "initiatives": "Initiatives",
     "groups": "Groups",
     "people": "People",
-    "responsible": "Responsible"
+    "responsible": "Responsible",
+    "links": "Knowledge"
   },
   "level": "Level",
   "sort": "Sort:",
@@ -24,7 +25,8 @@
     "initiatives": "{n, plural, one {1 initiative} other {# initiatives}}",
     "groups": "{n, plural, one {1 group} other {# groups}}",
     "people": "{n, plural, one {1 person} other {# people}}",
-    "responsible": "{n, plural, one {1 responsibility} other {# responsibilities}}"
+    "responsible": "{n, plural, one {1 responsibility} other {# responsibilities}}",
+    "links": "{n, plural, one {1 link} other {# links}}"
   },
   "nothing": "Nothing found. Try another word or level.",
   "groupMeta": "{n, plural, one {1 member} other {# members}} · {place}",

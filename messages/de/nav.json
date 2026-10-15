@@ -18,7 +18,8 @@
     "group": "Gruppen",
     "person": "Menschen",
     "responsible": "Zuständige",
-    "place": "Orte"
+    "place": "Orte",
+    "link": "Wissen"
   },
   "searchAll": "Alle Treffer für „{q}“",
   "searchBusy": "Sucht …",

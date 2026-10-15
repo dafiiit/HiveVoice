@@ -13,7 +13,7 @@ export async function findSimilar(title: string) {
     order by i.support_count desc limit 3`);
 }
 
-export type Hit = { kind: "initiative" | "group" | "person" | "responsible" | "place"; id: string; title: string; sub: string | null; href: string };
+export type Hit = { kind: "initiative" | "group" | "person" | "responsible" | "link" | "place"; id: string; title: string; sub: string | null; href: string };
 
 const like = (s: string) => `%${s.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
 
@@ -41,10 +41,16 @@ export async function quickSearch(q: string): Promise<Hit[]> {
       select s.id, s.title, s.organization_name as org from public.responsibilities s
       where lower(s.title || ' ' || coalesce(s.organization_name, '') || ' ' || s.description) like ${pattern}
       order by s.is_official desc limit 2`;
+    const links = await tx<{ id: string; title: string; host: string }[]>`
+      select r.id, r.title, r.host from public.resources r
+      where r.hidden_at is null and (lower(r.title) like ${pattern} or lower(coalesce(r.description, '')) like ${pattern} or r.host like ${pattern}
+        or exists (select 1 from public.resource_tags rt join public.tags t on t.id = rt.tag_id where rt.resource_id = r.id and t.slug like ${prefix.replace(/^#/, "")}))
+      order by r.score desc, r.created_at desc limit 3`;
     return [
       ...ini.map((r): Hit => ({ kind: "initiative", id: r.id, title: r.title, sub: r.region, href: `/initiatives/${r.id}` })),
       ...groups.map((r): Hit => ({ kind: "group", id: r.slug, title: r.name, sub: r.region, href: `/groups/${r.slug}` })),
       ...people.map((r): Hit => ({ kind: "person", id: r.id, title: r.name, sub: [r.headline, r.region].filter(Boolean).join(" · ") || null, href: `/profile/${r.id}` })),
+      ...links.map((r): Hit => ({ kind: "link", id: r.id, title: r.title, sub: r.host.replace(/^www\./, ""), href: `/links/${r.id}` })),
       ...resp.map((r): Hit => ({ kind: "responsible", id: r.id, title: r.org ? `${r.org} · ${r.title}` : r.title, sub: null, href: `/responsible?id=${r.id}` })),
     ];
   });

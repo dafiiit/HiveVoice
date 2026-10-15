@@ -24,13 +24,13 @@ const DICT: [RegExp, string][] = [
 ];
 const suggestTags = (text: string) => DICT.filter(([re]) => re.test(text)).map(([, tag]) => tag);
 
-export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { kind: "offer" | "need"; ideas: string[]; regionId: string | null; regionName: string | null; popular: string[] }) {
+export function ListingEditor({ kind, ideas, regionId, regionName, popular, initialTitle = "" }: { kind: "offer" | "need"; initialTitle?: string; ideas: string[]; regionId: string | null; regionName: string | null; popular: string[] }) {
   const t = useTranslations("market.editor");
   const tc = useTranslations("common");
   const tt = useTranslations("common.tags");
   const give = kind === "offer";
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState("");
   const [details, setDetails] = useState("");
   const [location, setLocation] = useState(regionName ?? "");

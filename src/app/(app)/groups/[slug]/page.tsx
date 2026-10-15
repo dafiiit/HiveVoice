@@ -17,8 +17,11 @@ import { Composer, PostList } from "@/components/PostList";
 import { ContactButton } from "@/components/listings/ContactButton";
 import { priceLabel } from "@/components/listings/price";
 import { FollowButton } from "@/components/FollowButton";
+import { LinkCard } from "@/components/links/LinkCard";
+import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
+import { btn } from "@/components/ui/styles";
 
-const TABS = ["goals", "talk", "needs", "tasks", "team", "about"] as const;
+const TABS = ["goals", "talk", "links", "needs", "tasks", "team", "about"] as const;
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
@@ -39,6 +42,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const me = session?.profile.id;
   const t = await getTranslations("group");
   const tc = await getTranslations("common");
+  const tl = await getTranslations("links");
   const locale = await getLocale();
   await sql`select app.tick()`;
 
@@ -81,6 +85,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       goals.push({ ...go, ballot });
     }
     const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "goals";
+    const links = active === "links" ? await tx<ResourceRow[]>`select ${resourceColumns(tx, me ?? null)} from ${resourceFrom(tx)} where r.group_id = ${g.id} and r.hidden_at is null order by r.score desc, r.created_at desc limit 100` : [];
     const posts = active === "talk" ? await loadPosts(tx, { groupId: g.id }, me ?? null, { sort: "chat", limit: 60 }) : [];
     const needs = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.group_id = ${g.id} and l.kind = 'need' and l.status = 'active' order by l.created_at desc`;
     const sentTo = me ? (await tx<{ listing_id: string }[]>`select listing_id from public.contact_requests where from_profile_id = ${me} and status = 'pending'`).map((x) => x.listing_id) : [];
@@ -100,7 +105,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       where g2.id <> ${g.id} and g2.archived_at is null and exists (
         select 1 from public.group_tags a join public.group_tags b on a.tag_id = b.tag_id where a.group_id = g2.id and b.group_id = ${g.id})
       order by g2.member_count desc limit 3`;
-    return { g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, needs, sentTo, tasks, requests, perms, similar, active };
+    return { g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
   });
   if (!data) notFound();
   const { g, role, active } = data;
@@ -110,6 +115,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const labels: Record<(typeof TABS)[number], string> = {
     goals: voting ? t("tabs.goalsVoting", { n: voting }) : t("tabs.goals"),
     talk: t("tabs.talk"),
+    links: t("tabs.links"),
     needs: t("tabs.needs", { n: data.needs.length }),
     tasks: t("tabs.tasks"),
     team: t("tabs.team"),
@@ -161,6 +167,20 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             {data.can_post
               ? <Composer ctx={{ groupId: g.id }} path={`${path}?tab=talk`} placeholder={t("talkPlaceholder", { name: g.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} />
               : <p className="m-0 text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</p>}
+          </section>
+        )}
+        {active === "links" && (
+          <section className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="m-0 max-w-[640px]">{tl("groupIntro")}</p>
+              {data.can_post
+                ? <Link href={`/new/link?group=${slug}`} className={btn.primary}>+ {tl("groupShare")}</Link>
+                : <span className="text-sm text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</span>}
+            </div>
+            {data.links.length === 0 && <p className="m-0 text-muted">{tl("empty")}</p>}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {data.links.map((r) => <LinkCard key={r.id} r={r} me={me ?? null} canVote={!!session?.profile.verified} />)}
+            </div>
           </section>
         )}
         {active === "needs" && (

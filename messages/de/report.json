@@ -3,11 +3,30 @@
   "step": "Schritt {n} von 3",
   "which": "Welche Regel verletzt der Beitrag?",
   "rules": {
-    "insult": { "label": "Beleidigung", "hint": "Herabwürdigung einer Person statt Auseinandersetzung mit der Sache" },
-    "threat": { "label": "Bedrohung", "hint": "Androhung von Gewalt oder Nachteilen" },
-    "spam": { "label": "Spam", "hint": "Werbung oder wiederholte Inhalte" },
-    "misinformation": { "label": "Falschinformation, mit Quelle widerlegt", "hint": "Bitte die Quelle im nächsten Schritt angeben" },
-    "personal_data": { "label": "Persönliche Daten anderer", "hint": "Adressen, Telefonnummern, private Details" }
+    "insult": {
+      "label": "Beleidigung",
+      "hint": "Herabwürdigung einer Person statt Auseinandersetzung mit der Sache"
+    },
+    "threat": {
+      "label": "Bedrohung",
+      "hint": "Androhung von Gewalt oder Nachteilen"
+    },
+    "spam": {
+      "label": "Spam",
+      "hint": "Werbung oder wiederholte Inhalte"
+    },
+    "misinformation": {
+      "label": "Falschinformation, mit Quelle widerlegt",
+      "hint": "Bitte die Quelle im nächsten Schritt angeben"
+    },
+    "personal_data": {
+      "label": "Persönliche Daten anderer",
+      "hint": "Adressen, Telefonnummern, private Details"
+    },
+    "unsafe_link": {
+      "label": "Unsicherer Link",
+      "hint": "Betrug, Schadsoftware oder ein Link, der etwas anderes verspricht"
+    }
   },
   "disagree": "Anderer Meinung? Dafür sind Argumente da. Widerspruch kann einen Beitrag nach unten sortieren, aber nie entfernen.",
   "rule": "Regel",

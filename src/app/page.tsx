@@ -17,6 +17,7 @@ export default async function Welcome() {
   const session = await getSession();
   if (session) redirect(session.profile.onboarded ? "/connect" : "/onboarding");
   const t = await getTranslations("welcome");
+  const tp = await getTranslations("principles");
 
   const [live, pairs] = await asViewer(null, async (tx) => [
     await tx<Card[]>`
@@ -48,6 +49,7 @@ export default async function Welcome() {
       <header className="flex items-center justify-between gap-4 border-b border-line px-6 py-4 md:px-10">
         <Logo size={40} />
         <div className="flex items-center gap-2">
+          <Link href="/principles" className="inline-flex h-11 items-center px-2 font-bold text-ink no-underline md:px-4">{tp("nav")}</Link>
           <LanguageMenu />
           <Link href="/explore" className="hidden h-11 items-center px-4 font-bold text-ink no-underline md:inline-flex">{t("guest")}</Link>
           <Link href="/login" className={btn.primary}>{t("login")}</Link>

@@ -9,6 +9,7 @@ import ns_market from "./market.json";
 import ns_me from "./me.json";
 import ns_nav from "./nav.json";
 import ns_onboarding from "./onboarding.json";
+import ns_principles from "./principles.json";
 import ns_responsible from "./responsible.json";
 import ns_welcome from "./welcome.json";
 
@@ -23,6 +24,7 @@ const messages = {
   "me": ns_me,
   "nav": ns_nav,
   "onboarding": ns_onboarding,
+  "principles": ns_principles,
   "responsible": ns_responsible,
   "welcome": ns_welcome,
 };

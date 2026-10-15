@@ -23,6 +23,7 @@ import ns_new from "./new.json";
 import ns_notifications from "./notifications.json";
 import ns_onboarding from "./onboarding.json";
 import ns_posts from "./posts.json";
+import ns_principles from "./principles.json";
 import ns_profile from "./profile.json";
 import ns_report from "./report.json";
 import ns_responsible from "./responsible.json";
@@ -54,6 +55,7 @@ const messages = {
   "notifications": ns_notifications,
   "onboarding": ns_onboarding,
   "posts": ns_posts,
+  "principles": ns_principles,
   "profile": ns_profile,
   "report": ns_report,
   "responsible": ns_responsible,

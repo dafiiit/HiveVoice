@@ -1,0 +1,42 @@
+{
+  "nav": "Unsere Werte",
+  "title": "Unsere Werte",
+  "lead": "Hier steht, was uns wichtig ist. Danach bauen wir HiveVoice.",
+  "items": [
+    {
+      "title": "Menschen in der Nähe",
+      "text": "Viele Menschen haben viele Kontakte im Internet. Trotzdem fühlen sich viele allein. Das wollen wir ändern. Du lernst die Menschen in deiner Nachbarschaft kennen."
+    },
+    {
+      "title": "Zusammen statt allein",
+      "text": "Du brauchst etwas? Frag hier. Du hast etwas übrig? Gib es weiter. Viele Menschen wollen das Gleiche? Dann macht ihr zusammen etwas Größeres. Was du nicht mehr brauchst, kann für andere wertvoll sein."
+    },
+    {
+      "title": "Etwas tun",
+      "text": "Im Internet reden viele Menschen nur. Und viele werden wütend. Hier sollen Menschen etwas tun. Du ärgerst dich über etwas? Dann starte eine Initiative. Wichtig ist: Was wird besser?"
+    },
+    {
+      "title": "Jede Stimme zählt gleich",
+      "text": "Jeder Mensch hat eine Stimme. Alle Stimmen sind gleich viel wert. Die meisten Stimmen entscheiden. Aber alle Meinungen werden gezeigt: dafür und dagegen."
+    },
+    {
+      "title": "Alle sollen mitmachen können",
+      "text": "Alle Menschen sollen mitmachen können. Das ist uns am wichtigsten. Darum gibt es Leichte Sprache. Darum achten wir auf Barrieren. Hier ist Platz für alle Menschen. Egal welches Geschlecht, welche Religion oder welche Meinung. Alle müssen sich an die Regeln halten."
+    },
+    {
+      "title": "Du bist geschützt",
+      "text": "Jeder Mensch hier ist geprüft. Hier sind nur echte Menschen. Trotzdem musst du deinen echten Namen nicht zeigen. Das schützt dich."
+    },
+    {
+      "title": "Fair streiten",
+      "text": "Streiten ist erlaubt. Aber freundlich und mit Gründen. Niemand darf andere beleidigen. Bei einem Streit entscheidet keine Chefin und kein Chef. Es entscheiden 7 Menschen. Sie werden ausgelost."
+    },
+    {
+      "title": "HiveVoice gehört allen",
+      "text": "Alle dürfen sehen, wie HiveVoice gemacht ist. Wir speichern nur wenige Daten. Wir verkaufen keine Daten."
+    }
+  ],
+  "closing": "Eine Stimme allein hört man leicht nicht. Viele Stimmen zusammen hört man.",
+  "join": "Mitmachen",
+  "source": "Den Code ansehen"
+}

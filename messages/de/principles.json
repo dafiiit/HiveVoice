@@ -1,0 +1,42 @@
+{
+  "nav": "Haltung",
+  "title": "Unsere Haltung",
+  "lead": "HiveVoice ist ein Werkzeug. Aber kein Werkzeug ist neutral. Diese Grundsätze entscheiden, was wir bauen, was wir weglassen und wofür wir einstehen.",
+  "items": [
+    {
+      "title": "Nähe statt Reichweite",
+      "text": "Nie waren wir so vernetzt und nie so allein. Das ändert sich jetzt. Unendlich viele Kontakte haben die Einsamkeit nicht beendet, sie haben sie nur unsichtbarer gemacht. HiveVoice misst sich nicht an Followern, sondern daran, ob du deine Nachbarschaft kennst und ob sie dich kennt."
+    },
+    {
+      "title": "Vom Ich zum Wir",
+      "text": "Eigeninteresse ist ein Anfang. Wer etwas braucht oder etwas übrig hat, ist hier richtig. Aber wenn wir unsere Interessen vernetzen, entsteht Größeres: Aus Gesuch und Angebot wird Begegnung, aus Begegnung Gemeinschaft, aus Gemeinschaft eine Initiative. Was für den einen Ballast ist, ist für die andere ein Schatz."
+    },
+    {
+      "title": "Handeln vor Meinen",
+      "text": "Das Netz ist reich an Meinungen und arm an Taten. Frust ist Energie. Anderswo wird sie zu Wut, hier wird sie zur Initiative. Wir messen uns nicht daran, wie viel gesagt wurde, sondern daran, was sich verändert hat."
+    },
+    {
+      "title": "Ein Mensch, eine Stimme",
+      "text": "Jede Stimme wiegt gleich, unabhängig von Titel, Vermögen oder Lautstärke. Die Mehrheit entscheidet, die Minderheit wird gehört: Pro und Contra stehen gleichberechtigt nebeneinander. Demokratie heißt nicht, dass die Lautesten gewinnen, sondern dass alle zählen."
+    },
+    {
+      "title": "Niemand bleibt draußen",
+      "text": "Teilhabe aller ist kein Zusatz, sondern das Fundament. Mitbestimmen kann nur, wer verstehen und teilnehmen kann. Darum Leichte Sprache, darum Barrierefreiheit, darum Offenheit für jedes Geschlecht, jede Orientierung, jeden Glauben und jede Überzeugung, die die Regeln der Gemeinschaft achtet."
+    },
+    {
+      "title": "Echt, aber geschützt",
+      "text": "Verifiziert menschlich, aber pseudonym. Hinter jedem Konto steht ein echter Mensch, der dort lebt, wo er mitredet. Gerade deshalb muss niemand seinen Namen zeigen. Das Pseudonym schützt vor Bloßstellung und Einschüchterung, es macht freie Rede erst möglich."
+    },
+    {
+      "title": "Streiten, nicht verachten",
+      "text": "Harte Argumente, keine harten Worte. Widerspruch ist kein Störfall, er ist der Motor guter Entscheidungen. Gegner sollen verhandeln, Kompromisse suchen und einander aushalten. Über Verstöße richtet keine Zentrale, sondern eine ausgeloste Jury aus sieben Menschen aus der Gemeinschaft."
+    },
+    {
+      "title": "Niemandem gehört HiveVoice",
+      "text": "Offener Code, möglichst wenig Daten. Jede Gemeinschaft kann ihre eigene Instanz betreiben, kein Betreiber steht über den Menschen, die sie nutzen. Wir sammeln nur, was wir wirklich brauchen, und verkaufen nichts davon."
+    }
+  ],
+  "closing": "Eine Stimme ist leicht zu überhören. Ein Schwarm nicht.",
+  "join": "Mitmachen",
+  "source": "Zum offenen Code"
+}

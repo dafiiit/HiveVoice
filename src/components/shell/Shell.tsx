@@ -16,6 +16,7 @@ type MyGroup = { slug: string; name: string };
 
 export async function Shell({ session, children }: { session: Session | null; children: React.ReactNode }) {
   const t = await getTranslations("nav");
+  const tp = await getTranslations("principles");
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   // Verbinden carries what waits for an answer: unread chats, requests to me, people asking to join my groups.
   const [groups, waiting] = session
@@ -73,6 +74,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
               <Logo size={36} />
             </Link>
             <div className="flex items-center gap-2 md:order-3 md:ml-auto">
+              <Link href="/principles" className="inline-flex h-11 items-center px-2 text-sm font-bold text-ink no-underline md:px-3">{tp("nav")}</Link>
               {session ? (
                 <>
                   <Link href="/notifications" aria-label={t("inbox", { n: session.profile.unread })}

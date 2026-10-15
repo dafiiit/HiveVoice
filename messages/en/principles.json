@@ -1,0 +1,42 @@
+{
+  "nav": "Principles",
+  "title": "Our principles",
+  "lead": "HiveVoice is a tool. But no tool is neutral. These principles decide what we build, what we leave out and what we stand for.",
+  "items": [
+    {
+      "title": "Closeness over reach",
+      "text": "We have never been so connected, and never so alone. That changes now. Endless contacts did not end loneliness, they only made it harder to see. HiveVoice does not measure itself in followers, but in whether you know your neighbourhood and whether it knows you."
+    },
+    {
+      "title": "From me to we",
+      "text": "Self-interest is a beginning. If you need something or have something to spare, you belong here. But when we connect our interests, something bigger emerges: requests and offers become encounters, encounters become community, community becomes an initiative. One person's clutter is another's treasure."
+    },
+    {
+      "title": "Action before opinion",
+      "text": "The internet is rich in opinions and poor in deeds. Frustration is energy. Elsewhere it turns into anger, here it becomes an initiative. We do not measure ourselves by how much was said, but by what has changed."
+    },
+    {
+      "title": "One person, one voice",
+      "text": "Every voice weighs the same, regardless of title, wealth or volume. The majority decides, the minority is heard: arguments for and against stand side by side as equals. Democracy does not mean the loudest win. It means everyone counts."
+    },
+    {
+      "title": "No one left outside",
+      "text": "Participation for all is not an add-on, it is the foundation. Only those who can understand and take part can have a say. Hence plain language, hence accessibility, hence openness to every gender, every orientation, every faith and every conviction that respects the rules of the community."
+    },
+    {
+      "title": "Real, but protected",
+      "text": "Verified human, but pseudonymous. Behind every account is a real person who lives where they speak up. That is exactly why no one has to show their name. A pseudonym protects against exposure and intimidation, and it is what makes free speech possible."
+    },
+    {
+      "title": "Argue, don't despise",
+      "text": "Hard arguments, not hard words. Disagreement is not a malfunction, it is the engine of good decisions. Opponents should negotiate, seek compromise and bear with one another. Violations are judged not by a central authority but by a jury of seven people drawn by lot from the community."
+    },
+    {
+      "title": "No one owns HiveVoice",
+      "text": "Open code, as little data as possible. Any community can run its own instance, and no operator stands above the people who use it. We collect only what we truly need, and we sell none of it."
+    }
+  ],
+  "closing": "One voice is easy to ignore. A swarm is not.",
+  "join": "Join in",
+  "source": "See the open code"
+}

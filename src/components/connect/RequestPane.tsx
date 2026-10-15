@@ -96,9 +96,9 @@ export function RequestPane({ r }: { r: RequestView }) {
         {pendingState && r.outgoing && (
           <button type="button" disabled={pending} className={btn.secondary} onClick={() => act(() => (join ? withdrawJoin(r.id) : withdrawContact(r.id)))}>{t("req.withdraw")}</button>
         )}
-        {join && r.group_slug && <Link href={`/groups/${r.group_slug}`} className="font-bold">{t("req.openGroup")}</Link>}
-        {!join && r.listing_id && <Link href={`/${r.listing_kind === "need" ? "needs" : "offers"}/${r.listing_id}`} className="font-bold">{t("openListing")}</Link>}
-        {(!join || !r.outgoing) && <Link href={`/profile/${r.other_id}`} className="font-bold">{t("openProfile")}</Link>}
+        {join && r.group_slug && <Link href={`/groups/${r.group_slug}`} className={btn.secondary}>{t("req.openGroup")}</Link>}
+        {!join && r.listing_id && <Link href={`/${r.listing_kind === "need" ? "needs" : "offers"}/${r.listing_id}`} className={btn.secondary}>{t("openListing")}</Link>}
+        {(!join || !r.outgoing) && <Link href={`/profile/${r.other_id}`} className={btn.secondary}>{t("openProfile")}</Link>}
       </div>
       {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
     </div>

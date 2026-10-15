@@ -67,6 +67,62 @@ test.describe("signed in", () => {
     await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(before);
   });
 
+  test("Verbinden: marketplace filter replaces the sort links, list filters stay compact", async ({ page }) => {
+    await login(page);
+    await page.goto("/connect");
+    await expect(page.getByText("Für dich", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Neueste", { exact: true })).toHaveCount(0);
+    const filters = page.getByRole("group", { name: "Anzeigen" });
+    await expect(filters.getByRole("link")).toHaveCount(4);
+    const box = await filters.boundingBox();
+    expect(box!.height).toBeLessThan(60);
+    await page.goto("/connect?c=market");
+    await page.locator("summary", { hasText: "Filter" }).first().click({ timeout: 8000 });
+    await expect(page.getByPlaceholder("Wort oder #hashtag")).toBeVisible();
+    await page.getByPlaceholder("Wort oder #hashtag").fill("kein-treffer-xyz");
+    await page.getByRole("button", { name: "Anwenden" }).click();
+    await expect(page).toHaveURL(/q=kein-treffer-xyz/);
+    await expect(page.getByText("Keine Beiträge dazu")).toBeVisible();
+  });
+
+  test("requests: all three actions look like buttons", async ({ page }) => {
+    await login(page);
+    await page.goto("/connect?f=requests");
+    await page.getByRole("region", { name: "Unterhaltungen" }).getByRole("link").filter({ hasText: "angefragt:" }).first().click();
+    const profile = page.getByRole("link", { name: "Profil ansehen" });
+    await expect(profile).toBeVisible();
+    expect(await profile.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("1px");
+  });
+
+  test("Entdecken: filters sit in compact menus", async ({ page }) => {
+    await login(page);
+    await page.goto("/explore");
+    await expect(page.locator("summary", { hasText: "Filter" })).toBeVisible();
+    await expect(page.locator("summary", { hasText: "Sortieren" })).toBeVisible();
+    await page.locator("summary", { hasText: "Filter" }).click();
+    await expect(page.getByRole("link", { name: "Gemeinde" })).toBeVisible();
+    await page.getByRole("link", { name: "Gemeinde" }).click();
+    await expect(page).toHaveURL(/level=municipality/);
+    await expect(page.getByRole("link", { name: /Gemeinde entfernen/ })).toBeVisible();
+  });
+
+  test("Mitteilungen show who and what, with a way to clear them", async ({ page }) => {
+    await login(page);
+    await page.goto("/notifications");
+    await expect(page.getByRole("heading", { name: "Mitteilungen" })).toBeVisible();
+    await expect(page.getByRole("group", { name: "Anzeigen" })).toBeVisible();
+    await expect(page.getByText("Neue Nachricht.")).toHaveCount(0);
+  });
+
+  test("a postal code finds the place in the offer form", async ({ page }) => {
+    await login(page);
+    await page.goto("/offers");
+    await page.locator("main input").first().fill("Test");
+    await page.getByRole("combobox").fill("80336");
+    await expect(page.getByRole("combobox")).toHaveValue("80336 München");
+    await expect(page.getByText(/Erkannt: München/)).toBeVisible();
+  });
+
   test("a profile photo can be uploaded and removed", async ({ page }) => {
     await login(page);
     await page.goto("/me");

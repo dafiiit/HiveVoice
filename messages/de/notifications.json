@@ -1,30 +1,129 @@
 {
   "title": "Mitteilungen",
   "empty": "Keine Mitteilungen. Alles ruhig.",
-  "kinds": {
-    "join_request": "Jemand möchte bei „{group}“ mitmachen.",
-    "join_accepted": "Du bist jetzt Mitglied von „{group}“.",
-    "join_declined": "Deine Anfrage bei „{group}“ wurde abgelehnt.",
-    "goal_vote": "Neues Ziel in „{group}“: „{goal}“. Stimm ab!",
-    "goal_adopted": "„{goal}“ wurde in „{group}“ beschlossen.",
-    "goal_rejected": "„{goal}“ wurde in „{group}“ nicht angenommen.",
-    "working_group": "Für „{title}“ gibt es jetzt eine Arbeitsgruppe.",
-    "initiative_vote": "Die Abstimmung über „{title}“ läuft.",
-    "initiative_passed": "„{title}“ wurde angenommen und geht an den Adressaten.",
-    "initiative_failed": "„{title}“ wurde in der Abstimmung abgelehnt.",
-    "request_answered": "Deine Anfrage wurde beantwortet.",
-    "request_forwarded": "Deine Anfrage wurde weitergeleitet.",
-    "responsibility_request": "Neue Anfrage an eine deiner Zuständigkeiten.",
-    "contact_request": "Neue Kontaktanfrage zu „{title}“.",
-    "contact_accepted": "Dein Kontakt zu „{title}“ wurde angenommen. Ihr könnt jetzt schreiben.",
-    "contact_declined": "Deine Anfrage zu „{title}“ wurde abgelehnt.",
-    "message": "Neue Nachricht.",
-    "post_reply": "Jemand hat auf deinen Beitrag geantwortet.",
-    "jury_invite": "Du wurdest für die Bürgerjury ausgelost (Fall {case_no}).",
-    "report_decided": "Deine Meldung (Fall {case_no}) wurde entschieden.",
-    "content_hidden": "Ein Beitrag von dir wurde nach Prüfung durch die Bürgerjury ausgeblendet (Fall {case_no}).",
-    "contact_request_direct": "Jemand möchte dir schreiben.",
-    "contact_accepted_direct": "Deine Nachricht wurde angenommen. Ihr könnt jetzt schreiben.",
-    "contact_declined_direct": "Deine Nachricht wurde nicht angenommen."
+  "emptyFilter": "Dazu gibt es nichts Neues.",
+  "markAll": "Alle als gelesen markieren",
+  "filter": {
+    "label": "Anzeigen",
+    "all": "Alles",
+    "messages": "Nachrichten",
+    "requests": "Anfragen",
+    "other": "Weiteres"
+  },
+  "sections": {
+    "new": "Neu",
+    "earlier": "Früher"
+  },
+  "labels": {
+    "message": "Chat",
+    "request": "Anfrage",
+    "group": "Gruppe",
+    "initiative": "Initiative",
+    "jury": "Jury",
+    "other": "Hinweis"
+  },
+  "open": "Öffnen",
+  "unreadN": "{n, plural, one {1 neue Nachricht} other {# neue Nachrichten}}",
+  "items": {
+    "message": {
+      "title": "{name}",
+      "body": "{preview}"
+    },
+    "contact_request": {
+      "title": "{name} fragt an",
+      "body": "„{title}“: {message}"
+    },
+    "contact_request_direct": {
+      "title": "{name} möchte dir schreiben",
+      "body": "{message}"
+    },
+    "contact_accepted": {
+      "title": "{name} hat angenommen",
+      "body": "Zu „{title}“. Ihr könnt jetzt schreiben."
+    },
+    "contact_accepted_direct": {
+      "title": "{name} hat angenommen",
+      "body": "Ihr könnt jetzt schreiben."
+    },
+    "contact_declined": {
+      "title": "{name} hat abgelehnt",
+      "body": "Deine Anfrage zu „{title}“ wurde nicht angenommen."
+    },
+    "contact_declined_direct": {
+      "title": "{name} hat abgelehnt",
+      "body": "Deine Nachricht wurde nicht angenommen."
+    },
+    "join_request": {
+      "title": "{name} möchte „{group}“ beitreten",
+      "body": "{message}"
+    },
+    "join_accepted": {
+      "title": "Willkommen in „{group}“",
+      "body": "Du bist jetzt Mitglied."
+    },
+    "join_declined": {
+      "title": "Beitritt abgelehnt",
+      "body": "„{group}“ hat deine Anfrage nicht angenommen."
+    },
+    "goal_vote": {
+      "title": "Abstimmung in „{group}“",
+      "body": "Neues Ziel: „{goal}“. Deine Stimme zählt."
+    },
+    "goal_adopted": {
+      "title": "Ziel beschlossen",
+      "body": "„{goal}“ wurde in „{group}“ angenommen."
+    },
+    "goal_rejected": {
+      "title": "Ziel abgelehnt",
+      "body": "„{goal}“ wurde in „{group}“ nicht angenommen."
+    },
+    "working_group": {
+      "title": "Neue Arbeitsgruppe",
+      "body": "Für „{title}“ gibt es jetzt eine Gruppe zur Umsetzung."
+    },
+    "initiative_vote": {
+      "title": "Abstimmung läuft",
+      "body": "„{title}“. Gib deine Stimme ab."
+    },
+    "initiative_passed": {
+      "title": "Initiative angenommen",
+      "body": "„{title}“ geht jetzt an den Adressaten."
+    },
+    "initiative_failed": {
+      "title": "Initiative abgelehnt",
+      "body": "„{title}“ hat die Abstimmung nicht bestanden."
+    },
+    "request_answered": {
+      "title": "Antwort der zuständigen Stelle",
+      "body": "Deine Anfrage wurde beantwortet."
+    },
+    "request_forwarded": {
+      "title": "Anfrage weitergeleitet",
+      "body": "Deine Anfrage liegt jetzt bei einer anderen Stelle."
+    },
+    "responsibility_request": {
+      "title": "Neue Anfrage für dich",
+      "body": "Jemand hat sich an eine deiner Zuständigkeiten gewandt. Es läuft eine Frist."
+    },
+    "post_reply": {
+      "title": "Neue Antwort",
+      "body": "Jemand hat auf deinen Beitrag geantwortet."
+    },
+    "jury_invite": {
+      "title": "Du bist Geschworene:r",
+      "body": "Fall {case_no}: Bitte prüfe die Meldung."
+    },
+    "report_decided": {
+      "title": "Deine Meldung wurde entschieden",
+      "body": "Fall {case_no}."
+    },
+    "content_hidden": {
+      "title": "Ein Beitrag von dir wurde ausgeblendet",
+      "body": "Nach Prüfung durch die Bürgerjury, Fall {case_no}."
+    },
+    "fallback": {
+      "title": "Neuigkeit",
+      "body": ""
+    }
   }
 }

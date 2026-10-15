@@ -4,10 +4,20 @@
   "search": "Search",
   "searchPlaceholder": "Search initiatives, groups, people, responsibilities",
   "what": "What are you looking for?",
-  "kinds": { "initiatives": "Initiatives", "groups": "Groups", "people": "People", "responsible": "Responsible" },
+  "kinds": {
+    "initiatives": "Initiatives",
+    "groups": "Groups",
+    "people": "People",
+    "responsible": "Responsible"
+  },
   "level": "Level",
   "sort": "Sort:",
-  "sorts": { "relevant": "Relevant", "new": "New", "soon": "Decided soon", "support": "Most support" },
+  "sorts": {
+    "relevant": "Relevant",
+    "new": "New",
+    "soon": "Decided soon",
+    "support": "Most support"
+  },
   "canVote": "In my places",
   "nearMe": "Near me",
   "count": {
@@ -18,11 +28,16 @@
   },
   "nothing": "Nothing found. Try another word or level.",
   "groupMeta": "{n, plural, one {1 member} other {# members}} · {place}",
-  "join": { "open": "open to all", "request": "join on request" },
+  "join": {
+    "open": "open to all",
+    "request": "join on request"
+  },
   "member": "Member",
   "offers": "offers",
   "needs": "needs",
   "followPrivate": "Following is private. There are no follower counts.",
   "official": "Officially verified",
-  "responds": "responds in {days, plural, one {1 day} other {# days}} on average"
+  "responds": "responds in {days, plural, one {1 day} other {# days}} on average",
+  "filter": "Filter",
+  "removeFilter": "Remove {what}"
 }

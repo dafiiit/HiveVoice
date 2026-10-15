@@ -8,6 +8,7 @@ import { Avatar } from "../ui/Avatar";
 import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { ImagePicker } from "../ImageUpload";
+import { PlaceInput } from "../PlaceInput";
 import { imageUrl } from "@/lib/images";
 import { btn, chip, field } from "../ui/styles";
 
@@ -31,6 +32,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
   const [description, setDescription] = useState("");
   const [details, setDetails] = useState("");
   const [location, setLocation] = useState(regionName ?? "");
+  const [placeId, setPlaceId] = useState<string | null>(null);
   const [schedule, setSchedule] = useState("");
   const [recurring, setRecurring] = useState(false);
   const [seats, setSeats] = useState("");
@@ -63,7 +65,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
     const res = await saveListing({
       kind, title, description, detailsPrivate: details, payMode: pay, rateEuro: rate, fixedEuro: fixed, swapText: swap,
       locationText: location, scheduleText: (schedule + (recurring ? "" : "")).trim(), isRecurring: recurring, seats, seekingAllies: !give && allies,
-      tags: allTags, regionId, responsibilityIds: resp.map((r) => r.id), images,
+      tags: allTags, regionId: placeId ?? regionId, responsibilityIds: resp.map((r) => r.id), images,
     });
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
     void status;
@@ -76,7 +78,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
   const edOpen = open || title.trim().length > 0;
 
   return (
-    <section aria-label={t(give ? "newOffer" : "newNeed")} className="flex flex-col gap-4 border-2 border-ink bg-surface p-5">
+    <section aria-label={t(give ? "newOffer" : "newNeed")} className="flex flex-col gap-4 border border-line bg-surface p-5">
       {done && <p role="status" className="m-0 flex items-center gap-2 font-bold"><IconCheck /> {t("published")}</p>}
       <div className="flex flex-col gap-3 md:flex-row">
         <input value={title} onChange={(e) => { setTitle(e.target.value); setDone(false); }} aria-label={t(give ? "titleOffer" : "titleNeed")}
@@ -97,7 +99,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
               <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t(give ? "descOffer" : "descNeed")} className={field.textarea} />
             </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <label className={field.label}>{t("location")}<input value={location} onChange={(e) => setLocation(e.target.value)} className={field.inputSm} /></label>
+              <PlaceInput label={t("location")} value={location} onChange={setLocation} onPlace={(p) => setPlaceId(p?.id ?? null)} hint={t("locationHint")} />
               <label className={field.label}>{t("schedule")}<input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder={t("schedulePlaceholder")} className={field.inputSm} /></label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={() => setRecurring(!recurring)} className="h-5 w-5 accent-[var(--ink)]" />{t("recurring")}</label>
               <label className={field.label}>{t(give ? "seats" : "people")}<input type="number" min={1} value={seats} onChange={(e) => setSeats(e.target.value)} className={field.inputSm} /></label>

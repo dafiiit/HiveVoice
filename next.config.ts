@@ -4,6 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   // Standalone output lets the app run in a plain Docker container for self-hosting.
   output: "standalone",
   turbopack: {

@@ -9,6 +9,7 @@ import { Glyph } from "@/components/ui/Glyph";
 import { IconCheck } from "@/components/ui/Icons";
 import { chip, tab, tag } from "@/components/ui/styles";
 import { FollowButton } from "@/components/FollowButton";
+import { Popover } from "@/components/ui/Popover";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("explore"))("title") };
@@ -102,49 +103,57 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.responsible?.length ?? 0;
 
   return (
-    <div className="flex flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-5 px-6 pb-12 pt-6 md:px-10 md:pb-20 md:pt-8">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
         <h1 className="display m-0">{t("title")}</h1>
-        <p className="m-0 max-w-[640px]">{t("lead")}</p>
+        <form action="/explore" className="flex h-11 w-full items-center gap-2.5 border border-ink bg-surface px-3.5 md:max-w-[420px]" role="search">
+          <Glyph shape="lupe" size={18} />
+          <label htmlFor="explore-q" className="sr-only">{t("search")}</label>
+          <input id="explore-q" type="search" name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink" />
+          {kind !== "initiatives" && <input type="hidden" name="kind" value={kind} />}
+        </form>
       </div>
-      <form action="/explore" className="flex h-[52px] max-w-[720px] items-center gap-3 border border-ink bg-surface px-4" role="search">
-        <Glyph shape="lupe" size={20} />
-        <label htmlFor="explore-q" className="sr-only">{t("search")}</label>
-        <input id="explore-q" type="search" name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink" />
-        {kind !== "initiatives" && <input type="hidden" name="kind" value={kind} />}
-      </form>
-      <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
+      <div role="tablist" aria-label={t("what")} className="-mt-1 flex overflow-x-auto border-b border-line">
         {KINDS.map((k) => (
           <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all", sort: "relevant" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
         ))}
       </div>
-      <div className="flex flex-col gap-3">
-        {kind === "initiatives" && (
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("level")}>
-            <span className="mr-1 text-sm font-bold">{t("level")}</span>
-            {LEVELS.map((l) => (
-              <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={`${chip(level === l)} no-underline`}>{tl(l)}</Link>
-            ))}
-          </div>
+      <div className="-mt-2 flex flex-wrap items-center gap-2 text-sm">
+        {(kind === "initiatives" || session) && (
+          <Popover label={t("filter")} badge={(level !== "all" ? 1 : 0) + (mine ? 1 : 0)}>
+            {kind === "initiatives" && (
+              <div className="flex flex-col gap-1.5" role="group" aria-label={t("level")}>
+                <span className="text-[13px] font-bold">{t("level")}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {LEVELS.map((l) => (
+                    <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={`${chip(level === l)} h-8 px-3 no-underline`}>{tl(l)}</Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {session && (
+              <Link href={href({ mine: mine ? "" : "1" })} className="inline-flex items-center gap-2 text-ink no-underline" aria-pressed={mine}>
+                <span className={`inline-flex h-5 w-5 items-center justify-center border border-ink ${mine ? "bg-ink text-on-ink" : ""}`}>{mine && <IconCheck size={12} />}</span>
+                {kind === "initiatives" ? t("canVote") : t("nearMe")}
+              </Link>
+            )}
+          </Popover>
         )}
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-          {session && (
-            <Link href={href({ mine: mine ? "" : "1" })} className="inline-flex items-center gap-2 text-ink no-underline" aria-pressed={mine}>
-              <span className={`inline-flex h-5 w-5 items-center justify-center border border-ink ${mine ? "bg-ink text-on-ink" : ""}`}>{mine && <IconCheck size={12} />}</span>
-              {kind === "initiatives" ? t("canVote") : t("nearMe")}
-            </Link>
-          )}
-          {kind === "initiatives" && (
-            <span className="flex flex-wrap items-center gap-2">
-              <span className="font-bold">{t("sort")}</span>
+        {kind === "initiatives" && (
+          <Popover label={<>{t("sort")} <span className="font-normal">{t(`sorts.${sort as "relevant"}`)}</span></>}>
+            <div className="flex flex-col" role="group" aria-label={t("sort")}>
               {SORTS.map((s) => (
                 <Link key={s} href={href({ sort: s })} aria-current={sort === s ? "true" : undefined}
-                  className={sort === s ? "font-bold text-ink" : "text-muted"}>{t(`sorts.${s}`)}</Link>
+                  className={`flex h-10 items-center justify-between border-b border-line text-ink no-underline last:border-b-0 ${sort === s ? "font-bold" : ""}`}>
+                  {t(`sorts.${s}`)}{sort === s && <IconCheck size={12} />}
+                </Link>
               ))}
-            </span>
-          )}
-          <span className="text-muted">{t(`count.${kind}`, { n: count })}</span>
-        </div>
+            </div>
+          </Popover>
+        )}
+        {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
+        {mine && <Link href={href({ mine: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
+        <span className="ml-auto text-muted">{t(`count.${kind}`, { n: count })}</span>
       </div>
 
       {count === 0 && <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>}

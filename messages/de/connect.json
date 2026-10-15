@@ -88,5 +88,17 @@
     "privacy": "{name} sieht deine Nachricht als Anfrage und entscheidet, ob ein Chat entsteht.",
     "sent": "Anfrage gesendet.",
     "seeInConnect": "In Verbinden ansehen"
+  },
+  "mf": {
+    "label": "Filter",
+    "radius": "Umkreis",
+    "search": "Suchen",
+    "searchPlaceholder": "Wort oder #hashtag",
+    "tags": "Beliebte Hashtags",
+    "apply": "Anwenden",
+    "reset": "Zurücksetzen",
+    "only": "Nur: {what}",
+    "clear": "Filter entfernen",
+    "none": "Keine Beiträge dazu. Ändere den Umkreis oder die Suche."
   }
 }

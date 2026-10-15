@@ -1,3 +1,4 @@
+import { ChatScroll } from "@/components/ChatScroll";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -80,7 +81,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       goals.push({ ...go, ballot });
     }
     const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "goals";
-    const posts = active === "talk" ? await loadPosts(tx, { groupId: g.id }, me ?? null) : [];
+    const posts = active === "talk" ? await loadPosts(tx, { groupId: g.id }, me ?? null, { sort: "chat", limit: 60 }) : [];
     const needs = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.group_id = ${g.id} and l.kind = 'need' and l.status = 'active' order by l.created_at desc`;
     const sentTo = me ? (await tx<{ listing_id: string }[]>`select listing_id from public.contact_requests where from_profile_id = ${me} and status = 'pending'`).map((x) => x.listing_id) : [];
     const tasks = active === "tasks" ? await tx<TaskView[]>`
@@ -153,11 +154,13 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             canPropose={data.can_propose} canEdit={role === "admin" || role === "maintainer"} canVote={data.can_vote} isMember={!!role && role !== "guest"} signedIn={!!session} />
         )}
         {active === "talk" && (
-          <section className="flex max-w-[760px] flex-col gap-4">
+          <section className="flex max-w-[760px] flex-col gap-3">
+            <ChatScroll count={data.posts.length} className="flex max-h-[60dvh] min-h-[240px] flex-col overflow-y-auto border border-line bg-surface px-4">
+              <PostList posts={data.posts} path={`${path}?tab=talk`} canWrite={data.can_post} viewerId={me} empty={t("noPosts")} />
+            </ChatScroll>
             {data.can_post
               ? <Composer ctx={{ groupId: g.id }} path={`${path}?tab=talk`} placeholder={t("talkPlaceholder", { name: g.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} />
               : <p className="m-0 text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</p>}
-            <PostList posts={data.posts} path={`${path}?tab=talk`} canWrite={data.can_post} viewerId={me} empty={t("noPosts")} />
           </section>
         )}
         {active === "needs" && (

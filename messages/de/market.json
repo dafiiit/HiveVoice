@@ -5,8 +5,14 @@
   "needLead": "Ein Verein für dein Engagement, ein Gym-Buddy um 6 Uhr oder ein Kirschbaum für deine Marmelade? Frag an, was dir fehlt.",
   "view": "Ansicht",
   "tabs": {
-    "offer": { "you": "Wo du gebraucht wirst", "near": "Alle Gesuche" },
-    "need": { "you": "Passt zu dir", "near": "Alle Angebote" },
+    "offer": {
+      "you": "Wo du gebraucht wirst",
+      "near": "Alle Gesuche"
+    },
+    "need": {
+      "you": "Passt zu dir",
+      "near": "Alle Angebote"
+    },
     "inbox": "Eingang",
     "inboxN": "Eingang · {n}"
   },
@@ -36,10 +42,40 @@
   "price": "Gegenwert",
   "since": "Eingetragen am",
   "privateDetails": "Details (nur für dich sichtbar, weil der Kontakt angenommen ist)",
-  "state": { "paused": "Pausiert", "closed": "Abgeschlossen", "draft": "Entwurf" },
+  "state": {
+    "paused": "Pausiert",
+    "closed": "Abgeschlossen",
+    "draft": "Entwurf"
+  },
   "yours": "Das ist dein Eintrag.",
-  "ideasOffer": ["Übernachtung für Reisende", "Nachhilfe in Physik", "Ein Sofa, das weg muss", "Gitarrenstunden für Anfänger", "Äpfel von meinem Baum", "Mitfahrt am Freitag", "Hilfe beim Bewerbungsschreiben", "Zuhören bei einem Kaffee", "Fotos für dein Projekt", "Übersetzen Arabisch–Deutsch", "Einkaufen für Nachbar:innen", "Brot vom Vortag"],
-  "ideasNeed": ["Bass für eine Funk-Band", "Laufpartner:in um 6 Uhr", "Mitbewohner:in für eine WG", "Startkapital für ein Café", "Hilfe bei der Steuererklärung", "Schachpartner:in im Park", "Leute für einen Kleidertausch", "Fahrgemeinschaft zur Arbeit", "Erfahrung mit Bienenhaltung", "Jemand zum Italienischsprechen", "Proberaum für einen Chor", "Mentor:in für die Gründung"],
+  "ideasOffer": [
+    "Übernachtung für Reisende",
+    "Nachhilfe in Physik",
+    "Ein Sofa, das weg muss",
+    "Gitarrenstunden für Anfänger",
+    "Äpfel von meinem Baum",
+    "Mitfahrt am Freitag",
+    "Hilfe beim Bewerbungsschreiben",
+    "Zuhören bei einem Kaffee",
+    "Fotos für dein Projekt",
+    "Übersetzen Arabisch–Deutsch",
+    "Einkaufen für Nachbar:innen",
+    "Brot vom Vortag"
+  ],
+  "ideasNeed": [
+    "Bass für eine Funk-Band",
+    "Laufpartner:in um 6 Uhr",
+    "Mitbewohner:in für eine WG",
+    "Startkapital für ein Café",
+    "Hilfe bei der Steuererklärung",
+    "Schachpartner:in im Park",
+    "Leute für einen Kleidertausch",
+    "Fahrgemeinschaft zur Arbeit",
+    "Erfahrung mit Bienenhaltung",
+    "Jemand zum Italienischsprechen",
+    "Proberaum für einen Chor",
+    "Mentor:in für die Gründung"
+  ],
   "editor": {
     "newOffer": "Neues Angebot",
     "newNeed": "Neue Anfrage",
@@ -64,8 +100,18 @@
     "payOffer": "Gegenwert",
     "payNeed": "Was du gibst",
     "pay": {
-      "give": { "free": "Kostenlos", "hourly": "Stundenlohn", "fixed": "Festpreis", "swap": "Tausch" },
-      "need": { "free": "Kostenlos", "hourly": "Ich zahle pro Stunde", "fixed": "Ich zahle pauschal", "swap": "Tausch" }
+      "give": {
+        "free": "Kostenlos",
+        "hourly": "Stundenlohn",
+        "fixed": "Festpreis",
+        "swap": "Tausch"
+      },
+      "need": {
+        "free": "Kostenlos",
+        "hourly": "Ich zahle pro Stunde",
+        "fixed": "Ich zahle pauschal",
+        "swap": "Tausch"
+      }
     },
     "perHour": "€ pro Stunde",
     "amount": "Betrag in €",
@@ -93,7 +139,9 @@
     "needs": "braucht",
     "seatsN": "{n} Plätze",
     "peopleN": "{n} Leute",
-    "toN": "an {n} Stelle(n)"
+    "toN": "an {n} Stelle(n)",
+    "placeFound": "Erkannt: {name} ({level})",
+    "locationHint": "Postleitzahl oder Ort"
   },
   "mine": {
     "offer": "Deine Angebote",
@@ -118,6 +166,11 @@
     "write": "Nachricht schreiben",
     "declined": "Abgelehnt, ohne Begründung.",
     "withdraw": "Zurückziehen",
-    "status": { "pending": "Wartet", "accepted": "Angenommen", "declined": "Abgelehnt", "withdrawn": "Zurückgezogen" }
+    "status": {
+      "pending": "Wartet",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "withdrawn": "Zurückgezogen"
+    }
   }
 }

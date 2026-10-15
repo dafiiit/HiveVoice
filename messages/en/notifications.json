@@ -1,30 +1,129 @@
 {
   "title": "Notifications",
   "empty": "No notifications. All quiet.",
-  "kinds": {
-    "join_request": "Someone wants to join “{group}”.",
-    "join_accepted": "You are now a member of “{group}”.",
-    "join_declined": "Your request to join “{group}” was declined.",
-    "goal_vote": "New goal in “{group}”: “{goal}”. Cast your vote!",
-    "goal_adopted": "“{goal}” was adopted in “{group}”.",
-    "goal_rejected": "“{goal}” was not adopted in “{group}”.",
-    "working_group": "There is now a working group for “{title}”.",
-    "initiative_vote": "The vote on “{title}” is running.",
-    "initiative_passed": "“{title}” was accepted and goes to the addressee.",
-    "initiative_failed": "“{title}” was rejected in the vote.",
-    "request_answered": "Your request was answered.",
-    "request_forwarded": "Your request was forwarded.",
-    "responsibility_request": "New request to one of your responsibilities.",
-    "contact_request": "New contact request about “{title}”.",
-    "contact_accepted": "Your contact about “{title}” was accepted. You can write now.",
-    "contact_declined": "Your request about “{title}” was declined.",
-    "message": "New message.",
-    "post_reply": "Someone replied to your post.",
-    "jury_invite": "You were drawn for the citizen jury (case {case_no}).",
-    "report_decided": "Your report (case {case_no}) was decided.",
-    "content_hidden": "A post of yours was hidden after review by the citizen jury (case {case_no}).",
-    "contact_request_direct": "Someone wants to write to you.",
-    "contact_accepted_direct": "Your message was accepted. You can chat now.",
-    "contact_declined_direct": "Your message was not accepted."
+  "emptyFilter": "Nothing new here.",
+  "markAll": "Mark all as read",
+  "filter": {
+    "label": "Show",
+    "all": "All",
+    "messages": "Messages",
+    "requests": "Requests",
+    "other": "More"
+  },
+  "sections": {
+    "new": "New",
+    "earlier": "Earlier"
+  },
+  "labels": {
+    "message": "Chat",
+    "request": "Request",
+    "group": "Group",
+    "initiative": "Initiative",
+    "jury": "Jury",
+    "other": "Notice"
+  },
+  "open": "Open",
+  "unreadN": "{n, plural, one {1 new message} other {# new messages}}",
+  "items": {
+    "message": {
+      "title": "{name}",
+      "body": "{preview}"
+    },
+    "contact_request": {
+      "title": "{name} is asking",
+      "body": "“{title}”: {message}"
+    },
+    "contact_request_direct": {
+      "title": "{name} wants to write to you",
+      "body": "{message}"
+    },
+    "contact_accepted": {
+      "title": "{name} accepted",
+      "body": "About “{title}”. You can chat now."
+    },
+    "contact_accepted_direct": {
+      "title": "{name} accepted",
+      "body": "You can chat now."
+    },
+    "contact_declined": {
+      "title": "{name} declined",
+      "body": "Your request about “{title}” was not accepted."
+    },
+    "contact_declined_direct": {
+      "title": "{name} declined",
+      "body": "Your message was not accepted."
+    },
+    "join_request": {
+      "title": "{name} wants to join “{group}”",
+      "body": "{message}"
+    },
+    "join_accepted": {
+      "title": "Welcome to “{group}”",
+      "body": "You are a member now."
+    },
+    "join_declined": {
+      "title": "Request declined",
+      "body": "“{group}” did not accept your request."
+    },
+    "goal_vote": {
+      "title": "Vote in “{group}”",
+      "body": "New goal: “{goal}”. Your vote counts."
+    },
+    "goal_adopted": {
+      "title": "Goal adopted",
+      "body": "“{goal}” was accepted in “{group}”."
+    },
+    "goal_rejected": {
+      "title": "Goal rejected",
+      "body": "“{goal}” was not accepted in “{group}”."
+    },
+    "working_group": {
+      "title": "New working group",
+      "body": "There is now a group to carry out “{title}”."
+    },
+    "initiative_vote": {
+      "title": "Vote is running",
+      "body": "“{title}”. Cast your vote."
+    },
+    "initiative_passed": {
+      "title": "Initiative passed",
+      "body": "“{title}” now goes to the addressee."
+    },
+    "initiative_failed": {
+      "title": "Initiative rejected",
+      "body": "“{title}” did not pass the vote."
+    },
+    "request_answered": {
+      "title": "Answer from the responsible body",
+      "body": "Your request was answered."
+    },
+    "request_forwarded": {
+      "title": "Request forwarded",
+      "body": "Your request is now with another body."
+    },
+    "responsibility_request": {
+      "title": "New request for you",
+      "body": "Someone contacted one of your responsibilities. A deadline is running."
+    },
+    "post_reply": {
+      "title": "New reply",
+      "body": "Someone replied to your post."
+    },
+    "jury_invite": {
+      "title": "You are a juror",
+      "body": "Case {case_no}: please review the report."
+    },
+    "report_decided": {
+      "title": "Your report was decided",
+      "body": "Case {case_no}."
+    },
+    "content_hidden": {
+      "title": "One of your posts was hidden",
+      "body": "After review by the citizen jury, case {case_no}."
+    },
+    "fallback": {
+      "title": "News",
+      "body": ""
+    }
   }
 }

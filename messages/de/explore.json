@@ -4,10 +4,20 @@
   "search": "Durchsuchen",
   "searchPlaceholder": "Initiativen, Gruppen, Menschen, Zuständige durchsuchen",
   "what": "Was suchst du?",
-  "kinds": { "initiatives": "Initiativen", "groups": "Gruppen", "people": "Menschen", "responsible": "Zuständige" },
+  "kinds": {
+    "initiatives": "Initiativen",
+    "groups": "Gruppen",
+    "people": "Menschen",
+    "responsible": "Zuständige"
+  },
   "level": "Ebene",
   "sort": "Sortieren:",
-  "sorts": { "relevant": "Relevant", "new": "Neu", "soon": "Bald entschieden", "support": "Meiste Unterstützung" },
+  "sorts": {
+    "relevant": "Relevant",
+    "new": "Neu",
+    "soon": "Bald entschieden",
+    "support": "Meiste Unterstützung"
+  },
   "canVote": "In meinen Orten",
   "nearMe": "In meiner Nähe",
   "count": {
@@ -18,11 +28,16 @@
   },
   "nothing": "Nichts gefunden. Versuch einen anderen Begriff oder eine andere Ebene.",
   "groupMeta": "{n, plural, one {1 Mitglied} other {# Mitglieder}} · {place}",
-  "join": { "open": "offen für alle", "request": "Beitritt auf Anfrage" },
+  "join": {
+    "open": "offen für alle",
+    "request": "Beitritt auf Anfrage"
+  },
   "member": "Mitglied",
   "offers": "bietet",
   "needs": "sucht",
   "followPrivate": "Folgen ist privat. Follower-Zahlen gibt es nicht.",
   "official": "Offiziell bestätigt",
-  "responds": "antwortet im Schnitt in {days, plural, one {1 Tag} other {# Tagen}}"
+  "responds": "antwortet im Schnitt in {days, plural, one {1 Tag} other {# Tagen}}",
+  "filter": "Filter",
+  "removeFilter": "{what} entfernen"
 }

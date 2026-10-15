@@ -88,5 +88,17 @@
     "privacy": "{name} sees your message as a request and decides whether a chat opens.",
     "sent": "Request sent.",
     "seeInConnect": "See in Connect"
+  },
+  "mf": {
+    "label": "Filter",
+    "radius": "Area",
+    "search": "Search",
+    "searchPlaceholder": "Word or #hashtag",
+    "tags": "Popular hashtags",
+    "apply": "Apply",
+    "reset": "Reset",
+    "only": "Only: {what}",
+    "clear": "Clear filters",
+    "none": "No posts match. Change the area or the search."
   }
 }

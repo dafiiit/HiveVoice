@@ -5,8 +5,14 @@
   "needLead": "A club to get involved in, a gym buddy at 6 am or a cherry tree for your jam? Ask for what you are missing.",
   "view": "View",
   "tabs": {
-    "offer": { "you": "Where you are needed", "near": "All requests" },
-    "need": { "you": "Matches for you", "near": "All offers" },
+    "offer": {
+      "you": "Where you are needed",
+      "near": "All requests"
+    },
+    "need": {
+      "you": "Matches for you",
+      "near": "All offers"
+    },
     "inbox": "Inbox",
     "inboxN": "Inbox · {n}"
   },
@@ -36,10 +42,40 @@
   "price": "In return",
   "since": "Listed on",
   "privateDetails": "Details (visible to you because the contact was accepted)",
-  "state": { "paused": "Paused", "closed": "Closed", "draft": "Draft" },
+  "state": {
+    "paused": "Paused",
+    "closed": "Closed",
+    "draft": "Draft"
+  },
   "yours": "This is your listing.",
-  "ideasOffer": ["A bed for travellers", "Physics tutoring", "A sofa that needs to go", "Guitar lessons for beginners", "Apples from my tree", "A lift on Friday", "Help with job applications", "Listening over a coffee", "Photos for your project", "Translating Arabic–German", "Shopping for neighbours", "Yesterday’s bread"],
-  "ideasNeed": ["Bass player for a funk band", "Running partner at 6 am", "Flatmate for a shared flat", "Seed money for a café", "Help with my tax return", "Chess partner in the park", "People for a clothes swap", "Car pool to work", "Experience with beekeeping", "Someone to speak Italian with", "Rehearsal room for a choir", "Mentor for my start-up"],
+  "ideasOffer": [
+    "A bed for travellers",
+    "Physics tutoring",
+    "A sofa that needs to go",
+    "Guitar lessons for beginners",
+    "Apples from my tree",
+    "A lift on Friday",
+    "Help with job applications",
+    "Listening over a coffee",
+    "Photos for your project",
+    "Translating Arabic–German",
+    "Shopping for neighbours",
+    "Yesterday’s bread"
+  ],
+  "ideasNeed": [
+    "Bass player for a funk band",
+    "Running partner at 6 am",
+    "Flatmate for a shared flat",
+    "Seed money for a café",
+    "Help with my tax return",
+    "Chess partner in the park",
+    "People for a clothes swap",
+    "Car pool to work",
+    "Experience with beekeeping",
+    "Someone to speak Italian with",
+    "Rehearsal room for a choir",
+    "Mentor for my start-up"
+  ],
   "editor": {
     "newOffer": "New offer",
     "newNeed": "New request",
@@ -64,8 +100,18 @@
     "payOffer": "In return",
     "payNeed": "What you give",
     "pay": {
-      "give": { "free": "Free", "hourly": "Hourly rate", "fixed": "Fixed price", "swap": "Swap" },
-      "need": { "free": "Free", "hourly": "I pay per hour", "fixed": "I pay a fixed amount", "swap": "Swap" }
+      "give": {
+        "free": "Free",
+        "hourly": "Hourly rate",
+        "fixed": "Fixed price",
+        "swap": "Swap"
+      },
+      "need": {
+        "free": "Free",
+        "hourly": "I pay per hour",
+        "fixed": "I pay a fixed amount",
+        "swap": "Swap"
+      }
     },
     "perHour": "€ per hour",
     "amount": "Amount in €",
@@ -93,7 +139,9 @@
     "needs": "needs",
     "seatsN": "{n} places",
     "peopleN": "{n} people",
-    "toN": "to {n} office(s)"
+    "toN": "to {n} office(s)",
+    "placeFound": "Found: {name} ({level})",
+    "locationHint": "Postal code or place"
   },
   "mine": {
     "offer": "Your offers",
@@ -118,6 +166,11 @@
     "write": "Write a message",
     "declined": "Declined, without reason.",
     "withdraw": "Withdraw",
-    "status": { "pending": "Waiting", "accepted": "Accepted", "declined": "Declined", "withdrawn": "Withdrawn" }
+    "status": {
+      "pending": "Waiting",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn"
+    }
   }
 }

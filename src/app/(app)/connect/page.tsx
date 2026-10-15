@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { loadPosts } from "@/lib/posts";
+import { loadPosts, marketTags } from "@/lib/posts";
 import { myMunicipality } from "@/lib/queries";
 import { relTime } from "@/lib/format";
 import type { Message } from "@/lib/actions/messages";
@@ -11,8 +11,10 @@ import { Composer, PostList } from "@/components/PostList";
 import { Conversation } from "@/components/connect/Conversation";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
+import { ChatScroll } from "@/components/ChatScroll";
+import { MarketFilter, type Radius } from "@/components/connect/MarketFilter";
 import { IconBack, IconPlus } from "@/components/ui/Icons";
-import { btn, chip } from "@/components/ui/styles";
+import { btn } from "@/components/ui/styles";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("connect"))("title") };
@@ -32,16 +34,23 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("connect");
+  const tl = await getTranslations("levels");
   const locale = await getLocale();
   const mode = sp.mode === "suggested" ? "suggested" : "chrono";
   const filter: Filter = (FILTERS as readonly string[]).includes(String(sp.f)) ? (sp.f as Filter) : "all";
   const sel = typeof sp.c === "string" ? sp.c : "market";
-  const sort = sp.sort === "new" ? "new" : "top";
+  const q = typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "";
+  const radiusParam = typeof sp.r === "string" ? sp.r : "";
 
   const data = await asViewer(viewer, async (tx) => {
     // Test phase: demo profiles send a few chats and requests so this page is not empty.
     if (me) await tx`select app.ensure_demo_chats()`;
     const muni = await myMunicipality(tx, me ?? undefined);
+    // "Radius": my municipality and the regions above it, from near to far.
+    const radii: (Radius & { id: string })[] = me ? (await tx<{ id: string; name: string; level: string }[]>`
+      select r.id, r.name, r.level::text from public.user_regions ur join public.regions r on r.id = ur.region_id
+      where ur.profile_id = ${me} and r.level in ('municipality', 'district', 'state', 'country')
+      order by array_position(array['municipality','district','state','country'], r.level::text)`).map((r, _i, all) => ({ id: r.id, key: r.level, name: all.filter((x) => x.name === r.name).length > 1 ? `${tl(r.level as "all")} ${r.name}` : r.name })) : [];
     const groups = me ? await tx<{ id: string; slug: string; name: string; member_count: number; preview: string | null; author: string | null; at: string | null }[]>`
       select g.id, g.slug::text, g.name, g.member_count,
         (select p.body from public.posts p where p.group_id = g.id and p.parent_id is null and p.hidden_at is null order by p.created_at desc limit 1) as preview,
@@ -87,18 +96,20 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
                g.member_count desc limit 6` : [];
 
     type Pane =
-      | { kind: "market"; posts: Awaited<ReturnType<typeof loadPosts>> }
+      | { kind: "market"; posts: Awaited<ReturnType<typeof loadPosts>>; tags: string[]; area: string }
       | { kind: "group"; group: { id: string; slug: string; name: string; member_count: number; can_post: boolean }; posts: Awaited<ReturnType<typeof loadPosts>> }
       | { kind: "direct"; id: string; other: string; other_id: string; other_seed: number; other_path: string | null; title: string | null; listing_id: string | null; listing_kind: string | null; messages: Message[]; other_read_at: string | null }
       | { kind: "request"; request: RequestView };
     let pane: Pane | null = null;
     if (sel === "market") {
       const regionIds = muni ? [muni.id] : (await tx<{ id: string }[]>`select id from public.regions where level = 'municipality' and id in (select distinct region_id from public.posts where region_id is not null) limit 50`).map((r) => r.id);
-      pane = { kind: "market", posts: await loadPosts(tx, { regionIds }, me, { sort }) };
+      const area = radii.find((r) => r.key === radiusParam) ?? radii[0];
+      const scope = area ? { underRegionId: area.id, search: q } : { regionIds, search: q };
+      pane = { kind: "market", posts: await loadPosts(tx, scope, me, { sort: "new" }), tags: area ? await marketTags(tx, area.id) : [], area: area?.key ?? "" };
     } else if (sel.startsWith("g:")) {
       const [g] = await tx<{ id: string; slug: string; name: string; member_count: number; can_post: boolean }[]>`
         select g.id, g.slug::text, g.name, g.member_count, app.has_group_permission(g.id, 'post') as can_post from public.groups g where g.slug = ${sel.slice(2)}`;
-      if (g) pane = { kind: "group", group: g, posts: await loadPosts(tx, { groupId: g.id }, me) };
+      if (g) pane = { kind: "group", group: g, posts: await loadPosts(tx, { groupId: g.id }, me, { sort: "chat", limit: 60 }) };
     } else if (sel.startsWith("d:") && me && /^[0-9a-f-]{36}$/.test(sel.slice(2))) {
       const id = sel.slice(2);
       const [c] = await tx<{ id: string; title: string | null; other: string; other_id: string; other_seed: number; other_path: string | null; listing_id: string | null; listing_kind: string | null; other_read_at: string | null }[]>`
@@ -125,7 +136,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
         await tx`update public.notifications set read_at = now() where profile_id = ${me} and read_at is null and kind = 'contact_request' and payload ->> 'request_id' = ${request.id}`;
       }
     }
-    return { muni, groups, directs, requests, suggestions, pane };
+    return { muni, radii, groups, directs, requests, suggestions, pane };
   });
 
   const rows: Row[] = [
@@ -157,6 +168,10 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   };
   const href = (patch: Record<string, string>) => {
     const p = new URLSearchParams({ c: sel, mode, f: filter, ...patch });
+    if ((patch.c ?? sel) === "market") {
+      if (q) p.set("q", q);
+      if (radiusParam) p.set("r", radiusParam);
+    }
     if (p.get("mode") === "chrono") p.delete("mode");
     if (p.get("f") === "all") p.delete("f");
     if (!p.get("c")) p.delete("c");
@@ -184,11 +199,12 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface lg:h-[min(820px,calc(100dvh-13rem))] lg:min-h-[480px] lg:flex-row lg:border">
         <section aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line lg:w-[360px] lg:border-r`}>
           {session && (
-            <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 flex flex-none gap-1.5 overflow-x-auto border-b border-line bg-surface px-4 py-3">
+            <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 grid flex-none grid-cols-4 gap-1 border-b border-line bg-surface p-2">
               {FILTERS.map((f) => (
-                <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f} className={`${chip(filter === f)} gap-1.5 whitespace-nowrap no-underline`}>
+                <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f}
+                  className={`relative inline-flex h-8 items-center justify-center gap-1 px-1 text-[13px] no-underline ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-chip text-ink"}`}>
                   {t(`filter.${f}`)}
-                  {counts[f] > 0 && <span className={`inline-flex h-4 min-w-4 items-center justify-center px-1 text-[11px] font-bold ${filter === f ? "bg-on-ink text-ink" : "bg-ink text-on-ink"}`}>{counts[f]}</span>}
+                  {counts[f] > 0 && <span className={`inline-flex h-4 min-w-4 items-center justify-center px-1 text-[10px] font-bold leading-none ${filter === f ? "bg-on-ink text-ink" : "bg-ink text-on-ink"}`}>{counts[f]}</span>}
                 </Link>
               ))}
             </div>
@@ -232,15 +248,13 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
           <Link href={href({ c: "" })} className="mb-2 inline-flex items-center gap-1 text-sm text-ink lg:hidden"><IconBack size={14} /> {t("back")}</Link>
           {pane?.kind === "market" && (
             <>
-              <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+              <header className="flex flex-col items-start gap-3 border-b border-line pb-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-col"><strong className="text-lg">{t("market")}</strong><span className="text-sm text-muted">{data.muni ? t("marketOpen", { place: data.muni.name }) : t("marketSubAll")}</span></div>
-                <div className="flex gap-3 text-sm">
-                  {(["top", "new"] as const).map((s) => <Link key={s} href={href({ sort: s })} className={sort === s ? "font-bold text-ink" : "text-muted"}>{t(`sort.${s}`)}</Link>)}
-                </div>
+                <MarketFilter radii={data.radii} radius={pane.area} q={q} tags={pane.tags} keep={{ ...(mode !== "chrono" ? { mode } : {}), ...(filter !== "all" ? { f: filter } : {}) }} />
               </header>
               {session && data.muni ? <div className="py-3"><Composer ctx={{ regionId: data.muni.id }} path="/connect" placeholder={t("marketPlaceholder")} viewerName={session.profile.display_name} viewerSeed={session.profile.avatar_seed} viewerPath={session.profile.avatar_path} /></div>
                 : !session && <p className="m-0 py-3 text-sm text-muted">{t("readOnly")}</p>}
-              <PostList posts={pane.posts} path="/connect" canWrite={!!session?.profile.verified} viewerId={me ?? undefined} empty={t("marketEmpty")} />
+              <PostList posts={pane.posts} path="/connect" canWrite={!!session?.profile.verified} viewerId={me ?? undefined} empty={q || pane.area !== data.radii[0]?.key ? t("mf.none") : t("marketEmpty")} />
             </>
           )}
           {pane?.kind === "group" && (
@@ -249,8 +263,10 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
                 <Link href={`/groups/${pane.group.slug}`} className="flex flex-col text-ink no-underline"><strong className="text-lg">{pane.group.name}</strong><span className="text-sm text-muted">{t("groupSub", { n: pane.group.member_count })}</span></Link>
                 <Link href={`/groups/${pane.group.slug}`} className="text-sm font-bold text-ink">{t("openGroup")}</Link>
               </header>
-              {pane.group.can_post && <div className="py-3"><Composer ctx={{ groupId: pane.group.id }} path="/connect" placeholder={t("groupPlaceholder", { name: pane.group.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} /></div>}
-              <PostList posts={pane.posts} path="/connect" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} />
+              <ChatScroll count={pane.posts.length} className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col overflow-y-auto lg:max-h-none">
+                <PostList posts={pane.posts} path="/connect" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} />
+              </ChatScroll>
+              {pane.group.can_post && <div className="border-t border-line pt-3"><Composer ctx={{ groupId: pane.group.id }} path="/connect" placeholder={t("groupPlaceholder", { name: pane.group.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} /></div>}
             </>
           )}
           {pane?.kind === "direct" && me && (

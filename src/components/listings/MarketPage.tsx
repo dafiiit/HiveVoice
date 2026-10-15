@@ -3,12 +3,10 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { listingCardColumns, listingCardFrom, myRegionIds, popularTags, type ListingCard } from "@/lib/queries";
-import { Avatar } from "../ui/Avatar";
-import { Cover } from "../ui/Cover";
 import { tab } from "../ui/styles";
-import { ContactButton } from "./ContactButton";
+import { ListingCardView } from "./ListingCardView";
 import { ListingEditor } from "./ListingEditor";
-import { AllyButton, MyListings, type MyListing } from "./MyListings";
+import { MyListings, type MyListing } from "./MyListings";
 import { Inbox, type ContactRow } from "./Inbox";
 import { priceLabel } from "./price";
 
@@ -114,26 +112,7 @@ export async function MarketPage({ kind, searchParams }: { kind: "offer" | "need
         data.cards.length === 0
           ? <p className="m-0 text-muted">{active === "you" ? t(give ? "emptyYouOffer" : "emptyYouNeed") : t("emptyNear")}</p>
           : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {data.cards.map((c) => (
-                <article key={c.id} className={`flex flex-col gap-3 bg-surface p-4 ${c.kind === "need" ? "border border-ink border-t-[6px]" : "border border-ink"}`}>
-                  {(c.images.length > 0 || c.cover_seed != null) && <Cover seed={c.cover_seed ?? 0} src={c.images[0]} label={undefined} ratio="16 / 9" />}
-                  <span className="flex items-center gap-2 text-sm">
-                    <Avatar name={c.group_name ?? c.owner_name} seed={c.group_name ? undefined : c.owner_seed} path={c.group_name ? null : c.owner_path} size={28} group={!!c.group_name} />
-                    <span><strong>{c.group_name ?? c.owner_name}</strong> {t(c.kind === "need" ? (c.goal_title ? "needsForGoal" : "needs") : "gives")}</span>
-                  </span>
-                  <Link href={`/${c.kind === "offer" ? "offers" : "needs"}/${c.id}`} className="text-lg font-bold leading-tight text-ink no-underline hover:underline">{c.title}</Link>
-                  <span className="text-sm text-muted">{[c.goal_title ? t("goal", { goal: c.goal_title }) : null, c.location_text ?? c.region_name, c.schedule_text, c.seats ? t("seats", { n: c.seats }) : null].filter(Boolean).join(" · ")}</span>
-                  {c.why && <span className="text-sm font-bold text-red">{t("why", { tag: c.why })}</span>}
-                  <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <span className={`px-2 py-1 text-sm font-bold ${c.pay_mode === "free" ? "border border-ink" : "bg-ink text-on-ink"}`}>{priceLabel(c, tc, locale)}</span>
-                    <div className="flex items-center gap-3">
-                      {c.kind === "need" && c.seeking_allies && session && <AllyButton id={c.id} on={c.allied} count={c.ally_count} />}
-                      <ContactButton listingId={c.id} ownerName={c.group_name ?? c.owner_name} ownerSeed={c.owner_seed} ownerPath={c.group_name ? null : c.owner_path} title={c.title} price={priceLabel(c, tc, locale)}
-                        label={t(give ? "help" : "ask")} signedIn={!!session} sent={c.sent} />
-                    </div>
-                  </div>
-                </article>
-              ))}
+              {data.cards.map((c) => <ListingCardView key={c.id} c={c} signedIn={!!session} why={c.why} sent={c.sent} allied={c.allied} />)}
             </div>
       )}
     </div>

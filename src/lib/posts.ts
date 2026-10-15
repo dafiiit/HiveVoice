@@ -23,26 +23,38 @@ export type PostView = {
   replies: PostView[];
 };
 
-type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[] };
+type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[]; underRegionId?: string; search?: string };
+
+const escapeLike = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+/** Everything below a region (the region itself, its boroughs, municipalities, ...). */
+const regionTree = (tx: Tx, id: string) => tx`(
+  with recursive d(id) as (select ${id}::uuid union all select r.id from public.regions r join d on r.parent_id = d.id) select id from d)`;
 
 /** Top-level posts of a group, an initiative thread or a regional marketplace, with replies. */
-export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, opts: { sort?: "new" | "top"; limit?: number } = {}) {
+export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, opts: { sort?: "new" | "top" | "chat"; limit?: number } = {}) {
+  const words = (scope.search ?? "").split(/\s+/).filter(Boolean).slice(0, 5).map((w) => `%${escapeLike(w)}%`);
   const where = scope.groupId
     ? tx`p.group_id = ${scope.groupId}`
     : scope.initiativeId
       ? tx`p.initiative_id = ${scope.initiativeId}`
-      : tx`p.region_id = any(${scope.regionIds ?? []}::uuid[]) and p.group_id is null and p.initiative_id is null`;
+      : scope.underRegionId
+        ? tx`p.region_id in ${regionTree(tx, scope.underRegionId)} and p.group_id is null and p.initiative_id is null`
+        : tx`p.region_id = any(${scope.regionIds ?? []}::uuid[]) and p.group_id is null and p.initiative_id is null`;
+  const filter = words.length ? tx`and p.body ilike all (${words}::text[])` : tx``;
+  // "chat": the newest messages, oldest of them first, so the latest one sits at the bottom.
   const order = opts.sort === "top"
     ? tx`p.is_pinned desc, (p.score + p.reply_count * 2)::float / power(extract(epoch from now() - p.created_at) / 3600 + 2, 1.2) desc`
-    : tx`p.is_pinned desc, p.created_at desc`;
+    : opts.sort === "chat" ? tx`p.created_at desc` : tx`p.is_pinned desc, p.created_at desc`;
   const posts = await tx<PostView[]>`
     select ${postColumns(tx, viewerId)}
     from public.posts p join public.profiles a on a.id = p.author_id
     left join public.regions ar on ar.id = a.home_region_id
     left join public.listings l on l.id = p.listing_id
     left join public.initiatives i on i.id = p.initiative_id
-    where ${where} and p.parent_id is null and p.hidden_at is null
+    where ${where} ${filter} and p.parent_id is null and p.hidden_at is null
     order by ${order} limit ${opts.limit ?? 40}`;
+  if (opts.sort === "chat") posts.reverse();
   if (!posts.length) return posts;
   const replies = await tx<(PostView & { parent_id: string })[]>`
     select ${postColumns(tx, viewerId)}, p.parent_id
@@ -62,3 +74,12 @@ const postColumns = (tx: Tx, viewerId: string | null) => tx`
   l.title as listing_title, l.kind::text as listing_kind, i.title as initiative_title,
   ${viewerId ? tx`coalesce((select v.value from public.post_votes v where v.post_id = p.id and v.profile_id = ${viewerId}), 0)` : tx`0`}::int as my_vote,
   '[]'::jsonb as replies`;
+
+/** Hashtags used most in the marketplace of a region tree: ideas for the filter. */
+export async function marketTags(tx: Tx, underRegionId: string, limit = 8) {
+  const rows = await tx<{ tag: string }[]>`
+    select lower(m[1]) as tag from public.posts p, regexp_matches(p.body, '#([[:alnum:]_-]{2,30})', 'g') m
+    where p.region_id in ${regionTree(tx, underRegionId)} and p.group_id is null and p.initiative_id is null and p.hidden_at is null
+    group by 1 order by count(*) desc, 1 limit ${limit}`;
+  return rows.map((r) => r.tag);
+}

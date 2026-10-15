@@ -105,3 +105,16 @@ export async function popularTags(tx: Tx, limit = 80) {
     group by t.slug order by count(distinct lt.listing_id) + count(distinct ui.profile_id) desc, t.slug limit ${limit}`;
   return rows.map((r) => r.slug);
 }
+
+/** A region and everything below it (boroughs, municipalities, ...), as a subquery for "in (...)". */
+export const regionTree = (tx: Tx, id: string) => tx`(
+  with recursive d(id) as (select ${id}::uuid union all select r.id from public.regions r join d on r.parent_id = d.id) select id from d)`;
+
+export type PlaceStep = { id: string; name: string; level: string };
+
+/** A place and the regions above it, from near to far (borough, municipality, district, state, country). */
+export async function placeChain(tx: Tx, regionId: string) {
+  return tx<PlaceStep[]>`
+    select r.id, r.name, r.level::text from app.region_ancestors(${regionId}) a join public.regions r on r.id = a
+    order by array_position(array['borough','municipality','district','state','country'], r.level::text)`;
+}

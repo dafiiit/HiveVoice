@@ -12,5 +12,31 @@
   "searchPlaceholder": "Initiatives, groups, people, places",
   "inbox": "Notifications, {n} unread",
   "profileOf": "For me – {name}",
-  "login": "Sign in"
+  "login": "Sign in",
+  "searchKinds": {
+    "initiative": "Initiatives",
+    "group": "Groups",
+    "person": "People",
+    "responsible": "Responsible",
+    "place": "Places"
+  },
+  "searchAll": "All results for “{q}”",
+  "searchBusy": "Searching …",
+  "searchNone": "Nothing fitting. Press Enter for the full search.",
+  "place": {
+    "label": "Place",
+    "yours": "Your place",
+    "chosen": "Chosen place",
+    "choose": "Choose place",
+    "explain": "Your place decides which marketplace you see and what fits you.",
+    "explainGuest": "Without an account we only remember the place in this browser. It decides which marketplace you see.",
+    "discover": "Explore {name}",
+    "change": "Change place",
+    "searchPlaceholder": "Postal code or place",
+    "wholePlace": "Whole municipality",
+    "boroughHint": "Choose a district",
+    "forget": "Forget place",
+    "none": "No place found.",
+    "partOf": "Part of"
+  }
 }

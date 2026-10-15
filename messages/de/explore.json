@@ -39,5 +39,6 @@
   "official": "Offiziell bestätigt",
   "responds": "antwortet im Schnitt in {days, plural, one {1 Tag} other {# Tagen}}",
   "filter": "Filter",
-  "removeFilter": "{what} entfernen"
+  "removeFilter": "{what} entfernen",
+  "inPlace": "In {name}"
 }

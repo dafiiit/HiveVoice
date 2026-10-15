@@ -1,5 +1,6 @@
 import "server-only";
 import type { Tx } from "./db";
+import { regionTree } from "./queries";
 
 export type PostView = {
   id: string;
@@ -26,10 +27,6 @@ export type PostView = {
 type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[]; underRegionId?: string; search?: string };
 
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
-
-/** Everything below a region (the region itself, its boroughs, municipalities, ...). */
-const regionTree = (tx: Tx, id: string) => tx`(
-  with recursive d(id) as (select ${id}::uuid union all select r.id from public.regions r join d on r.parent_id = d.id) select id from d)`;
 
 /** Top-level posts of a group, an initiative thread or a regional marketplace, with replies. */
 export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, opts: { sort?: "new" | "top" | "chat"; limit?: number } = {}) {

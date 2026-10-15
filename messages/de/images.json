@@ -14,5 +14,20 @@
     "decode": "Das Bild konnte nicht gelesen werden. Bitte nimm ein JPG oder PNG.",
     "auth": "Bitte melde dich zuerst an.",
     "upload": "Das Hochladen hat nicht geklappt. Bitte versuche es noch einmal."
+  },
+  "fromDevice": "Vom Gerät",
+  "fromGoogle": "Aus Google Fotos",
+  "dropHint": "Oder Fotos hierher ziehen.",
+  "dropHere": "Hier ablegen",
+  "google": {
+    "authorizing": "Google fragt nach …",
+    "open": "Google Fotos öffnen",
+    "waiting": "Wähle deine Fotos in Google Fotos aus und bestätige. Hier geht es dann automatisch weiter.",
+    "importing": "Fotos werden übernommen …",
+    "cancel": "Abbrechen",
+    "none": "Es wurde nichts übernommen. Wähle mindestens ein Foto.",
+    "failed": "Google Fotos hat nicht geantwortet. Bitte versuche es noch einmal.",
+    "denied": "Der Zugriff auf Google Fotos wurde nicht erlaubt.",
+    "timeout": "Die Auswahl hat zu lange gedauert. Bitte starte noch einmal."
   }
 }

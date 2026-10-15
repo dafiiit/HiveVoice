@@ -3,6 +3,7 @@ type P = { size?: number; className?: string };
 const base = (size: number) => ({ width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
   strokeLinecap: "square" as const, "aria-hidden": true });
 
+export const IconPin = ({ size = 16, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><rect x="10" y="8" width="4" height="4" /></svg>;
 export const IconPlus = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M12 4v16M4 12h16" /></svg>;
 export const IconSearch = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><circle cx="10" cy="10" r="6" /><path d="M15 15l6 6" /></svg>;
 export const IconInbox = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 13h5l1 3h6l1-3h5" /><path d="M3 13l3-8h12l3 8v7H3z" /></svg>;

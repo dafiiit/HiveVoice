@@ -9,6 +9,7 @@ import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { ImagePicker } from "../ImageUpload";
 import { PlaceInput } from "../PlaceInput";
+import { Carousel } from "../ui/Carousel";
 import { imageUrl } from "@/lib/images";
 import { btn, chip, field } from "../ui/styles";
 
@@ -26,6 +27,7 @@ const suggestTags = (text: string) => DICT.filter(([re]) => re.test(text)).map((
 export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { kind: "offer" | "need"; ideas: string[]; regionId: string | null; regionName: string | null; popular: string[] }) {
   const t = useTranslations("market.editor");
   const tc = useTranslations("common");
+  const tt = useTranslations("common.tags");
   const give = kind === "offer";
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -43,7 +45,6 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
   const [allies, setAllies] = useState(!give);
   const [tags, setTags] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
-  const [ideaPage, setIdeaPage] = useState(0);
   const [finder, setFinder] = useState(false);
   const [fq, setFq] = useState("");
   const [hits, setHits] = useState<RespHit[]>([]);
@@ -74,7 +75,6 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
   });
 
   const payOpts = give ? (["free", "hourly", "fixed", "swap"] as const) : (["free", "hourly", "fixed", "swap"] as const);
-  const shownIdeas = ideas.slice((ideaPage * 4) % ideas.length, ((ideaPage * 4) % ideas.length) + 4);
   const edOpen = open || title.trim().length > 0;
 
   return (
@@ -86,10 +86,13 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular }: { 
         {!edOpen && <button type="button" onClick={() => setOpen(true)} className={btn.primaryLg}>{t(give ? "startOffer" : "startNeed")}</button>}
       </div>
       {!edOpen && ideas.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-muted">{t("ideas")}</span>
-          {shownIdeas.map((i) => <button key={i} type="button" onClick={() => { setTitle(i); setOpen(true); }} className={chip(false)}>{i}</button>)}
-          <button type="button" onClick={() => setIdeaPage(ideaPage + 1)} aria-label={t("moreIdeas")} className="border-0 bg-transparent text-muted underline">↻ {t("others")}</button>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] text-muted">{tt("ideas")}</span>
+          <Carousel items={ideas} keyOf={(i) => i} loop label={tt("ideas")}
+            render={(i, hidden) => (
+              <button type="button" tabIndex={hidden ? -1 : 0} aria-hidden={hidden || undefined} onClick={() => { setTitle(i); setOpen(true); }}
+                className={`${chip(false)} whitespace-nowrap`}>{i}</button>
+            )} />
         </div>
       )}
       {edOpen && (

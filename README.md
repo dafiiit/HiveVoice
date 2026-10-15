@@ -14,7 +14,7 @@ dem Online-Ausweis (eID) folgt.
 
 | Bereich | Inhalt |
 | --- | --- |
-| Entdecken | Initiativen, Gruppen, Menschen und Zuständige, gefiltert nach Ebene (Stadtteil bis Bund) |
+| Entdecken | Initiativen, Gruppen, Menschen und Zuständige, gefiltert nach Ebene (Stadtteil bis Bund) oder nach einem Ort. Die Suche oben zeigt beim Tippen Treffer je Art, auch Orte; der Ort daneben (Mitglieder: Wohnort, Gäste: im Browser gemerkt) bestimmt den Marktplatz |
 | Anfragen · Anbieten | Einträge mit bis zu vier Fotos und Gegenwert (kostenlos, Stundenlohn, Festpreis, Tausch), Matching über Stichwörter und Region (Ideen als Karussell), „Ich auch“, Kontakt erst nach Zustimmung, privater Chat danach. In „Anfragen“ lässt sich eine zuständige Stelle eintragen (Suche „Wer ist zuständig?“) |
 | Verbinden | Marktplatz deines Orts, Gruppengespräche, private Chats (Polling, „Gelesen“-Anzeige) und alles, was du gesendet hast oder beantworten musst: Anfragen aus Angeboten und Gesuchen, erste Nachrichten, Beitrittswünsche. Gruppen gründen |
 | Gruppen | Ziele mit Unterzielen und geheimer Zielabstimmung, Gespräch, Bedarf, Aufgaben-Board, Rollen und Rechte-Matrix, Beitritt offen oder auf Anfrage |
@@ -25,7 +25,7 @@ dem Online-Ausweis (eID) folgt.
 | Verwaltung | Versteckte Admin-Seite unter `ADMIN_PATH` |
 
 Sprachen: Deutsch (Standard für alle, unabhängig vom Browser), Englisch, Leichte Sprache. Die Auswahl „DE ▾“ steht auch für Gäste oben auf Willkommens-, Anmelde- und Lese-Seiten und wird in einem Cookie gemerkt. Darstellung: standardmäßig hell, dunkel oder wie das Gerät auf Wunsch.
-Installierbar als PWA.
+Installierbar als PWA. Google-Anmeldung und „Aus Google Fotos“ einrichten: `docs/google-anmeldung.md`.
 
 ## Technik in Kürze
 

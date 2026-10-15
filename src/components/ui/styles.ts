@@ -15,7 +15,7 @@ export const btn = {
 
 export const field = {
   label: "flex flex-col gap-1.5 text-sm font-bold",
-  input: "h-12 w-full px-3 border border-ink bg-surface text-base font-normal text-ink",
+  input: "h-[52px] w-full px-3 border border-ink bg-surface text-base font-normal text-ink",
   inputSm: "h-11 w-full px-3 border border-line bg-surface text-base font-normal text-ink",
   textarea: "w-full p-3 border border-ink bg-surface text-base font-normal text-ink leading-normal",
   select: "h-11 px-2 border border-ink bg-surface text-ink font-normal",

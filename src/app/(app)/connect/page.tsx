@@ -4,6 +4,7 @@ import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadPosts, marketTags } from "@/lib/posts";
 import { myMunicipality } from "@/lib/queries";
+import { getPlace } from "@/lib/place";
 import { relTime } from "@/lib/format";
 import type { Message } from "@/lib/actions/messages";
 import { Avatar } from "@/components/ui/Avatar";
@@ -36,6 +37,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const t = await getTranslations("connect");
   const tl = await getTranslations("levels");
   const locale = await getLocale();
+  const place = await getPlace();
   const mode = sp.mode === "suggested" ? "suggested" : "chrono";
   const filter: Filter = (FILTERS as readonly string[]).includes(String(sp.f)) ? (sp.f as Filter) : "all";
   const sel = typeof sp.c === "string" ? sp.c : "market";
@@ -45,12 +47,11 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const data = await asViewer(viewer, async (tx) => {
     // Test phase: demo profiles send a few chats and requests so this page is not empty.
     if (me) await tx`select app.ensure_demo_chats()`;
-    const muni = await myMunicipality(tx, me ?? undefined);
-    // "Radius": my municipality and the regions above it, from near to far.
-    const radii: (Radius & { id: string })[] = me ? (await tx<{ id: string; name: string; level: string }[]>`
-      select r.id, r.name, r.level::text from public.user_regions ur join public.regions r on r.id = ur.region_id
-      where ur.profile_id = ${me} and r.level in ('municipality', 'district', 'state', 'country')
-      order by array_position(array['municipality','district','state','country'], r.level::text)`).map((r, _i, all) => ({ id: r.id, key: r.level, name: all.filter((x) => x.name === r.name).length > 1 ? `${tl(r.level as "all")} ${r.name}` : r.name })) : [];
+    // The marketplace belongs to the place in the header: a member's home place or the one a guest picked.
+    const chain = (place?.chain ?? []).filter((r) => ["municipality", "district", "state", "country"].includes(r.level));
+    const muni = chain.find((r) => r.level === "municipality") ?? (await myMunicipality(tx, me ?? undefined));
+    // "Radius": the municipality and the regions above it, from near to far.
+    const radii: (Radius & { id: string })[] = chain.map((r, _i, all) => ({ id: r.id, key: r.level, name: all.filter((x) => x.name === r.name).length > 1 ? `${tl(r.level as "all")} ${r.name}` : r.name }));
     const groups = me ? await tx<{ id: string; slug: string; name: string; member_count: number; preview: string | null; author: string | null; at: string | null }[]>`
       select g.id, g.slug::text, g.name, g.member_count,
         (select p.body from public.posts p where p.group_id = g.id and p.parent_id is null and p.hidden_at is null order by p.created_at desc limit 1) as preview,

@@ -4,16 +4,18 @@ import { asViewer } from "@/lib/db";
 import type { Session } from "@/lib/session";
 import { Logo, LogoMark } from "../ui/Logo";
 import { Avatar } from "../ui/Avatar";
-import { IconInbox, IconPlus, IconSearch, IconSquare } from "../ui/Icons";
+import { IconInbox, IconPlus } from "../ui/Icons";
 import { BottomNav, SideLinks, type NavItem } from "./NavLinks";
 import { btn } from "../ui/styles";
 import { LanguageMenu } from "../LanguageMenu";
+import { QuickSearch } from "./QuickSearch";
+import { PlaceMenu } from "./PlaceMenu";
+import { getPlace } from "@/lib/place";
 
 type MyGroup = { slug: string; name: string };
 
 export async function Shell({ session, children }: { session: Session | null; children: React.ReactNode }) {
   const t = await getTranslations("nav");
-  const tl = await getTranslations("levels");
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   // Verbinden carries what waits for an answer: unread chats, requests to me, people asking to join my groups.
   const [groups, waiting] = session
@@ -38,7 +40,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
     { href: "/offers", label: t("offers") },
     { href: "/connect", label: t("connect"), badge: waiting },
   ];
-  const place = session?.profile.home_region;
+  const place = await getPlace();
 
   return (
     <div className="flex min-h-dvh">
@@ -65,53 +67,39 @@ export async function Shell({ session, children }: { session: Session | null; ch
       </nav>
 
       <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
-        <header className="flex flex-col gap-3 border-b border-line px-6 py-4 md:h-[72px] md:flex-row md:items-center md:gap-3 md:px-10 md:py-0">
+        <header className="flex flex-col gap-3 border-b border-line px-6 py-3 md:h-[72px] md:flex-row md:items-center md:gap-3 md:px-10 md:py-0">
           <div className="flex items-center gap-2 md:contents">
             <Link href={session ? "/connect" : "/"} className="flex flex-1 items-center text-ink no-underline md:hidden" aria-label="HiveVoice">
               <Logo size={36} />
             </Link>
-            <form action="/explore" role="search" className="hidden h-11 max-w-[520px] flex-1 items-center gap-2.5 border border-line bg-surface px-3.5 md:flex">
-              <IconSearch />
-              <label className="sr-only" htmlFor="top-search">{t("search")}</label>
-              <input id="top-search" name="q" type="search" placeholder={t("searchPlaceholder")}
-                className="min-w-0 flex-1 border-0 bg-transparent text-ink outline-offset-2" />
-            </form>
-            <Link href="/explore" aria-label={t("explore")} className="inline-flex h-11 w-11 items-center justify-center border border-line-strong text-ink md:hidden">
-              <IconSearch />
-            </Link>
-            {place && (
-              <Link href="/me?tab=settings" className="hidden h-11 items-center gap-2 whitespace-nowrap border border-line-strong px-3.5 text-sm text-ink no-underline lg:inline-flex">
-                <IconSquare /> <strong>{place.name}</strong>&nbsp;· {tl(place.level as "municipality")}
-              </Link>
-            )}
-            <span className="hidden flex-1 md:block" />
-            {session ? (
-              <>
-                <Link href="/notifications" aria-label={t("inbox", { n: session.profile.unread })}
-                  className="relative inline-flex h-11 w-11 items-center justify-center border border-line text-ink">
-                  <IconInbox />
-                  {session.profile.unread > 0 && (
-                    <span className="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 items-center justify-center bg-red px-1 text-[11px] font-bold text-on-red">
-                      {session.profile.unread}
-                    </span>
-                  )}
-                </Link>
-                <Link href="/me" aria-label={t("profileOf", { name: session.profile.display_name })} className="inline-flex">
-                  <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={44} />
-                </Link>
-              </>
-            ) : (
-              <>
-                <LanguageMenu />
-                <Link href="/login" className={btn.primary}>{t("login")}</Link>
-              </>
-            )}
+            <div className="flex items-center gap-2 md:order-3 md:ml-auto">
+              {session ? (
+                <>
+                  <Link href="/notifications" aria-label={t("inbox", { n: session.profile.unread })}
+                    className="relative inline-flex h-11 w-11 items-center justify-center border border-line text-ink">
+                    <IconInbox />
+                    {session.profile.unread > 0 && (
+                      <span className="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 items-center justify-center bg-red px-1 text-[11px] font-bold text-on-red">
+                        {session.profile.unread}
+                      </span>
+                    )}
+                  </Link>
+                  <Link href="/me" aria-label={t("profileOf", { name: session.profile.display_name })} className="inline-flex">
+                    <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={44} />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <LanguageMenu />
+                  <Link href="/login" className={btn.primary}>{t("login")}</Link>
+                </>
+              )}
+            </div>
           </div>
-          {place && (
-            <Link href="/me?tab=settings" className="inline-flex h-8 items-center gap-2 self-start text-sm text-muted no-underline md:hidden">
-              <IconSquare size={12} /> <strong className="text-ink">{place.name}</strong>&nbsp;· {tl(place.level as "municipality")}
-            </Link>
-          )}
+          <div className="flex items-center gap-2 md:contents">
+            <QuickSearch className="md:order-1" />
+            <PlaceMenu className="md:order-2" signedIn={!!session} place={place ? { id: place.id, name: place.name, level: place.level, chain: place.chain } : null} />
+          </div>
         </header>
         <main id="main" className="flex-1">{children}</main>
       </div>

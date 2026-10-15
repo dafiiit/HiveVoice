@@ -9,8 +9,34 @@
   "yourGroups": "Deine Gruppen",
   "responsible": "Wer ist zuständig?",
   "search": "Suche",
-  "searchPlaceholder": "Initiativen, Gruppen, Menschen, Orte",
+  "searchPlaceholder": "Suchen: Initiativen, Gruppen, Menschen, Orte",
   "inbox": "Mitteilungen, {n} ungelesen",
   "profileOf": "Für mich – {name}",
-  "login": "Anmelden"
+  "login": "Anmelden",
+  "searchKinds": {
+    "initiative": "Initiativen",
+    "group": "Gruppen",
+    "person": "Menschen",
+    "responsible": "Zuständige",
+    "place": "Orte"
+  },
+  "searchAll": "Alle Treffer für „{q}“",
+  "searchBusy": "Sucht …",
+  "searchNone": "Nichts Passendes. Mit Enter die ganze Suche öffnen.",
+  "place": {
+    "label": "Ort",
+    "yours": "Dein Ort",
+    "chosen": "Gewählter Ort",
+    "choose": "Ort wählen",
+    "explain": "Dein Ort bestimmt, welchen Marktplatz du siehst und was zu dir passt.",
+    "explainGuest": "Ohne Konto merken wir uns den Ort nur in diesem Browser. Er bestimmt, welchen Marktplatz du siehst.",
+    "discover": "In {name} entdecken",
+    "change": "Ort ändern",
+    "searchPlaceholder": "Postleitzahl oder Ort",
+    "wholePlace": "Ganze Gemeinde",
+    "boroughHint": "Stadtteil wählen",
+    "forget": "Ort vergessen",
+    "none": "Keinen Ort gefunden.",
+    "partOf": "Gehört zu"
+  }
 }

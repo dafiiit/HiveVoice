@@ -9,7 +9,16 @@ function hash(s: string) {
   return h;
 }
 
-/** Square avatar: the uploaded photo, or a glyph that is stable per person. */
+/** First letter or digit of a name, upper case: "Möwe-2290" gives "M", "Ärztin" gives "Ä". */
+export function initialOf(name: string) {
+  const m = name.trim().match(/[\p{L}\p{N}]/u);
+  return (m ? m[0] : "?").toLocaleUpperCase("de");
+}
+
+/**
+ * Square avatar: the uploaded photo, otherwise the initial of the name (the real name,
+ * or the pseudonym for anonymous members). Groups keep a geometric glyph on red.
+ */
 export function Avatar({ name, seed, size = 40, group = false, path }: { name: string; seed?: number; size?: number; group?: boolean; path?: string | null }) {
   const photo = imageUrl(path);
   if (photo) {
@@ -19,19 +28,21 @@ export function Avatar({ name, seed, size = 40, group = false, path }: { name: s
         className="inline-block flex-none bg-chip object-cover" style={{ width: size, height: size }} />
     );
   }
+  if (!group) {
+    return (
+      <span role="img" aria-label={name} title={name}
+        className="inline-flex flex-none select-none items-center justify-center overflow-hidden font-bold"
+        style={{ width: size, height: size, background: "var(--ink)", color: "var(--on-ink)", fontSize: Math.round(size * 0.54), lineHeight: 1, letterSpacing: "-0.04em" }}>
+        {initialOf(name)}
+      </span>
+    );
+  }
   const n = seed ?? hash(name);
   const shape = SHAPES[n % SHAPES.length];
-  const bg = group ? "var(--red)" : "var(--ink)";
-  const fg = group ? "var(--on-red)" : "var(--on-ink)";
   return (
-    <span
-      role="img"
-      aria-label={name}
-      title={name}
-      className="inline-flex flex-none items-center justify-center overflow-hidden"
-      style={{ width: size, height: size, background: bg }}
-    >
-      <Glyph shape={shape} size={Math.round(size * 0.56)} color={fg} rotate={(n % 4) * 90} />
+    <span role="img" aria-label={name} title={name} className="inline-flex flex-none items-center justify-center overflow-hidden"
+      style={{ width: size, height: size, background: "var(--red)" }}>
+      <Glyph shape={shape} size={Math.round(size * 0.56)} color="var(--on-red)" rotate={(n % 4) * 90} />
     </span>
   );
 }

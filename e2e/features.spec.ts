@@ -118,9 +118,51 @@ test.describe("signed in", () => {
     await login(page);
     await page.goto("/offers");
     await page.locator("main input").first().fill("Test");
-    await page.getByRole("combobox").fill("80336");
-    await expect(page.getByRole("combobox")).toHaveValue("80336 München");
+    await page.getByRole("combobox", { name: "Ort" }).fill("80336");
+    await expect(page.getByRole("combobox", { name: "Ort" })).toHaveValue("80336 München");
     await expect(page.getByText(/Erkannt: München/)).toBeVisible();
+  });
+
+  test("people without a photo get a letter, not a shape", async ({ page }) => {
+    await login(page);
+    await page.goto("/connect");
+    const avatar = page.getByRole("region", { name: "Unterhaltungen" }).getByRole("img", { name: "Felix Wolf" }).first();
+    await expect(avatar).toHaveText("F");
+  });
+
+  test("the search at the top offers direct hits, including places", async ({ page }) => {
+    await login(page);
+    await page.goto("/connect");
+    await page.getByRole("combobox").first().fill("mün");
+    const places = page.getByRole("option", { name: /^München/ }).first();
+    await expect(places).toBeVisible();
+    await places.click();
+    await expect(page).toHaveURL(/\/explore\?place=/);
+    await expect(page.getByRole("link", { name: "München entfernen" })).toBeVisible();
+  });
+
+  test("the place menu says what the place is for", async ({ page }) => {
+    await login(page);
+    await page.goto("/connect");
+    await page.getByRole("button", { name: /^Dein Ort/ }).click();
+    await expect(page.getByText(/bestimmt, welchen Marktplatz/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /entdecken$/ })).toBeVisible();
+  });
+
+  test("idea suggestions loop and the field is as tall as its button", async ({ page }, info) => {
+    await login(page);
+    await page.goto("/offers");
+    const prev = page.getByRole("button", { name: "Zurück blättern" }).first();
+    const next = page.getByRole("button", { name: "Weiter blättern" }).first();
+    await expect(prev).toBeEnabled();
+    for (let i = 0; i < 12; i++) { await next.click(); await page.waitForTimeout(120); }
+    await expect(next).toBeEnabled();
+    await expect(prev).toBeEnabled();
+    if (info.project.name === "desktop") {
+      const field = await page.locator("main input").first().boundingBox();
+      const button = await page.getByRole("button", { name: "Angebot erstellen" }).boundingBox();
+      expect(Math.round(field!.height)).toBe(Math.round(button!.height));
+    }
   });
 
   test("a profile photo can be uploaded and removed", async ({ page }) => {
@@ -166,5 +208,19 @@ test.describe("language without signing in", () => {
     await page.getByRole("button", { name: /Choose language/ }).click();
     await page.getByRole("menuitemradio", { name: "Deutsch" }).click();
     await expect(page.getByRole("heading", { name: "Entdecken" })).toBeVisible();
+  });
+});
+
+test.describe("a guest can pick a place", () => {
+  test("it is remembered in the browser and drives the marketplace", async ({ page }) => {
+    await page.goto("/explore");
+    await page.getByRole("button", { name: "Ort wählen" }).click();
+    await page.getByPlaceholder("Postleitzahl oder Ort").fill("80336");
+    await page.getByRole("button", { name: /München/ }).first().click();
+    const whole = page.getByRole("button", { name: "Ganze Gemeinde" });
+    if (await whole.isVisible().catch(() => false)) await whole.click();
+    await expect(page.getByRole("button", { name: /^Gewählter Ort/ })).toBeVisible();
+    await page.goto("/connect?c=market");
+    await expect(page.getByText(/Offen für alle in München · jede/)).toBeVisible();
   });
 });

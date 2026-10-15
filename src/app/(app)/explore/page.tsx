@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { initiativeCardColumns, initiativeCardFrom, myRegionIds, type InitiativeCard as Card } from "@/lib/queries";
+import { initiativeCardColumns, initiativeCardFrom, myRegionIds, regionTree, type InitiativeCard as Card } from "@/lib/queries";
+import { getPlace } from "@/lib/place";
 import { InitiativeCard } from "@/components/InitiativeCard";
 import { Avatar } from "@/components/ui/Avatar";
 import { Glyph } from "@/components/ui/Glyph";
@@ -31,15 +32,19 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const sort = (SORTS as readonly string[]).includes(str("sort")) ? str("sort") : "relevant";
   const mine = str("mine") === "1";
   const q = str("q").trim();
+  const placeId = /^[0-9a-f-]{36}$/.test(str("place")) ? str("place") : "";
   const like = `%${q.toLowerCase()}%`;
 
   const session = await getSession();
+  const home = await getPlace();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const t = await getTranslations("explore");
   const tl = await getTranslations("levels");
 
+  const [filterPlace] = placeId ? await asViewer(null, (tx) => tx<{ id: string; name: string }[]>`select id, name from public.regions where id = ${placeId}`) : [];
   const data = await asViewer(viewer, async (tx) => {
-    const regions = await myRegionIds(tx, session?.profile.id);
+    const regions = session ? await myRegionIds(tx, session.profile.id) : (home?.chain.map((r) => r.id) ?? []);
+    const inPlace = (column: ReturnType<typeof tx>) => filterPlace ? tx`and ${column} in ${regionTree(tx, filterPlace.id)}` : tx``;
     if (kind === "initiatives") {
       const order =
         sort === "new" ? tx`i.created_at desc`
@@ -52,6 +57,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           where i.published_at is not null
             ${level !== "all" ? tx`and r.level = ${level}` : tx``}
             ${mine ? tx`and i.region_id = any(${regions}::uuid[])` : tx``}
+            ${inPlace(tx`i.region_id`)}
             ${q ? tx`and (lower(i.title) like ${like} or lower(coalesce(i.summary, '')) like ${like} or lower(r.name) like ${like})` : tx``}
           order by ${order} limit 60`,
       };
@@ -66,6 +72,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           where g.archived_at is null
             ${q ? tx`and (lower(g.name) like ${like} or lower(coalesce(g.summary, '')) like ${like})` : tx``}
             ${mine ? tx`and g.region_id = any(${regions}::uuid[])` : tx``}
+            ${inPlace(tx`g.region_id`)}
           order by (g.region_id = any(${regions}::uuid[])) desc, g.member_count desc limit 60`,
       };
     }
@@ -78,6 +85,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
             ${viewer ? tx`exists (select 1 from public.follows f where f.follower_id = ${viewer.profileId} and f.target_type = 'profile' and f.target_id = p.id)` : tx`false`} as following
           from public.profiles p left join public.regions r on r.id = p.home_region_id
           where p.onboarded_at is not null ${viewer ? tx`and p.id <> ${viewer.profileId}` : tx``}
+            ${inPlace(tx`p.home_region_id`)}
             ${q ? tx`and (lower(p.display_name) like ${like} or lower(coalesce(p.headline, '')) like ${like}
                      or exists (select 1 from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = p.id and t.slug like ${like}))` : tx``}
           order by p.helped_count desc, p.created_at desc limit 60`,
@@ -90,12 +98,13 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
         from public.responsibilities s join public.profiles p on p.id = s.holder_id left join public.regions r on r.id = s.region_id
         where true ${q ? tx`and (lower(s.title) like ${like} or lower(s.description) like ${like} or lower(coalesce(s.organization_name, '')) like ${like})` : tx``}
           ${mine ? tx`and s.region_id = any(${regions}::uuid[])` : tx``}
+          ${inPlace(tx`s.region_id`)}
         order by s.is_official desc, (s.region_id = any(${regions}::uuid[])) desc, s.title limit 60`,
     };
   });
 
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ kind, level, sort, q, mine: mine ? "1" : "" , ...patch });
+    const p = new URLSearchParams({ kind, level, sort, q, mine: mine ? "1" : "", place: filterPlace?.id ?? "", ...patch });
     for (const [k, v] of [...p.entries()]) if (!v || (k === "level" && v === "all") || (k === "sort" && v === "relevant") || (k === "kind" && v === "initiatives")) p.delete(k);
     const s = p.toString();
     return `/explore${s ? `?${s}` : ""}`;
@@ -111,6 +120,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           <label htmlFor="explore-q" className="sr-only">{t("search")}</label>
           <input id="explore-q" type="search" name="q" defaultValue={q} placeholder={t("searchPlaceholder")} className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink" />
           {kind !== "initiatives" && <input type="hidden" name="kind" value={kind} />}
+          {filterPlace && <input type="hidden" name="place" value={filterPlace.id} />}
         </form>
       </div>
       <div role="tablist" aria-label={t("what")} className="-mt-1 flex overflow-x-auto border-b border-line">
@@ -152,6 +162,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           </Popover>
         )}
         {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
+        {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
         <span className="ml-auto text-muted">{t(`count.${kind}`, { n: count })}</span>
       </div>

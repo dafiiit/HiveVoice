@@ -14,5 +14,20 @@
     "decode": "The image could not be read. Please use a JPG or PNG.",
     "auth": "Please sign in first.",
     "upload": "The upload failed. Please try again."
+  },
+  "fromDevice": "From device",
+  "fromGoogle": "From Google Photos",
+  "dropHint": "Or drop photos here.",
+  "dropHere": "Drop here",
+  "google": {
+    "authorizing": "Asking Google …",
+    "open": "Open Google Photos",
+    "waiting": "Choose your photos in Google Photos and confirm. This page continues on its own.",
+    "importing": "Importing photos …",
+    "cancel": "Cancel",
+    "none": "Nothing was imported. Choose at least one photo.",
+    "failed": "Google Photos did not answer. Please try again.",
+    "denied": "Access to Google Photos was not allowed.",
+    "timeout": "The selection took too long. Please start again."
   }
 }

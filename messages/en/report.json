@@ -1,0 +1,23 @@
+{
+  "title": "Report post",
+  "step": "Step {n} of 3",
+  "which": "Which rule does the post break?",
+  "rules": {
+    "insult": { "label": "Insult", "hint": "Belittling a person instead of engaging with the issue" },
+    "threat": { "label": "Threat", "hint": "Threatening violence or harm" },
+    "spam": { "label": "Spam", "hint": "Advertising or repeated content" },
+    "misinformation": { "label": "Misinformation, disproved by a source", "hint": "Please give the source in the next step" },
+    "personal_data": { "label": "Other people’s personal data", "hint": "Addresses, phone numbers, private details" }
+  },
+  "disagree": "Disagree? That is what arguments are for. Disagreement can push a post down, but never remove it.",
+  "rule": "Rule",
+  "note": "Note for the jury (optional)",
+  "notePlaceholder": "What should the jury know?",
+  "send": "Send report",
+  "sent": "Thank you.",
+  "juryIntro": "Case {caseNo}: a randomly drawn jury from your region reviews it anonymously.",
+  "how1": "Up to seven people are drawn by lot.",
+  "how2": "They see the post without names, with context and the reported rule.",
+  "how3": "The majority decides. Both sides learn the result.",
+  "track": "Track status"
+}

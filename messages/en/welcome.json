@@ -1,0 +1,30 @@
+{
+  "guest": "Explore as guest",
+  "login": "Sign in",
+  "join": "Join",
+  "hero1": "From an idea",
+  "hero2": "to change.",
+  "lead": "Ask for what you are missing. Offer what you can spare. People who want the same thing team up in groups with goals.",
+  "moving": "On the move",
+  "allInitiatives": "All initiatives",
+  "stagesTitle": "Ask · Offer · Connect",
+  "stage": {
+    "need": { "name": "Ask", "text": "What you are missing. From cake and tea to a bike lane." },
+    "offer": { "name": "Offer", "text": "What you can do or have to spare. Free or paid." },
+    "connect": { "name": "Connect", "text": "People who want the same thing form a group and agree on goals." }
+  },
+  "offerTitle": "Offer what you can. Find what you need.",
+  "offerText": "From expertise to a sofa bed. Mostly free, with an hourly rate if you like. Contact only when both agree.",
+  "offerCta": "Add an offer",
+  "needs": "needs",
+  "offers": "offers",
+  "trust": {
+    "bots": { "title": "A space without bots", "text": "Only verified people can write and vote. Whether you appear under a pseudonym or your real name is up to you." },
+    "secret": { "title": "Secret ballot", "text": "Only totals are counted. Nobody can see who voted for what." },
+    "life": { "title": "For every part of life", "text": "Find a flatmate, start a band, raise seed money or save the playground. All in one place." }
+  },
+  "nonpartisan": "Non-partisan",
+  "imprint": "Imprint",
+  "privacy": "Privacy",
+  "source": "Source code"
+}

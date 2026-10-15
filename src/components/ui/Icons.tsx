@@ -1,0 +1,16 @@
+// Stroke icons, square caps, matching the Swiss design.
+type P = { size?: number; className?: string };
+const base = (size: number) => ({ width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+  strokeLinecap: "square" as const, "aria-hidden": true });
+
+export const IconPlus = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M12 4v16M4 12h16" /></svg>;
+export const IconSearch = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><circle cx="10" cy="10" r="6" /><path d="M15 15l6 6" /></svg>;
+export const IconInbox = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 13h5l1 3h6l1-3h5" /><path d="M3 13l3-8h12l3 8v7H3z" /></svg>;
+export const IconCheck = ({ size = 14, className }: P) => <svg {...base(size)} strokeWidth={3} className={className}><path d="M4 12l5 5L20 6" /></svg>;
+export const IconUp = ({ size = 16, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M7 11v9H3v-9zM7 11l4-8c1.5 0 2.5 1 2.5 2.5V9H20l-1.5 11H7" /></svg>;
+export const IconDown = ({ size = 16, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M17 13V4h4v9zM17 13l-4 8c-1.5 0-2.5-1-2.5-2.5V15H4l1.5-11H17" /></svg>;
+export const IconReply = ({ size = 16, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 5h18v12H9l-5 4v-4H3z" /></svg>;
+export const IconLock = ({ size = 16, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="5" y="11" width="14" height="10" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
+export const IconSquare = ({ size = 14, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><rect x="6" y="6" width="12" height="12" /></svg>;
+export const IconClose = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M5 5l14 14M19 5L5 19" /></svg>;
+export const IconBack = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M15 4l-8 8 8 8" /></svg>;

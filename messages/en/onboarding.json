@@ -1,0 +1,39 @@
+{
+  "title": "Welcome",
+  "step": "Step {n} of {total}",
+  "steps": "Steps",
+  "stepNames": { "intro": "How it works", "place": "Home", "appearance": "Appearance", "interests": "Interests" },
+  "cards": {
+    "need": { "title": "Ask for what you are missing.", "text": "Big or small. Someone will turn up.", "example": "Beach volleyball partners, a car pool, more drinking water in the neighbourhood." },
+    "offer": { "title": "Offer what you can.", "text": "Free or paid, you decide.", "example": "Repairing bikes, space in your yard for a party, piano lessons for vegetables." },
+    "connect": { "title": "Connect with everyone who wants the same.", "text": "Together you agree on goals. Your vote stays secret.", "example": "Start a band, push for a bike lane, found a solar cooperative." }
+  },
+  "skipIntro": "Skip",
+  "placeTitle": "Where do you live?",
+  "placeText": "This decides what we suggest and where your vote counts as affected. You can read and discuss everywhere.",
+  "placeLabel": "Postcode or place",
+  "placePlaceholder": "e.g. 81369 or Sendling",
+  "placeResults": "Places found",
+  "change": "Change",
+  "borough": "Neighbourhood",
+  "noBorough": "No neighbourhood",
+  "placeNote": "We only store your municipality and neighbourhood, never your address.",
+  "appearanceTitle": "How do you want to appear?",
+  "appearanceText": "You are verified either way. You decide what others see. You can change it later.",
+  "mode": {
+    "real": { "title": "Real name", "text": "Your name appears on posts and in groups." },
+    "alias": { "title": "Pseudonym", "text": "A pseudonym marked “verified”. Nobody sees who is behind it." }
+  },
+  "yourName": "Your name",
+  "realName": "First and last name",
+  "alias": "Pseudonym",
+  "reroll": "Roll again",
+  "interestsTitle": "What do you need? What can you offer?",
+  "interestsText": "Tap what fits or add your own. You can be more specific later.",
+  "needsLabel": "I am looking for",
+  "offersLabel": "I offer",
+  "needsPlaceholder": "e.g. rehearsal-room",
+  "offersPlaceholder": "e.g. bike-repair",
+  "welcome": "You appear as {name}.",
+  "finish": "Let’s go"
+}

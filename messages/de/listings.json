@@ -1,0 +1,8 @@
+{
+  "requested": "Angefragt · wartet",
+  "defaultMessage": "Hallo! Ich hätte Interesse. Wann passt es dir?",
+  "contactTitle": "Anfrage",
+  "to": "An {name}",
+  "message": "Nachricht",
+  "privacy": "Kontaktdaten werden erst geteilt, wenn {name} zustimmt."
+}

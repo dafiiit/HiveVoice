@@ -1,0 +1,16 @@
+{
+  "main": "Hauptnavigation",
+  "explore": "Entdecken",
+  "needs": "Anfragen",
+  "offers": "Anbieten",
+  "connect": "Verbinden",
+  "me": "Für mich",
+  "new": "Neu",
+  "yourGroups": "Deine Gruppen",
+  "responsible": "Wer ist zuständig?",
+  "search": "Suche",
+  "searchPlaceholder": "Initiativen, Gruppen, Menschen, Orte",
+  "inbox": "Mitteilungen, {n} ungelesen",
+  "profileOf": "Für mich – {name}",
+  "login": "Anmelden"
+}

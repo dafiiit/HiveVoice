@@ -1,0 +1,27 @@
+{
+  "title": "Mitteilungen",
+  "empty": "Keine Mitteilungen. Alles ruhig.",
+  "kinds": {
+    "join_request": "Jemand möchte bei „{group}“ mitmachen.",
+    "join_accepted": "Du bist jetzt Mitglied von „{group}“.",
+    "join_declined": "Deine Anfrage bei „{group}“ wurde abgelehnt.",
+    "goal_vote": "Neues Ziel in „{group}“: „{goal}“. Stimm ab!",
+    "goal_adopted": "„{goal}“ wurde in „{group}“ beschlossen.",
+    "goal_rejected": "„{goal}“ wurde in „{group}“ nicht angenommen.",
+    "working_group": "Für „{title}“ gibt es jetzt eine Arbeitsgruppe.",
+    "initiative_vote": "Die Abstimmung über „{title}“ läuft.",
+    "initiative_passed": "„{title}“ wurde angenommen und geht an den Adressaten.",
+    "initiative_failed": "„{title}“ wurde in der Abstimmung abgelehnt.",
+    "request_answered": "Deine Anfrage wurde beantwortet.",
+    "request_forwarded": "Deine Anfrage wurde weitergeleitet.",
+    "responsibility_request": "Neue Anfrage an eine deiner Zuständigkeiten.",
+    "contact_request": "Neue Kontaktanfrage zu „{title}“.",
+    "contact_accepted": "Dein Kontakt zu „{title}“ wurde angenommen. Ihr könnt jetzt schreiben.",
+    "contact_declined": "Deine Anfrage zu „{title}“ wurde abgelehnt.",
+    "message": "Neue Nachricht.",
+    "post_reply": "Jemand hat auf deinen Beitrag geantwortet.",
+    "jury_invite": "Du wurdest für die Bürgerjury ausgelost (Fall {case_no}).",
+    "report_decided": "Deine Meldung (Fall {case_no}) wurde entschieden.",
+    "content_hidden": "Ein Beitrag von dir wurde nach Prüfung durch die Bürgerjury ausgeblendet (Fall {case_no})."
+  }
+}

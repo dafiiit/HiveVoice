@@ -1,0 +1,27 @@
+{
+  "title": "Notifications",
+  "empty": "No notifications. All quiet.",
+  "kinds": {
+    "join_request": "Someone wants to join “{group}”.",
+    "join_accepted": "You are now a member of “{group}”.",
+    "join_declined": "Your request to join “{group}” was declined.",
+    "goal_vote": "New goal in “{group}”: “{goal}”. Cast your vote!",
+    "goal_adopted": "“{goal}” was adopted in “{group}”.",
+    "goal_rejected": "“{goal}” was not adopted in “{group}”.",
+    "working_group": "There is now a working group for “{title}”.",
+    "initiative_vote": "The vote on “{title}” is running.",
+    "initiative_passed": "“{title}” was accepted and goes to the addressee.",
+    "initiative_failed": "“{title}” was rejected in the vote.",
+    "request_answered": "Your request was answered.",
+    "request_forwarded": "Your request was forwarded.",
+    "responsibility_request": "New request to one of your responsibilities.",
+    "contact_request": "New contact request about “{title}”.",
+    "contact_accepted": "Your contact about “{title}” was accepted. You can write now.",
+    "contact_declined": "Your request about “{title}” was declined.",
+    "message": "New message.",
+    "post_reply": "Someone replied to your post.",
+    "jury_invite": "You were drawn for the citizen jury (case {case_no}).",
+    "report_decided": "Your report (case {case_no}) was decided.",
+    "content_hidden": "A post of yours was hidden after review by the citizen jury (case {case_no})."
+  }
+}

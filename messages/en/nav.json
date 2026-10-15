@@ -1,0 +1,16 @@
+{
+  "main": "Main navigation",
+  "explore": "Explore",
+  "needs": "Requests",
+  "offers": "Offers",
+  "connect": "Connect",
+  "me": "For me",
+  "new": "New",
+  "yourGroups": "Your groups",
+  "responsible": "Who is responsible?",
+  "search": "Search",
+  "searchPlaceholder": "Initiatives, groups, people, places",
+  "inbox": "Notifications, {n} unread",
+  "profileOf": "For me – {name}",
+  "login": "Sign in"
+}

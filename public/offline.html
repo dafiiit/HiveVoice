@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offline · HiveVoice</title>
+<style>
+  :root { --paper:#f4f4f4; --ink:#111; }
+  @media (prefers-color-scheme: dark) { :root { --paper:#111; --ink:#f1f1f1; } }
+  body { margin:0; min-height:100vh; display:flex; align-items:center; padding:24px; background:var(--paper); color:var(--ink);
+         font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; }
+  h1 { font-size:48px; line-height:.95; letter-spacing:-.035em; margin:0 0 16px; }
+  p { font-size:18px; max-width:420px; }
+  span { color:#e2001a; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Keine Verbindung.<br><span>No connection.</span></h1>
+  <p>HiveVoice braucht das Internet. Sobald du wieder online bist, lädt die Seite neu.</p>
+  <p>HiveVoice needs the internet. The page reloads once you are back online.</p>
+</main>
+<script>addEventListener('online', () => location.reload());</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "title": "Explore",
+  "lead": "Initiatives, groups, people and those responsible, in your places and everywhere else.",
+  "search": "Search",
+  "searchPlaceholder": "Search initiatives, groups, people, responsibilities",
+  "what": "What are you looking for?",
+  "kinds": { "initiatives": "Initiatives", "groups": "Groups", "people": "People", "responsible": "Responsible" },
+  "level": "Level",
+  "sort": "Sort:",
+  "sorts": { "relevant": "Relevant", "new": "New", "soon": "Decided soon", "support": "Most support" },
+  "canVote": "In my places",
+  "nearMe": "Near me",
+  "count": {
+    "initiatives": "{n, plural, one {1 initiative} other {# initiatives}}",
+    "groups": "{n, plural, one {1 group} other {# groups}}",
+    "people": "{n, plural, one {1 person} other {# people}}",
+    "responsible": "{n, plural, one {1 responsibility} other {# responsibilities}}"
+  },
+  "nothing": "Nothing found. Try another word or level.",
+  "groupMeta": "{n, plural, one {1 member} other {# members}} · {place}",
+  "join": { "open": "open to all", "request": "join on request" },
+  "member": "Member",
+  "offers": "offers",
+  "needs": "needs",
+  "followPrivate": "Following is private. There are no follower counts.",
+  "official": "Officially verified",
+  "responds": "responds in {days, plural, one {1 day} other {# days}} on average"
+}

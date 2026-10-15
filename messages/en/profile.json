@@ -1,0 +1,16 @@
+{
+  "alias": "Pseudonym · verified",
+  "helped": "{n, plural, =0 {nobody says “helped me” yet} one {1 person says “helped me”} other {# people say “helped me”}}",
+  "edit": "Edit profile",
+  "gives": "Offers and needs",
+  "nothing": "Nothing listed yet.",
+  "offer": "Offer",
+  "need": "Request",
+  "ask": "Ask",
+  "help": "Help",
+  "offersTag": "offers",
+  "posts": "Posts",
+  "looksFor": "Interested in",
+  "responsible": "Responsible for",
+  "groups": "Groups"
+}

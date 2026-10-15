@@ -1,0 +1,5 @@
+{
+  "guestBanner": "Du bist Gast. Du kannst lesen. Zum Schreiben musst du dich anmelden.",
+  "error": "Das hat nicht geklappt. Bitte noch einmal versuchen.",
+  "phase": { "addressee": "Bei der Stelle", "implementation": "Wird gemacht", "done": "Fertig" }
+}

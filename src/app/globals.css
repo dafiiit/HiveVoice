@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
+/* Swiss Design: one red accent, black rules, square corners, no shadows. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --paper: #f4f4f4;
+  --surface: #ffffff;
+  --ink: #111111;
+  --on-ink: #ffffff;
+  --muted: #5f5f5f;
+  --line: #d4d4d4;
+  --line-strong: #b3b3b3;
+  --chip: #e8e8e8;
+  --red: #e2001a;
+  --on-red: #ffffff;
+  --red-soft: #fde6e8;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --paper: #111111;
+    --surface: #1b1b1b;
+    --ink: #f1f1f1;
+    --on-ink: #111111;
+    --muted: #a8a8a8;
+    --line: #343434;
+    --line-strong: #555555;
+    --chip: #262626;
+    --red: #ff4d5e;
+    --on-red: #111111;
+    --red-soft: #3a1418;
+    color-scheme: dark;
   }
 }
 
+:root[data-theme="dark"] {
+  --paper: #111111;
+  --surface: #1b1b1b;
+  --ink: #f1f1f1;
+  --on-ink: #111111;
+  --muted: #a8a8a8;
+  --line: #343434;
+  --line-strong: #555555;
+  --chip: #262626;
+  --red: #ff4d5e;
+  --on-red: #111111;
+  --red-soft: #3a1418;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-on-ink: var(--on-ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-chip: var(--chip);
+  --color-red: var(--red);
+  --color-on-red: var(--on-red);
+  --color-red-soft: var(--red-soft);
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --radius-none: 0;
+}
+
+@layer base {
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+input,
+textarea,
+select {
+  border-radius: 0;
+}
+}
+
+.display-xl {
+  font-size: clamp(44px, 6.6vw, 96px);
+  line-height: 0.92;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.display {
+  font-size: clamp(36px, 4.2vw, 60px);
+  line-height: 0.95;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }

@@ -1,0 +1,63 @@
+import "server-only";
+import type { Tx } from "./db";
+
+export type PostView = {
+  id: string;
+  body: string;
+  created_at: string;
+  author_id: string;
+  author_name: string;
+  author_seed: number;
+  author_mode: "real" | "alias";
+  author_region: string | null;
+  score: number;
+  reply_count: number;
+  is_pinned: boolean;
+  my_vote: number;
+  listing_id: string | null;
+  listing_title: string | null;
+  listing_kind: string | null;
+  initiative_id: string | null;
+  initiative_title: string | null;
+  replies: PostView[];
+};
+
+type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[] };
+
+/** Top-level posts of a group, an initiative thread or a regional marketplace, with replies. */
+export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, opts: { sort?: "new" | "top"; limit?: number } = {}) {
+  const where = scope.groupId
+    ? tx`p.group_id = ${scope.groupId}`
+    : scope.initiativeId
+      ? tx`p.initiative_id = ${scope.initiativeId}`
+      : tx`p.region_id = any(${scope.regionIds ?? []}::uuid[]) and p.group_id is null and p.initiative_id is null`;
+  const order = opts.sort === "top"
+    ? tx`p.is_pinned desc, (p.score + p.reply_count * 2)::float / power(extract(epoch from now() - p.created_at) / 3600 + 2, 1.2) desc`
+    : tx`p.is_pinned desc, p.created_at desc`;
+  const posts = await tx<PostView[]>`
+    select ${postColumns(tx, viewerId)}
+    from public.posts p join public.profiles a on a.id = p.author_id
+    left join public.regions ar on ar.id = a.home_region_id
+    left join public.listings l on l.id = p.listing_id
+    left join public.initiatives i on i.id = p.initiative_id
+    where ${where} and p.parent_id is null and p.hidden_at is null
+    order by ${order} limit ${opts.limit ?? 40}`;
+  if (!posts.length) return posts;
+  const replies = await tx<(PostView & { parent_id: string })[]>`
+    select ${postColumns(tx, viewerId)}, p.parent_id
+    from public.posts p join public.profiles a on a.id = p.author_id
+    left join public.regions ar on ar.id = a.home_region_id
+    left join public.listings l on l.id = p.listing_id
+    left join public.initiatives i on i.id = p.initiative_id
+    where p.parent_id = any(${posts.map((p) => p.id)}::uuid[]) and p.hidden_at is null
+    order by p.created_at asc`;
+  for (const p of posts) p.replies = replies.filter((r) => r.parent_id === p.id);
+  return posts;
+}
+
+const postColumns = (tx: Tx, viewerId: string | null) => tx`
+  p.id, p.body, p.created_at, p.author_id, p.score, p.reply_count, p.is_pinned, p.listing_id, p.initiative_id,
+  a.display_name as author_name, a.avatar_seed as author_seed, a.display_mode as author_mode, ar.name as author_region,
+  l.title as listing_title, l.kind::text as listing_kind, i.title as initiative_title,
+  ${viewerId ? tx`coalesce((select v.value from public.post_votes v where v.post_id = p.id and v.profile_id = ${viewerId}), 0)` : tx`0`}::int as my_vote,
+  '[]'::jsonb as replies`;

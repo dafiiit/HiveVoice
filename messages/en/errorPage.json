@@ -1,0 +1,8 @@
+{
+  "notFound": "Not found.",
+  "notFoundText": "This page does not exist, or no longer does.",
+  "home": "Go to the start page",
+  "error": "Something went wrong.",
+  "errorText": "Please try again. If it happens again, let the operator know.",
+  "retry": "Try again"
+}

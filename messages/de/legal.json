@@ -1,0 +1,23 @@
+{
+  "placeholder": "Platzhalter: Der Betreiber dieser Instanz ergänzt hier seine Angaben.",
+  "imprint": {
+    "title": "Impressum",
+    "body": [
+      "Angaben gemäß § 5 DDG:\n[Name des Betreibers]\n[Straße und Hausnummer]\n[PLZ Ort]",
+      "Kontakt:\nE-Mail: [E-Mail-Adresse]",
+      "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:\n[Name, Anschrift]",
+      "HiveVoice ist freie Software unter der AGPL-3.0. Beiträge der Nutzer:innen geben deren eigene Meinung wieder."
+    ]
+  },
+  "privacy": {
+    "title": "Datenschutz",
+    "body": [
+      "Verantwortlich: [Name und Anschrift des Betreibers].",
+      "Was wir speichern: E-Mail-Adresse für die Anmeldung, dein Anzeigename (Klarname oder Pseudonym), Gemeinde und Stadtteil (nie die Adresse), deine Beiträge, Argumente, Anfragen und Angebote.",
+      "Was wir nie speichern: wie du abgestimmt hast. Teilnahme und Stimme liegen getrennt; die Stimme ist nur über einen geheimen Schlüssel des Servers mit einem Token verknüpft, nicht mit deinem Konto.",
+      "Hosting: Datenbank und Anmeldung bei Supabase (Rechenzentrum Frankfurt am Main), Webserver bei Vercel. [Auftragsverarbeitungsverträge ergänzen.]",
+      "Cookies: nur technisch notwendige Cookies für Anmeldung, Sprache und Darstellung. Keine Werbung, kein Tracking.",
+      "Deine Rechte: Auskunft, Berichtigung, Löschung (unter „Für mich → Einstellungen → Konto verlassen“), Einschränkung, Datenübertragbarkeit, Widerspruch und Beschwerde bei einer Aufsichtsbehörde."
+    ]
+  }
+}

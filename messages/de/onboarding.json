@@ -1,0 +1,39 @@
+{
+  "title": "Willkommen",
+  "step": "Schritt {n} von {total}",
+  "steps": "Schritte",
+  "stepNames": { "intro": "So geht’s", "place": "Wohnort", "appearance": "Auftreten", "interests": "Interessen" },
+  "cards": {
+    "need": { "title": "Frag an, was dir fehlt.", "text": "Klein oder groß. Jemand findet sich.", "example": "Mitspieler:innen fürs Beachvolleyball, eine Fahrgemeinschaft, mehr Trinkwasser im Viertel." },
+    "offer": { "title": "Biete, was du kannst.", "text": "Kostenlos oder bezahlt, du entscheidest.", "example": "Fahrräder reparieren, Platz im Hof für ein Fest, Klavierstunden gegen Gemüse." },
+    "connect": { "title": "Verbinde dich mit allen, die dasselbe wollen.", "text": "Gemeinsam beschließt ihr Ziele. Deine Stimme bleibt geheim.", "example": "Eine Band gründen, einen Radweg durchsetzen, eine Solar-Genossenschaft starten." }
+  },
+  "skipIntro": "Überspringen",
+  "placeTitle": "Wo wohnst du?",
+  "placeText": "Daraus ergibt sich, was dir vorgeschlagen wird und wo deine Stimme als betroffen zählt. Mitlesen und mitreden kannst du überall.",
+  "placeLabel": "Postleitzahl oder Ort",
+  "placePlaceholder": "z. B. 81369 oder Sendling",
+  "placeResults": "Gefundene Orte",
+  "change": "Ändern",
+  "borough": "Stadtteil",
+  "noBorough": "Keinen Stadtteil angeben",
+  "placeNote": "Wir speichern nur Gemeinde und Stadtteil, nie deine Adresse.",
+  "appearanceTitle": "Wie willst du auftreten?",
+  "appearanceText": "Bestätigt bist du in beiden Fällen. Was andere sehen, entscheidest du. Du kannst es später ändern.",
+  "mode": {
+    "real": { "title": "Mit Klarnamen", "text": "Dein Name steht an Beiträgen und in Gruppen." },
+    "alias": { "title": "Mit Pseudonym", "text": "Ein Pseudonym mit dem Hinweis „verifiziert“. Niemand sieht, wer dahinter steht." }
+  },
+  "yourName": "Dein Name",
+  "realName": "Vor- und Nachname",
+  "alias": "Pseudonym",
+  "reroll": "Neu würfeln",
+  "interestsTitle": "Was brauchst du? Was bietest du an?",
+  "interestsText": "Tippe an, was passt, oder trag Eigenes ein. Genauer geht es später.",
+  "needsLabel": "Ich suche",
+  "offersLabel": "Ich biete",
+  "needsPlaceholder": "z. B. proberaum",
+  "offersPlaceholder": "z. B. fahrrad-reparatur",
+  "welcome": "Du trittst auf als {name}.",
+  "finish": "Los geht’s"
+}

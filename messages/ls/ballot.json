@@ -1,0 +1,5 @@
+{
+  "secret": "Niemand sieht, was du wählst.",
+  "blind": "Das Ergebnis zeigen wir erst am Ende.",
+  "choiceHint": { "abstain": "Du sagst weder Ja noch Nein." }
+}

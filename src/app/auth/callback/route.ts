@@ -1,0 +1,33 @@
+import { NextResponse, type NextRequest } from "next/server";
+import { cookies } from "next/headers";
+import { createSupabaseServer } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
+import { EASY_COOKIE, LANG_COOKIE, THEME_COOKIE } from "@/i18n/config";
+
+// Finishes OAuth and email confirmation (PKCE code), creates the profile on
+// first sign-in and restores the person's language and theme.
+export async function GET(request: NextRequest) {
+  const url = request.nextUrl;
+  const code = url.searchParams.get("code");
+  const nextParam = url.searchParams.get("next") ?? "/connect";
+  const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/connect";
+
+  if (code) {
+    const supabase = await createSupabaseServer();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) return NextResponse.redirect(new URL("/login?error=callback", url.origin));
+  }
+  const session = await getSession();
+  if (!session) return NextResponse.redirect(new URL("/login", url.origin));
+
+  const store = await cookies();
+  const year = 60 * 60 * 24 * 365;
+  const s = session.profile.settings;
+  if (s) {
+    store.set(LANG_COOKIE, s.language, { maxAge: year, path: "/" });
+    store.set(EASY_COOKIE, s.easy_language ? "1" : "0", { maxAge: year, path: "/" });
+    store.set(THEME_COOKIE, s.theme, { maxAge: year, path: "/" });
+  }
+  const dest = session.profile.onboarded ? (next === "/onboarding" ? "/connect" : next) : "/onboarding";
+  return NextResponse.redirect(new URL(dest, url.origin));
+}

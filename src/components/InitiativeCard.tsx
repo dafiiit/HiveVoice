@@ -1,0 +1,45 @@
+import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { InitiativeCard as Card } from "@/lib/queries";
+import { daysUntil, num } from "@/lib/format";
+import { Cover } from "./ui/Cover";
+import { Rail, PHASES } from "./ui/Rail";
+
+export async function PhaseRail({ phase, outcome, compact }: { phase: Card["phase"]; outcome: Card["outcome"]; compact?: boolean }) {
+  const t = await getTranslations("common");
+  const labels = PHASES.map((p) => t(`phase.${p}`));
+  const idx = PHASES.indexOf(phase);
+  return (
+    <Rail phase={phase} labels={labels} compact={compact} exit={outcome ? t(`outcome.${outcome}`) : null}
+      nowLabel={t("phase.now", { n: idx + 1, label: labels[idx] })} />
+  );
+}
+
+export async function InitiativeCard({ it, showArgs = false }: { it: Card; showArgs?: boolean }) {
+  const t = await getTranslations("initiative");
+  const tl = await getTranslations("levels");
+  const locale = await getLocale();
+  const numbers = [
+    t("supports", { n: it.support_count, formatted: num(it.support_count, locale) }),
+    it.ballot_closes_at ? t("voteRunning", { days: daysUntil(it.ballot_closes_at) }) : null,
+  ].filter(Boolean).join(" · ");
+  return (
+    <article className="flex min-w-0 flex-col gap-3.5">
+      <Link href={`/initiatives/${it.id}`} tabIndex={-1} aria-hidden="true"><Cover seed={it.cover_seed} ratio="3 / 2" /></Link>
+      <span className="text-[13px] font-bold">{t("kind")} · {it.region_name} · {tl(it.region_level as "municipality")}</span>
+      <Link href={`/initiatives/${it.id}`} className="text-2xl font-bold leading-[1.15] tracking-[-0.01em] text-ink no-underline hover:underline">
+        {it.title}
+      </Link>
+      {it.summary && <p className="m-0">{it.summary}</p>}
+      <PhaseRail phase={it.phase} outcome={it.outcome} compact />
+      <span className="tabular text-sm">{numbers}</span>
+      {showArgs && (it.top_pro || it.top_contra) && (
+        <div className="flex flex-col gap-1.5 border-t border-line pt-2.5 text-sm">
+          {it.top_pro && <span><strong>+</strong> {it.top_pro}</span>}
+          {it.top_contra && <span><strong>−</strong> {it.top_contra}</span>}
+        </div>
+      )}
+      {it.addressee && <span className="text-sm">{t("to", { who: it.addressee })}</span>}
+    </article>
+  );
+}

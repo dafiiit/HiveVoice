@@ -1,0 +1,7 @@
+{
+  "lead": "Du brauchst etwas? Frag hier. Du kannst etwas gut? Biete es an. Andere Menschen wollen das Gleiche? Ihr macht eine Gruppe.",
+  "trust": {
+    "bots": { "title": "Nur echte Menschen", "text": "Nur bestätigte Menschen dürfen schreiben und abstimmen. Du darfst einen anderen Namen benutzen." },
+    "secret": { "title": "Die Wahl ist geheim", "text": "Niemand sieht, was du gewählt hast." }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "guest": "Als Gast entdecken",
+  "login": "Anmelden",
+  "join": "Mitmachen",
+  "hero1": "Von der Idee",
+  "hero2": "zur Veränderung.",
+  "lead": "Frag an, was dir fehlt. Biete, was du entbehren kannst. Wer dasselbe will, verbindet sich zu Gruppen mit Zielen.",
+  "moving": "Gerade in Bewegung",
+  "allInitiatives": "Alle Initiativen",
+  "stagesTitle": "Anfragen · Anbieten · Verbinden",
+  "stage": {
+    "need": { "name": "Anfragen", "text": "Was dir fehlt. Von Kuchen und Tee bis zum Radweg." },
+    "offer": { "name": "Anbieten", "text": "Was du kannst oder übrig hast. Kostenlos oder bezahlt." },
+    "connect": { "name": "Verbinden", "text": "Wer dasselbe will, schließt sich zur Gruppe zusammen und beschließt Ziele." }
+  },
+  "offerTitle": "Biete, was du kannst. Finde, was dir fehlt.",
+  "offerText": "Von Fachwissen bis Schlafsofa. Meist kostenlos, auf Wunsch mit Stundenlohn. Kontakt erst, wenn beide zustimmen.",
+  "offerCta": "Angebot eintragen",
+  "needs": "braucht",
+  "offers": "bietet",
+  "trust": {
+    "bots": { "title": "Ein Raum ohne Bots", "text": "Schreiben und abstimmen kann nur, wer bestätigt ist. Ob du anonym oder mit Klarnamen auftrittst, entscheidest du." },
+    "secret": { "title": "Geheime Wahl", "text": "Gezählt werden nur Summen. Wer was gewählt hat, sieht niemand." },
+    "life": { "title": "Für jeden Lebensbereich", "text": "Mitbewohnerin finden, eine Band gründen, Startkapital auftreiben oder den Spielplatz retten. Alles am selben Ort." }
+  },
+  "nonpartisan": "Parteiunabhängig",
+  "imprint": "Impressum",
+  "privacy": "Datenschutz",
+  "source": "Quellcode"
+}

@@ -13,14 +13,13 @@ export default async function NewPage() {
   const options = [
     { href: "/needs", shape: "lupe", key: "need", dark: false },
     { href: "/offers", shape: "gift", key: "offer", dark: false },
-    { href: "/new/link", shape: "stripes", key: "link", dark: false },
     { href: "/new/group", shape: "flower", key: "group", dark: true },
-    { href: "/new/initiative", shape: "arch", key: "initiative", dark: false },
+    { href: "/connect?c=market", shape: "bubble", key: "voice", dark: false },
   ] as const;
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
+    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <h1 className="display m-0">{t("title")}</h1>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {options.map((o) => (
           <Link key={o.key} href={o.href} className={`flex min-h-[220px] flex-col gap-4 p-6 no-underline ${o.dark ? "bg-ink text-on-ink" : "border border-ink bg-surface text-ink"}`}>
             <Glyph shape={o.shape} size={56} color={o.dark ? "var(--on-ink)" : "var(--ink)"} />
@@ -29,7 +28,6 @@ export default async function NewPage() {
           </Link>
         ))}
       </div>
-      <Link href="/connect" className="self-start font-bold">{t("post")}</Link>
     </div>
   );
 }

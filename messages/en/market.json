@@ -141,7 +141,11 @@
     "peopleN": "{n} people",
     "toN": "to {n} office(s)",
     "placeFound": "Found: {name} ({level})",
-    "locationHint": "Postal code or place"
+    "locationHint": "Postal code or place",
+    "modeLabel": "What do you want to share?",
+    "modeOffer": "Offer something",
+    "modeKnowledge": "Share knowledge",
+    "knowledgeLead": "Share a link to files, folders, maps, code or designs you already keep in Drive, Dropbox, GitHub, Figma and the like."
   },
   "mine": {
     "offer": "Your offers",
@@ -172,6 +176,5 @@
       "declined": "Declined",
       "withdrawn": "Withdrawn"
     }
-  },
-  "shareLinkCta": "Or share knowledge and files as a link"
+  }
 }

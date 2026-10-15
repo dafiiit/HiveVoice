@@ -132,7 +132,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.responsible?.length ?? data.links?.length ?? 0;
 
   return (
-    <div className="flex flex-col gap-5 px-6 pb-12 pt-6 md:px-10 md:pb-20 md:pt-8">
+    <div className="flex flex-col gap-5 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <h1 className="display m-0">{t("title")}</h1>
       <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
         {KINDS.map((k) => (
@@ -247,19 +247,21 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
       {data.people && (
         <div className="flex flex-col border-t border-line">
           {data.people.map((p) => (
-            <div key={p.id} className="flex flex-wrap items-center gap-4 border-b border-line py-4">
-              <Link href={`/profile/${p.id}`} className="flex min-w-[240px] flex-1 items-center gap-3 text-ink no-underline">
+            <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 border-b border-line py-4">
+              <Link href={`/profile/${p.id}`} className="flex min-w-0 items-center gap-3 text-ink no-underline">
                 <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={56} />
                 <span className="flex min-w-0 flex-col">
-                  <strong className="text-lg">{p.display_name}</strong>
-                  <span className="text-sm text-muted">{[p.headline, p.region_name].filter(Boolean).join(" · ")}</span>
+                  <strong className="truncate text-lg">{p.display_name}</strong>
+                  <span className="truncate text-sm text-muted">{[p.headline, p.region_name].filter(Boolean).join(" · ")}</span>
                 </span>
               </Link>
-              <div className="flex flex-wrap gap-1.5">
-                {p.offers.slice(0, 3).map((x) => <span key={`o${x}`} className={tag}>#{t("offers")} {x}</span>)}
-                {p.needs.slice(0, 2).map((x) => <span key={`n${x}`} className={tag}>#{t("needs")} {x}</span>)}
-              </div>
-              {session && <FollowButton type="profile" id={p.id} following={p.following} />}
+              <span className="justify-self-end">{session && <FollowButton type="profile" id={p.id} following={p.following} />}</span>
+              {(p.offers.length > 0 || p.needs.length > 0) && (
+                <div className="col-span-2 flex flex-wrap gap-1.5 md:col-span-1 md:col-start-1">
+                  {p.offers.slice(0, 3).map((x) => <span key={`o${x}`} className={tag}>#{t("offers")} {x}</span>)}
+                  {p.needs.slice(0, 2).map((x) => <span key={`n${x}`} className={tag}>#{t("needs")} {x}</span>)}
+                </div>
+              )}
             </div>
           ))}
           <span className="pt-3 text-sm text-muted">{t("followPrivate")}</span>

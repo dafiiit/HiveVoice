@@ -64,7 +64,7 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
         <div className="flex flex-col gap-2 sm:flex-row">
           <input id="link-url" type="url" inputMode="url" autoComplete="off" autoFocus value={url} onChange={(e) => { setUrl(e.target.value); setFound(null); setBlocked(null); }}
             onPaste={() => setTimeout(() => document.getElementById("link-check")?.click(), 50)}
-            placeholder={t("urlPlaceholder")} className={`${field.input} flex-1`} />
+            placeholder={t("urlPlaceholder")} className={`${field.input} sm:flex-1`} />
           <button id="link-check" type="submit" disabled={checking || !url.trim()} className={btn.primaryLg}>{checking ? t("checking") : t("check")}</button>
         </div>
         {!found && !blocked && !checking && <span className="text-sm text-muted">{t("checkFirst")}</span>}

@@ -65,7 +65,7 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
   };
 
   return (
-    <div className="flex flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
+    <div className="flex flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-col gap-2">
         <h1 className="display m-0">{t("title")}</h1>
         <p className="m-0 max-w-[720px]">{t("lead")}</p>
@@ -79,8 +79,8 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
       {view === "search" && (
         <>
           <form action="/responsible" className="flex max-w-[720px] gap-2" role="search">
-            <input type="search" name="q" defaultValue={q} placeholder={t("placeholder")} aria-label={t("search")} className="h-12 flex-1 border border-ink bg-surface px-3 text-ink" />
-            <button type="submit" className="h-12 bg-ink px-5 font-bold text-on-ink">{t("find")}</button>
+            <input type="search" name="q" defaultValue={q} placeholder={t("placeholder")} aria-label={t("search")} className="h-[52px] min-w-0 flex-1 border border-ink bg-surface px-3 text-ink" />
+            <button type="submit" className="h-[52px] bg-ink px-5 font-bold text-on-ink">{t("find")}</button>
           </form>
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("level")}>
             {["all", ...(session ? ["mine"] : []), "borough", "municipality", "state", "country"].map((l) => (

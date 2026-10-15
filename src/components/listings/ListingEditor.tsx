@@ -10,6 +10,7 @@ import { TagPicker } from "../TagPicker";
 import { ImagePicker } from "../ImageUpload";
 import { PlaceInput } from "../PlaceInput";
 import { Carousel } from "../ui/Carousel";
+import { ShareLinkForm } from "../links/ShareLinkForm";
 import { imageUrl } from "@/lib/images";
 import { btn, chip, field } from "../ui/styles";
 
@@ -24,12 +25,13 @@ const DICT: [RegExp, string][] = [
 ];
 const suggestTags = (text: string) => DICT.filter(([re]) => re.test(text)).map(([, tag]) => tag);
 
-export function ListingEditor({ kind, ideas, regionId, regionName, popular, initialTitle = "" }: { kind: "offer" | "need"; initialTitle?: string; ideas: string[]; regionId: string | null; regionName: string | null; popular: string[] }) {
+export function ListingEditor({ kind, ideas, regionId, regionName, popular, initialTitle = "", groups = [], startWithLink = false }: { kind: "offer" | "need"; initialTitle?: string; groups?: { id: string; slug: string; name: string }[]; startWithLink?: boolean; ideas: string[]; regionId: string | null; regionName: string | null; popular: string[] }) {
   const t = useTranslations("market.editor");
   const tc = useTranslations("common");
   const tt = useTranslations("common.tags");
   const give = kind === "offer";
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<"listing" | "knowledge">(give && startWithLink ? "knowledge" : "listing");
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState("");
   const [details, setDetails] = useState("");
@@ -79,10 +81,24 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular, init
 
   return (
     <section aria-label={t(give ? "newOffer" : "newNeed")} className="flex flex-col gap-4 border border-line bg-surface p-5">
+      {give && (
+        <div role="radiogroup" aria-label={t("modeLabel")} className="flex flex-wrap gap-2">
+          {(["listing", "knowledge"] as const).map((k) => (
+            <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className={chip(mode === k)}>{t(k === "listing" ? "modeOffer" : "modeKnowledge")}</button>
+          ))}
+        </div>
+      )}
+      {give && mode === "knowledge" && (
+        <>
+          <p className="m-0 max-w-[680px] text-sm">{t("knowledgeLead")}</p>
+          <ShareLinkForm groups={groups} initialGroup={null} ideas={popular} />
+        </>
+      )}
+      {(!give || mode === "listing") && <>
       {done && <p role="status" className="m-0 flex items-center gap-2 font-bold"><IconCheck /> {t("published")}</p>}
       <div className="flex flex-col gap-3 md:flex-row">
         <input value={title} onChange={(e) => { setTitle(e.target.value); setDone(false); }} aria-label={t(give ? "titleOffer" : "titleNeed")}
-          placeholder={t(give ? "placeholderOffer" : "placeholderNeed")} className={`${field.input} flex-1`} />
+          placeholder={t(give ? "placeholderOffer" : "placeholderNeed")} className={`${field.input} md:flex-1`} />
         {!edOpen && <button type="button" onClick={() => setOpen(true)} className={btn.primaryLg}>{t(give ? "startOffer" : "startNeed")}</button>}
       </div>
       {!edOpen && ideas.length > 0 && (
@@ -179,6 +195,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular, init
           </aside>
         </div>
       )}
+      </>}
     </section>
   );
 }

@@ -33,7 +33,7 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
   const { l } = data;
   const own = l.owner_id === me;
   return (
-    <div className="flex max-w-[860px] flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
+    <div className="flex max-w-[860px] flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
         <Link href={kind === "offer" ? "/needs?tab=near" : "/offers?tab=near"} className="text-ink">{t(kind === "offer" ? "allOffers" : "allNeeds")}</Link>
       </nav>

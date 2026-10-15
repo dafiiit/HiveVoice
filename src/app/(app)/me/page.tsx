@@ -68,11 +68,11 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const interests = d.tags.filter((x) => x.relation === "interest").map((x) => x.slug);
 
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
+    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <section className="flex flex-wrap items-start gap-6">
-        <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} />
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <h1 className="display m-0 flex items-center gap-3">{session.profile.display_name}{session.profile.verified && <span aria-label={t("verified")} title={t("verified")}><IconCheck size={28} /></span>}</h1>
+        <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={160} />
+        <div className="flex min-w-[260px] flex-1 basis-[260px] flex-col gap-2">
+          <h1 className="display m-0 flex flex-wrap items-center gap-x-3 break-words">{session.profile.display_name}{session.profile.verified && <span className="flex-none" aria-label={t("verified")} title={t("verified")}><IconCheck size={28} /></span>}</h1>
           <span>{t("stats", { groups: d.p.group_count, helped: d.p.helped_count })}</span>
           <span className="text-muted">{d.places}</span>
           <DisplayToggle mode={d.p.display_mode} realName={session.profile.real_name ?? ""} alias={d.p.alias ?? ""} headline={d.p.headline ?? ""} bio={d.p.bio ?? ""} />

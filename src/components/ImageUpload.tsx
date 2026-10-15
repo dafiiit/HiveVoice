@@ -101,16 +101,14 @@ export function AvatarUpload({ name, seed, path, size = 120 }: { name: string; s
   const working = busy || pending;
 
   return (
-    <div className="flex flex-col items-start gap-2"
+    <div className="flex w-[160px] max-w-full flex-col items-stretch gap-2"
       onDragOver={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(true); } }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(false); void pick(e.dataTransfer.files); } }}>
-      <div className={over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""}><Avatar name={name} seed={seed} path={path} size={size} /></div>
-      <div className="flex flex-col items-start gap-1">
-        <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondary} h-9 px-3 text-sm`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
-        <GooglePhotosButton max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondary} h-9 px-3 text-sm`}>{t("fromGoogle")}</GooglePhotosButton>
-        {path && <button type="button" disabled={working} onClick={remove} className={`${btn.ghost} h-9 text-sm`}>{t("removePhoto")}</button>}
-      </div>
+      <div className={`${over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""} w-full`}><Avatar name={name} seed={seed} path={path} size={size} /></div>
+      <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondary} h-10 w-full px-2 text-sm`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
+      <GooglePhotosButton wide max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondary} h-10 w-full px-2 text-sm`}>{t("fromGoogle")}</GooglePhotosButton>
+      {path && <button type="button" disabled={working} onClick={remove} className="h-9 w-full border-0 bg-transparent px-0 text-sm text-muted underline">{t("removePhoto")}</button>}
       <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => pick(e.target.files)} />
       {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}
     </div>

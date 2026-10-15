@@ -1,17 +1,16 @@
 {
   "title": "New",
-  "post": "Or just write a post on the marketplace",
   "need": {
     "title": "Make a request",
     "text": "Big or small. You’ll find others with the same concern there."
   },
   "offer": {
     "title": "Make an offer",
-    "text": "Skills, time, knowledge, things."
+    "text": "Skills, time, things and knowledge. Also as a link to files and folders."
   },
   "group": {
     "title": "Start a group",
-    "text": "With goals, responsibilities and votes."
+    "text": "A shared purpose: a project, a club or a demand to an authority. With goals, people in charge and votes."
   },
   "initiative": {
     "title": "Title",
@@ -81,8 +80,20 @@
     "other": "Other place",
     "placeholder": "Postcode or place"
   },
-  "link": {
-    "title": "Share a link",
-    "text": "Knowledge, files and places from Drive, Dropbox, GitHub, Figma, maps … Only the link is stored."
+  "voice": {
+    "title": "Voice an opinion",
+    "text": "Make yourself heard and get talking with people in your area."
+  },
+  "purpose": {
+    "title": "What is the group for?",
+    "project": {
+      "title": "Getting something done together",
+      "text": "A project, a club, a neighbourhood. With goals, tasks and roles."
+    },
+    "demand": {
+      "title": "Demand something",
+      "text": "A demand to a responsible body, with debate, secret ballot and a duty to answer. If it passes, a group forms to carry it out."
+    },
+    "later": "The purpose may evolve: goals can be changed at any time, and an initiative turns into a group."
   }
 }

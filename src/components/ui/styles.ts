@@ -9,7 +9,7 @@ export const btn = {
   secondaryLg:
     "inline-flex items-center justify-center gap-2 h-[52px] px-6 border border-line-strong bg-transparent text-ink font-bold no-underline cursor-pointer disabled:opacity-45",
   red: "inline-flex items-center justify-center gap-2 h-11 px-4 bg-red text-on-red font-bold no-underline cursor-pointer border-0",
-  ghost: "inline-flex items-center h-11 px-2 bg-transparent border-0 text-muted underline cursor-pointer",
+  ghost: "inline-flex items-center h-11 px-0 bg-transparent border-0 text-muted underline cursor-pointer",
   text: "inline-flex items-center gap-1.5 bg-transparent border-0 p-0 text-muted cursor-pointer hover:text-ink",
 };
 

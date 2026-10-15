@@ -62,7 +62,7 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
     <div ref={root} className={`relative ${className}`}>
       <button type="button" aria-haspopup="true" aria-expanded={open} onClick={() => setOpen(!open)}
         aria-label={place ? `${t(signedIn ? "yours" : "chosen")}: ${place.name}` : t("choose")}
-        className="inline-flex h-11 max-w-[220px] items-center gap-2 border border-line bg-surface px-3 text-sm text-ink md:max-w-[260px]">
+        className="inline-flex h-11 max-w-[220px] items-center gap-2 border border-line-strong bg-surface px-3 text-sm text-ink md:max-w-[260px]">
         <IconPin size={16} />
         <strong className="min-w-0 truncate">{place?.name ?? t("choose")}</strong>
         <span aria-hidden="true" className="text-xs">▾</span>

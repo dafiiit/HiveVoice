@@ -118,3 +118,6 @@ select {
     animation: none !important;
   }
 }
+
+/* A lead line right under a page title keeps a little air (display titles have a tight line height). */
+.display + p { margin-top: 0.5rem; }

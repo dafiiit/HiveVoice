@@ -39,5 +39,6 @@
     "forget": "Forget place",
     "none": "No place found.",
     "partOf": "Part of"
-  }
+  },
+  "searchPlaceholderShort": "Search …"
 }

@@ -133,9 +133,15 @@ test.describe("signed in", () => {
   test("the search at the top offers direct hits, including places", async ({ page }) => {
     await login(page);
     await page.goto("/connect");
-    await page.getByRole("combobox").first().fill("mün");
+    await page.waitForLoadState("networkidle");
+    const box = page.getByRole("combobox").first();
     const places = page.getByRole("option", { name: /^München\s+München$/ }).first();
-    await expect(places).toBeVisible({ timeout: 15_000 });
+    // The first search may have to wake the server up: type again if nothing shows.
+    await expect(async () => {
+      await box.fill("");
+      await box.fill("mün");
+      await expect(places).toBeVisible({ timeout: 8000 });
+    }).toPass({ timeout: 45_000 });
     await places.click();
     await expect(page).toHaveURL(/\/explore\?place=/);
     await expect(page.getByRole("link", { name: "München entfernen" })).toBeVisible();
@@ -247,12 +253,61 @@ test.describe("signed in", () => {
     await expect(page.getByRole("option", { name: /supabase\/supabase/ }).first()).toBeVisible({ timeout: 15_000 });
   });
 
+  test("Neu has four tiles; knowledge sharing lives inside the offer; group and initiative are one flow", async ({ page }) => {
+    await login(page);
+    await page.goto("/new");
+    const tiles = page.locator("main a").filter({ has: page.locator("strong") });
+    await expect(tiles).toHaveCount(4);
+    for (const name of ["Anfrage stellen", "Angebot machen", "Gruppe gründen", "Meinung äußern"]) await expect(page.getByRole("link", { name: new RegExp(name) })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Link teilen|Initiative starten/ })).toHaveCount(0);
+    await page.goto("/offers");
+    await expect(page.getByText("Oder teile Wissen")).toHaveCount(0);
+    await page.getByRole("radio", { name: "Wissen teilen" }).click();
+    await expect(page.getByLabel("Adresse des Links")).toBeVisible();
+    await page.goto("/new/group");
+    await expect(page.getByRole("radio", { name: /Gemeinsam etwas umsetzen/ })).toBeChecked();
+    await page.getByRole("radio", { name: /Etwas fordern/ }).click();
+    await expect(page.getByRole("radio", { name: /Etwas fordern/ })).toBeChecked();
+    await page.goto("/new/initiative");
+    await expect(page).toHaveURL(/\/new\/group\?purpose=demand/);
+  });
+
+  test("the top bar stays put while the page scrolls", async ({ page }) => {
+    await login(page);
+    await page.goto("/explore?kind=links");
+    await page.mouse.wheel(0, 900);
+    await page.waitForTimeout(300);
+    expect((await page.locator("header").first().boundingBox())!.y).toBe(0);
+    await expect(page.getByRole("combobox").first()).toBeInViewport();
+  });
+
+  test("things line up: photo block, carousel rows and top bar controls", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "measured at desktop width");
+    await login(page);
+    await page.goto("/me");
+    const widths = await page.evaluate(() => {
+      const col = document.querySelector("main button")!.parentElement!;
+      const kids = Array.from(col.children).map((c) => Math.round(c.getBoundingClientRect().width)).filter((w) => w > 10);
+      return kids;
+    });
+    expect(new Set(widths).size).toBe(1);
+    const chips = await page.evaluate(() => {
+      const track = document.querySelector('[role="group"][tabindex="0"]')!;
+      const cols = new Map<number, number[]>();
+      Array.from(track.children).slice(0, 12).forEach((c) => { const r = c.getBoundingClientRect(); cols.set(Math.round(r.x), [...(cols.get(Math.round(r.x)) ?? []), Math.round(r.width)]); });
+      return [...cols.values()].filter((w) => w.length === 2).every(([a, b]) => a === b);
+    });
+    expect(chips).toBe(true);
+    const bar = await page.evaluate(() => Array.from(document.querySelectorAll("header a[aria-label], header form, header button[aria-haspopup]")).filter((e) => e.getBoundingClientRect().height > 0).map((e) => `${Math.round(e.getBoundingClientRect().y)}/${Math.round(e.getBoundingClientRect().height)}`));
+    expect(new Set(bar).size).toBe(1);
+  });
+
   test("a profile photo can be uploaded and removed", async ({ page }) => {
     await login(page);
     await page.goto("/me");
     test.skip(await page.getByRole("button", { name: "Foto entfernen" }).isVisible(), "this account already has a photo; leave it alone");
     await page.locator('input[type="file"]').first().setInputFiles({ name: "me.png", mimeType: "image/png", buffer: PNG });
-    const avatar = page.locator('main img[width="120"]');
+    const avatar = page.locator('main img[width="160"]');
     await expect(avatar).toBeVisible({ timeout: 20_000 });
     const src = await avatar.getAttribute("src");
     expect(src).toMatch(/\/storage\/v1\/object\/public\/images\/[0-9a-f-]{36}\/[0-9a-f]+\.jpg$/);

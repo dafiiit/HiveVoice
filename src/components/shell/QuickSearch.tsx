@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 import { Suspense } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -30,8 +30,12 @@ function SearchWithUrl({ className }: { className: string }) {
   return <SearchBox key={urlQuery} initial={urlQuery} className={className} />;
 }
 
+const wideQuery = "(min-width: 640px)";
+const watchWide = (cb: () => void) => { const m = window.matchMedia(wideQuery); m.addEventListener("change", cb); return () => m.removeEventListener("change", cb); };
+
 function SearchBox({ initial, className }: { initial: string; className: string }) {
   const t = useTranslations("nav");
+  const wide = useSyncExternalStore(watchWide, () => window.matchMedia(wideQuery).matches, () => true);
   const router = useRouter();
   const [q, setQ] = useState(initial);
   const [hits, setHits] = useState<Hit[]>([]);
@@ -78,10 +82,10 @@ function SearchBox({ initial, className }: { initial: string; className: string 
   const shown = open && query.length >= 2;
   return (
     <form ref={root} action="/explore" role="search" onSubmit={(e) => { e.preventDefault(); if (query) full(); }} className={`relative min-w-0 flex-1 md:max-w-[560px] ${className}`}>
-      <div className="flex h-11 items-center gap-2.5 border border-line bg-surface px-3.5 focus-within:border-ink">
+      <div className="flex h-11 items-center gap-2.5 border border-line-strong bg-surface px-3.5 focus-within:border-ink">
         <IconSearch />
         <label className="sr-only" htmlFor={`${list}-q`}>{t("search")}</label>
-        <input id={`${list}-q`} name="q" type="search" value={q} autoComplete="off" placeholder={t("searchPlaceholder")}
+        <input id={`${list}-q`} name="q" type="search" value={q} autoComplete="off" placeholder={wide ? t("searchPlaceholder") : t("searchPlaceholderShort")}
           role="combobox" aria-expanded={shown} aria-controls={list} aria-autocomplete="list" aria-activedescendant={active >= 0 ? `${list}-${active}` : undefined}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={onKey}
           className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink outline-none" />

@@ -10,8 +10,8 @@ import { btn } from "./ui/styles";
  * Google's own picker, and the chosen ones are copied into HiveVoice. Hidden until the
  * Google client id is configured.
  */
-export function GooglePhotosButton({ max, maxSide = 1600, onPicked, className, children }: {
-  max: number; maxSide?: number; onPicked: (paths: string[]) => void; className?: string; children: React.ReactNode;
+export function GooglePhotosButton({ max, maxSide = 1600, onPicked, className, children, wide = false }: {
+  max: number; maxSide?: number; onPicked: (paths: string[]) => void; className?: string; children: React.ReactNode; wide?: boolean;
 }) {
   const t = useTranslations("images.google");
   const [step, setStep] = useState<"idle" | "auth" | "waiting" | "importing">("idle");
@@ -60,7 +60,7 @@ export function GooglePhotosButton({ max, maxSide = 1600, onPicked, className, c
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={`flex flex-col gap-2 ${wide ? "w-full" : ""}`}>
       <button type="button" disabled={step !== "idle"} onClick={start} className={className}>{step === "idle" ? children : t(step === "importing" ? "importing" : "authorizing")}</button>
       {step === "waiting" && uri && (
         <div role="status" className="flex max-w-[360px] flex-col gap-2 border border-ink bg-surface p-3 text-sm">

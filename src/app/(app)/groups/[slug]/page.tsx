@@ -124,7 +124,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const tabs = TABS.filter((k) => k !== "tasks" || g.mod_tasks);
 
   return (
-    <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div className="flex min-w-0 flex-col gap-6">
         <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
           <Link href="/groups" className="text-ink">{t("groups")}</Link><span aria-hidden="true">/</span><span>{g.name}</span>

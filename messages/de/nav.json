@@ -39,5 +39,6 @@
     "forget": "Ort vergessen",
     "none": "Keinen Ort gefunden.",
     "partOf": "Gehört zu"
-  }
+  },
+  "searchPlaceholderShort": "Suchen …"
 }

@@ -80,7 +80,7 @@ export function Carousel<T>({ items: all, render, label, rows = 1, loop = false,
     <div className="flex items-stretch gap-1">
       <button type="button" onClick={() => page(-1)} disabled={!loop && edge.start} aria-label={t("prev")} className={arrow}><span aria-hidden="true">‹</span></button>
       <div ref={track} onScroll={onScroll} tabIndex={0} role="group" aria-label={label}
-        className={`grid min-w-0 flex-1 auto-cols-max grid-flow-col gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${rows === 2 ? "grid-rows-2" : "grid-rows-1"}`}>
+        className={`grid min-w-0 flex-1 auto-cols-max grid-flow-col gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&>*]:w-full ${rows === 2 ? "grid-rows-2" : "grid-rows-1"}`}>
         {Array.from({ length: copies }, (_, c) => items.map((item) => (
           <Fragment key={`${c}-${keyOf(item)}`}>{render(item, c !== (loop ? 2 : 0))}</Fragment>
         )))}

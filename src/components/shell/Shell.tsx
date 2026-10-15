@@ -67,7 +67,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
       </nav>
 
       <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
-        <header className="flex flex-col gap-3 border-b border-line px-6 py-3 md:h-[72px] md:flex-row md:items-center md:gap-3 md:px-10 md:py-0">
+        <header className="sticky top-0 z-30 flex flex-col gap-3 border-b border-line bg-paper px-6 py-3 md:h-[72px] md:flex-row md:items-center md:gap-3 md:px-10 md:py-0">
           <div className="flex items-center gap-2 md:contents">
             <Link href={session ? "/connect" : "/"} className="flex flex-1 items-center text-ink no-underline md:hidden" aria-label="HiveVoice">
               <Logo size={36} />
@@ -76,7 +76,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
               {session ? (
                 <>
                   <Link href="/notifications" aria-label={t("inbox", { n: session.profile.unread })}
-                    className="relative inline-flex h-11 w-11 items-center justify-center border border-line text-ink">
+                    className="relative inline-flex h-11 w-11 flex-none items-center justify-center border border-line-strong bg-surface text-ink">
                     <IconInbox />
                     {session.profile.unread > 0 && (
                       <span className="absolute -right-1.5 -top-1.5 inline-flex h-5 min-w-5 items-center justify-center bg-red px-1 text-[11px] font-bold text-on-red">
@@ -84,7 +84,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
                       </span>
                     )}
                   </Link>
-                  <Link href="/me" aria-label={t("profileOf", { name: session.profile.display_name })} className="inline-flex">
+                  <Link href="/me" aria-label={t("profileOf", { name: session.profile.display_name })} className="inline-flex h-11 w-11 flex-none">
                     <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={44} />
                   </Link>
                 </>

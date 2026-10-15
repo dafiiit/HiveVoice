@@ -161,7 +161,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
   );
 
   return (
-    <div className="flex max-w-[860px] flex-col gap-5 px-6 pb-12 pt-6 md:px-10 md:pb-20 md:pt-8">
+    <div className="flex max-w-[860px] flex-col gap-5 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h1 className="display m-0">{t("title")}</h1>
         {hasUnread && <MarkAllRead label={t("markAll")} />}

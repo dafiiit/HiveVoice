@@ -19,7 +19,7 @@ export default async function EditInitiative({ params }: PageProps<"/initiatives
   });
   if (!row || !row.is_author) notFound();
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
+    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <h1 className="display m-0">{t("initiative.editTitle")}</h1>
       <InitiativeWizard chain={[]} initial={{
         id: row.id, title: row.title, summary: row.summary ?? "", body: row.body ?? "", bodyEasy: row.body_easy ?? "",

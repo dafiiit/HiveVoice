@@ -75,7 +75,10 @@ export async function MarketPage({ kind, searchParams }: { kind: "offer" | "need
     const pendingIn = me ? Number((await tx`select count(*)::int n from public.contact_requests where to_profile_id = ${me} and status = 'pending'`)[0].n) : 0;
     const popular = await popularTags(tx);
     const [region] = me ? await tx<{ id: string; name: string }[]>`select r.id, r.name from public.profiles p join public.regions r on r.id = p.home_region_id where p.id = ${me}` : [];
-    return { mine, cards, inbox, pendingIn, popular, region };
+    const groups = give && me ? await tx<{ id: string; slug: string; name: string }[]>`
+      select g.id, g.slug::text, g.name from public.group_members gm join public.groups g on g.id = gm.group_id
+      where gm.profile_id = ${me} and g.archived_at is null and app.has_group_permission(g.id, 'post') order by g.name` : [];
+    return { mine, cards, inbox, pendingIn, popular, region, groups };
   });
 
   const ideas = (t.raw(give ? "ideasOffer" : "ideasNeed") as string[]) ?? [];
@@ -87,13 +90,12 @@ export async function MarketPage({ kind, searchParams }: { kind: "offer" | "need
   };
 
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12">
+    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-col gap-2">
         <h1 className="display m-0">{t(give ? "offerTitle" : "needTitle")}</h1>
         <p className="m-0 max-w-[640px]">{t(give ? "offerLead" : "needLead")}</p>
-        {give && <Link href="/new/link" className="self-start font-bold">{t("shareLinkCta")} →</Link>}
       </div>
-      {session ? <ListingEditor kind={kind} initialTitle={typeof searchParams.title === "string" ? searchParams.title.slice(0, 120) : ""} ideas={ideas} regionId={data.region?.id ?? null} regionName={data.region?.name ?? null} popular={data.popular} />
+      {session ? <ListingEditor kind={kind} groups={data.groups} startWithLink={searchParams.share === "link"} initialTitle={typeof searchParams.title === "string" ? searchParams.title.slice(0, 120) : ""} ideas={ideas} regionId={data.region?.id ?? null} regionName={data.region?.name ?? null} popular={data.popular} />
         : <p className="m-0"><Link href={`/login?next=${base}`} className="font-bold">{tc("signInToWrite")}</Link></p>}
       <MyListings kind={kind} items={mine} />
       <div role="tablist" aria-label={t("view")} className="flex overflow-x-auto border-b border-line">

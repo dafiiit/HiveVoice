@@ -141,7 +141,11 @@
     "peopleN": "{n} Leute",
     "toN": "an {n} Stelle(n)",
     "placeFound": "Erkannt: {name} ({level})",
-    "locationHint": "Postleitzahl oder Ort"
+    "locationHint": "Postleitzahl oder Ort",
+    "modeLabel": "Was möchtest du teilen?",
+    "modeOffer": "Etwas anbieten",
+    "modeKnowledge": "Wissen teilen",
+    "knowledgeLead": "Teile einen Link zu Dateien, Ordnern, Karten, Code oder Designs, die du schon in Drive, Dropbox, GitHub, Figma und Co. abgelegt hast."
   },
   "mine": {
     "offer": "Deine Angebote",
@@ -172,6 +176,5 @@
       "declined": "Abgelehnt",
       "withdrawn": "Zurückgezogen"
     }
-  },
-  "shareLinkCta": "Oder teile Wissen und Dateien als Link"
+  }
 }

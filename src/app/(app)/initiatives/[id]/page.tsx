@@ -122,7 +122,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
     k === "threads" ? t("tabs.threadsN", { n: ini.thread_count }) : k === "arguments" ? t("tabs.argumentsN", { n: data.args.length }) : t(`tabs.${k}`);
 
   return (
-    <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-12 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-6">
         <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
           <Link href="/explore" className="text-ink">{t("explore")}</Link><span aria-hidden="true">/</span><span>{ini.region_name}</span>

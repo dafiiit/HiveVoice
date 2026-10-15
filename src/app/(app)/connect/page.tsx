@@ -183,7 +183,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const hasAnything = data.directs.length + data.groups.length + data.requests.length > 0;
 
   return (
-    <div className="flex flex-col gap-4 px-0 pb-8 pt-6 md:px-10 md:pb-12 md:pt-10">
+    <div className="flex flex-col gap-4 px-0 pb-8 pt-8 md:px-10 md:pb-12 md:pt-10">
       <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} />
       <div className="flex flex-wrap items-end justify-between gap-4 px-6 md:px-0">
         <h1 className="display m-0">{t("title")}</h1>
@@ -200,7 +200,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface lg:h-[min(820px,calc(100dvh-13rem))] lg:min-h-[480px] lg:flex-row lg:border">
         <section aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line lg:w-[360px] lg:border-r`}>
           {session && (
-            <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 grid flex-none grid-cols-4 gap-1 border-b border-line bg-surface p-2">
+            <div role="group" aria-label={t("filter.label")} className="z-10 grid flex-none grid-cols-4 lg:sticky lg:top-0 gap-1 border-b border-line bg-surface p-2">
               {FILTERS.map((f) => (
                 <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f}
                   className={`relative inline-flex h-8 items-center justify-center gap-1 px-1 text-[13px] no-underline ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-chip text-ink"}`}>

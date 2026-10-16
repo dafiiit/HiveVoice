@@ -183,7 +183,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const hasAnything = data.directs.length + data.groups.length + data.requests.length > 0;
 
   return (
-    <div className="flex flex-col gap-4 px-0 pb-8 pt-8 md:px-10 md:pb-12 md:pt-10">
+    <div className="flex flex-col gap-4 px-0 pb-8 pt-8 md:px-10 md:pb-12 md:pt-10 lg:h-[calc(100dvh-72px)] lg:min-h-[560px] lg:pb-8 lg:pt-6">
       <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} />
       <div className="flex flex-wrap items-end justify-between gap-4 px-6 md:px-0">
         <h1 className="display m-0">{t("title")}</h1>
@@ -197,7 +197,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
         </div>
       </div>
       {!session && <p className="m-0 border-l-4 border-ink bg-surface px-4 py-3 md:mx-0"><strong>{t("guestTitle")}</strong> {t("guestText")} <Link href="/login?next=/connect" className="font-bold">{t("signIn")}</Link></p>}
-      <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface lg:h-[min(820px,calc(100dvh-13rem))] lg:min-h-[480px] lg:flex-row lg:border">
+      <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface lg:min-h-0 lg:flex-1 lg:flex-row lg:border">
         <section aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line lg:w-[360px] lg:border-r`}>
           {session && (
             <div role="group" aria-label={t("filter.label")} className="z-10 grid flex-none grid-cols-4 lg:sticky lg:top-0 gap-1 border-b border-line bg-surface p-2">
@@ -245,34 +245,36 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
             </>
           )}
         </section>
-        <section aria-label={t("pane")} className={`${paneOpen ? "flex" : "hidden lg:flex"} min-h-0 min-w-0 flex-1 flex-col px-4 py-4 md:px-6 lg:overflow-y-auto`}>
+        <section aria-label={t("pane")} className={`${paneOpen ? "flex" : "hidden lg:flex"} min-h-0 min-w-0 flex-1 flex-col px-4 py-4 md:px-6 lg:overflow-hidden`}>
           <Link href={href({ c: "" })} className="mb-2 inline-flex items-center gap-1 text-sm text-ink lg:hidden"><IconBack size={14} /> {t("back")}</Link>
           {pane?.kind === "market" && (
             <>
-              <header className="flex flex-col items-start gap-3 border-b border-line pb-3 md:flex-row md:items-center md:justify-between">
+              <header className="flex flex-none flex-col items-start gap-3 border-b border-line pb-3 md:flex-row md:items-center md:justify-between">
                 <div className="flex flex-col"><strong className="text-lg">{t("market")}</strong><span className="text-sm text-muted">{data.muni ? t("marketOpen", { place: data.muni.name }) : t("marketSubAll")}</span></div>
                 <MarketFilter radii={data.radii} radius={pane.area} q={q} tags={pane.tags} keep={{ ...(mode !== "chrono" ? { mode } : {}), ...(filter !== "all" ? { f: filter } : {}) }} />
               </header>
-              {session && data.muni ? <div className="py-3"><Composer ctx={{ regionId: data.muni.id }} path="/connect" placeholder={t("marketPlaceholder")} viewerName={session.profile.display_name} viewerSeed={session.profile.avatar_seed} viewerPath={session.profile.avatar_path} /></div>
-                : !session && <p className="m-0 py-3 text-sm text-muted">{t("readOnly")}</p>}
-              <PostList posts={pane.posts} path="/connect" canWrite={!!session?.profile.verified} viewerId={me ?? undefined} empty={q || pane.area !== data.radii[0]?.key ? t("mf.none") : t("marketEmpty")} />
+              {session && data.muni ? <div className="flex-none py-3"><Composer ctx={{ regionId: data.muni.id }} path="/connect" placeholder={t("marketPlaceholder")} viewerName={session.profile.display_name} viewerSeed={session.profile.avatar_seed} viewerPath={session.profile.avatar_path} /></div>
+                : !session && <p className="m-0 flex-none py-3 text-sm text-muted">{t("readOnly")}</p>}
+              <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+                <PostList posts={pane.posts} path="/connect" canWrite={!!session?.profile.verified} viewerId={me ?? undefined} empty={q || pane.area !== data.radii[0]?.key ? t("mf.none") : t("marketEmpty")} />
+              </div>
             </>
           )}
           {pane?.kind === "group" && (
             <>
-              <header className="flex items-center justify-between gap-3 border-b border-line pb-3">
+              <header className="flex flex-none items-center justify-between gap-3 border-b border-line pb-3">
                 <Link href={`/groups/${pane.group.slug}`} className="flex flex-col text-ink no-underline"><strong className="text-lg">{pane.group.name}</strong><span className="text-sm text-muted">{t("groupSub", { n: pane.group.member_count })}</span></Link>
                 <Link href={`/groups/${pane.group.slug}`} className="text-sm font-bold text-ink">{t("openGroup")}</Link>
               </header>
-              <ChatScroll count={pane.posts.length} className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col overflow-y-auto lg:max-h-none">
+              <ChatScroll count={pane.posts.length} className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col overflow-y-auto lg:max-h-none lg:min-h-0">
                 <PostList posts={pane.posts} path="/connect" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} />
               </ChatScroll>
-              {pane.group.can_post && <div className="border-t border-line pt-3"><Composer ctx={{ groupId: pane.group.id }} path="/connect" placeholder={t("groupPlaceholder", { name: pane.group.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} /></div>}
+              {pane.group.can_post && <div className="flex-none border-t border-line pt-3"><Composer ctx={{ groupId: pane.group.id }} path="/connect" placeholder={t("groupPlaceholder", { name: pane.group.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} /></div>}
             </>
           )}
           {pane?.kind === "direct" && me && (
             <>
-              <header className="flex items-center gap-3 border-b border-line pb-3">
+              <header className="flex flex-none items-center gap-3 border-b border-line pb-3">
                 <Avatar name={pane.other} seed={pane.other_seed} path={pane.other_path} size={44} />
                 <div className="flex min-w-0 flex-1 flex-col">
                   <Link href={`/profile/${pane.other_id}`} className="truncate text-lg font-bold text-ink no-underline">{pane.other}</Link>
@@ -286,7 +288,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
               <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} />
             </>
           )}
-          {pane?.kind === "request" && <RequestPane key={pane.request.id} r={pane.request} />}
+          {pane?.kind === "request" && <div className="min-h-0 flex-1 lg:overflow-y-auto"><RequestPane key={pane.request.id} r={pane.request} /></div>}
           {!pane && <p className="m-0 text-muted">{t("pick")}</p>}
         </section>
       </div>

@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { castVote } from "@/lib/actions/ballots";
 import { dateTime, daysUntil } from "@/lib/format";
 import { Glyph } from "./ui/Glyph";
+import { BallotBox } from "./BallotBox";
 import { btn } from "./ui/styles";
 
 export type BallotView = {
@@ -125,8 +126,8 @@ export function BallotPanel({ ballot, voted, segment, turnout, signedIn, canVote
 
         {voted && !changing && (
           <div role="status" className="flex gap-4 border border-line bg-surface p-5">
-            <Glyph shape="keyhole" size={56} />
-            <div className="flex flex-col gap-1.5">
+            <BallotBox drop={justVoted} size={56} />
+            <div className={`flex flex-col gap-1.5 ${justVoted ? "fade-up" : ""}`}>
               <strong className="text-lg">{t("counted")}</strong>
               <span>{open ? t("canChange", { date: dateTime(ballot.closes_at, locale) }) : t("closedSecret")}</span>
               {open && <button type="button" onClick={() => setChanging(true)} className={`${btn.ghost} self-start px-0`}>{t("change")}</button>}

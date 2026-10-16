@@ -74,7 +74,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
               <Logo size={36} />
             </Link>
             <div className="flex items-center gap-2 md:order-3 md:ml-auto">
-              <Link href="/principles" className="inline-flex h-11 items-center px-2 text-sm font-bold text-ink no-underline md:px-3">{tp("nav")}</Link>
+              <Link href="/principles" className="inline-flex h-11 items-center px-1 text-sm font-bold text-ink no-underline sm:px-2 md:px-3">{tp("nav")}</Link>
               {session ? (
                 <>
                   <Link href="/notifications" aria-label={t("inbox", { n: session.profile.unread })}

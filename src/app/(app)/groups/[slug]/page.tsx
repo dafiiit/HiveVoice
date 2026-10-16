@@ -25,7 +25,7 @@ const TABS = ["goals", "talk", "links", "needs", "tasks", "team", "about"] as co
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
-  join_policy: "open" | "request"; member_count: number; cover_seed: number; mod_tasks: boolean; region_name: string | null; created_at: string;
+  join_policy: "open" | "request"; member_count: number; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
 };
 
 export async function generateMetadata({ params }: PageProps<"/groups/[slug]">) {
@@ -49,7 +49,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const data = await asViewer(viewer, async (tx) => {
     const [g] = await tx<Group[]>`
       select g.id, g.slug::text, g.name, g.summary, g.description, g.kind::text, g.visibility::text, g.join_policy::text, g.member_count,
-             g.cover_seed, g.mod_tasks, g.created_at, r.name as region_name
+             g.cover_seed, g.cover_path, g.mod_tasks, g.created_at, r.name as region_name
       from public.groups g left join public.regions r on r.id = g.region_id where g.slug = ${slug}`;
     if (!g) return null;
     const [{ role, can_post, can_propose, can_vote, can_tasks, can_manage }] = await tx<{ role: string | null; can_post: boolean; can_propose: boolean; can_vote: boolean; can_tasks: boolean; can_manage: boolean }[]>`
@@ -129,7 +129,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
           <Link href="/groups" className="text-ink">{t("groups")}</Link><span aria-hidden="true">/</span><span>{g.name}</span>
         </nav>
-        <Cover seed={g.cover_seed} ratio="21 / 9" />
+        <Cover seed={g.cover_seed} src={g.cover_path} ratio="21 / 9" />
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="inline-flex h-8 items-center bg-ink px-3 font-bold text-on-ink">{t(`kinds.${g.kind}`)}</span>
           {g.region_name && <span className={tag}>{g.region_name}</span>}

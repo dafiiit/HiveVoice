@@ -14,7 +14,7 @@
     "connect": { "name": "Verbinden", "text": "Wer dasselbe will, schließt sich zur Gruppe zusammen und beschließt Ziele." }
   },
   "offerTitle": "Biete, was du kannst. Finde, was dir fehlt.",
-  "offerText": "Von Fachwissen bis Schlafsofa. Meist kostenlos, auf Wunsch mit Stundenlohn. Kontakt erst, wenn beide zustimmen.",
+  "heroAlt": "Nachbarn planen gemeinsam an einem Tisch im Hinterhof",
   "offerCta": "Angebot eintragen",
   "needs": "braucht",
   "offers": "bietet",

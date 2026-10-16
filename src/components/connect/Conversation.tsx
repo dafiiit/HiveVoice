@@ -1,12 +1,13 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { fetchMessages, sendMessage, type Message } from "@/lib/actions/messages";
 import { Avatar } from "../ui/Avatar";
 import { btn, field } from "../ui/styles";
 import { ReportButton } from "../ReportDialog";
 
-type Local = Omit<Message, "created_at"> & { created_at: string | Date; sending?: boolean };
+// `key` stays the same when a sent message gets its real id, so its bubble is not rebuilt; `fresh` bubbles slide in.
+type Local = Omit<Message, "created_at"> & { created_at: string | Date; sending?: boolean; key: string; fresh?: boolean };
 const ms = (d: string | Date) => new Date(d).getTime();
 const dayKey = (d: string | Date) => new Date(d).toDateString();
 
@@ -15,7 +16,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
 }) {
   const t = useTranslations("connect");
   const locale = useLocale();
-  const [messages, setMessages] = useState<Local[]>(initial);
+  const [messages, setMessages] = useState<Local[]>(() => initial.map((m) => ({ ...m, key: m.id })));
   const [readAt, setReadAt] = useState<string | Date | null>(initialRead);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const field_ = useRef<HTMLTextAreaElement>(null);
   const stick = useRef(true);
   const seq = useRef(0);
+  const arrived = useRef(false);
   const settled = messages.filter((m) => !m.sending);
   const last = settled[settled.length - 1]?.created_at;
 
@@ -33,7 +35,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
       const res = await fetchMessages(id, new Date(last ?? 0).toISOString());
       if (!res.ok) return;
       setReadAt(res.data.otherReadAt);
-      if (res.data.messages.length) setMessages((m) => [...m, ...res.data.messages.filter((x) => !m.some((y) => y.id === x.id))]);
+      if (res.data.messages.length) setMessages((m) => [...m, ...res.data.messages.filter((x) => !m.some((y) => y.id === x.id)).map((x) => ({ ...x, key: x.id, fresh: true }))]);
     };
     const h = setInterval(tick, 4000);
     return () => clearInterval(h);
@@ -41,7 +43,11 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
 
   useEffect(() => {
     const el = list.current;
-    if (el && stick.current) el.scrollTop = el.scrollHeight;
+    if (el && stick.current) {
+      const calm = !arrived.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollTo({ top: el.scrollHeight, behavior: calm ? "auto" : "smooth" });
+    }
+    arrived.current = true;
   }, [messages.length]);
 
   const fmt = useMemo(() => ({
@@ -62,13 +68,12 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     setDraft("");
     setError(null);
     stick.current = true;
-    setMessages((m) => [...m, { id: tmp, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true }]);
+    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true }]);
     const res = await sendMessage(id, body);
     if (res.ok) {
-      setMessages((m) => {
-        const rest = m.filter((x) => x.id !== tmp);
-        return rest.some((x) => x.id === res.data.id) ? rest : [...rest, res.data];
-      });
+      setMessages((m) => m.some((x) => x.id === res.data.id)
+        ? m.filter((x) => x.id !== tmp)
+        : m.map((x) => (x.id === tmp ? { ...res.data, key: tmp, fresh: true } : x)));
     } else {
       setMessages((m) => m.filter((x) => x.id !== tmp));
       setDraft(body);
@@ -83,19 +88,19 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={list} aria-live="polite" role="log"
         onScroll={(e) => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
-        className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col gap-1 overflow-y-auto py-4 lg:max-h-none">
+        className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col gap-1 overflow-y-auto py-4 lg:max-h-none lg:min-h-0">
         {messages.map((m, i) => {
           const mine = m.sender_id === viewerId;
           const prev = messages[i - 1];
           const newDay = !prev || dayKey(prev.created_at) !== dayKey(m.created_at);
           const cluster = !newDay && prev.sender_id === m.sender_id && ms(m.created_at) - ms(prev.created_at) < 5 * 60000;
           return (
-            <div key={m.id} className={cluster ? "" : "mt-3 first:mt-0"}>
+            <div key={m.key} className={cluster ? "" : "mt-3 first:mt-0"}>
               {newDay && <div className="my-3 flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-line" />{dayLabel(m.created_at)}<span className="h-px flex-1 bg-line" /></div>}
               <div className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
                 {!mine && (cluster ? <span className="w-7 flex-none" /> : <Avatar name={m.sender_name} seed={m.sender_seed} path={m.sender_path} size={28} />)}
-                <div className={`flex max-w-[78%] flex-col gap-0.5 ${mine ? "items-end" : "items-start"}`}>
-                  <span className={`whitespace-pre-line break-words px-3.5 py-2.5 ${mine ? "bg-ink text-on-ink" : "border border-line bg-surface text-ink"} ${m.sending ? "opacity-60" : ""}`}>{m.body}</span>
+                <div style={{ "--ox": mine ? "100%" : "0%" } as CSSProperties} className={`flex max-w-[78%] flex-col gap-0.5 ${m.fresh ? "bubble-in" : ""} ${mine ? "items-end" : "items-start"}`}>
+                  <span className={`whitespace-pre-line break-words px-3.5 py-2.5 ${mine ? "bg-ink text-on-ink" : "border border-line bg-surface text-ink"} transition-opacity duration-300 ${m.sending ? "opacity-60" : ""}`}>{m.body}</span>
                   <span className="flex items-center gap-2 text-xs text-muted">
                     {m.sending ? t("sending") : fmt.time.format(new Date(m.created_at))}
                     {mine && lastMine?.id === m.id && readAt && ms(readAt) >= ms(m.created_at) - 1000 && <span>· {t("read")}</span>}

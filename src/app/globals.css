@@ -119,5 +119,53 @@ select {
   }
 }
 
+/* Motion. Springs are sampled from damped-spring curves; browsers without linear() get a cubic-bezier with a similar overshoot. */
+:root {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --spring-soft: cubic-bezier(0.3, 1.25, 0.5, 1);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --spring: linear(0, 0.059, 0.21, 0.415, 0.636, 0.845, 1.022, 1.153, 1.236, 1.272, 1.269, 1.236, 1.184, 1.124, 1.065, 1.012, 0.971, 0.942, 0.928, 0.925, 0.931, 0.943, 0.959, 0.976, 0.991, 1.004, 1.013, 1.019, 1.021, 1.02, 1.017, 1.013, 1.008, 1.004, 1, 0.997, 0.995, 0.994, 0.994, 0.995, 1);
+    --spring-soft: linear(0, 0.017, 0.063, 0.128, 0.207, 0.294, 0.384, 0.473, 0.559, 0.64, 0.713, 0.78, 0.838, 0.887, 0.929, 0.964, 0.992, 1.014, 1.03, 1.041, 1.049, 1.053, 1.054, 1.054, 1.051, 1.048, 1.044, 1.039, 1.034, 1.029, 1.025, 1.02, 1.016, 1.012, 1.009, 1.006, 1);
+  }
+}
+
+/* 1. Votes: the arrow is pressed and springs back, a few specks fly off an up vote, the count rolls. */
+@keyframes vote-up { from { transform: translateY(4px) scale(0.7); } to { transform: none; } }
+@keyframes vote-down { from { transform: translateY(-6px) scale(1.1); } to { transform: none; } }
+@keyframes vote-undo { from { transform: scale(0.82); } to { transform: none; } }
+@keyframes burst {
+  from { transform: rotate(var(--a)) translateX(6px) scale(1); opacity: 1; }
+  to { transform: rotate(var(--a)) translateX(18px) scale(0.2); opacity: 0; }
+}
+@keyframes roll-in { from { transform: translateY(calc(var(--d, 1) * 80%)); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes roll-out { from { transform: none; opacity: 1; } to { transform: translateY(calc(var(--d, 1) * -80%)); opacity: 0; } }
+.vote-up { animation: vote-up 560ms var(--spring) both; }
+.vote-down { animation: vote-down 520ms var(--spring) both; }
+.vote-undo { animation: vote-undo 420ms var(--spring) both; }
+.burst { position: absolute; inset: 0; pointer-events: none; }
+.burst > i { position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; margin: -1.5px; background: var(--red); opacity: 0; animation: burst 520ms var(--ease-out) both; }
+.roll { position: relative; display: inline-flex; overflow: hidden; vertical-align: bottom; padding-block: 1px; }
+.roll-in { animation: roll-in 420ms var(--spring-soft) both; }
+.roll-out { position: absolute; left: 0; top: 1px; opacity: 0; animation: roll-out 240ms var(--ease-out) both; }
+
+/* 2. Messages arrive with a soft spring from the side they come from. */
+@keyframes bubble-in { from { transform: translateY(10px) scale(0.9); opacity: 0; } to { transform: none; opacity: 1; } }
+.bubble-in { transform-origin: var(--ox, 0%) 100%; animation: bubble-in 440ms var(--spring-soft) backwards; }
+
+/* 3. A cast ballot drops into the box, the box takes the weight, then the confirmation appears. */
+@keyframes urne-paper {
+  0% { transform: translateY(-34px) rotate(-10deg); opacity: 0; }
+  14% { opacity: 1; }
+  100% { transform: translateY(30px) rotate(2deg); opacity: 1; }
+}
+@keyframes urne-bump { from { transform: scale(1.05, 0.88); } to { transform: none; } }
+@keyframes fade-up { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.urne-paper { opacity: 0; transform-box: fill-box; transform-origin: center; animation: urne-paper 560ms cubic-bezier(0.5, 0, 0.9, 0.55) 140ms both; }
+.urne-box { transform-box: fill-box; transform-origin: 50% 100%; animation: urne-bump 640ms var(--spring) 680ms backwards; }
+.fade-up { animation: fade-up 480ms var(--ease-out) 760ms both; }
+
 /* A lead line right under a page title keeps a little air (display titles have a tight line height). */
 .display + p { margin-top: 0.5rem; }

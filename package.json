@@ -13,7 +13,8 @@
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
     "db:seed": "node --env-file-if-exists=.env.local scripts/seed.mjs",
     "db:regions": "node --env-file-if-exists=.env.local scripts/import-regions.mjs",
-    "messages": "node scripts/messages-index.mjs"
+    "messages": "node scripts/messages-index.mjs",
+    "db:images": "node --env-file-if-exists=.env.local scripts/upload-demo-images.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

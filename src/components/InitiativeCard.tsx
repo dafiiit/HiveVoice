@@ -25,7 +25,7 @@ export async function InitiativeCard({ it, showArgs = false }: { it: Card; showA
   ].filter(Boolean).join(" · ");
   return (
     <article className="flex min-w-0 flex-col gap-3.5">
-      <Link href={`/initiatives/${it.id}`} tabIndex={-1} aria-hidden="true"><Cover seed={it.cover_seed} ratio="3 / 2" /></Link>
+      <Link href={`/initiatives/${it.id}`} tabIndex={-1} aria-hidden="true"><Cover seed={it.cover_seed} src={it.cover_path} ratio="3 / 2" /></Link>
       <span className="text-[13px] font-bold">{t("kind")} · {it.region_name} · {tl(it.region_level as "municipality")}</span>
       <Link href={`/initiatives/${it.id}`} className="text-2xl font-bold leading-[1.15] tracking-[-0.01em] text-ink no-underline hover:underline">
         {it.title}

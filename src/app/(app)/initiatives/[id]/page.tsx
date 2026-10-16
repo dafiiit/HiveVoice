@@ -22,7 +22,7 @@ const TABS = ["about", "threads", "arguments", "vote", "implementation", "histor
 type Ini = {
   id: string; title: string; summary: string | null; body: string | null; body_easy: string | null; phase: "idea" | "debate" | "addressee" | "implementation" | "done";
   outcome: "rejected_vote" | "rejected_addressee" | "withdrawn" | null; support_count: number; argument_count: number; thread_count: number;
-  cost_estimate_cents: number | null; cover_seed: number; created_at: string; updated_at: string; response_due_at: string | null;
+  cost_estimate_cents: number | null; cover_seed: number; cover_path: string | null; created_at: string; updated_at: string; response_due_at: string | null;
   region_id: string; region_name: string; region_level: string; addressee_text: string | null; resp_id: string | null; resp_title: string | null;
   resp_org: string | null; resp_official: boolean | null; resp_days: number | null; group_slug: string | null; group_name: string | null;
 };
@@ -127,7 +127,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
         <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
           <Link href="/explore" className="text-ink">{t("explore")}</Link><span aria-hidden="true">/</span><span>{ini.region_name}</span>
         </nav>
-        <Cover seed={ini.cover_seed} ratio="21 / 9" />
+        <Cover seed={ini.cover_seed} src={ini.cover_path} ratio="21 / 9" />
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="inline-flex h-8 items-center bg-ink px-3 font-bold text-on-ink">{ini.region_name} · {tl(ini.region_level as "municipality")}</span>
           {data.tags.map((x) => <Link key={x.slug} href={`/explore?q=${x.slug}`} className={`${tag} text-ink no-underline`}>#{x.slug}</Link>)}

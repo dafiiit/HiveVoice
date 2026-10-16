@@ -50,6 +50,7 @@ cp .env.example .env.local   # Werte eintragen
 npm run db:migrate           # Schema und Logik
 npm run db:regions           # Länder, Kreise, Gemeinden, PLZ (OpenPLZ API)
 npm run db:seed              # optional: Demo-Daten aus dem Prototyp (inkl. Beispiel-Chats, siehe Admin-Seite)
+npm run db:images            # optional: Demo-Fotos (supabase/seed/images) in den Speicher hochladen, Ordner demo/
 npm run dev
 ```
 

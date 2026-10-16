@@ -7,8 +7,11 @@ import { createPost, deletePost, votePost } from "@/lib/actions/posts";
 import { relTime } from "@/lib/format";
 import { Avatar } from "./ui/Avatar";
 import { IconCheck, IconDown, IconReply, IconUp } from "./ui/Icons";
+import { Pop, Roll, usePulse } from "./ui/Vote";
 import { ReportButton } from "./ReportDialog";
 import { btn, field } from "./ui/styles";
+
+const press = "inline-flex h-9 items-center border-0 bg-transparent p-0 transition-transform duration-150 ease-out active:scale-90";
 
 type Ctx = { groupId?: string; initiativeId?: string; regionId?: string };
 
@@ -49,11 +52,13 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
   const locale = useLocale();
   const [vote, setVote] = useOptimistic(p.my_vote);
   const [, start] = useTransition();
+  const [pulse, ping] = usePulse();
   const [open, setOpen] = useState(false);
   const score = p.score - p.my_vote + vote;
   const cast = (v: 1 | -1) => {
     if (!canWrite) return;
     const next = vote === v ? 0 : v;
+    ping(v, next !== 0);
     start(async () => { setVote(next); await votePost(p.id, next); });
   };
   const verified = p.author_mode === "real";
@@ -80,12 +85,12 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
         {!compact && (
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <button type="button" aria-pressed={vote === 1} aria-label={tc("upvote")} onClick={() => cast(1)} disabled={!canWrite}
-              className={`inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 ${vote === 1 ? "font-bold text-ink" : "text-muted"}`}>
-              <IconUp /> <span className="tabular">{score}</span>
+              className={`${press} gap-1.5 ${vote === 1 ? "font-bold text-ink" : "text-muted"}`}>
+              <Pop arrow={1} pulse={pulse}><IconUp /></Pop> <Roll value={score} />
             </button>
             <button type="button" aria-pressed={vote === -1} aria-label={tc("downvote")} onClick={() => cast(-1)} disabled={!canWrite}
-              className={`inline-flex h-9 items-center border-0 bg-transparent p-0 ${vote === -1 ? "text-ink" : "text-muted"}`}>
-              <IconDown />
+              className={`${press} ${vote === -1 ? "text-ink" : "text-muted"}`}>
+              <Pop arrow={-1} pulse={pulse}><IconDown /></Pop>
             </button>
             <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
               className="inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 text-muted">

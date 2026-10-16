@@ -1,0 +1,107 @@
+import { expect, test, type Page } from "@playwright/test";
+import postgres from "postgres";
+
+const signedIn = !!process.env.TEST_USER_EMAIL;
+const RADSPUR = "7ee2cdaf-6661-4c62-b5ba-7c26bf600653";
+
+async function login(page: Page) {
+  await page.goto("/login");
+  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
+  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
+  await page.getByRole("button", { name: "Anmelden" }).click();
+  await page.waitForURL(/\/(connect|onboarding)/);
+}
+
+test.describe("motion", () => {
+  test.skip(!signedIn, "TEST_USER_EMAIL not set");
+  test.describe.configure({ mode: "serial" });
+
+  test("a vote springs, throws specks and rolls the number; taking it back answers too", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "writes data, and both projects would race on the same post");
+    await login(page);
+    await page.goto("/connect?c=market");
+    const post = page.locator("article", { hasText: "Hanna Vogt" }).first();
+    const up = post.getByRole("button", { name: "Daumen hoch" });
+    const count = post.locator(".roll > span").first();
+    await expect(up).toBeVisible();
+    if ((await up.getAttribute("aria-pressed")) === "true") { await up.click(); await expect(up).toHaveAttribute("aria-pressed", "false"); }
+    const before = Number(await count.innerText());
+
+    await up.click();
+    await expect(up).toHaveAttribute("aria-pressed", "true");
+    await expect(up.locator(".vote-up")).toHaveCount(1);
+    await expect(up.locator(".burst i")).toHaveCount(6);
+    await expect(post.locator(".roll-in")).toHaveText(String(before + 1));
+    await expect(post.locator(".roll-out")).toHaveText(String(before));
+
+    await up.click();
+    await expect(up).toHaveAttribute("aria-pressed", "false");
+    await expect(up.locator(".vote-undo")).toHaveCount(1);
+    await expect(up.locator(".burst")).toHaveCount(0);
+    await expect(post.locator(".roll-in")).toHaveText(String(before));
+  });
+
+  test("a new chat message slides in, old ones are already in place, and nothing is rebuilt when it is confirmed", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "writes data, and both projects would race in the same chat");
+    const marker = `Bewegungstest ${Date.now()}`;
+    const sql = postgres(process.env.DATABASE_URL!, { max: 1, ssl: "require", prepare: false });
+    try {
+      await login(page);
+      await page.goto("/connect?f=chats");
+      await page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first().click();
+      const log = page.getByRole("log");
+      await expect(log).toBeVisible();
+      await expect(log.locator(".bubble-in")).toHaveCount(0);
+      const field = page.getByLabel("Nachricht schreiben");
+      await field.fill(marker);
+      await field.press("Enter");
+      const bubble = log.locator(".bubble-in", { hasText: marker });
+      await expect(bubble).toHaveCount(1);
+      // The bubble is confirmed by the server without being replaced.
+      await expect(log.getByText("Wird gesendet")).toHaveCount(0, { timeout: 10_000 });
+      await expect(bubble).toHaveCount(1);
+      const handle = await bubble.elementHandle();
+      await page.waitForTimeout(600);
+      expect(await handle!.evaluate((el) => el.isConnected)).toBe(true);
+    } finally {
+      await sql`delete from public.messages where body = ${marker}`;
+      await sql.end();
+    }
+  });
+
+  test("a cast ballot drops into the box", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "writes data, and both projects would race on the same ballot");
+    await login(page);
+    await page.goto(`/initiatives/${RADSPUR}?tab=vote`);
+    const status = page.getByRole("status");
+    if (!(await status.isVisible())) test.skip(true, "this account cannot vote on the demo ballot");
+    await expect(status.locator(".urne-paper")).toHaveCount(0);
+    await status.getByRole("button", { name: "Stimme ändern" }).click();
+    await page.getByRole("radio", { name: /Ja/ }).click();
+    await page.getByRole("button", { name: "Weiter" }).click();
+    const confirm = page.getByRole("button", { name: /Stimme abgeben: Ja/ });
+    await confirm.click();
+    await expect(page.getByRole("status").locator(".urne-paper")).toHaveCount(1);
+    await expect(page.getByRole("status").locator(".urne-box")).toHaveCount(1);
+    await expect(page.getByRole("status")).toContainText("gezählt und geheim");
+  });
+});
+
+test.describe("reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("nothing slides or springs", async ({ page }) => {
+    await page.goto("/");
+    const header = page.locator("header").first();
+    expect(await header.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe("0s");
+    const name = await page.evaluate(() => {
+      const el = document.createElement("span");
+      el.className = "vote-up";
+      document.body.append(el);
+      const v = getComputedStyle(el).animationName;
+      el.remove();
+      return v;
+    });
+    expect(name).toBe("none");
+  });
+});

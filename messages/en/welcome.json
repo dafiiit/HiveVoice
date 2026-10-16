@@ -14,7 +14,7 @@
     "connect": { "name": "Connect", "text": "People who want the same thing form a group and agree on goals." }
   },
   "offerTitle": "Offer what you can. Find what you need.",
-  "offerText": "From expertise to a sofa bed. Mostly free, with an hourly rate if you like. Contact only when both agree.",
+  "heroAlt": "Neighbours planning together around a table in a courtyard",
   "offerCta": "Add an offer",
   "needs": "needs",
   "offers": "offers",

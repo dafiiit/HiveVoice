@@ -13,6 +13,7 @@ export type InitiativeCard = {
   region_level: string;
   addressee: string | null;
   cover_seed: number;
+  cover_path: string | null;
   ballot_closes_at: string | null;
   top_pro: string | null;
   top_contra: string | null;
@@ -20,7 +21,7 @@ export type InitiativeCard = {
 };
 
 export const initiativeCardColumns = (tx: Tx) => tx`
-  i.id, i.title, i.summary, i.phase, i.outcome, i.support_count, i.argument_count, i.cover_seed, i.created_at,
+  i.id, i.title, i.summary, i.phase, i.outcome, i.support_count, i.argument_count, i.cover_seed, i.cover_path, i.created_at,
   r.name as region_name, r.level as region_level,
   coalesce(resp.organization_name || ' · ' || resp.title, resp.title, i.addressee_text) as addressee,
   (select b.closes_at from public.ballots b where b.initiative_id = i.id and b.status = 'open' limit 1) as ballot_closes_at,

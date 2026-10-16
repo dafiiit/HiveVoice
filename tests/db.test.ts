@@ -333,3 +333,14 @@ describe("shared links", () => {
     expect(caseNo).toMatch(/^\d{4}-\d{4}$/);
   }));
 });
+
+describe("cover photos", () => {
+  it("are readable by guests on groups and initiatives, and an ordinary member is no server admin", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Gruppe mit Bild","join_policy":"open"}'::jsonb) as gid`);
+    const [row] = await as(tx, null, () => tx<{ cover_path: string | null }[]>`select cover_path from public.groups where id = ${gid}`);
+    expect(row.cover_path).toBeNull();
+    await as(tx, null, () => tx`select cover_path from public.initiatives limit 1`);
+    expect((await as(tx, a, () => tx<{ ok: boolean }[]>`select app.is_server_admin() as ok`))[0].ok).toBe(false);
+  }));
+});

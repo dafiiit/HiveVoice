@@ -19,7 +19,7 @@ export function Logo({ size = 40, wordmark = true }: { size?: number; wordmark?:
     <span role="img" aria-label="HiveVoice" className="inline-flex items-center" style={{ gap: Math.round(size * 0.18) }}>
       <LogoMark size={size} />
       {wordmark && (
-        <span style={{ fontSize: Math.round(size * 0.6), letterSpacing: "-0.04em", lineHeight: 1 }} className="whitespace-nowrap">
+        <span style={{ fontSize: Math.round(size * 0.6), letterSpacing: "-0.04em", lineHeight: 1 }} className="whitespace-nowrap max-[360px]:hidden">
           <span className="font-bold">hive</span>
           <span className="font-normal">voice</span>
         </span>

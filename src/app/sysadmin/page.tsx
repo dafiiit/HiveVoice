@@ -20,7 +20,7 @@ export default async function SysAdmin() {
         <Link href="/" className="text-ink no-underline"><Logo size={36} /></Link>
         <span className="text-sm font-bold">{t("title")}</span>
       </header>
-      <main className="flex flex-col gap-8 px-6 pb-16 pt-8 md:px-10">
+      <main className="flex flex-col gap-5 px-4 pb-8 pt-4 md:gap-8 md:px-10">
         <h1 className="display m-0">{t("title")}</h1>
         {!state.allowed && state.reason === "login" && (
           <div className="flex flex-col gap-3"><p className="m-0">{t("loginFirst")}</p><Link href="/login" className={`${btn.primary} self-start`}>{t("login")}</Link></div>

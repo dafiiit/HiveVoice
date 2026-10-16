@@ -133,6 +133,7 @@
   "form": {
     "title": "Start a group",
     "lead": "A shared purpose, people who share it, and a way there. You decide what the group is for.",
+    "leadShort": "What is the group for? You decide.",
     "name": "Name",
     "summary": "In one sentence",
     "description": "Description",

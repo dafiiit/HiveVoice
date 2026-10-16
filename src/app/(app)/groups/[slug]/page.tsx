@@ -124,7 +124,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const tabs = TABS.filter((k) => k !== "tasks" || g.mod_tasks);
 
   return (
-    <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_300px]">
+    <div className="grid gap-5 px-4 pb-6 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_300px]">
       <div className="flex min-w-0 flex-col gap-6">
         <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
           <Link href="/groups" className="text-ink">{t("groups")}</Link><span aria-hidden="true">/</span><span>{g.name}</span>
@@ -138,7 +138,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           {data.tags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}
         </div>
         <h1 className="display m-0">{g.name}</h1>
-        {g.summary && <p className="m-0 max-w-[720px] text-xl">{g.summary}</p>}
+        {g.summary && <p className="m-0 max-w-[720px] text-base md:text-xl">{g.summary}</p>}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <span className="flex items-center gap-2">
             {admins.slice(0, 3).map((a) => <Avatar key={a.id} name={a.name} seed={a.seed} size={28} />)}

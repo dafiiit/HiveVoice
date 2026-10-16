@@ -7,6 +7,7 @@
   },
   "guestTitle": "You are reading as a guest.",
   "guestText": "You can read public groups and the marketplace. Sign in to write.",
+  "guestTextShort": "Reading works without an account, writing does not.",
   "signIn": "Sign in",
   "conversations": "Conversations",
   "pane": "Conversation",

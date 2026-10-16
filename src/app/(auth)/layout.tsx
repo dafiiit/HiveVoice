@@ -15,7 +15,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
           <Link href="/explore" className="inline-flex h-11 items-center font-bold text-ink">{t("guest")}</Link>
         </div>
       </SmartHeader>
-      <main className="flex-1 px-6 pb-20 pt-8 md:px-10 md:pt-16">
+      <main className="flex-1 px-4 pb-10 pt-4 sm:px-6 md:px-10 md:pb-20 md:pt-16">
         <div className="flex max-w-[720px] flex-col gap-10 md:pl-[25%]">{children}</div>
       </main>
     </div>

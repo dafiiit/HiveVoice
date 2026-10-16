@@ -17,14 +17,16 @@ export default async function NewPage() {
     { href: "/connect?c=market", shape: "bubble", key: "voice", dark: false },
   ] as const;
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
       <h1 className="display m-0">{t("title")}</h1>
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {options.map((o) => (
-          <Link key={o.key} href={o.href} className={`flex min-h-[220px] flex-col gap-4 p-6 no-underline ${o.dark ? "bg-ink text-on-ink" : "border border-ink bg-surface text-ink"}`}>
-            <Glyph shape={o.shape} size={56} color={o.dark ? "var(--on-ink)" : "var(--ink)"} />
-            <strong className="text-2xl leading-tight">{t(`${o.key}.title`)}</strong>
-            <span>{t(`${o.key}.text`)}</span>
+          <Link key={o.key} href={o.href} className={`flex items-center gap-4 p-4 no-underline md:min-h-[220px] md:flex-col md:items-stretch md:p-6 ${o.dark ? "bg-ink text-on-ink" : "border border-ink bg-surface text-ink"}`}>
+            <span className="flex-none max-md:[&>svg]:size-10"><Glyph shape={o.shape} size={56} color={o.dark ? "var(--on-ink)" : "var(--ink)"} /></span>
+            <span className="flex min-w-0 flex-col gap-1 md:gap-4">
+              <strong className="text-xl leading-tight md:text-2xl">{t(`${o.key}.title`)}</strong>
+              <span className="max-md:line-clamp-2 max-md:text-sm">{t(`${o.key}.text`)}</span>
+            </span>
           </Link>
         ))}
       </div>

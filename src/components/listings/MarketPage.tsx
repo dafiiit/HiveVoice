@@ -9,6 +9,7 @@ import { ListingEditor } from "./ListingEditor";
 import { MyListings, type MyListing } from "./MyListings";
 import { Inbox, type ContactRow } from "./Inbox";
 import { priceLabel } from "./price";
+import { Lead } from "../ui/Lead";
 
 type Card = ListingCard & { why: string | null; sent: boolean; allied: boolean };
 
@@ -90,10 +91,10 @@ export async function MarketPage({ kind, searchParams }: { kind: "offer" | "need
   };
 
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-col gap-2">
-        <h1 className="display m-0">{t(give ? "offerTitle" : "needTitle")}</h1>
-        <p className="m-0 max-w-[640px]">{t(give ? "offerLead" : "needLead")}</p>
+        <h1 className="display m-0 max-md:sr-only">{t(give ? "offerTitle" : "needTitle")}</h1>
+        <Lead long={t(give ? "offerLead" : "needLead")} short={t(give ? "offerLeadShort" : "needLeadShort")} />
       </div>
       {session ? <ListingEditor kind={kind} groups={data.groups} startWithLink={searchParams.share === "link"} initialTitle={typeof searchParams.title === "string" ? searchParams.title.slice(0, 120) : ""} ideas={ideas} regionId={data.region?.id ?? null} regionName={data.region?.name ?? null} popular={data.popular} />
         : <p className="m-0"><Link href={`/login?next=${base}`} className="font-bold">{tc("signInToWrite")}</Link></p>}

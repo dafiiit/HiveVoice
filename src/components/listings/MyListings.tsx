@@ -12,7 +12,7 @@ export function MyListings({ kind, items }: { kind: "offer" | "need"; items: MyL
   if (!items.length) return null;
   return (
     <section aria-label={t(kind)} className="flex flex-col">
-      <h2 className="m-0 mb-2 text-2xl font-bold">{t(kind)}</h2>
+      <h2 className="m-0 mb-2 text-xl font-bold md:text-2xl">{t(kind)}</h2>
       {items.map((x) => (
         <div key={x.id} className={`flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-3 ${x.status === "paused" ? "opacity-60" : ""}`}>
           <Link href={`/${kind === "offer" ? "offers" : "needs"}/${x.id}`} className="min-w-[200px] flex-1 font-bold text-ink no-underline">{x.title}</Link>

@@ -13,6 +13,7 @@ import { LinkCard } from "@/components/links/LinkCard";
 import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
+import { MobileFinder } from "@/components/shell/MobileFinder";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("explore"))("title") };
@@ -132,8 +133,9 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.responsible?.length ?? data.links?.length ?? 0;
 
   return (
-    <div className="flex flex-col gap-5 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
-      <h1 className="display m-0">{t("title")}</h1>
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-5 md:px-10 md:pb-20 md:pt-10">
+      <MobileFinder />
+      <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
       <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
         {KINDS.map((k) => (
           <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all", sort: "relevant", rk: "" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>

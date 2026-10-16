@@ -48,7 +48,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
   const { p } = d;
   const self = me === id;
   return (
-    <div className="grid gap-10 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid gap-5 px-4 pb-6 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-8">
         <section className="flex flex-wrap items-start gap-6">
           <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={120} />

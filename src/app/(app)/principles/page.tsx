@@ -15,7 +15,7 @@ export default async function Principles() {
   const session = await getSession();
   const items = t.raw("items") as Principle[];
   return (
-    <article className="flex flex-col px-6 pb-16 pt-10 md:px-10 md:pb-24 md:pt-16">
+    <article className="flex flex-col px-4 pb-8 pt-4 md:px-10 md:pb-24 md:pt-16">
       <header className="flex flex-col gap-6 pb-12 md:pb-20">
         <h1 className="m-0 text-[clamp(40px,5vw,72px)] font-light uppercase leading-none tracking-[-0.02em]">{t("title")}</h1>
         <p className="m-0 max-w-[620px] text-xl leading-snug">{t("lead")}</p>

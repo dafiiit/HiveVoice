@@ -39,7 +39,7 @@ export default async function Groups() {
     </Link>
   );
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="display m-0">{t("groups")}</h1>
         <Link href="/new/group" className={btn.primaryLg}>+ {t("found")}</Link>

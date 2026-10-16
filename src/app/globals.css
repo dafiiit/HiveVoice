@@ -167,5 +167,11 @@ select {
 .urne-box { transform-box: fill-box; transform-origin: 50% 100%; animation: urne-bump 640ms var(--spring) 680ms backwards; }
 .fade-up { animation: fade-up 480ms var(--ease-out) 760ms both; }
 
+/* Phones: smaller titles, the room goes to the content. */
+@media (max-width: 767px) {
+  .display { font-size: 28px; line-height: 1; letter-spacing: -0.03em; }
+  .display-xl { font-size: clamp(36px, 11vw, 48px); }
+}
+
 /* A lead line right under a page title keeps a little air (display titles have a tight line height). */
 .display + p { margin-top: 0.5rem; }

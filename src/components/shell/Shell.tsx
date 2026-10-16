@@ -67,9 +67,9 @@ export async function Shell({ session, children }: { session: Session | null; ch
         )}
       </nav>
 
-      <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
-        <header className="sticky top-0 z-30 flex flex-col gap-3 border-b border-line bg-paper px-6 py-3 md:h-[72px] md:flex-row md:items-center md:gap-3 md:px-10 md:py-0">
-          <div className="flex items-center gap-2 md:contents">
+      <div className="flex min-w-0 flex-1 flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-paper px-4 md:h-[72px] md:px-10">
+          <div className="flex min-w-0 flex-1 items-center gap-2 md:contents">
             <Link href={session ? "/connect" : "/"} className="flex flex-1 items-center text-ink no-underline md:hidden" aria-label="HiveVoice">
               <Logo size={36} />
             </Link>
@@ -98,7 +98,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 md:contents">
+          <div className="hidden items-center gap-2 md:contents">
             <QuickSearch className="md:order-1" />
             <PlaceMenu className="md:order-2" signedIn={!!session} place={place ? { id: place.id, name: place.name, level: place.level, chain: place.chain } : null} />
           </div>

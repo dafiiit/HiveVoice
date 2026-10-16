@@ -44,7 +44,10 @@ test.describe("motion", () => {
   test("a new chat message slides in, old ones are already in place, and nothing is rebuilt when it is confirmed", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "writes data, and both projects would race in the same chat");
     const marker = `Bewegungstest ${Date.now()}`;
-    const sql = postgres(process.env.DATABASE_URL!, { max: 1, ssl: "require", prepare: false });
+    // The app's own database role cannot see or remove other people's rows, so the cleanup uses the migration connection.
+    const cleanup = process.env.MIGRATION_DATABASE_URL;
+    test.skip(!cleanup, "MIGRATION_DATABASE_URL not set, the test message could not be removed again");
+    const sql = postgres(cleanup!, { max: 1, ssl: cleanup!.includes("localhost") ? false : "require" });
     try {
       await login(page);
       await page.goto("/connect?f=chats");
@@ -64,7 +67,7 @@ test.describe("motion", () => {
       await page.waitForTimeout(600);
       expect(await handle!.evaluate((el) => el.isConnected)).toBe(true);
     } finally {
-      await sql`delete from public.messages where body = ${marker}`;
+      await sql`select private.exec(${`delete from public.messages where body = '${marker}'`})`;
       await sql.end();
     }
   });

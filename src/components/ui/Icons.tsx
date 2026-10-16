@@ -15,3 +15,7 @@ export const IconLock = ({ size = 16, className }: P) => <svg {...base(size)} st
 export const IconSquare = ({ size = 14, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><rect x="6" y="6" width="12" height="12" /></svg>;
 export const IconClose = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M5 5l14 14M19 5L5 19" /></svg>;
 export const IconBack = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M15 4l-8 8 8 8" /></svg>;
+export const IconCompass = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></svg>;
+export const IconAsk = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7" /><path d="M12 16.5v1" /></svg>;
+export const IconGift = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="3" y="9" width="18" height="4" /><path d="M5 13v8h14v-8M12 9v12M12 9c-2-4-6-4-6-1.5S9 9 12 9zM12 9c2-4 6-4 6-1.5S15 9 12 9z" /></svg>;
+export const IconChat = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 4h13v9H8l-4 3v-3H3z" /><path d="M19 9h2v10l-3-2h-7v-2" /></svg>;

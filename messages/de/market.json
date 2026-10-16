@@ -3,6 +3,8 @@
   "needTitle": "Anfragen",
   "offerLead": "Was kannst, hast oder weißt du? Biete Gesellschaft, verleihe Dinge oder hilf mit deinem Können.",
   "needLead": "Ein Verein für dein Engagement, ein Gym-Buddy um 6 Uhr oder ein Kirschbaum für deine Marmelade? Frag an, was dir fehlt.",
+  "offerLeadShort": "Biete, was du kannst oder hast.",
+  "needLeadShort": "Frag an, was dir fehlt.",
   "view": "Ansicht",
   "tabs": {
     "offer": {

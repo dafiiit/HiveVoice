@@ -3,6 +3,7 @@
   "share": "Share a link",
   "shareTitle": "Share a link",
   "shareLead": "Share knowledge, files and places you already keep somewhere else: Google Drive, Dropbox, GitHub, Figma, maps and more. HiveVoice only keeps the link and a small preview, never the file itself.",
+  "shareLeadShort": "Share links to knowledge, files and places. We keep only the link and a preview.",
   "urlLabel": "Link address",
   "urlPlaceholder": "https://drive.google.com/…",
   "check": "Check",

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Lead } from "@/components/ui/Lead";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { myRegionIds } from "@/lib/queries";
@@ -65,10 +66,10 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
   };
 
   return (
-    <div className="flex flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-col gap-2">
         <h1 className="display m-0">{t("title")}</h1>
-        <p className="m-0 max-w-[720px]">{t("lead")}</p>
+        <Lead long={t("lead")} short={t("leadShort")} className="max-w-[720px]" />
       </div>
       {d.mine.length > 0 && (
         <div role="tablist" className="flex border-b border-line">

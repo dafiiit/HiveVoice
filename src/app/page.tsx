@@ -7,6 +7,7 @@ import { initiativeCardColumns, initiativeCardFrom, type InitiativeCard as Card 
 import { InitiativeCard } from "@/components/InitiativeCard";
 import { Logo } from "@/components/ui/Logo";
 import { SmartHeader } from "@/components/shell/SmartHeader";
+import { Lead } from "@/components/ui/Lead";
 import { btn } from "@/components/ui/styles";
 import { LanguageMenu } from "@/components/LanguageMenu";
 
@@ -53,11 +54,11 @@ export default async function Welcome() {
         </div>
       </SmartHeader>
 
-      <section className="flex flex-wrap items-end gap-10 border-b border-line px-6 pb-14 pt-12 md:px-10 md:pb-[104px] md:pt-24">
+      <section className="flex flex-wrap items-end gap-6 border-b border-line px-4 pb-8 pt-6 sm:px-6 md:px-10 md:pb-[104px] md:pt-24">
         <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-10">
           <h1 className="display-xl m-0 max-w-[1000px]">{t("hero1")}<br /><span className="text-red">{t("hero2")}</span></h1>
           <div className="relative flex flex-col gap-6 md:pl-[25%]">
-            <p className="m-0 max-w-[560px] text-xl">{t("lead")}</p>
+            <Lead long={t("lead")} short={t("leadShort")} className="max-w-[560px] text-xl" />
             <div className="flex flex-wrap gap-3">
               <Link href="/signup" className={btn.primaryLg}>{t("join")}</Link>
               <Link href="/explore" className={btn.secondaryLg}>{t("guest")}</Link>
@@ -70,7 +71,7 @@ export default async function Welcome() {
         className="aspect-[1584/672] min-h-[220px] w-full border-b border-line object-cover" />
 
       {live.length > 0 && (
-        <section className="flex flex-col gap-6 border-b border-line px-6 py-10 md:px-10 md:py-[72px]">
+        <section className="flex flex-col gap-6 border-b border-line px-4 py-6 sm:px-6 md:px-10 md:py-[72px]">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <h2 className="m-0 text-2xl font-bold">{t("moving")}</h2>
             <Link href="/explore" className="font-bold text-ink">{t("allInitiatives")}</Link>
@@ -81,7 +82,7 @@ export default async function Welcome() {
         </section>
       )}
 
-      <section className="flex flex-col gap-6 border-b border-line px-6 py-10 md:px-10 md:py-[72px]">
+      <section className="flex flex-col gap-6 border-b border-line px-4 py-6 sm:px-6 md:px-10 md:py-[72px]">
         <h2 className="m-0 text-2xl font-bold">{t("stagesTitle")}</h2>
         <ol className="m-0 grid list-none gap-5 p-0 md:grid-cols-3">
           {stages.map((s) => (
@@ -96,7 +97,7 @@ export default async function Welcome() {
         </ol>
       </section>
 
-      <section className="flex flex-wrap gap-10 border-b border-line bg-surface px-6 py-10 md:px-10 md:py-[72px]">
+      <section className="flex flex-wrap gap-10 border-b border-line bg-surface px-4 py-6 sm:px-6 md:px-10 md:py-[72px]">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
           <h2 className="m-0 text-[clamp(32px,3.4vw,48px)] font-bold leading-none tracking-[-0.03em]">{t("offerTitle")}</h2>
           <Link href="/offers" className={`${btn.primaryLg} self-start`}>{t("offerCta")}</Link>
@@ -114,7 +115,7 @@ export default async function Welcome() {
         )}
       </section>
 
-      <section className="grid gap-5 border-b border-line px-6 py-10 md:grid-cols-3 md:px-10 md:py-[72px]">
+      <section className="grid gap-4 border-b border-line px-4 py-6 sm:px-6 md:grid-cols-3 md:gap-5 md:px-10 md:py-[72px]">
         {(["bots", "secret", "life"] as const).map((k) => (
           <div key={k} className="flex flex-col gap-3">
             <h3 className="m-0 text-2xl font-bold">{t(`trust.${k}.title`)}</h3>
@@ -123,7 +124,7 @@ export default async function Welcome() {
         ))}
       </section>
 
-      <footer className="flex flex-wrap gap-x-6 gap-y-2 px-6 pb-10 pt-6 text-sm md:px-10">
+      <footer className="flex flex-wrap gap-x-6 gap-y-2 px-4 pb-6 pt-4 text-sm sm:px-6 md:px-10 md:pb-10 md:pt-6">
         <strong>HiveVoice</strong>
         <span>{t("nonpartisan")}</span>
         <Link href="/principles">{tp("nav")}</Link>

@@ -67,13 +67,14 @@ test.describe("signed in", () => {
     await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(before);
   });
 
-  test("Verbinden: marketplace filter replaces the sort links, list filters stay compact", async ({ page }) => {
+  test("Verbinden: marketplace filter replaces the sort links, list filters stay compact", async ({ page }, info) => {
     await login(page);
     await page.goto("/connect");
     await expect(page.getByText("Für dich", { exact: true })).toHaveCount(0);
     await expect(page.getByText("Neueste", { exact: true })).toHaveCount(0);
     const filters = page.getByRole("group", { name: "Anzeigen" });
-    await expect(filters.getByRole("link")).toHaveCount(4);
+    // On a phone the four filters share their row with a small "+" for a new group.
+    await expect(filters.getByRole("link")).toHaveCount(info.project.name === "mobile" ? 5 : 4);
     const box = await filters.boundingBox();
     expect(box!.height).toBeLessThan(60);
     await page.goto("/connect?c=market");
@@ -130,9 +131,10 @@ test.describe("signed in", () => {
     await expect(avatar).toHaveText("F");
   });
 
-  test("the search at the top offers direct hits, including places", async ({ page }) => {
+  test("the search at the top offers direct hits, including places", async ({ page }, info) => {
     await login(page);
-    await page.goto("/connect");
+    // Phones keep search and place out of the top bar, they sit under it in Entdecken.
+    await page.goto(info.project.name === "mobile" ? "/explore" : "/connect");
     await page.waitForLoadState("networkidle");
     const box = page.getByRole("combobox").first();
     const places = page.getByRole("option", { name: /^München\s+München$/ }).first();
@@ -147,9 +149,9 @@ test.describe("signed in", () => {
     await expect(page.getByRole("link", { name: "München entfernen" })).toBeVisible();
   });
 
-  test("the place menu says what the place is for", async ({ page }) => {
+  test("the place menu says what the place is for", async ({ page }, info) => {
     await login(page);
-    await page.goto("/connect");
+    await page.goto(info.project.name === "mobile" ? "/explore" : "/connect");
     await page.getByRole("button", { name: /^Dein Ort/ }).click();
     await expect(page.getByText(/bestimmt, welchen Marktplatz/)).toBeVisible();
     await expect(page.getByRole("link", { name: /entdecken$/ })).toBeVisible();
@@ -272,13 +274,14 @@ test.describe("signed in", () => {
     await expect(page).toHaveURL(/\/new\/group\?purpose=demand/);
   });
 
-  test("the top bar stays put while the page scrolls", async ({ page }) => {
+  test("the top bar stays put while the page scrolls", async ({ page }, info) => {
     await login(page);
     await page.goto("/explore?kind=links");
     await page.mouse.wheel(0, 900);
     await page.waitForTimeout(300);
     expect((await page.locator("header").first().boundingBox())!.y).toBe(0);
-    await expect(page.getByRole("combobox").first()).toBeInViewport();
+    // The search belongs to the bar on wide screens only; on phones it scrolls with the page.
+    if (info.project.name !== "mobile") await expect(page.getByRole("combobox").first()).toBeInViewport();
   });
 
   test("things line up: photo block, carousel rows and top bar controls", async ({ page }, info) => {
@@ -349,7 +352,7 @@ test.describe("language without signing in", () => {
 });
 
 test.describe("a guest can pick a place", () => {
-  test("it is remembered in the browser and drives the marketplace", async ({ page }) => {
+  test("it is remembered in the browser and drives the marketplace", async ({ page }, info) => {
     await page.goto("/explore");
     await page.getByRole("button", { name: "Ort wählen" }).click();
     await page.getByPlaceholder("Postleitzahl oder Ort").fill("80336");
@@ -358,7 +361,7 @@ test.describe("a guest can pick a place", () => {
     if (await whole.isVisible().catch(() => false)) await whole.click();
     await expect(page.getByRole("button", { name: /^Gewählter Ort/ })).toBeVisible();
     await page.goto("/connect?c=market");
-    await expect(page.getByText(/Offen für alle in München · jede/)).toBeVisible();
+    await expect(page.getByText(info.project.name === "mobile" ? "Offen für alle in München" : /Offen für alle in München · jede/, { exact: info.project.name === "mobile" })).toBeVisible();
   });
 });
 

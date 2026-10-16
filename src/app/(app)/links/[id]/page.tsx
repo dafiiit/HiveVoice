@@ -41,7 +41,7 @@ export default async function LinkPage({ params }: PageProps<"/links/[id]">) {
   const host = r.host.replace(/^www\./, "");
   const careful = r.safety === "caution";
   return (
-    <div className="flex max-w-[860px] flex-col gap-6 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex max-w-[860px] flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
       <nav className="text-sm"><Link href="/explore?kind=links" className="text-ink">{t("back")}</Link></nav>
       <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />
       <div className="flex flex-wrap items-center gap-2 text-sm">

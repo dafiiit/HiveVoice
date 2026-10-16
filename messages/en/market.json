@@ -3,6 +3,8 @@
   "needTitle": "Request",
   "offerLead": "What can you do, what do you have, what do you know? Offer company, lend things or help with your skills.",
   "needLead": "A club to get involved in, a gym buddy at 6 am or a cherry tree for your jam? Ask for what you are missing.",
+  "offerLeadShort": "Offer what you can or have.",
+  "needLeadShort": "Ask for what you are missing.",
   "view": "View",
   "tabs": {
     "offer": {

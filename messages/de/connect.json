@@ -7,6 +7,7 @@
   },
   "guestTitle": "Du liest als Gast.",
   "guestText": "Öffentliche Gruppen und den Marktplatz kannst du lesen. Schreiben kannst du nach der Anmeldung.",
+  "guestTextShort": "Lesen geht ohne Anmeldung, Schreiben nicht.",
   "signIn": "Anmelden",
   "conversations": "Unterhaltungen",
   "pane": "Unterhaltung",

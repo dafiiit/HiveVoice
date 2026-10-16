@@ -133,6 +133,7 @@
   "form": {
     "title": "Gruppe gründen",
     "lead": "Ein gemeinsamer Zweck, Menschen, die ihn teilen, und ein Weg dorthin. Du legst fest, wofür die Gruppe da ist.",
+    "leadShort": "Wofür ist die Gruppe da? Du legst es fest.",
     "name": "Name",
     "summary": "In einem Satz",
     "description": "Beschreibung",

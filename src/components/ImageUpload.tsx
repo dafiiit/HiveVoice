@@ -105,7 +105,7 @@ export function AvatarUpload({ name, seed, path, size = 120 }: { name: string; s
       onDragOver={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(true); } }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(false); void pick(e.dataTransfer.files); } }}>
-      <div className={`${over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""} w-full`}><Avatar name={name} seed={seed} path={path} size={size} /></div>
+      <div className={`${over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""} w-full max-md:[zoom:0.6]`}><Avatar name={name} seed={seed} path={path} size={size} /></div>
       <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondary} h-10 w-full px-2 text-sm`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
       <GooglePhotosButton wide max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondary} h-10 w-full px-2 text-sm`}>{t("fromGoogle")}</GooglePhotosButton>
       {path && <button type="button" disabled={working} onClick={remove} className="h-9 w-full border-0 bg-transparent px-0 text-sm text-muted underline">{t("removePhoto")}</button>}

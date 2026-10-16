@@ -22,7 +22,7 @@ export default async function JuryPage({ params }: PageProps<"/jury/[id]">) {
   });
   if (!c) notFound();
   return (
-    <div className="px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-16">
+    <div className="px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-16">
       <JuryReview caseId={c.id} caseNo={c.case_no} rule={c.rule} context={c.context_text} target={c.target_text} decided={c.decided} status={c.status} jurySize={c.jury_size} />
     </div>
   );

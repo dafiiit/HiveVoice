@@ -68,7 +68,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const interests = d.tags.filter((x) => x.relation === "interest").map((x) => x.slug);
 
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
       <section className="flex flex-wrap items-start gap-6">
         <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={160} />
         <div className="flex min-w-[260px] flex-1 basis-[260px] flex-col gap-2">

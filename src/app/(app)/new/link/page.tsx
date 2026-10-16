@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Lead } from "@/components/ui/Lead";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { popularTags } from "@/lib/queries";
@@ -19,10 +20,10 @@ export default async function NewLink({ searchParams }: PageProps<"/new/link">) 
     ideas: await popularTags(tx),
   }));
   return (
-    <div className="flex flex-col gap-8 px-6 pb-12 pt-8 md:px-10 md:pb-20 md:pt-10">
+    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-col gap-2">
         <h1 className="display m-0">{t("shareTitle")}</h1>
-        <p className="m-0 max-w-[680px]">{t("shareLead")}</p>
+        <Lead long={t("shareLead")} short={t("shareLeadShort")} className="max-w-[680px]" />
       </div>
       <ShareLinkForm groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} />
     </div>

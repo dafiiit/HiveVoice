@@ -88,7 +88,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={list} aria-live="polite" role="log"
         onScroll={(e) => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
-        className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col gap-1 overflow-y-auto py-4 lg:max-h-none lg:min-h-0">
+        className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col gap-1 overflow-y-auto py-3 max-md:max-h-none max-md:min-h-0 lg:max-h-none lg:min-h-0 md:py-4">
         {messages.map((m, i) => {
           const mine = m.sender_id === viewerId;
           const prev = messages[i - 1];

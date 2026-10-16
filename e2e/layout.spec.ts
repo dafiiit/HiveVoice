@@ -98,3 +98,75 @@ test("nothing on the welcome header is cut off, whatever the screen width", asyn
   expect(box.x + box.width).toBeLessThanOrEqual(width);
   await expect(page.getByRole("contentinfo").getByRole("link", { name: "Haltung" })).toBeVisible();
 });
+
+test.describe("on a phone", () => {
+  test.skip(!signedIn, "TEST_USER_EMAIL not set");
+
+  test("the top bar holds no search or place, Entdecken shows them under it", async ({ page }, info) => {
+    test.skip(info.project.name !== "mobile", "phones only");
+    await login(page);
+    await page.goto("/connect");
+    await expect(page.getByRole("search")).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /^Dein Ort/ })).toHaveCount(0);
+    expect((await page.locator("header").first().boundingBox())!.height).toBeLessThanOrEqual(58);
+
+    await page.goto("/explore");
+    const search = page.getByRole("search");
+    await expect(search).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Dein Ort/ })).toBeVisible();
+    const bar = (await page.locator("header").first().boundingBox())!;
+    expect((await search.boundingBox())!.y).toBeGreaterThanOrEqual(bar.y + bar.height);
+  });
+
+  test("the bottom bar has an icon and a label for every section", async ({ page }, info) => {
+    test.skip(info.project.name !== "mobile", "phones only");
+    await login(page);
+    await page.goto("/connect");
+    const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
+    for (const label of ["Entdecken", "Anfragen", "Neu", "Anbieten", "Verbinden"]) {
+      const item = nav.getByRole("link", { name: label });
+      await expect(item).toBeVisible();
+      await expect(item.locator("svg")).toHaveCount(1);
+      await expect(item).toContainText(label);
+    }
+    await expect(nav.getByRole("link", { name: "Verbinden" })).toHaveAttribute("aria-current", "page");
+  });
+
+  test("Verbinden puts the chats first and fills the screen without page scroll", async ({ page }, info) => {
+    test.skip(info.project.name !== "mobile", "phones only");
+    await login(page);
+    await page.goto("/connect");
+    const list = page.getByRole("region", { name: "Unterhaltungen" });
+    await expect(list.getByRole("link").first()).toBeVisible();
+    const first = (await list.getByRole("link").nth(5).boundingBox())!;
+    expect(first.y, "several conversations are visible without scrolling").toBeLessThan(500);
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+
+    await page.goto("/connect?f=chats");
+    await page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first().click();
+    const field = page.getByLabel("Nachricht schreiben");
+    await expect(field).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
+    const bottom = (await page.getByRole("navigation", { name: "Hauptnavigation" }).boundingBox())!;
+    expect((await field.boundingBox())!.y + (await field.boundingBox())!.height).toBeLessThanOrEqual(bottom.y);
+  });
+
+  test("texts are short on a phone and in full on a wide screen", async ({ page }, info) => {
+    await login(page);
+    await page.goto("/needs");
+    const short = page.getByText("Frag an, was dir fehlt.", { exact: true });
+    const long = page.getByText(/Ein Verein für dein Engagement/);
+    if (info.project.name === "mobile") {
+      await expect(short).toBeVisible();
+      await expect(long).toBeHidden();
+    } else {
+      await expect(long).toBeVisible();
+      await expect(short).toBeHidden();
+    }
+  });
+});
+
+test("the installed app opens on Verbinden", async ({ request }) => {
+  const res = await request.get("/manifest.webmanifest");
+  expect((await res.json()).start_url).toBe("/connect");
+});

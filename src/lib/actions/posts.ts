@@ -1,10 +1,13 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { run } from "../action";
+import { MAX_FILES, cleanPoll, pollReady, type PollDraft, type UploadedFile } from "../files";
 
-export async function createPost(input: { body: string; groupId?: string; initiativeId?: string; regionId?: string; parentId?: string; path: string }) {
+export async function createPost(input: { body: string; groupId?: string; initiativeId?: string; regionId?: string; parentId?: string; path: string; files?: UploadedFile[]; poll?: PollDraft | null }) {
   const body = input.body.trim();
-  if (!body) return { ok: false as const, error: "invalid" };
+  const files = (input.files ?? []).slice(0, MAX_FILES);
+  const poll = input.poll && pollReady(input.poll) ? cleanPoll(input.poll) : null;
+  if (!body && !files.length && !poll) return { ok: false as const, error: "invalid" };
   const res = await run(async (tx, s) => {
     let groupId = input.groupId ?? null, initiativeId = input.initiativeId ?? null, regionId = input.regionId ?? null;
     if (input.parentId) {
@@ -17,6 +20,7 @@ export async function createPost(input: { body: string; groupId?: string; initia
       insert into public.posts (author_id, body, group_id, initiative_id, region_id, parent_id)
       values (${s.profile.id}, ${body.slice(0, 5000)}, ${groupId}, ${initiativeId}, ${regionId}, ${input.parentId ?? null})
       returning id`;
+    if (files.length || poll) await tx`select app.add_extras('post', ${row.id}, ${tx.json(files)}, ${poll ? tx.json(poll) : null})`;
     return row.id;
   });
   revalidatePath(input.path.split("?")[0]);

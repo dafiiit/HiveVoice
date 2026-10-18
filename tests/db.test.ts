@@ -344,3 +344,67 @@ describe("cover photos", () => {
     expect((await as(tx, a, () => tx<{ ok: boolean }[]>`select app.is_server_admin() as ok`))[0].ok).toBe(false);
   }));
 });
+
+describe("replies, polls and files", () => {
+  async function conversation(tx: postgres.TransactionSql, owner: string, other: string) {
+    const [{ lid }] = await as(tx, owner, () => tx<{ lid: string }[]>`select app.save_listing(${tx.json({ kind: "offer", title: "Etwas zum Leihen" })}) as lid`);
+    const [{ rid }] = await as(tx, other, () => tx<{ rid: string }[]>`select app.request_contact(${lid}, 'Hallo!') as rid`);
+    const [{ conv }] = await as(tx, owner, () => tx<{ conv: string }[]>`select app.decide_contact(${rid}, true) as conv`);
+    return conv;
+  }
+  const pollOf = { question: "Wann passt es?", options: ["Samstag", "Sonntag", "Montag"], multiple: false };
+
+  it("quotes only a message of the same conversation", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const one = await conversation(tx, a, b), two = await conversation(tx, a, c);
+    const [{ id: first }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.messages (conversation_id, sender_id, body) values (${one}, ${a}, 'Erste') returning id`);
+    await as(tx, b, () => tx`insert into public.messages (conversation_id, sender_id, body, reply_to_id) values (${one}, ${b}, 'Antwort', ${first})`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`insert into public.messages (conversation_id, sender_id, body, reply_to_id) values (${two}, ${c}, 'Falsch', ${first})`))).toMatch(/invalid/);
+  }));
+
+  it("refuses a completely empty message", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const conv = await conversation(tx, a, b);
+    await as(tx, a, () => tx`insert into public.messages (conversation_id, sender_id, body) values (${conv}, ${a}, '')`);
+    expect(await fails(tx, (sp) => sp`set constraints all immediate`)).toMatch(/invalid/);
+  }));
+
+  it("accepts a poll on its own and counts one vote per person, in secret", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ pid }] = await as(tx, a, () => tx<{ pid: string }[]>`insert into public.posts (author_id, body) values (${a}, '') returning id as pid`);
+    await as(tx, a, () => tx`select app.add_extras('post', ${pid}, null, ${tx.json(pollOf)})`);
+    await tx`set constraints all immediate`;
+    const options = await as(tx, b, () => tx<{ id: string; position: number }[]>`select o.id, o.position from public.poll_options o join public.polls p on p.id = o.poll_id where p.post_id = ${pid} order by o.position`);
+    expect(options.length).toBe(3);
+    const [{ id: poll }] = await as(tx, b, () => tx<{ id: string }[]>`select id from public.polls where post_id = ${pid}`);
+
+    await as(tx, a, () => tx`select app.vote_poll(${poll}, ${[options[0].id]}::uuid[])`);
+    await as(tx, b, () => tx`select app.vote_poll(${poll}, ${[options[0].id]}::uuid[])`);
+    await as(tx, b, () => tx`select app.vote_poll(${poll}, ${[options[1].id]}::uuid[])`); // changing the answer replaces it
+    // A single-choice poll takes one answer only.
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.vote_poll(${poll}, ${[options[0].id, options[1].id]}::uuid[])`))).toMatch(/invalid/);
+
+    const [{ v }] = await as(tx, b, () => tx<{ v: { voters: number; options: { votes: number; mine: boolean }[] }[] }[]>`select app.poll_view(${[poll]}::uuid[]) as v`);
+    expect(v[0].voters).toBe(2);
+    expect(v[0].options.map((o) => o.votes)).toEqual([1, 1, 0]);
+    expect(v[0].options.map((o) => o.mine)).toEqual([false, true, false]);
+    // Who voted for what is not readable: each person sees only their own row.
+    expect((await as(tx, b, () => tx`select 1 from public.poll_votes`)).length).toBe(1);
+    // Guests may read the counts of a public poll but not vote.
+    const [{ g }] = await as(tx, null, () => tx<{ g: { voters: number }[] }[]>`select app.poll_view(${[poll]}::uuid[]) as g`);
+    expect(g[0].voters).toBe(2);
+    expect(await fails(tx, (sp) => as(sp, null, () => sp`select app.vote_poll(${poll}, ${[options[0].id]}::uuid[])`))).toMatch(/not_authenticated|permission denied/);
+  }));
+
+  it("lets only the author attach things, and only files that really are in the store", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ pid }] = await as(tx, a, () => tx<{ pid: string }[]>`insert into public.posts (author_id, body) values (${a}, 'Mit Datei') returning id as pid`);
+    await as(tx, b, () => fails(tx, (sp) => sp`select app.add_extras('post', ${pid}, null, ${tx.json(pollOf)})`));
+    const folder = authIds.get(a);
+    const fake = [{ path: `${folder}/${"a".repeat(32)}.pdf`, name: "bericht.pdf", mime: "application/pdf", size: 1000 }];
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.add_extras('post', ${pid}, ${sp.json(fake)}, null)`))).toMatch(/invalid/);
+    // A path in someone else's folder is refused before the store is even asked.
+    const foreign = [{ path: `${authIds.get(b)}/${"b".repeat(32)}.pdf`, name: "x.pdf", mime: "application/pdf", size: 1000 }];
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.add_extras('post', ${pid}, ${sp.json(foreign)}, null)`))).toMatch(/invalid/);
+  }));
+});

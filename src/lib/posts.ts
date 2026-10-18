@@ -1,6 +1,8 @@
 import "server-only";
 import type { Tx } from "./db";
 import { regionTree } from "./queries";
+import { loadExtras } from "./extras";
+import type { Attachment, PollView } from "./files";
 
 export type PostView = {
   id: string;
@@ -22,6 +24,8 @@ export type PostView = {
   initiative_id: string | null;
   initiative_title: string | null;
   replies: PostView[];
+  attachments: Attachment[];
+  poll: PollView | null;
 };
 
 type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[]; underRegionId?: string; search?: string };
@@ -62,6 +66,11 @@ export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, o
     where p.parent_id = any(${posts.map((p) => p.id)}::uuid[]) and p.hidden_at is null
     order by p.created_at asc`;
   for (const p of posts) p.replies = replies.filter((r) => r.parent_id === p.id);
+  const ex = await loadExtras(tx, "post", [...posts, ...replies].map((p) => p.id));
+  for (const p of [...posts, ...replies]) {
+    p.attachments = ex.attachments.get(p.id) ?? [];
+    p.poll = ex.polls.get(p.id) ?? null;
+  }
   return posts;
 }
 
@@ -70,7 +79,7 @@ const postColumns = (tx: Tx, viewerId: string | null) => tx`
   a.display_name as author_name, a.avatar_seed as author_seed, a.avatar_path as author_path, a.display_mode as author_mode, ar.name as author_region,
   l.title as listing_title, l.kind::text as listing_kind, i.title as initiative_title,
   ${viewerId ? tx`coalesce((select v.value from public.post_votes v where v.post_id = p.id and v.profile_id = ${viewerId}), 0)` : tx`0`}::int as my_vote,
-  '[]'::jsonb as replies`;
+  '[]'::jsonb as replies, '[]'::jsonb as attachments, null::jsonb as poll`;
 
 /** Hashtags used most in the marketplace of a region tree: ideas for the filter. */
 export async function marketTags(tx: Tx, underRegionId: string, limit = 8) {

@@ -9,6 +9,9 @@ import { Avatar } from "./ui/Avatar";
 import { IconCheck, IconDown, IconReply, IconUp } from "./ui/Icons";
 import { Pop, Roll, usePulse } from "./ui/Vote";
 import { ReportButton } from "./ReportDialog";
+import { Attachments } from "./Attachments";
+import { PollCard } from "./PollCard";
+import { ExtrasButtons, ExtrasPreview, useExtras } from "./ComposerExtras";
 import { btn, field } from "./ui/styles";
 
 const press = "inline-flex h-9 items-center border-0 bg-transparent p-0 transition-transform duration-150 ease-out active:scale-90";
@@ -22,25 +25,33 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const x = useExtras();
   const reply = !!ctx.parentId;
+  const canSend = (!!body.trim() || x.has) && !x.blocked && !pending;
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!body.trim()) return;
+    if (!canSend) return;
     start(async () => {
-      const res = await createPost({ ...ctx, body, path });
+      const res = await createPost({ ...ctx, body, path, files: x.files, poll: x.poll });
       if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
       setBody("");
+      x.clear();
       setError(null);
       onPosted?.();
     });
   };
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
-      <div className={`flex gap-3 ${reply ? "flex-col sm:flex-row sm:items-start" : "items-start"}`}>
+      <div className="flex items-start gap-3">
         {viewerName && !reply && <Avatar name={viewerName} seed={viewerSeed} path={viewerPath} size={36} />}
         <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={reply ? 2 : body.length > 80 ? 3 : 1} aria-label={placeholder}
           placeholder={placeholder} className={`${field.textarea} ${reply ? "min-h-[4.5rem]" : "min-h-11"} min-w-0 flex-1 resize-y border-line py-2.5`} />
-        <button type="submit" disabled={pending || !body.trim()} className={`${btn.primary} ${reply ? "self-end sm:self-start" : ""}`}>{reply ? tc("reply") : tc("post")}</button>
+      </div>
+      <ExtrasPreview x={x} />
+      <div className={`flex items-center gap-1.5 ${viewerName && !reply ? "pl-12" : ""}`}>
+        <ExtrasButtons x={x} size="sm" />
+        <span className="flex-1" />
+        <button type="submit" disabled={!canSend} className={btn.primary}>{reply ? tc("reply") : tc("post")}</button>
       </div>
       {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
     </form>
@@ -76,7 +87,9 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
           <span className="text-muted">{relTime(p.created_at, locale)}</span>
           {p.is_pinned && <span className="font-bold">{t("pinned")}</span>}
         </div>
-        <p className="m-0 whitespace-pre-line">{p.body}</p>
+        {p.body && <p className="m-0 whitespace-pre-line">{p.body}</p>}
+        <Attachments items={p.attachments} />
+        {p.poll && <PollCard poll={p.poll} canVote={canWrite} signedIn={!!viewerId} loginPath={path} />}
         {p.listing_id && (
           <Link href={`/${p.listing_kind === "offer" ? "offers" : "needs"}/${p.listing_id}`} className="flex flex-col gap-0.5 border border-ink bg-surface p-3 text-ink no-underline">
             <span className="text-xs font-bold">{p.listing_kind === "offer" ? t("offer") : t("need")}</span>

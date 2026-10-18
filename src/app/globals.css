@@ -175,3 +175,7 @@ select {
 
 /* A lead line right under a page title keeps a little air (display titles have a tight line height). */
 .display + p { margin-top: 0.5rem; }
+
+/* A quoted message that was jumped to flashes once so the eye finds it. */
+@keyframes msg-flash { 0%, 35% { background: var(--chip); } 100% { background: transparent; } }
+.flash { animation: msg-flash 1400ms var(--ease-out); }

@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadPosts, marketTags } from "@/lib/posts";
+import { loadMessages } from "@/lib/messages";
 import { myMunicipality } from "@/lib/queries";
 import { getPlace } from "@/lib/place";
 import { relTime } from "@/lib/format";
@@ -123,9 +124,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
         left join public.listings l on l.id = cr.listing_id
         where c.id = ${id}`;
       if (c) {
-        const messages = await tx<Message[]>`
-          select m.id, m.body, m.created_at, m.sender_id, p.display_name as sender_name, p.avatar_seed as sender_seed, p.avatar_path as sender_path
-          from public.messages m join public.profiles p on p.id = m.sender_id where m.conversation_id = ${id} order by m.created_at`;
+        const messages = await loadMessages(tx, id);
         await tx`update public.conversation_participants set last_read_at = now() where conversation_id = ${id} and profile_id = ${me}`;
         await tx`update public.notifications set read_at = now() where profile_id = ${me} and kind = 'message' and read_at is null and payload ->> 'conversation_id' = ${id}`;
         pane = { kind: "direct", ...c, messages };
@@ -298,7 +297,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
                     : <span className="text-sm text-muted">{t("private", { title: "" }).replace(/ · $/, "")}</span>}
                 </div>
               </header>
-              <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} />
+              <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} verified={!!session?.profile.verified} />
             </>
           )}
           {pane?.kind === "request" && <div className="min-h-0 flex-1 overflow-y-auto"><RequestPane key={pane.request.id} r={pane.request} /></div>}

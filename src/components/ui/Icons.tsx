@@ -18,3 +18,6 @@ export const IconBack = ({ size = 18, className }: P) => <svg {...base(size)} st
 export const IconCompass = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></svg>;
 export const IconChat = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 4h13v9H8l-4 3v-3H3z" /><path d="M19 9h2v10l-3-2h-7v-2" /></svg>;
 export const IconShare = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M12 15V4M7 9l5-5 5 5" /><path d="M4 14v6h16v-6" /></svg>;
+export const IconAttach = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7" /></svg>;
+export const IconPoll = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 20V10M12 20V4M19 20v-7" /></svg>;
+export const IconFile = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4" /></svg>;

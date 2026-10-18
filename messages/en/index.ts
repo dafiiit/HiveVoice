@@ -7,6 +7,7 @@ import ns_common from "./common.json";
 import ns_connect from "./connect.json";
 import ns_errorPage from "./errorPage.json";
 import ns_explore from "./explore.json";
+import ns_extras from "./extras.json";
 import ns_group from "./group.json";
 import ns_images from "./images.json";
 import ns_initiative from "./initiative.json";
@@ -39,6 +40,7 @@ const messages = {
   "connect": ns_connect,
   "errorPage": ns_errorPage,
   "explore": ns_explore,
+  "extras": ns_extras,
   "group": ns_group,
   "images": ns_images,
   "initiative": ns_initiative,

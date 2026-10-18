@@ -179,3 +179,33 @@ select {
 /* A quoted message that was jumped to flashes once so the eye finds it. */
 @keyframes msg-flash { 0%, 35% { background: var(--chip); } 100% { background: transparent; } }
 .flash { animation: msg-flash 1400ms var(--ease-out); }
+
+/* Markdown notes: plain typography in the Swiss style. */
+.md { font-size: 1rem; line-height: 1.6; overflow-wrap: anywhere; }
+.md > :first-child { margin-top: 0; }
+.md > :last-child { margin-bottom: 0; }
+.md h1, .md h2, .md h3, .md h4 { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin: 1.6em 0 0.5em; }
+.md h1 { font-size: 1.9rem; }
+.md h2 { font-size: 1.45rem; border-top: 3px solid var(--ink); padding-top: 0.6em; }
+.md h3 { font-size: 1.2rem; }
+.md h4 { font-size: 1rem; }
+.md p, .md ul, .md ol, .md blockquote, .md pre, .md .md-table, .md figure { margin: 0 0 1em; }
+.md ul, .md ol { padding-left: 1.5em; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md ul.contains-task-list { list-style: none; padding-left: 0.2em; }
+.md li + li { margin-top: 0.25em; }
+.md li > input[type="checkbox"] { margin-right: 0.5em; accent-color: var(--ink); }
+.md a { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
+.md blockquote { border-left: 4px solid var(--ink); padding: 0.1em 0 0.1em 1em; color: var(--muted); }
+.md hr { border: 0; border-top: 1px solid var(--line-strong); margin: 1.6em 0; }
+.md code { background: var(--chip); padding: 0.1em 0.35em; font-size: 0.92em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.md pre { background: var(--chip); padding: 0.8em 1em; overflow-x: auto; }
+.md pre code { background: none; padding: 0; font-size: 0.88em; }
+.md .md-table { overflow-x: auto; }
+.md table { border-collapse: collapse; min-width: 60%; }
+.md th, .md td { border: 1px solid var(--line-strong); padding: 0.4em 0.7em; text-align: left; vertical-align: top; }
+.md th { background: var(--chip); }
+.md .md-diagram { background: var(--surface); border: 1px solid var(--line); padding: 1em; overflow-x: auto; text-align: center; color: var(--muted); font-size: 0.9rem; }
+.md .md-diagram svg { max-width: 100%; height: auto; }
+.md .md-diagram-error { background: var(--red-soft); color: var(--ink); border-left: 4px solid var(--red); font-size: 0.9rem; white-space: pre-wrap; }

@@ -2,8 +2,8 @@
   "title": "Knowledge and links",
   "share": "Share a link",
   "shareTitle": "Share a link",
-  "shareLead": "Share knowledge, files and places you already keep somewhere else: Google Drive, Dropbox, GitHub, Figma, maps and more. HiveVoice only keeps the link and a small preview, never the file itself.",
-  "shareLeadShort": "Share links to knowledge, files and places. We keep only the link and a preview.",
+  "shareLead": "Share knowledge as a link to something you keep elsewhere, as a file (photo, PDF) or as a Markdown note you write here and can edit later. For links HiveVoice only keeps the link and a small preview.",
+  "shareLeadShort": "Share links, files or notes.",
   "urlLabel": "Link address",
   "urlPlaceholder": "https://drive.google.com/…",
   "check": "Check",
@@ -34,7 +34,8 @@
     "design": "Design",
     "map": "Map",
     "dataset": "Data",
-    "page": "Web page"
+    "page": "Web page",
+    "note": "Note"
   },
   "kindShort": {
     "document": "DOC",
@@ -50,7 +51,8 @@
     "design": "DESIGN",
     "map": "MAP",
     "dataset": "DATA",
-    "page": "PAGE"
+    "page": "PAGE",
+    "note": "NOTE"
   },
   "providers": {
     "drive": "Google Drive",
@@ -71,7 +73,9 @@
     "wiki": "Wikipedia",
     "recipes": "Recipes",
     "official": "Official body",
-    "web": "Web page"
+    "web": "Web page",
+    "upload": "Uploaded",
+    "note": "Note in HiveVoice"
   },
   "trust": {
     "trusted": "Known service",

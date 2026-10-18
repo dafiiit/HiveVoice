@@ -1,8 +1,10 @@
 # Wissen und Links teilen
 
 Menschen teilen Wissen, Dateien und Orte, die sie schon anderswo abgelegt haben (Google Drive, Dropbox, GitHub, Figma, Karten, Rezepte,
-PDFs auf einer Webseite). **HiveVoice speichert nie eine Datei**, nur Adresse, Titel, Beschreibung, Hashtags und die Vorschau-Angaben
+PDFs auf einer Webseite). **Bei einem Link speichert HiveVoice nie eine Datei**, nur Adresse, Titel, Beschreibung, Hashtags und die Vorschau-Angaben
 (Titel, Beschreibung, Adresse eines Vorschaubilds, Typ, Größe).
+
+Eigene Dateien (Foto, PDF) und Markdown-Notizen hängen am selben Ort, siehe [dateien.md](dateien.md).
 
 Wo man es findet: Entdecken → **Wissen**, Neu → **Link teilen**, in jeder Gruppe der Reiter **Links**, die Suche oben (Treffer „Wissen“).
 Wer etwas nicht findet, kann direkt eine Anfrage dazu stellen („Nichts gefunden? Frag danach“).

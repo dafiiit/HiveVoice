@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
-import type { ResourceRow } from "@/lib/links/queries";
+import { plainExcerpt, type ResourceRow } from "@/lib/links/queries";
+import { formatSize, isImage } from "@/lib/files";
 import { relTime } from "@/lib/format";
 import { Avatar } from "../ui/Avatar";
 import { IconCheck } from "../ui/Icons";
@@ -24,19 +25,24 @@ export async function LinkCard({ r, me, canVote }: { r: ResourceRow; me: string 
   const locale = await getLocale();
   const kind = (k: string) => (t.has(`kinds.${k}`) ? t(`kinds.${k}` as "kinds.page") : k);
   const provider = t.has(`providers.${r.provider}`) ? t(`providers.${r.provider}` as "providers.web") : r.provider;
+  const isLink = r.origin === "link";
+  const excerpt = plainExcerpt(r.excerpt, 90);
+  const image = r.origin === "file" && r.file_id && r.file_mime && isImage(r.file_mime) ? `/api/files/${r.file_id}` : isLink ? r.preview.image : null;
+  const sub = isLink ? r.host.replace(/^www\./, "") : r.origin === "file" ? (r.file_name ?? "") : excerpt;
+  const line = isLink ? r.host.replace(/^www\./, "") : r.origin === "file" ? `${r.file_name ?? ""} · ${formatSize(r.file_size ?? 0)}` : "";
   return (
     <article className="flex flex-col gap-3 border border-ink border-t-[6px] bg-surface p-4">
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <strong>{kind(r.kind)}</strong>
         {provider !== kind(r.kind) && <span className="text-muted">· {provider}</span>}
-        <span className="ml-auto"><TrustBadge trust={r.safety} /></span>
+        {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
       </div>
       <Link href={`/links/${r.id}`} tabIndex={-1} aria-hidden="true" className="block">
-        <PreviewImage src={r.preview.image} label={t.has(`kindShort.${r.kind}`) ? t(`kindShort.${r.kind}` as "kindShort.page") : r.kind} sub={r.host.replace(/^www\./, "")} />
+        <PreviewImage src={image} label={t.has(`kindShort.${r.kind}`) ? t(`kindShort.${r.kind}` as "kindShort.page") : r.kind} sub={sub} />
       </Link>
       <Link href={`/links/${r.id}`} className="text-lg font-bold leading-tight text-ink no-underline hover:underline">{r.title}</Link>
       {r.description && <p className="m-0 line-clamp-3 text-sm">{r.description}</p>}
-      <span className="truncate text-xs text-muted">{r.host.replace(/^www\./, "")}</span>
+      {line && <span className="truncate text-xs text-muted">{line}</span>}
       {r.tags.length > 0 && <div className="flex flex-wrap gap-1.5">{r.tags.slice(0, 5).map((x) => <span key={x} className="inline-flex h-7 items-center border border-line px-2 text-xs">#{x}</span>)}</div>}
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
         <span className="flex min-w-0 items-center gap-2 text-xs text-muted">

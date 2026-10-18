@@ -31,6 +31,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const [flash, setFlash] = useState<string | null>(null);
   const x = useExtras();
   const list = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
   const field_ = useRef<HTMLTextAreaElement>(null);
   const stick = useRef(true);
   const seq = useRef(0);
@@ -60,6 +61,15 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     }
     arrived.current = true;
   }, [messages.length]);
+
+  // Photos and polls grow after they appear: while the reader sits at the bottom, the bottom stays in view.
+  useEffect(() => {
+    const el = inner.current;
+    if (!el) return;
+    const watch = new ResizeObserver(() => { const box = list.current; if (box && stick.current) box.scrollTop = box.scrollHeight; });
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, []);
 
   const fmt = useMemo(() => ({
     time: new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit" }),
@@ -125,6 +135,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
       <div ref={list} aria-live="polite" role="log"
         onScroll={(e) => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
         className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col gap-1 overflow-y-auto py-3 max-md:max-h-none max-md:min-h-0 lg:max-h-none lg:min-h-0 md:py-4">
+        <div ref={inner} className="flex flex-col gap-1">
         {messages.map((m, i) => {
           const mine = m.sender_id === viewerId;
           const prev = messages[i - 1];
@@ -171,6 +182,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
             </div>
           );
         })}
+        </div>
       </div>
       {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
       <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="flex flex-none flex-col gap-2 border-t border-line pt-2 md:pt-3">

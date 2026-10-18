@@ -3,7 +3,7 @@ import { Lead } from "@/components/ui/Lead";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { popularTags } from "@/lib/queries";
-import { ShareLinkForm } from "@/components/links/ShareLinkForm";
+import { ShareKnowledge } from "@/components/links/ShareKnowledge";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("links"))("shareTitle") };
@@ -25,7 +25,7 @@ export default async function NewLink({ searchParams }: PageProps<"/new/link">) 
         <h1 className="display m-0">{t("shareTitle")}</h1>
         <Lead long={t("shareLead")} short={t("shareLeadShort")} className="max-w-[680px]" />
       </div>
-      <ShareLinkForm groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} />
+      <ShareKnowledge groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} />
     </div>
   );
 }

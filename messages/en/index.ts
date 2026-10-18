@@ -12,6 +12,7 @@ import ns_group from "./group.json";
 import ns_images from "./images.json";
 import ns_initiative from "./initiative.json";
 import ns_jury from "./jury.json";
+import ns_knowledge from "./knowledge.json";
 import ns_legal from "./legal.json";
 import ns_levels from "./levels.json";
 import ns_links from "./links.json";
@@ -45,6 +46,7 @@ const messages = {
   "images": ns_images,
   "initiative": ns_initiative,
   "jury": ns_jury,
+  "knowledge": ns_knowledge,
   "legal": ns_legal,
   "levels": ns_levels,
   "links": ns_links,

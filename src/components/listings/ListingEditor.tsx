@@ -10,7 +10,7 @@ import { TagPicker } from "../TagPicker";
 import { ImagePicker } from "../ImageUpload";
 import { PlaceInput } from "../PlaceInput";
 import { Carousel } from "../ui/Carousel";
-import { ShareLinkForm } from "../links/ShareLinkForm";
+import { ShareKnowledge } from "../links/ShareKnowledge";
 import { imageUrl } from "@/lib/images";
 import { btn, chip, field } from "../ui/styles";
 
@@ -91,7 +91,7 @@ export function ListingEditor({ kind, ideas, regionId, regionName, popular, init
       {give && mode === "knowledge" && (
         <>
           <p className="m-0 max-w-[680px] text-sm">{t("knowledgeLead")}</p>
-          <ShareLinkForm groups={groups} initialGroup={null} ideas={popular} />
+          <ShareKnowledge groups={groups} initialGroup={null} ideas={popular} />
         </>
       )}
       {(!give || mode === "listing") && <>

@@ -20,7 +20,7 @@ export async function generateMetadata() {
 }
 
 const KINDS = ["initiatives", "groups", "people", "responsible", "links"] as const;
-const RKINDS = ["document", "sheet", "slides", "form", "folder", "file", "pdf", "image", "video", "code", "design", "map", "dataset", "page"] as const;
+const RKINDS = ["document", "sheet", "slides", "form", "folder", "file", "pdf", "image", "video", "code", "design", "map", "dataset", "page", "note"] as const;
 const LEVELS = ["all", "borough", "municipality", "district", "state", "country"] as const;
 const SORTS = ["relevant", "new", "soon", "support"] as const;
 
@@ -59,7 +59,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           select ${resourceColumns(tx, session?.profile.id ?? null)} from ${resourceFrom(tx)}
           where r.hidden_at is null
             ${rk ? tx`and r.kind = ${rk}` : tx``}
-            ${q ? tx`and (lower(r.title) like ${like} or lower(coalesce(r.description, '')) like ${like} or r.host like ${like}
+            ${q ? tx`and (lower(r.title) like ${like} or lower(coalesce(r.description, '')) like ${like} or r.host like ${like} or lower(coalesce(r.body_md, '')) like ${like}
                      or exists (select 1 from public.resource_tags rt join public.tags t on t.id = rt.tag_id where rt.resource_id = r.id and t.slug like ${qq + "%"}))` : tx``}
             ${mine ? tx`and r.region_id = any(${regions}::uuid[])` : tx``}
             ${inPlace(tx`r.region_id`)}

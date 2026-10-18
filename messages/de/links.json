@@ -2,8 +2,8 @@
   "title": "Wissen und Links",
   "share": "Link teilen",
   "shareTitle": "Link teilen",
-  "shareLead": "Teile Wissen, Dateien und Orte, die du schon anderswo abgelegt hast: Google Drive, Dropbox, GitHub, Figma, Karten und mehr. HiveVoice speichert nur den Link und eine kleine Vorschau, nie die Datei selbst.",
-  "shareLeadShort": "Teile Links zu Wissen, Dateien und Orten. Wir speichern nur Link und Vorschau.",
+  "shareLead": "Teile Wissen als Link zu etwas, das du schon anderswo abgelegt hast, als Datei (Foto, PDF) oder als Markdown-Notiz, die du hier schreibst und später weiter bearbeiten kannst. Bei Links speichert HiveVoice nur den Link und eine kleine Vorschau.",
+  "shareLeadShort": "Teile Links, Dateien oder Notizen.",
   "urlLabel": "Adresse des Links",
   "urlPlaceholder": "https://drive.google.com/…",
   "check": "Prüfen",
@@ -34,7 +34,8 @@
     "design": "Design",
     "map": "Karte",
     "dataset": "Daten",
-    "page": "Webseite"
+    "page": "Webseite",
+    "note": "Notiz"
   },
   "kindShort": {
     "document": "DOC",
@@ -50,7 +51,8 @@
     "design": "DESIGN",
     "map": "KARTE",
     "dataset": "DATEN",
-    "page": "SEITE"
+    "page": "SEITE",
+    "note": "NOTIZ"
   },
   "providers": {
     "drive": "Google Drive",
@@ -71,7 +73,9 @@
     "wiki": "Wikipedia",
     "recipes": "Rezepte",
     "official": "Offizielle Stelle",
-    "web": "Webseite"
+    "web": "Webseite",
+    "upload": "Hochgeladen",
+    "note": "Notiz in HiveVoice"
   },
   "trust": {
     "trusted": "Bekannter Dienst",

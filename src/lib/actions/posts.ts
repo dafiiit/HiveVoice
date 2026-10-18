@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { run } from "../action";
+import { purgeFiles } from "../storage";
 import { MAX_FILES, cleanPoll, pollReady, type PollDraft, type UploadedFile } from "../files";
 
 export async function createPost(input: { body: string; groupId?: string; initiativeId?: string; regionId?: string; parentId?: string; path: string; files?: UploadedFile[]; poll?: PollDraft | null }) {
@@ -40,10 +41,13 @@ export async function votePost(postId: string, value: -1 | 0 | 1, path: string) 
 }
 
 export async function deletePost(postId: string, path: string) {
+  let paths: string[] = [];
   const res = await run(async (tx) => {
+    paths = (await tx<{ path: string }[]>`select path from public.attachments where post_id = ${postId} or post_id in (select id from public.posts where parent_id = ${postId})`).map((r) => r.path);
     await tx`delete from public.posts where id = ${postId}`;
     return null;
   });
+  if (res.ok) await purgeFiles(paths);
   revalidatePath(path.split("?")[0]);
   return res;
 }

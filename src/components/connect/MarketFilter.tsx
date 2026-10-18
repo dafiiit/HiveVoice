@@ -20,7 +20,7 @@ export async function MarketFilter({ radii, radius, q, tags, keep }: { radii: Ra
         {active > 0 && <span className="inline-flex h-4 min-w-4 items-center justify-center bg-ink px-1 text-[11px] font-bold text-on-ink">{active}</span>}
         <span aria-hidden="true" className="text-xs group-open:rotate-180">▾</span>
       </summary>
-      <form method="get" action="/connect" className="absolute left-0 z-20 mt-1 flex md:left-auto md:right-0 w-[min(320px,calc(100vw-2rem))] flex-col gap-3 border border-ink bg-surface p-3">
+      <form method="get" action="/connect" className="absolute right-0 z-20 mt-1 flex w-[min(320px,calc(100vw-2rem))] flex-col gap-3 border border-ink bg-surface p-3">
         <input type="hidden" name="c" value="market" />
         {Object.entries(keep).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
         {radii.length > 1 && (

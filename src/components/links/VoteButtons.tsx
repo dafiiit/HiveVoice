@@ -1,5 +1,6 @@
 "use client";
 import { useOptimistic, useTransition } from "react";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { voteResource } from "@/lib/actions/links";
 import { IconDown, IconUp } from "../ui/Icons";
@@ -10,6 +11,7 @@ const press = "inline-flex h-9 w-9 items-center justify-center border-0 bg-trans
 /** Up and down vote. Voting again on the same arrow takes the vote back. */
 export function VoteButtons({ id, score, mine, canVote }: { id: string; score: number; mine: number | null; canVote: boolean }) {
   const t = useTranslations("links");
+  const path = usePathname();
   const [vote, setVote] = useOptimistic(mine ?? 0);
   const [, start] = useTransition();
   const [pulse, ping] = usePulse();
@@ -18,7 +20,7 @@ export function VoteButtons({ id, score, mine, canVote }: { id: string; score: n
     if (!canVote) return;
     const next = vote === v ? 0 : v;
     ping(v, next !== 0);
-    start(async () => { setVote(next); await voteResource(id, next); });
+    start(async () => { setVote(next); await voteResource(id, next, path); });
   };
   return (
     <div role="group" aria-label={t("votes")} className="inline-flex items-center gap-1">

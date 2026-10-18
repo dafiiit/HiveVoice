@@ -36,13 +36,14 @@ export async function shareLink(input: ShareInput) {
   return res;
 }
 
-export async function voteResource(id: string, value: -1 | 0 | 1) {
+export async function voteResource(id: string, value: -1 | 0 | 1, path: string) {
   const res = await run(async (tx, s) => {
     if (value === 0) await tx`delete from public.resource_votes where resource_id = ${id} and profile_id = ${s.profile.id}`;
     else await tx`insert into public.resource_votes (resource_id, profile_id, value) values (${id}, ${s.profile.id}, ${value})
                   on conflict (resource_id, profile_id) do update set value = excluded.value`;
     return null;
   });
+  revalidatePath(path.split("?")[0]);
   return res;
 }
 

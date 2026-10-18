@@ -22,6 +22,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const reply = !!ctx.parentId;
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!body.trim()) return;
@@ -35,11 +36,11 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   };
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
-      <div className="flex items-start gap-3">
-        {viewerName && <Avatar name={viewerName} seed={viewerSeed} path={viewerPath} size={36} />}
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={body.length > 80 ? 3 : 1} aria-label={placeholder}
-          placeholder={placeholder} className={`${field.textarea} min-h-11 flex-1 resize-y border-line py-2.5`} />
-        <button type="submit" disabled={pending || !body.trim()} className={btn.primary}>{ctx.parentId ? tc("reply") : tc("post")}</button>
+      <div className={`flex gap-3 ${reply ? "flex-col sm:flex-row sm:items-start" : "items-start"}`}>
+        {viewerName && !reply && <Avatar name={viewerName} seed={viewerSeed} path={viewerPath} size={36} />}
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={reply ? 2 : body.length > 80 ? 3 : 1} aria-label={placeholder}
+          placeholder={placeholder} className={`${field.textarea} ${reply ? "min-h-[4.5rem]" : "min-h-11"} min-w-0 flex-1 resize-y border-line py-2.5`} />
+        <button type="submit" disabled={pending || !body.trim()} className={`${btn.primary} ${reply ? "self-end sm:self-start" : ""}`}>{reply ? tc("reply") : tc("post")}</button>
       </div>
       {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
     </form>
@@ -59,7 +60,7 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
     if (!canWrite) return;
     const next = vote === v ? 0 : v;
     ping(v, next !== 0);
-    start(async () => { setVote(next); await votePost(p.id, next); });
+    start(async () => { setVote(next); await votePost(p.id, next, path); });
   };
   const verified = p.author_mode === "real";
   return (

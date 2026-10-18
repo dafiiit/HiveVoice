@@ -2,11 +2,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
-import { IconAsk, IconChat, IconCompass, IconGift, IconPlus } from "../ui/Icons";
+import { IconChat, IconCompass, IconPlus, IconSearch, IconShare } from "../ui/Icons";
 
 export type NavItem = { href: string; label: string; badge?: number };
 
-const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/needs": IconAsk, "/offers": IconGift, "/connect": IconChat };
+const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/needs": IconSearch, "/offers": IconShare, "/connect": IconChat };
 
 const isActive = (path: string, href: string) => path === href || path.startsWith(href + "/");
 

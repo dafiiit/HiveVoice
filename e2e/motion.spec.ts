@@ -33,6 +33,10 @@ test.describe("motion", () => {
     await expect(up.locator(".burst i")).toHaveCount(6);
     await expect(post.locator(".roll-in")).toHaveText(String(before + 1));
     await expect(post.locator(".roll-out")).toHaveText(String(before));
+    // The stored vote replaces the optimistic one: it must not spring back once the server has answered.
+    await page.waitForTimeout(2500);
+    await expect(up).toHaveAttribute("aria-pressed", "true");
+    await expect(post.locator(".roll > span").first()).toHaveText(String(before + 1));
 
     await up.click();
     await expect(up).toHaveAttribute("aria-pressed", "false");

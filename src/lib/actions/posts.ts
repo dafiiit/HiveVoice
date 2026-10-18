@@ -23,13 +23,16 @@ export async function createPost(input: { body: string; groupId?: string; initia
   return res;
 }
 
-export async function votePost(postId: string, value: -1 | 0 | 1) {
-  return run(async (tx, s) => {
+/** The page is refreshed in the same round trip, so the optimistic vote is replaced by the stored one instead of springing back. */
+export async function votePost(postId: string, value: -1 | 0 | 1, path: string) {
+  const res = await run(async (tx, s) => {
     if (value === 0) await tx`delete from public.post_votes where post_id = ${postId} and profile_id = ${s.profile.id}`;
     else await tx`insert into public.post_votes (post_id, profile_id, value) values (${postId}, ${s.profile.id}, ${value})
                   on conflict (post_id, profile_id) do update set value = excluded.value`;
     return null;
   });
+  revalidatePath(path.split("?")[0]);
+  return res;
 }
 
 export async function deletePost(postId: string, path: string) {

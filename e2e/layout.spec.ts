@@ -151,6 +151,27 @@ test.describe("on a phone", () => {
     expect((await field.boundingBox())!.y + (await field.boundingBox())!.height).toBeLessThanOrEqual(bottom.y);
   });
 
+  test("sorting stays in the list, and the marketplace filter opens inside the screen", async ({ page }, info) => {
+    test.skip(info.project.name !== "mobile", "phones only");
+    await login(page);
+    await page.goto("/connect");
+    const bars = [page.getByRole("group", { name: "Anzeigen" }), page.getByRole("group", { name: "Reihenfolge" })];
+    const heights = await Promise.all(bars.map(async (b) => Math.round((await b.boundingBox())!.height)));
+    expect(heights[1], "both bars are equally tall").toBe(heights[0]);
+    await page.getByRole("link", { name: "Vorgeschlagen" }).first().click();
+    await expect(page).toHaveURL(/mode=suggested/);
+    await expect(page).not.toHaveURL(/[?&]c=/);
+    await expect(page.getByRole("region", { name: "Unterhaltungen" })).toBeVisible();
+
+    await page.goto("/connect?c=market");
+    await page.locator("summary", { hasText: "Filter" }).first().click();
+    const panel = page.getByRole("button", { name: "Anwenden" }).locator("xpath=ancestor::form");
+    const box = (await panel.boundingBox())!;
+    const width = await page.evaluate(() => document.documentElement.clientWidth);
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+  });
+
   test("texts are short on a phone and in full on a wide screen", async ({ page }, info) => {
     await login(page);
     await page.goto("/needs");

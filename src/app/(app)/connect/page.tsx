@@ -106,7 +106,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       const regionIds = muni ? [muni.id] : (await tx<{ id: string }[]>`select id from public.regions where level = 'municipality' and id in (select distinct region_id from public.posts where region_id is not null) limit 50`).map((r) => r.id);
       const area = radii.find((r) => r.key === radiusParam) ?? radii[0];
       const scope = area ? { underRegionId: area.id, search: q } : { regionIds, search: q };
-      pane = { kind: "market", posts: await loadPosts(tx, scope, me, { sort: "new" }), tags: area ? await marketTags(tx, area.id) : [], area: area?.key ?? "" };
+      pane = { kind: "market", posts: await loadPosts(tx, scope, me, { sort: mode === "suggested" ? "top" : "new" }), tags: area ? await marketTags(tx, area.id) : [], area: area?.key ?? "" };
     } else if (sel.startsWith("g:")) {
       const [g] = await tx<{ id: string; slug: string; name: string; member_count: number; can_post: boolean }[]>`
         select g.id, g.slug::text, g.name, g.member_count, app.has_group_permission(g.id, 'post') as can_post from public.groups g where g.slug = ${sel.slice(2)}`;
@@ -160,7 +160,10 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
     }),
   ];
   const shown = rows.filter((r) => FILTER_KINDS[filter].includes(r.kind));
-  if (mode === "chrono") shown.sort((a, b) => (a.kind === "market" ? -1 : b.kind === "market" ? 1 : (b.at ? new Date(b.at).getTime() : 0) - (a.at ? new Date(a.at).getTime() : 0)));
+  // The marketplace stays pinned. "Chronologisch": newest first. "Vorgeschlagen": what waits for an answer first, then newest.
+  const needsAnswer = (r: Row) => (r.unread > 0 || r.tag === t("req.newTag") ? 1 : 0);
+  const newest = (r: Row) => (r.at ? new Date(r.at).getTime() : 0);
+  shown.sort((a, b) => (a.kind === "market" ? -1 : b.kind === "market" ? 1 : (mode === "suggested" ? needsAnswer(b) - needsAnswer(a) : 0) || newest(b) - newest(a)));
   const counts = {
     all: 0,
     chats: data.directs.reduce((n, d) => n + d.unread, 0),
@@ -168,7 +171,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
     requests: data.requests.filter((r) => r.status === "pending" && !r.outgoing).length,
   };
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ c: sel, mode, f: filter, ...patch });
+    const p = new URLSearchParams({ c: typeof sp.c === "string" ? sel : "", mode, f: filter, ...patch });
     if ((patch.c ?? sel) === "market") {
       if (q) p.set("q", q);
       if (radiusParam) p.set("r", radiusParam);
@@ -202,20 +205,21 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface max-md:min-h-0 max-md:flex-1 lg:min-h-0 lg:flex-1 lg:flex-row lg:border">
         <section aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line max-md:min-h-0 max-md:flex-1 lg:w-[360px] lg:border-r`}>
           {session && (
-            <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 grid flex-none grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1 border-b border-line bg-surface p-1.5 md:grid-cols-4 md:p-2">
+            <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 grid flex-none grid-cols-[repeat(4,minmax(0,1fr))_44px] border-b border-line bg-surface md:grid-cols-4 md:gap-1 md:p-2">
               {FILTERS.map((f) => (
                 <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f}
-                  className={`relative inline-flex h-8 items-center justify-center gap-1 px-1 text-[13px] no-underline ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-chip text-ink"}`}>
+                  className={`relative inline-flex h-11 items-center justify-center gap-1 border-r border-line px-1 text-sm no-underline md:h-8 md:border-0 md:text-[13px] ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-surface text-ink md:bg-chip"}`}>
                   {t(`filter.${f}`)}
                   {counts[f] > 0 && <span className={`inline-flex h-4 min-w-4 items-center justify-center px-1 text-[10px] font-bold leading-none ${filter === f ? "bg-on-ink text-ink" : "bg-ink text-on-ink"}`}>{counts[f]}</span>}
                 </Link>
               ))}
-              <Link href="/new/group" aria-label={t("newGroup")} title={t("newGroup")} className="inline-flex h-8 w-8 items-center justify-center bg-chip text-ink md:hidden"><IconPlus size={16} /></Link>
+              <Link href="/new/group" aria-label={t("newGroup")} title={t("newGroup")} className="inline-flex h-11 w-11 items-center justify-center bg-surface text-ink md:hidden"><IconPlus size={18} /></Link>
             </div>
           )}
-          <div role="group" aria-label={t("order")} className="flex flex-none items-center gap-4 border-b border-line px-3 py-1.5 text-xs md:hidden">
-            {(["chrono", "suggested"] as const).map((m) => (
-              <Link key={m} href={href({ mode: m })} aria-pressed={mode === m} className={`text-ink no-underline ${mode === m ? "border-b-2 border-ink font-bold" : "text-muted"}`}>{t(`mode.${m}`)}</Link>
+          <div role="group" aria-label={t("order")} className="grid flex-none grid-cols-2 border-b border-line md:hidden">
+            {(["chrono", "suggested"] as const).map((m, i) => (
+              <Link key={m} href={href({ mode: m })} aria-pressed={mode === m}
+                className={`relative inline-flex h-11 items-center justify-center text-sm no-underline ${i === 0 ? "border-r border-line" : ""} ${mode === m ? "font-bold text-ink after:absolute after:inset-x-4 after:bottom-0 after:h-[3px] after:bg-ink" : "text-muted"}`}>{t(`mode.${m}`)}</Link>
             ))}
           </div>
           {shown.map((r) => (

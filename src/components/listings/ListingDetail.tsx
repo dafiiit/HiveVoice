@@ -12,6 +12,7 @@ import { ReportButton } from "../ReportDialog";
 import { ContactButton } from "./ContactButton";
 import { AllyButton } from "./MyListings";
 import { priceLabel } from "./price";
+import { ShareBlock } from "../ShareBlock";
 
 export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | "need" }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
@@ -58,6 +59,7 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
       </span>
       <h1 className="display m-0">{l.title}</h1>
       {l.description && <p className="m-0 whitespace-pre-line text-lg">{l.description}</p>}
+      <ShareBlock path={`/${kind === "need" ? "needs" : "offers"}/${id}`} title={l.title} isPublic={!l.group_slug} />
       <dl className="m-0 grid grid-cols-[140px_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">
         {l.goal_title && (<><dt className="font-bold">{t("forGoal")}</dt><dd className="m-0">{l.goal_title}</dd></>)}
         <dt className="font-bold">{t("where")}</dt><dd className="m-0">{l.location_text ?? l.region_name ?? "–"}</dd>

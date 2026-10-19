@@ -1,0 +1,64 @@
+{
+  "title": "Teilen und einladen",
+  "lead": "HiveVoice wächst, wenn Menschen einander mitnehmen. Hier teilst du die App, lädst Menschen ein und siehst, wo bei dir noch jemand fehlt.",
+  "share": {
+    "share": "Teilen",
+    "copy": "Link kopieren",
+    "copied": "Kopiert",
+    "qr": "QR-Code zeigen",
+    "qrAlt": "QR-Code zu {title}",
+    "qrHint": "Mit der Kamera des Handys scannen.",
+    "app": "HiveVoice weitergeben",
+    "appText": "Ich nutze HiveVoice: Menschen aus unserer Gegend schlagen Dinge vor, diskutieren fair und stimmen geheim ab. Komm dazu:",
+    "content": "Das weitergeben",
+    "contentPrivate": "Dieses ist nicht öffentlich. Wer es sehen soll, bekommt eine Einladung.",
+    "contentText": "Schau dir das auf HiveVoice an:"
+  },
+  "invite": {
+    "title": "Einladungen",
+    "mode_open": "Die Anmeldung ist offen. Einladungscodes sind im Moment nicht nötig.",
+    "mode_invite": "Im Moment kommt man mit einem Einladungscode oder zwei Bürgschaften hinein.",
+    "left": "Du kannst noch {n} Menschen einladen.",
+    "leftNone": "Du hast gerade keine Einladungen übrig. Es kommen neue dazu, wenn Eingeladene dabeibleiben.",
+    "create": "Einladungscode erzeugen",
+    "copyLink": "Einladungslink kopieren",
+    "link": "Link",
+    "used": "eingelöst",
+    "expires": "gültig bis {date}",
+    "revoke": "Zurückziehen",
+    "none": "Noch keine Codes.",
+    "voucher": "Du bürgst {days} Tage für",
+    "voucherText": "Das sieht niemand sonst. Wenn eine eingeladene Person gegen Regeln verstößt, erfährst du es.",
+    "redeemTitle": "Du hast einen Einladungscode?",
+    "redeemPlaceholder": "Code eingeben",
+    "redeem": "Einlösen",
+    "redeemed": "Willkommen! Du bist jetzt dabei.",
+    "needCode": "Für dein Konto fehlt noch ein Einladungscode oder zwei Bürgschaften. Lesen kannst du schon jetzt."
+  },
+  "page": {
+    "title": "Du wurdest eingeladen",
+    "text": "Jemand hat dich zu HiveVoice eingeladen. Hier schlagen Menschen aus ihrer Gegend Dinge vor, diskutieren fair und stimmen geheim ab.",
+    "signIn": "Anmelden oder Konto anlegen",
+    "redeem": "Einladung annehmen",
+    "done": "Du bist dabei.",
+    "used": "Dieser Code ist schon benutzt, abgelaufen oder zurückgezogen.",
+    "own": "Das ist dein eigener Code. Gib ihn an jemand anderen weiter."
+  },
+  "gaps": {
+    "title": "Wo bei dir noch jemand fehlt",
+    "text": "Über diese Themen wird in deiner Gegend schon geschrieben, aber noch niemand hat die Zuständigkeit übernommen:",
+    "n": "{n, plural, one {1 Beitrag} other {# Beiträge}}",
+    "invite": "Lade jemanden ein, der sich auskennt",
+    "responsibility": "Selbst zuständig werden",
+    "none": "Für alle Themen bei dir gibt es schon Zuständige. Danke!",
+    "place": "Ort: {name}"
+  },
+  "admin": {
+    "title": "Anmeldung",
+    "text": "Offen: jede Person kann sich anmelden. Mit Einladung: neue Konten brauchen einen Einladungscode oder zwei Bürgschaften, bevor sie Gruppen gründen oder Initiativen starten. Bestehende Konten bleiben unverändert.",
+    "mode_open": "Offen",
+    "mode_invite": "Mit Einladung",
+    "mint": "10 Einladungscodes erzeugen",
+    "mintText": "Für die Anlaufphase, wenn noch niemand einladen kann. Die Codes gelten 30 Tage."
+  }
+}

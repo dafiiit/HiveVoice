@@ -20,6 +20,7 @@ export default async function Welcome() {
   const tp = await getTranslations("principles");
   const tr = await getTranslations("rights");
   const ttr = await getTranslations("modrights.transparency");
+  const ttg = await getTranslations("growth");
 
   const [live, pairs] = await asViewer(null, async (tx) => [
     await tx<Card[]>`
@@ -131,6 +132,7 @@ export default async function Welcome() {
         <span>{t("nonpartisan")}</span>
         <Link href="/principles">{tp("nav")}</Link>
         <Link href="/rechte">{tr("title")}</Link>
+        <Link href="/teilen">{ttg("title")}</Link>
         <Link href="/transparenz">{ttr("title")}</Link>
         <Link href="/legal/imprint">{t("imprint")}</Link>
         <Link href="/legal/privacy">{t("privacy")}</Link>

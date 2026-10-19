@@ -33,6 +33,10 @@ export async function setVerificationMode(mode: "login" | "vouch" | "eid") {
   return guard(() => sql`select app.admin_set_setting('verification_mode', ${sql.json(mode)})`);
 }
 
+export async function setRegistrationMode(mode: "open" | "invite") {
+  return guard(() => sql`select app.admin_set_setting('registration_mode', ${sql.json(mode)})`);
+}
+
 export async function addDomain(domain: string, label: string) {
   const d = domain.trim().toLowerCase().replace(/^@/, "");
   if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d)) return { ok: false as const, error: "invalid" };

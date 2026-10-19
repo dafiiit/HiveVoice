@@ -17,6 +17,7 @@ import { AuthorTools } from "@/components/initiative/AuthorTools";
 import { CoAuthors, type AuthorRow, type PendingInvite, type RemovalRow } from "@/components/initiative/CoAuthors";
 import { AuthorInviteBanner } from "@/components/initiative/AuthorInviteBanner";
 import { BlockInitiative } from "@/components/initiative/BlockInitiative";
+import { ShareBlock } from "@/components/ShareBlock";
 import { BallotPanel, type BallotView } from "@/components/BallotPanel";
 import { Composer, PostList } from "@/components/PostList";
 
@@ -212,6 +213,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
           {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className="inline-flex h-[52px] items-center bg-ink px-6 font-bold text-on-ink no-underline">{t("help")}</Link>}
           <span className="tabular">{t("supports", { n: ini.support_count, formatted: num(ini.support_count, locale) })}</span>
         </div>
+        <ShareBlock path={path} title={ini.title} isPublic={!!ini.published_at && !ini.blocked_at} />
         {isAuthor && !ini.blocked_at && (
           <AuthorTools id={id} phase={ini.phase} outcome={ini.outcome} hasBallot={ballotOpen} hasGroup={!!ini.group_slug} title={ini.title}
             isLead={ini.lead_id === me} supports={ini.support_count} needed={data.needed} debateUntil={data.debate_pending && data.debate_until ? dateLong(data.debate_until, locale) : null}

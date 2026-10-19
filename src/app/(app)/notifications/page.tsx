@@ -144,6 +144,8 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = "/me?tab=docs"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
     } else if (kind.startsWith("resource_")) {
       href = `/links/${p.resource_id}`; label = t("labels.other");
+    } else if (kind === "invite_used" || kind === "invitee_violation") {
+      href = "/teilen"; label = t("labels.other");
     } else if (kind === "vouched") {
       href = "/rechte";
     } else if (kind === "post_removed") {

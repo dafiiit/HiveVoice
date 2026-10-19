@@ -1182,3 +1182,52 @@ describe("moderation: emergency path, ladder, appeals, juries, admins", () => {
     expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.admin_action('chat_access', ${cv}, 'zu knapp')`))).toMatch(/reason_required/);
   }));
 });
+
+describe("growth: invitations, registration mode, bots", () => {
+  const level = async (tx: postgres.TransactionSql, id: string) => (await tx<{ l: number }[]>`select app.trust_level(${id}) as l`)[0].l;
+
+  it("asks for an invitation code in the invitation phase, lets members invite five people, and tells the inviter", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    expect(await level(tx, a)).toBe(2);
+    await tx`select app.admin_set_setting('registration_mode', '"invite"'::jsonb)`;
+    expect(await level(tx, a)).toBe(2);                       // members from before keep their rights
+    const b = await person(tx, "Ben");
+    expect(await level(tx, b)).toBe(1);                       // a new account reads and waits for a code
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.redeem_invite_code('AAAAAAAAAA')`))).toMatch(/invite_invalid/);
+    const codes: string[] = [];
+    for (let i = 0; i < 5; i++) codes.push((await as(tx, a, () => tx<{ c: string }[]>`select app.create_invite_code() as c`))[0].c);
+    expect(codes[0]).toMatch(/^[A-Z2-9]{10}$/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.create_invite_code()`))).toMatch(/no_invites_left|rate_limited/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.redeem_invite_code(${codes[1]})`))).toMatch(/already_member/);
+    await as(tx, b, () => tx`select app.redeem_invite_code(${codes[0]})`);
+    expect(await level(tx, b)).toBe(2);
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'invite_used'`)).length).toBe(1);
+    expect((await as(tx, a, () => tx<{ inv: { name: string }[] }[]>`select app.my_invitees() as inv`))[0].inv.length).toBe(1);
+    const c = await person(tx, "Cem");
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.redeem_invite_code(${codes[0]})`))).toMatch(/invite_invalid/);   // used up
+    await as(tx, a, () => tx`select app.revoke_invite_code(${codes[1]})`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.redeem_invite_code(${codes[1]})`))).toMatch(/invite_invalid/);   // revoked
+    // two vouches also open the door
+    expect(await level(tx, c)).toBe(1);
+  }));
+
+  it("does not accept disposable mail domains and stops identical messages and link floods", () => scenario(async (tx) => {
+    expect((await tx<{ ok: boolean }[]>`select app.email_allowed('x@mailinator.com') as ok`)[0].ok).toBe(false);
+    expect((await tx<{ ok: boolean }[]>`select app.email_allowed('x@sub.yopmail.com') as ok`)[0].ok).toBe(false);
+    expect((await tx<{ ok: boolean }[]>`select app.email_allowed('x@example.org') as ok`)[0].ok).toBe(true);
+    const a = await person(tx, "Ada");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Werbetafel","join_policy":"open"}'::jsonb) as gid`);
+    const text = "Kaufen Sie jetzt unser tolles Angebot, nur heute und nur hier!";
+    for (let i = 0; i < 4; i++) await as(tx, a, () => tx`insert into public.posts (author_id, group_id, body) values (${a}, ${gid}, ${text})`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`insert into public.posts (author_id, group_id, body) values (${a}, ${gid}, ${text})`))).toMatch(/spam_detected/);
+    // a brand new account may not flood links
+    for (let i = 0; i < 3; i++) await as(tx, a, () => tx`insert into public.posts (author_id, group_id, body) values (${a}, ${gid}, ${`Schaut mal hier ${i}: https://example.org/${i}`})`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`insert into public.posts (author_id, group_id, body) values (${a}, ${gid}, 'Und noch einer: https://example.org/x')`))).toMatch(/spam_detected/);
+  }));
+
+  it("shows the topics for which a place still lacks somebody", () => scenario(async (tx) => {
+    const [{ id: region }] = await tx<{ id: string }[]>`select id from public.regions where level = 'borough' limit 1`;
+    const g = await tx<{ gaps: { tag: string; n: number }[] }[]>`select app.gaps(${region}) as gaps`;
+    expect(Array.isArray(g[0].gaps)).toBe(true);
+  }));
+});

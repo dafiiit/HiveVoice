@@ -356,6 +356,14 @@
     "emergency_access": {
       "title": "Emergency access to a chat",
       "body": "Two admins looked briefly into a chat of yours, with a reason. This is noted in the log."
+    },
+    "invite_used": {
+      "title": "{name} followed your invitation",
+      "body": "You now vouch for this person for 30 days."
+    },
+    "invitee_violation": {
+      "title": "Notice about an invited person",
+      "body": "Case {case_no}: a person you invited broke the rules."
     }
   }
 }

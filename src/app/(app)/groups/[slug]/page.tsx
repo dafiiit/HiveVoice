@@ -25,6 +25,7 @@ import { Leadership, type MotionView, type TransferView } from "@/components/gro
 import { GroupRules } from "@/components/group/GroupRules";
 import { DangerZone } from "@/components/group/DangerZone";
 import { InviteBanner } from "@/components/group/InviteBanner";
+import { ShareBlock } from "@/components/ShareBlock";
 
 const TABS = ["goals", "talk", "links", "needs", "tasks", "team", "about"] as const;
 
@@ -177,6 +178,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           </span>
           {session && <FollowButton type="group" id={g.id} following={data.following} />}
         </div>
+        <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} />
         {g.archived_at && <p role="status" className="m-0 border-l-4 border-red bg-surface p-3 font-bold">{tr("danger.archived")}</p>}
         {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
         <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}

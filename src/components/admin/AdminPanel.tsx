@@ -2,7 +2,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { addDomain, grantAdmin, purgeDemo, removeDomain, setDemoChats, setVerificationMode } from "@/lib/actions/admin";
+import { addDomain, grantAdmin, purgeDemo, removeDomain, setDemoChats, setRegistrationMode, setVerificationMode } from "@/lib/actions/admin";
+import { mintInviteCodes } from "@/lib/actions/growth";
 import { btn, chip, field } from "../ui/styles";
 
 type Overview = {
@@ -26,6 +27,9 @@ export function AdminPanel({ o, me }: { o: Overview; me: string }) {
     router.refresh();
   });
   const mode = String(o.settings.verification_mode ?? "login");
+  const regMode = String(o.settings.registration_mode ?? "open");
+  const [minted, setMinted] = useState<string[]>([]);
+  const tg = useTranslations("growth.admin");
   const demoChats = o.settings.demo_chats === true;
   const stats: [string, number][] = [["profiles", o.profiles], ["demo_profiles", o.demo_profiles], ["groups", o.groups], ["initiatives", o.initiatives],
     ["listings", o.listings], ["open_ballots", o.open_ballots], ["open_cases", o.open_cases], ["regions", o.regions]];
@@ -41,6 +45,18 @@ export function AdminPanel({ o, me }: { o: Overview; me: string }) {
         <div className="flex gap-2">
           {(["login", "vouch", "eid"] as const).map((m) => <button key={m} type="button" aria-pressed={mode === m} disabled={pending} onClick={() => act(() => setVerificationMode(m))} className={chip(mode === m)}>{t(`modes.${m}`)}</button>)}
         </div>
+      </section>
+      <section className="flex flex-col gap-3">
+        <h2 className="m-0 text-2xl font-bold">{tg("title")}</h2>
+        <p className="m-0 max-w-[720px]">{tg("text")}</p>
+        <div className="flex gap-2">
+          {(["open", "invite"] as const).map((m) => <button key={m} type="button" aria-pressed={regMode === m} disabled={pending} onClick={() => act(() => setRegistrationMode(m))} className={chip(regMode === m)}>{tg(`mode_${m}`)}</button>)}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" disabled={pending} className={btn.secondary} onClick={() => start(async () => { const r = await mintInviteCodes(10); if (r.ok) setMinted(r.data); else setMsg(tc(`errors.${r.error}` as "errors.unknown")); })}>{tg("mint")}</button>
+          <span className="text-sm text-muted">{tg("mintText")}</span>
+        </div>
+        {minted.length > 0 && <pre className="m-0 overflow-x-auto border border-line bg-surface p-3 text-sm">{minted.join("\n")}</pre>}
       </section>
       <section className="flex flex-col gap-3">
         <h2 className="m-0 text-2xl font-bold">{t("domains")}</h2>

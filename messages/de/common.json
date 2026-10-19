@@ -90,7 +90,11 @@
     "outdated": "Das Dokument hat sich seit dem Vorschlag geändert. Bitte schlage es neu vor.",
     "quota_exceeded": "Dein Speicher ist voll. Lösche etwas oder lass dich bestätigen, dann gibt es mehr Platz.",
     "appeal_window_over": "Die Frist für den Einspruch ist vorbei.",
-    "second_admin_needed": "Eine zweite Admin muss zustimmen."
+    "second_admin_needed": "Eine zweite Admin muss zustimmen.",
+    "no_invites_left": "Du hast keine Einladungen mehr übrig.",
+    "already_member": "Du bist schon dabei.",
+    "email_not_allowed": "Mit dieser E-Mail-Adresse kann man sich nicht anmelden (Wegwerf-Adresse).",
+    "spam_detected": "Das sieht nach Spam aus: derselbe Text oder viele Links in kurzer Zeit. Warte bitte etwas."
   },
   "phase": {
     "idea": "Idee",

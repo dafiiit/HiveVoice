@@ -356,6 +356,14 @@
     "emergency_access": {
       "title": "Notfallzugriff auf einen Chat",
       "body": "Zwei Admins haben mit Begründung kurz in einen Chat von dir gesehen. Das ist im Protokoll vermerkt."
+    },
+    "invite_used": {
+      "title": "{name} ist deiner Einladung gefolgt",
+      "body": "Du bürgst jetzt 30 Tage für diese Person."
+    },
+    "invitee_violation": {
+      "title": "Hinweis zu einer eingeladenen Person",
+      "body": "Fall {case_no}: Eine Person, die du eingeladen hast, hat gegen Regeln verstoßen."
     }
   }
 }

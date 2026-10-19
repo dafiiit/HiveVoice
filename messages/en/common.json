@@ -90,7 +90,11 @@
     "outdated": "The document changed since the suggestion. Please suggest it again.",
     "quota_exceeded": "Your storage is full. Delete something or get verified for more room.",
     "appeal_window_over": "The time for an appeal has passed.",
-    "second_admin_needed": "A second admin has to agree."
+    "second_admin_needed": "A second admin has to agree.",
+    "no_invites_left": "You have no invitations left.",
+    "already_member": "You are in already.",
+    "email_not_allowed": "You cannot sign up with this address (disposable address).",
+    "spam_detected": "This looks like spam: the same text or many links in a short time. Please wait a little."
   },
   "phase": {
     "idea": "Idea",

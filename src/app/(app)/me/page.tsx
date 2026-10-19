@@ -32,6 +32,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "profile";
   const t = await getTranslations("me");
   const tm = await getTranslations("modrights");
+  const tgr = await getTranslations("growth");
   const tr = await getTranslations("rights");
   const locale = await getLocale();
 
@@ -131,6 +132,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
             <TagEditor relation="offers" label={t("offers")} initial={offers} suggestions={d.suggestions} />
             <TagEditor relation="needs" label={t("needs")} initial={needs} suggestions={d.suggestions} />
             <p className="m-0 text-sm text-muted">{t("tagsHint")} <Link href="/offers">{t("toOffers")}</Link> · <Link href="/needs">{t("toNeeds")}</Link></p>
+            <Link href="/teilen" className="inline-flex h-12 items-center self-start border border-ink px-5 font-bold text-ink no-underline">{tgr("share.app")}</Link>
           </div>
           <div className="flex flex-col gap-8">
             <section className="flex flex-col gap-3">

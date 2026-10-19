@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { emailAllowed } from "@/lib/actions/growth";
+import { Captcha, captchaOn } from "./Captcha";
 import { btn, field } from "../ui/styles";
 
 const providers = (process.env.NEXT_PUBLIC_AUTH_PROVIDERS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
@@ -17,16 +19,19 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [trap, setTrap] = useState("");
   const target = next && next.startsWith("/") ? next : "/connect";
   const callback = () => `${window.location.origin}/auth/callback?next=${encodeURIComponent(mode === "signup" ? "/onboarding" : target)}`;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (trap) return;                 // a field only bots fill in
     setBusy(true);
     setError(null);
     const supabase = createSupabaseBrowser();
     if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({ email, password, options: captcha ? { captchaToken: captcha } : undefined });
       if (error) {
         setError(error.code === "email_not_confirmed" ? t("errors.notConfirmed") : t("errors.invalid"));
         setBusy(false);
@@ -35,7 +40,8 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
       router.replace(`/auth/callback?next=${encodeURIComponent(target)}&session=1`);
       return;
     }
-    const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: callback() } });
+    if (!(await emailAllowed(email))) { setBusy(false); setError(t("errors.disposable")); return; }
+    const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: callback(), captchaToken: captcha ?? undefined } });
     setBusy(false);
     if (error) {
       setError(error.code === "weak_password" ? t("errors.weak") : error.code === "user_already_exists" ? t("errors.exists") : error.message);
@@ -88,9 +94,11 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
             value={password} onChange={(e) => setPassword(e.target.value)} className={field.input} />
           {mode === "signup" && <span className={field.hint}>{t("passwordHint")}</span>}
         </label>
+        <input type="text" name="website" value={trap} onChange={(e) => setTrap(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+        <Captcha onToken={setCaptcha} />
         {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
         <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={busy} className={btn.primaryLg}>{mode === "login" ? t("login") : t("signup")}</button>
+          <button type="submit" disabled={busy || (captchaOn && !captcha)} className={btn.primaryLg}>{mode === "login" ? t("login") : t("signup")}</button>
           {mode === "login"
             ? <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ""}`} className={btn.ghost}>{t("noAccount")}</Link>
             : <Link href="/login" className={btn.ghost}>{t("haveAccount")}</Link>}

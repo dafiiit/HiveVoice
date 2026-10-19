@@ -136,6 +136,74 @@
     "ttl_proposed": {
       "title": "Disappearing messages",
       "body": "Someone proposes that messages disappear after {days} days. Open the chat to agree."
+    },
+    "group_invite": {
+      "title": "{by} invites you",
+      "body": "To the group “{group}”."
+    },
+    "group_invite_used": {
+      "title": "{name} joined",
+      "body": "Through your invitation link to “{group}”."
+    },
+    "invite_accepted": {
+      "title": "{name} accepted",
+      "body": "The invitation to “{group}”."
+    },
+    "invite_declined": {
+      "title": "{name} declined",
+      "body": "The invitation to “{group}”."
+    },
+    "group_removed": {
+      "title": "You were removed from “{group}”",
+      "body": "Reason: {reason}"
+    },
+    "group_transfer_proposed": {
+      "title": "{name} wants to hand “{group}” over to you",
+      "body": "Open the group to accept."
+    },
+    "group_transfer_accepted": {
+      "title": "{name} takes over “{group}”",
+      "body": "The hand-over takes effect after 48 hours; until then you can take it back."
+    },
+    "group_transfer_declined": {
+      "title": "{name} declines the hand-over",
+      "body": "“{group}” stays with you."
+    },
+    "group_owner_changed": {
+      "title": "{name} now leads “{group}”",
+      "body": "The leadership of the group changed."
+    },
+    "group_orphaned": {
+      "title": "“{group}” has no leadership anymore",
+      "body": "Members can ask to take over."
+    },
+    "group_motion_opened_takeover": {
+      "title": "Vote in “{group}”",
+      "body": "About taking over the leadership. Vote in the group."
+    },
+    "group_motion_opened_recall": {
+      "title": "Vote in “{group}”",
+      "body": "About recalling the leadership. Vote in the group."
+    },
+    "group_motion_result_yes": {
+      "title": "Vote in “{group}” passed",
+      "body": "The members agreed."
+    },
+    "group_motion_result_no": {
+      "title": "Vote in “{group}” failed",
+      "body": "There was no majority."
+    },
+    "group_delete_requested": {
+      "title": "“{group}” is to be deleted",
+      "body": "For good on {date}. Download the data first."
+    },
+    "group_archived": {
+      "title": "“{group}” was archived",
+      "body": "The group can only be read now."
+    },
+    "group_rule_changed": {
+      "title": "“{group}” became more open",
+      "body": "Visibility, joining or rights changed."
     }
   }
 }

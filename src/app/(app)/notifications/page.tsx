@@ -125,6 +125,16 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = p.group_id ? "/connect" : p.initiative_id ? `/initiatives/${p.initiative_id}?tab=threads` : "/connect";
     } else if (kind === "jury_invite") {
       href = `/jury/${p.case_id}`; label = t("labels.jury");
+    } else if (kind === "group_invite" || kind === "invite_accepted" || kind === "invite_declined" || kind === "group_invite_used") {
+      href = `/groups/${p.slug}`; category = "requests"; label = t("labels.group");
+    } else if (kind === "group_transfer_proposed" || kind === "group_transfer_accepted" || kind === "group_transfer_declined" || kind === "group_owner_changed" || kind === "group_orphaned") {
+      href = `/groups/${p.slug}?tab=team`; label = t("labels.group");
+    } else if (kind === "group_motion_opened") {
+      kind = `group_motion_opened_${p.kind}`; href = `/groups/${p.slug}?tab=team`; label = t("labels.group");
+    } else if (kind === "group_motion_result") {
+      kind = `group_motion_result_${String(p.passed) === "true" ? "yes" : "no"}`; href = `/groups/${p.slug}?tab=team`; label = t("labels.group");
+    } else if (kind === "group_removed" || kind === "group_delete_requested" || kind === "group_archived" || kind === "group_rule_changed") {
+      href = kind === "group_removed" ? "/connect" : `/groups/${p.slug}`; label = t("labels.group");
     } else if (kind === "vouched") {
       href = "/rechte";
     } else if (kind === "post_removed") {

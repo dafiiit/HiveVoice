@@ -20,12 +20,19 @@ import { FollowButton } from "@/components/FollowButton";
 import { LinkCard } from "@/components/links/LinkCard";
 import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
 import { btn } from "@/components/ui/styles";
+import { Invites } from "@/components/group/Invites";
+import { Leadership, type MotionView, type TransferView } from "@/components/group/Leadership";
+import { GroupRules } from "@/components/group/GroupRules";
+import { DangerZone } from "@/components/group/DangerZone";
+import { InviteBanner } from "@/components/group/InviteBanner";
 
 const TABS = ["goals", "talk", "links", "needs", "tasks", "team", "about"] as const;
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
-  join_policy: "open" | "request"; member_count: number; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
+  join_policy: "open" | "request" | "invite"; member_count: number; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
+  owner_id: string | null; owner_name: string | null; orphaned_at: string | null; delete_requested_at: string | null; archived_at: string | null;
+  slow_mode_seconds: number; adults_only: boolean; can_takeover: boolean;
 };
 
 export async function generateMetadata({ params }: PageProps<"/groups/[slug]">) {
@@ -41,6 +48,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id;
   const t = await getTranslations("group");
+  const tr = await getTranslations("grouprights");
   const tc = await getTranslations("common");
   const tl = await getTranslations("links");
   const locale = await getLocale();
@@ -49,8 +57,10 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const data = await asViewer(viewer, async (tx) => {
     const [g] = await tx<Group[]>`
       select g.id, g.slug::text, g.name, g.summary, g.description, g.kind::text, g.visibility::text, g.join_policy::text, g.member_count,
-             g.cover_seed, g.cover_path, g.mod_tasks, g.created_at, r.name as region_name
-      from public.groups g left join public.regions r on r.id = g.region_id where g.slug = ${slug}`;
+             g.cover_seed, g.cover_path, g.mod_tasks, g.created_at, r.name as region_name,
+             g.owner_id, op.display_name as owner_name, g.orphaned_at, g.delete_requested_at, g.archived_at, g.slow_mode_seconds, g.adults_only,
+             (g.orphaned_at is not null or g.owner_id is null or app.last_activity(g.owner_id) < now() - interval '30 days') as can_takeover
+      from public.groups g left join public.regions r on r.id = g.region_id left join public.profiles op on op.id = g.owner_id where g.slug = ${slug}`;
     if (!g) return null;
     const [{ role, can_post, can_propose, can_vote, can_tasks, can_manage }] = await tx<{ role: string | null; can_post: boolean; can_propose: boolean; can_vote: boolean; can_tasks: boolean; can_manage: boolean }[]>`
       select app.group_role(${g.id})::text as role, app.has_group_permission(${g.id}, 'post') as can_post,
@@ -96,6 +106,25 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     const requests = active === "team" && can_manage ? await tx<{ id: string; profile_id: string; name: string; seed: number; path: string | null; message: string | null }[]>`
       select r.id, r.profile_id, p.display_name as name, p.avatar_seed as seed, p.avatar_path as path, r.message from public.group_join_requests r join public.profiles p on p.id = r.profile_id
       where r.group_id = ${g.id} and r.status = 'pending' order by r.created_at` : [];
+    const invite = me ? (await tx<{ id: string; by: string | null }[]>`
+      select r.id, p.display_name as by from public.group_join_requests r left join public.profiles p on p.id = r.decided_by
+      where r.group_id = ${g.id} and r.profile_id = ${me} and r.direction = 'invite' and r.status = 'pending' limit 1`)[0] ?? null : null;
+    const canInvite = me ? (await tx<{ ok: boolean }[]>`select app.may_invite(${g.id}, 'contributor') as ok`)[0].ok : false;
+    const team = active === "team" && role ? {
+      links: canInvite ? await tx<{ id: string; role: string; expires_at: string; max_uses: number | null; uses: number }[]>`
+        select id, role::text, expires_at, max_uses, uses from public.group_invites where group_id = ${g.id} and revoked_at is null and expires_at > now() and (max_uses is null or uses < max_uses) order by created_at desc` : [],
+      transfer: (await tx<TransferView[]>`
+        select t.id, t.status, t.to_id, tp.display_name as to_name, t.from_id, fp.display_name as from_name, t.executes_at
+        from public.group_transfers t join public.profiles tp on tp.id = t.to_id join public.profiles fp on fp.id = t.from_id
+        where t.group_id = ${g.id} and t.status in ('proposed', 'accepted') limit 1`)[0] ?? null,
+      motion: (await tx<MotionView[]>`
+        select m.id, m.kind, sp.display_name as subject_name, m.closes_at, (c.n ->> 'yes')::int as yes, (c.n ->> 'no')::int as no, (c.n ->> 'members')::int as members, (c.n ->> 'mine')::boolean as mine
+        from public.group_motions m join public.profiles sp on sp.id = m.subject_id, lateral (select app.motion_counts(m.id) as n) c
+        where m.group_id = ${g.id} and m.status = 'open' limit 1`)[0] ?? null,
+      audit: role === "admin" ? await tx<{ id: number; action: string; actor: string | null; at: string }[]>`
+        select a.id, a.action, p.display_name as actor, a.created_at as at from public.audit_log a left join public.profiles p on p.id = a.actor_id
+        where a.group_id = ${g.id} order by a.id desc limit 30` : [],
+    } : null;
     const permRows = active === "team" ? await tx<{ holder: string; permission: string; allowed: boolean }[]>`
       select holder::text, permission::text, allowed from public.group_role_permissions where group_id = ${g.id}` : [];
     const perms: Record<string, Record<string, boolean>> = {};
@@ -105,10 +134,11 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       where g2.id <> ${g.id} and g2.archived_at is null and exists (
         select 1 from public.group_tags a join public.group_tags b on a.tag_id = b.tag_id where a.group_id = g2.id and b.group_id = ${g.id})
       order by g2.member_count desc limit 3`;
-    return { g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
+    return { team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
   });
   if (!data) notFound();
   const { g, role, active } = data;
+  const locked = g.visibility !== "public" && !role;
   const path = `/groups/${slug}`;
   const voting = data.goals.filter((x) => x.status === "voting").length;
   const admins = data.members.filter((m) => m.role === "admin");
@@ -134,7 +164,8 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           <span className="inline-flex h-8 items-center bg-ink px-3 font-bold text-on-ink">{t(`kinds.${g.kind}`)}</span>
           {g.region_name && <span className={tag}>{g.region_name}</span>}
           <span className={tag}>{t(`policy.${g.join_policy}`)}</span>
-          {g.visibility === "members" && <span className={tag}>{t("vis.members")}</span>}
+          {g.visibility !== "public" && <span className={tag}>{tr(`vis.${g.visibility}` as "vis.members")}</span>}
+          {g.adults_only && <span className={tag}>{tr("adultsOnly")}</span>}
           {data.tags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}
         </div>
         <h1 className="display m-0">{g.name}</h1>
@@ -146,20 +177,23 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           </span>
           {session && <FollowButton type="group" id={g.id} following={data.following} />}
         </div>
+        {g.archived_at && <p role="status" className="m-0 border-l-4 border-red bg-surface p-3 font-bold">{tr("danger.archived")}</p>}
+        {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
         <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
           lastAdmin={role === "admin" && admins.length === 1} />
 
-        <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">
+        {locked && <p className="m-0 border-l-4 border-ink bg-surface p-4">{data.invite && g.visibility === "secret" ? tr("lockedSecret") : tr("lockedTitle")}</p>}
+        {!locked && <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">
           {tabs.map((k) => (
             <Link key={k} role="tab" aria-selected={active === k} href={`${path}${k === "goals" ? "" : `?tab=${k}`}`} scroll={false} className={tab(active === k)}>{labels[k]}</Link>
           ))}
-        </div>
+        </div>}
 
-        {active === "goals" && (
+        {!locked && active === "goals" && (
           <Goals slug={slug} groupId={g.id} goals={data.goals} members={data.members.map((m) => ({ id: m.id, name: m.name }))}
             canPropose={data.can_propose} canEdit={role === "admin" || role === "maintainer"} canVote={data.can_vote} isMember={!!role && role !== "guest"} signedIn={!!session} />
         )}
-        {active === "talk" && (
+        {!locked && active === "talk" && (
           <section className="flex max-w-[760px] flex-col gap-3">
             <ChatScroll count={data.posts.length} className="flex max-h-[60dvh] min-h-[240px] flex-col overflow-y-auto border border-line bg-surface px-4">
               <PostList posts={data.posts} path={`${path}?tab=talk`} canWrite={data.can_post} viewerId={me} empty={t("noPosts")} canModerate={role === "admin" || role === "maintainer"} />
@@ -169,7 +203,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
               : <p className="m-0 text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</p>}
           </section>
         )}
-        {active === "links" && (
+        {!locked && active === "links" && (
           <section className="flex flex-col gap-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="m-0 max-w-[640px]">{tl("groupIntro")}</p>
@@ -183,7 +217,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             </div>
           </section>
         )}
-        {active === "needs" && (
+        {!locked && active === "needs" && (
           <section className="flex flex-col gap-4">
             <p className="m-0 max-w-[640px]">{t("needsIntro")}</p>
             {data.needs.length === 0 && <p className="m-0 text-muted">{t("noNeeds")}</p>}
@@ -204,12 +238,38 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             </div>
           </section>
         )}
-        {active === "tasks" && <Tasks slug={slug} groupId={g.id} tasks={data.tasks} canEdit={data.can_tasks} viewerId={me} />}
-        {active === "team" && (
-          <Team slug={slug} groupId={g.id} visibility={g.visibility} joinPolicy={g.join_policy} members={data.members} requests={data.requests}
-            perms={data.perms} myRole={role} canManage={data.can_manage} viewerId={me} />
+        {!locked && active === "tasks" && <Tasks slug={slug} groupId={g.id} tasks={data.tasks} canEdit={data.can_tasks} viewerId={me} />}
+        {!locked && active === "team" && (
+          <div className="flex flex-col gap-10">
+            <Leadership slug={slug} groupId={g.id} ownerId={g.owner_id} ownerName={g.owner_name} orphaned={!!g.orphaned_at} viewerId={me} isMember={!!role}
+              candidates={data.members.filter((m) => m.id !== me && (m.role === "admin" || m.role === "maintainer")).map((m) => ({ id: m.id, name: m.name }))}
+              transfer={data.team?.transfer ?? null} motion={data.team?.motion ?? null} canTakeover={g.can_takeover} />
+            {data.canInvite && (
+              <Invites slug={slug} groupId={g.id} links={data.team?.links ?? []}
+                roles={me === g.owner_id ? ["contributor", "guest", "maintainer", "admin"] : role === "admin" ? ["contributor", "guest", "maintainer"] : ["contributor", "guest"]} />
+            )}
+            <Team slug={slug} groupId={g.id} ownerId={g.owner_id} members={data.members} requests={data.requests}
+              perms={data.perms} myRole={role} canManage={data.can_manage} viewerId={me} />
+            {role === "admin" && (
+              <>
+                <GroupRules slug={slug} groupId={g.id} visibility={g.visibility} joinPolicy={g.join_policy} adultsOnly={g.adults_only} slowMode={g.slow_mode_seconds} />
+                <section aria-label={tr("log.title")} className="flex flex-col gap-2">
+                  <h2 className="m-0 text-2xl font-bold">{tr("log.title")}</h2>
+                  <span className="text-sm text-muted">{tr("log.text")}</span>
+                  {(data.team?.audit.length ?? 0) === 0 && <span className="text-muted">{tr("log.empty")}</span>}
+                  {data.team?.audit.map((a) => (
+                    <span key={a.id} className="flex flex-wrap justify-between gap-2 border-b border-line py-1.5 text-sm">
+                      <span>{tr.has(`log.actions.${a.action}`) ? tr(`log.actions.${a.action}` as "log.actions.set_role") : a.action}{a.actor ? ` · ${a.actor}` : ""}</span>
+                      <span className="text-muted">{new Date(a.at).toLocaleString(locale)}</span>
+                    </span>
+                  ))}
+                </section>
+                <DangerZone slug={slug} groupId={g.id} archived={!!g.archived_at} deleteRequestedAt={g.delete_requested_at} isOwner={me === g.owner_id} isAdmin />
+              </>
+            )}
+          </div>
         )}
-        {active === "about" && (
+        {!locked && active === "about" && (
           <section className="flex max-w-[720px] flex-col gap-4">
             <p className="m-0 whitespace-pre-line text-lg leading-relaxed">{g.description ?? g.summary ?? t("noDescription")}</p>
             <dl className="m-0 grid grid-cols-[140px_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">

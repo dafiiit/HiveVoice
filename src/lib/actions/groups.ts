@@ -7,7 +7,7 @@ const path = (slug: string) => `/groups/${slug}`;
 
 export type GroupInput = {
   name: string; summary: string; description: string; kind: string; visibility: string; joinPolicy: string;
-  regionId: string; modTasks: boolean; modOfficial: boolean; tags: string[]; focus: string;
+  regionId: string; modTasks: boolean; modOfficial: boolean; tags: string[]; focus: string; template?: string; adultsOnly?: boolean;
 };
 
 export async function createGroup(input: GroupInput) {
@@ -15,7 +15,7 @@ export async function createGroup(input: GroupInput) {
     const [{ id }] = await tx<{ id: string }[]>`select app.create_group(${tx.json({
       name: input.name, summary: input.summary, description: input.description, kind: input.kind, visibility: input.visibility,
       join_policy: input.joinPolicy, region_id: input.regionId, mod_tasks: input.modTasks, mod_official: input.modOfficial,
-      tags: input.tags, focus: input.focus,
+      tags: input.tags, focus: input.focus, template: input.template ?? "project", adults_only: input.adultsOnly ?? false,
     })}) as id`;
     const [{ slug }] = await tx<{ slug: string }[]>`select slug::text from public.groups where id = ${id}`;
     return slug;
@@ -24,14 +24,16 @@ export async function createGroup(input: GroupInput) {
   return res;
 }
 
-export async function updateGroup(slug: string, id: string, input: Partial<{ name: string; summary: string; description: string; visibility: string; joinPolicy: string; modTasks: boolean }>) {
+export async function updateGroup(slug: string, id: string, input: Partial<{ name: string; summary: string; description: string; visibility: string; joinPolicy: string; modTasks: boolean; slowMode: number; adultsOnly: boolean }>) {
   const res = await run(async (tx) => {
     await tx`update public.groups set
       name = coalesce(${input.name ?? null}, name), summary = coalesce(${input.summary ?? null}, summary),
       description = coalesce(${input.description ?? null}, description),
       visibility = coalesce(${input.visibility ?? null}::public.visibility, visibility),
       join_policy = coalesce(${input.joinPolicy ?? null}::public.join_policy, join_policy),
-      mod_tasks = coalesce(${input.modTasks ?? null}::boolean, mod_tasks)
+      mod_tasks = coalesce(${input.modTasks ?? null}::boolean, mod_tasks),
+      slow_mode_seconds = coalesce(${input.slowMode ?? null}::int, slow_mode_seconds),
+      adults_only = coalesce(${input.adultsOnly ?? null}::boolean, adults_only)
       where id = ${id}`;
     return null;
   });
@@ -169,4 +171,118 @@ export async function deleteTask(slug: string, taskId: string) {
   });
   revalidatePath(path(slug));
   return res;
+}
+
+/** Removing a member says why and may keep them from coming back (none, 30 days, forever). */
+export async function removeMemberWithReason(slug: string, groupId: string, profileId: string, reason: string, ban: "none" | "30" | "forever") {
+  const res = await run(async (tx) => { await tx`select app.remove_member(${groupId}, ${profileId}, ${reason}, ${ban})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+
+export async function createInviteLink(slug: string, groupId: string, role: string, days: number, maxUses: number | null) {
+  const res = await run(async (tx) => {
+    const [{ code }] = await tx<{ code: string }[]>`select app.create_invite_link(${groupId}, ${role}::public.group_role, ${days}, ${maxUses}) as code`;
+    return code;
+  });
+  revalidatePath(path(slug));
+  return res;
+}
+
+export async function revokeInviteLink(slug: string, inviteId: string) {
+  const res = await run(async (tx) => { await tx`select app.revoke_invite_link(${inviteId})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+
+export type Invitee = { id: string; name: string; headline: string | null };
+/** People who can be invited: by name, only those who may be found and are not in the group yet. */
+export async function searchInvitees(groupId: string, q: string): Promise<Invitee[]> {
+  const query = q.trim();
+  if (query.length < 3) return [];
+  const res = await run(async (tx, s) => {
+    const [{ ok }] = await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`;
+    if (!ok) return [] as Invitee[];
+    return tx<Invitee[]>`
+      select p.id, p.display_name as name, p.headline from public.profiles p
+      where p.onboarded_at is not null and p.id <> ${s.profile.id} and lower(p.display_name) like ${`%${query.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`}
+        and app.can_find(${s.profile.id}, p.id)
+        and not exists (select 1 from public.group_members m where m.group_id = ${groupId} and m.profile_id = p.id)
+      order by p.helped_count desc limit 6`;
+  });
+  return res.ok ? res.data : [];
+}
+
+export async function inviteMember(slug: string, groupId: string, profileId: string, role: string, message: string) {
+  const res = await run(async (tx) => { await tx`select app.invite_member(${groupId}, ${profileId}, ${role}::public.group_role, ${message || null})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+
+export async function decideInvite(requestId: string, accept: boolean) {
+  const res = await run(async (tx) => {
+    const [{ slug }] = await tx<{ slug: string }[]>`select app.decide_invite(${requestId}, ${accept}) as slug`;
+    return slug;
+  });
+  revalidatePath("/", "layout");
+  return res;
+}
+
+export async function acceptInviteLink(code: string) {
+  const res = await run(async (tx) => {
+    const [{ slug }] = await tx<{ slug: string }[]>`select app.accept_invite_link(${code}) as slug`;
+    return slug;
+  });
+  revalidatePath("/", "layout");
+  return res;
+}
+
+export async function proposeTransfer(slug: string, groupId: string, toId: string) {
+  const res = await run(async (tx) => { await tx`select app.propose_transfer(${groupId}, ${toId})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+export async function respondTransfer(slug: string, transferId: string, accept: boolean) {
+  const res = await run(async (tx) => { await tx`select app.respond_transfer(${transferId}, ${accept})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+export async function cancelTransfer(slug: string, transferId: string) {
+  const res = await run(async (tx) => { await tx`select app.cancel_transfer(${transferId})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+
+export async function openMotion(slug: string, groupId: string, kind: "takeover" | "recall") {
+  const res = await run(async (tx) => { await tx`select app.open_motion(${groupId}, ${kind}, null)`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+export async function voteMotion(slug: string, motionId: string, yes: boolean) {
+  const res = await run(async (tx) => { await tx`select app.vote_motion(${motionId}, ${yes})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+
+export async function archiveGroup(slug: string, groupId: string, on: boolean) {
+  const res = await run(async (tx) => { await tx`select app.archive_group(${groupId}, ${on})`; return null; });
+  revalidatePath(path(slug));
+  revalidatePath("/", "layout");
+  return res;
+}
+export async function requestDeleteGroup(slug: string, groupId: string, on: boolean) {
+  const res = await run(async (tx) => { await tx`select app.request_delete_group(${groupId}, ${on})`; return null; });
+  revalidatePath(path(slug));
+  return res;
+}
+
+/** Names of existing groups that look like the one being founded. */
+export async function similarGroups(name: string): Promise<{ slug: string; name: string }[]> {
+  const q = name.trim().toLowerCase();
+  if (q.length < 4) return [];
+  const res = await run(async (tx) => tx<{ slug: string; name: string }[]>`
+    select g.slug::text, g.name from public.groups g
+    where g.archived_at is null and g.visibility <> 'secret' and (lower(g.name) like ${`%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`} or ${q} like '%' || lower(g.name) || '%')
+    order by g.member_count desc limit 3`);
+  return res.ok ? res.data : [];
 }

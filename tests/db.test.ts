@@ -24,7 +24,7 @@ async function person(tx: postgres.TransactionSql, name: string) {
   const authId = randomUUID();
   const [{ id }] = await tx<{ id: string }[]>`select app.ensure_profile(${authId}, ${name}) as id`;
   authIds.set(id, authId);
-  await as(tx, id, () => tx`select app.complete_onboarding('{}'::jsonb)`);
+  await as(tx, id, () => tx`select app.complete_onboarding(${tx.json({ display_mode: "real", real_name: name })})`);
   return id;
 }
 
@@ -115,7 +115,7 @@ describe("group rights", () => {
     const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Rechtegruppe","join_policy":"open"}'::jsonb) as gid`);
     await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
     expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.set_member_role(${gid}, ${a}, 'guest')`))).toMatch(/forbidden/);
-    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.set_member_role(${gid}, ${a}, 'contributor')`))).toMatch(/last_admin/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.set_member_role(${gid}, ${a}, 'contributor')`))).toMatch(/owner_must_transfer|last_admin/);
     // Contributors may propose goals by default, guests may not.
     await as(tx, a, () => tx`select app.set_member_role(${gid}, ${b}, 'guest')`);
     expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.propose_goal(${sp.json({ group_id: gid, title: "Gastziel" })})`))).toMatch(/forbidden/);
@@ -553,7 +553,137 @@ describe("contact, privacy and messages", () => {
 
   it("allows switching between alias and real name once a month", () => scenario(async (tx) => {
     const a = await person(tx, "Ada");
-    await as(tx, a, () => tx`update public.profiles set display_mode = 'real' where id = ${a}`);
-    expect(await fails(tx, (sp) => as(sp, a, () => sp`update public.profiles set display_mode = 'alias' where id = ${a}`))).toMatch(/mode_change_limit/);
+    await as(tx, a, () => tx`update public.profiles set display_mode = 'alias' where id = ${a}`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`update public.profiles set display_mode = 'real' where id = ${a}`))).toMatch(/mode_change_limit/);
+  }));
+});
+
+describe("groups: owner, invitations, removal, hand-over, motions", () => {
+  const mk = (tx: postgres.TransactionSql, who: string, p: Record<string, string | boolean | number>) =>
+    as(tx, who, () => tx<{ gid: string }[]>`select app.create_group(${tx.json(p)}) as gid`).then((r) => r[0].gid);
+  const roleOf = async (tx: postgres.TransactionSql, gid: string, who: string) =>
+    (await as(tx, who, () => tx<{ role: string }[]>`select role::text from public.group_members where group_id = ${gid} and profile_id = ${who}`))[0]?.role;
+
+  it("makes the founder the owner; only the owner appoints admins; templates set different rights", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const gid = await mk(tx, a, { name: "Verein Eins", template: "club", join_policy: "open" });
+    const [{ owner_id: owner }] = await as(tx, a, () => tx<{ owner_id: string }[]>`select owner_id from public.groups where id = ${gid}`);
+    expect(owner).toBe(a);
+    const club = await as(tx, a, () => tx<{ allowed: boolean }[]>`select allowed from public.group_role_permissions where group_id = ${gid} and holder = 'contributor' and permission = 'edit_files'`);
+    expect(club[0].allowed).toBe(false);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, a, () => tx`select app.set_member_role(${gid}, ${b}, 'admin')`);
+    expect(await roleOf(tx, gid, b)).toBe("admin");
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.set_member_role(${gid}, ${c}, 'admin')`))).toMatch(/forbidden/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.set_member_role(${gid}, ${a}, 'contributor')`))).toMatch(/forbidden|owner_must_transfer/);
+  }));
+
+  it("works with invitation links: used up, revoked and secret groups show little", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const gid = await mk(tx, a, { name: "Geheimrunde", visibility: "secret", join_policy: "invite" });
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.join_group(${gid}, null)`))).toMatch(/invite_only|group_not_found/);
+    const [{ code }] = await as(tx, a, () => tx<{ code: string }[]>`select app.create_invite_link(${gid}, 'contributor', 7, 1) as code`);
+    const [{ p }] = await as(tx, null, () => tx<{ p: { valid: boolean; name: string; summary: string | null } }[]>`select app.invite_preview(${code}) as p`);
+    expect(p.valid).toBe(true);
+    expect(p.name).toBe("Geheimrunde");
+    expect(p.summary).toBeNull();
+    await as(tx, b, () => tx`select app.accept_invite_link(${code})`);
+    expect(await roleOf(tx, gid, b)).toBe("contributor");
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.accept_invite_link(${code})`))).toMatch(/invite_invalid/);
+    const [{ code: code2 }] = await as(tx, a, () => tx<{ code: string }[]>`select app.create_invite_link(${gid}) as code`);
+    const [inv] = await as(tx, a, () => tx<{ id: string }[]>`select id from public.group_invites where code = ${code2}`);
+    await as(tx, a, () => tx`select app.revoke_invite_link(${inv.id})`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.accept_invite_link(${code2})`))).toMatch(/invite_invalid/);
+    // an outsider cannot make links
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.create_invite_link(${gid})`))).toMatch(/forbidden/);
+  }));
+
+  it("invites a person directly; the person can accept, and an invite lets them into an invite-only group", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    await as(tx, a, () => tx`select app.set_privacy('all', 'all')`);
+    await as(tx, b, () => tx`select app.set_privacy('all', 'all')`);
+    const gid = await mk(tx, a, { name: "Nur mit Einladung", join_policy: "invite" });
+    await as(tx, a, () => tx`select app.invite_member(${gid}, ${b}, 'contributor', 'Komm dazu')`);
+    const [req] = await as(tx, b, () => tx<{ id: string }[]>`select id from public.group_join_requests where group_id = ${gid} and profile_id = ${b} and direction = 'invite'`);
+    await as(tx, b, () => tx`select app.decide_invite(${req.id}, true)`);
+    expect(await roleOf(tx, gid, b)).toBe("contributor");
+  }));
+
+  it("removes a member with a reason and can keep them out", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const gid = await mk(tx, a, { name: "Offene Runde", join_policy: "open" });
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.remove_member(${gid}, ${b}, '', 'none')`))).toMatch(/reason_required/);
+    await as(tx, a, () => tx`select app.remove_member(${gid}, ${b}, 'Immer wieder Streit', 'forever')`);
+    expect(await roleOf(tx, gid, b)).toBeUndefined();
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.join_group(${gid}, null)`))).toMatch(/banned_from_group/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.remove_member(${gid}, ${a}, 'Ich selbst', 'none')`))).toMatch(/owner_must_transfer/);
+  }));
+
+  it("hands a group over in two steps and lets the owner take it back during the wait", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const gid = await mk(tx, a, { name: "Übergabe", join_policy: "open" });
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, a, () => tx`select app.set_member_role(${gid}, ${b}, 'maintainer')`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.propose_transfer(${gid}, ${c})`))).toMatch(/invalid/);
+    const [{ tid }] = await as(tx, a, () => tx<{ tid: string }[]>`select app.propose_transfer(${gid}, ${b}) as tid`);
+    await as(tx, b, () => tx`select app.respond_transfer(${tid}, true)`);
+    const [t] = await as(tx, a, () => tx<{ status: string; hours: number }[]>`select status, extract(epoch from executes_at - now()) / 3600 as hours from public.group_transfers where id = ${tid}`);
+    expect(t.status).toBe("accepted");
+    expect(Math.round(Number(t.hours))).toBe(48);
+    await as(tx, a, () => tx`select app.cancel_transfer(${tid})`);
+    expect((await as(tx, a, () => tx<{ status: string }[]>`select status from public.group_transfers where id = ${tid}`))[0].status).toBe("revoked");
+  }));
+
+  it("opens motions only when allowed and counts the votes", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const gid = await mk(tx, a, { name: "Streitgruppe", join_policy: "open" });
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.open_motion(${gid}, 'takeover', null)`))).toMatch(/not_allowed/);
+    const [{ mid }] = await as(tx, b, () => tx<{ mid: string }[]>`select app.open_motion(${gid}, 'recall', null) as mid`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.open_motion(${gid}, 'recall', null)`))).toMatch(/duplicate|unique|motions_open/);
+    await as(tx, b, () => tx`select app.vote_motion(${mid}, true)`);
+    await as(tx, c, () => tx`select app.vote_motion(${mid}, false)`);
+    await as(tx, c, () => tx`select app.vote_motion(${mid}, true)`);
+    const [{ n }] = await as(tx, c, () => tx<{ n: { yes: number; no: number; members: number; mine: boolean } }[]>`select app.motion_counts(${mid}) as n`);
+    expect(n.yes).toBe(2);
+    expect(n.no).toBe(0);
+    expect(n.members).toBe(3);
+    expect(n.mine).toBe(true);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.open_motion(${gid}, 'recall', ${a})`))).toMatch(/invalid|duplicate|unique/);
+  }));
+
+  it("archives, schedules deletion for the owner only, and announces openings", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const gid = await mk(tx, a, { name: "Wandelnde Regeln", visibility: "members", join_policy: "open" });
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, a, () => tx`update public.groups set visibility = 'public' where id = ${gid}`);
+    const notes = await as(tx, b, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'group_rule_changed'`);
+    expect(notes.length).toBe(1);
+    const log = await as(tx, a, () => tx<{ action: string }[]>`select action from public.audit_log where group_id = ${gid}`);
+    expect(log.map((r) => r.action)).toContain("group_rules");
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.archive_group(${gid}, true)`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.archive_group(${gid}, true)`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.request_delete_group(${gid}, true)`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.request_delete_group(${gid}, true)`);
+    expect((await as(tx, a, () => tx<{ d: string | null }[]>`select delete_requested_at as d from public.groups where id = ${gid}`))[0].d).not.toBeNull();
+  }));
+
+  it("protects official names, asks public founders for their real name, and keeps minors out of adult groups", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.create_group('{"name":"Stadt Neustadt Aktiv"}'::jsonb)`))).toMatch(/name_protected/);
+    const alias = randomUUID();
+    const [{ id: shy }] = await tx<{ id: string }[]>`select app.ensure_profile(${alias}, 'Schatten') as id`;
+    await as(tx, shy, () => tx`select app.complete_onboarding('{"display_mode":"alias","alias":"Leisefuchs","age_ok":true}'::jsonb)`);
+    expect(await fails(tx, (sp) => as(sp, shy, () => sp`select app.create_group('{"name":"Offene Runde ohne Namen"}'::jsonb)`))).toMatch(/real_name_required/);
+    await as(tx, shy, () => tx`select app.create_group('{"name":"Stille Runde","visibility":"secret"}'::jsonb)`);
+    const kid = randomUUID();
+    const [{ id: young }] = await tx<{ id: string }[]>`select app.ensure_profile(${kid}, 'Jule') as id`;
+    await as(tx, young, () => tx`select app.complete_onboarding('{"display_mode":"real","real_name":"Jule","is_minor":true,"age_ok":true}'::jsonb)`);
+    const gid = await mk(tx, a, { name: "Ab achtzehn", adults_only: true, join_policy: "open" });
+    expect(await fails(tx, (sp) => as(sp, young, () => sp`select app.join_group(${gid}, null)`))).toMatch(/adults_only/);
   }));
 });

@@ -136,6 +136,74 @@
     "ttl_proposed": {
       "title": "Verschwindende Nachrichten",
       "body": "Es wird vorgeschlagen, dass Nachrichten nach {days} Tagen verschwinden. Öffne den Chat, um zuzustimmen."
+    },
+    "group_invite": {
+      "title": "{by} lädt dich ein",
+      "body": "In die Gruppe „{group}“."
+    },
+    "group_invite_used": {
+      "title": "{name} ist beigetreten",
+      "body": "Über deinen Einladungslink in „{group}“."
+    },
+    "invite_accepted": {
+      "title": "{name} hat angenommen",
+      "body": "Die Einladung in „{group}“."
+    },
+    "invite_declined": {
+      "title": "{name} hat abgelehnt",
+      "body": "Die Einladung in „{group}“."
+    },
+    "group_removed": {
+      "title": "Du wurdest aus „{group}“ entfernt",
+      "body": "Grund: {reason}"
+    },
+    "group_transfer_proposed": {
+      "title": "{name} möchte dir „{group}“ übergeben",
+      "body": "Öffne die Gruppe, um die Übergabe anzunehmen."
+    },
+    "group_transfer_accepted": {
+      "title": "{name} übernimmt „{group}“",
+      "body": "Die Übergabe wird nach 48 Stunden wirksam, bis dahin kannst du sie zurücknehmen."
+    },
+    "group_transfer_declined": {
+      "title": "{name} lehnt die Übergabe ab",
+      "body": "„{group}“ bleibt bei dir."
+    },
+    "group_owner_changed": {
+      "title": "{name} leitet jetzt „{group}“",
+      "body": "Die Leitung der Gruppe hat gewechselt."
+    },
+    "group_orphaned": {
+      "title": "„{group}“ hat keine Leitung mehr",
+      "body": "Mitglieder können die Übernahme beantragen."
+    },
+    "group_motion_opened_takeover": {
+      "title": "Abstimmung in „{group}“",
+      "body": "Es geht um die Übernahme der Leitung. Stimme in der Gruppe ab."
+    },
+    "group_motion_opened_recall": {
+      "title": "Abstimmung in „{group}“",
+      "body": "Es geht um die Abwahl der Leitung. Stimme in der Gruppe ab."
+    },
+    "group_motion_result_yes": {
+      "title": "Abstimmung in „{group}“ angenommen",
+      "body": "Die Mitglieder haben zugestimmt."
+    },
+    "group_motion_result_no": {
+      "title": "Abstimmung in „{group}“ abgelehnt",
+      "body": "Es gab keine Mehrheit."
+    },
+    "group_delete_requested": {
+      "title": "„{group}“ soll gelöscht werden",
+      "body": "Am {date} endgültig. Lade vorher Daten herunter."
+    },
+    "group_archived": {
+      "title": "„{group}“ wurde archiviert",
+      "body": "Die Gruppe ist nur noch zum Lesen da."
+    },
+    "group_rule_changed": {
+      "title": "„{group}“ ist offener geworden",
+      "body": "Sichtbarkeit, Beitritt oder Rechte haben sich geändert."
     }
   }
 }

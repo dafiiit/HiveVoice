@@ -6,11 +6,12 @@ import { joinGroup, leaveGroup } from "@/lib/actions/groups";
 import { btn, field } from "../ui/styles";
 
 export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdmin }: {
-  slug: string; id: string; policy: "open" | "request"; role: string | null; requested: boolean; signedIn: boolean; lastAdmin: boolean;
+  slug: string; id: string; policy: "open" | "request" | "invite"; role: string | null; requested: boolean; signedIn: boolean; lastAdmin: boolean;
 }) {
   const t = useTranslations("group");
   const tc = useTranslations("common");
   const tcn = useTranslations("connect");
+  const tr = useTranslations("grouprights");
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState("");
   const [state, setState] = useState<string | null>(requested ? "requested" : null);
@@ -35,6 +36,7 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
       </span>
     );
   }
+  if (policy === "invite") return <span className="text-sm font-bold">{tr("join.inviteText")}</span>;
   const join = () => start(async () => {
     const res = await joinGroup(slug, id, msg);
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));

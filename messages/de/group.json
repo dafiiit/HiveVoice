@@ -15,7 +15,8 @@
   },
   "policy": {
     "open": "Offen für alle",
-    "request": "Beitritt auf Anfrage"
+    "request": "Beitritt auf Anfrage",
+    "invite": "Nur mit Einladung"
   },
   "policyText": {
     "open": "Jede:r kann beitreten und mitbestimmen.",
@@ -23,7 +24,8 @@
   },
   "vis": {
     "public": "Öffentlich",
-    "members": "Nur Mitglieder"
+    "members": "Nur Mitglieder",
+    "secret": "Geheim"
   },
   "visText": {
     "public": "Alle können Gespräch, Ziele und Verlauf lesen.",

@@ -15,7 +15,8 @@
   },
   "policy": {
     "open": "Open to all",
-    "request": "Join on request"
+    "request": "Join on request",
+    "invite": "By invitation only"
   },
   "policyText": {
     "open": "Anyone can join and take part in decisions.",
@@ -23,7 +24,8 @@
   },
   "vis": {
     "public": "Public",
-    "members": "Members only"
+    "members": "Members only",
+    "secret": "Secret"
   },
   "visText": {
     "public": "Everyone can read the conversation, goals and history.",

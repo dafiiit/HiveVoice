@@ -61,7 +61,15 @@
     "edit_window_over": "Editing only works for 15 minutes.",
     "locked": "Comments are locked.",
     "slow_mode": "In this group you can only write every few minutes. Try again shortly.",
-    "age_required": "Please confirm that you are at least 16."
+    "age_required": "Please confirm that you are at least 16.",
+    "invite_only": "This group can only be joined by invitation.",
+    "invite_invalid": "This invitation link is no longer valid.",
+    "banned_from_group": "You cannot join this group.",
+    "adults_only": "This group is for adults only.",
+    "owner_must_transfer": "The owner has to hand the group over first.",
+    "reason_required": "Please give a reason.",
+    "name_protected": "This name is reserved for public bodies and parties.",
+    "not_allowed": "That is not possible right now."
   },
   "phase": {
     "idea": "Idea",

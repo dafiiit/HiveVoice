@@ -34,8 +34,8 @@ export function mimeOf(file: { name: string; type: string }): string | null {
 export type UploadedFile = { path: string; name: string; mime: string; size: number };
 export type Attachment = { id: string; name: string; mime: string; size_bytes: number };
 export type PollOption = { id: string; label: string; votes: number; mine: boolean };
-export type PollView = { id: string; question: string; multiple: boolean; closed: boolean; voters: number; options: PollOption[] };
-export type PollDraft = { question: string; options: string[]; multiple: boolean };
+export type PollView = { id: string; question: string; multiple: boolean; closed: boolean; closes_at?: string | null; can_manage?: boolean; voters: number; options: PollOption[] };
+export type PollDraft = { question: string; options: string[]; multiple: boolean; hours?: number };
 
 export const isImage = (mime: string) => mime.startsWith("image/");
 
@@ -47,4 +47,4 @@ export function formatSize(bytes: number) {
 
 /** A poll draft is ready when it has a question and at least two filled options. */
 export const pollReady = (p: PollDraft | null) => !!p && p.question.trim().length > 0 && p.options.filter((o) => o.trim()).length >= 2;
-export const cleanPoll = (p: PollDraft): PollDraft => ({ question: p.question.trim(), multiple: p.multiple, options: p.options.map((o) => o.trim()).filter(Boolean).slice(0, 8) });
+export const cleanPoll = (p: PollDraft): PollDraft => ({ question: p.question.trim(), multiple: p.multiple, options: p.options.map((o) => o.trim()).filter(Boolean).slice(0, 8), hours: p.hours && p.hours > 0 ? p.hours : undefined });

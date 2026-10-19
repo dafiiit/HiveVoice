@@ -1,0 +1,16 @@
+{
+  "title": "Deine Rechte",
+  "lead": "Hier steht, was du in HiveVoice tun darfst. Und warum manches noch nicht geht.",
+  "leadShort": "Was du tun darfst.",
+  "matrixLead": "Für alles gibt es eine Regel. Alle lesen hier die gleichen Regeln.",
+  "limitsHint": "Jeden Tag gibt es eine Grenze. So schützen wir alle vor Spam.",
+  "why": {
+    "level_required": "Dafür brauchst du Stufe 2. Das heißt: bestätigt. Unter „Deine Rechte“ steht, was fehlt.",
+    "not_allowed": "Das darfst du hier nicht. Frag die Admins.",
+    "not_shared": "Das ist nicht mit dir geteilt. Frag die Person, der es gehört.",
+    "view_only": "Du darfst nur lesen. Frag, ob du auch ändern darfst.",
+    "not_author": "Das dürfen nur die Autorinnen und Autoren.",
+    "not_member": "Das dürfen nur Mitglieder. Tritt der Gruppe bei.",
+    "not_found": "Das gibt es nicht mehr."
+  }
+}

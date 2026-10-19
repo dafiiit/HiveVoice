@@ -1,8 +1,9 @@
 "use client";
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { votePoll } from "@/lib/actions/polls";
+import { useLocale, useTranslations } from "next-intl";
+import { closePoll, deletePoll, votePoll } from "@/lib/actions/polls";
+import { dateTime } from "@/lib/format";
 import type { PollView } from "@/lib/files";
 
 /**
@@ -11,6 +12,8 @@ import type { PollView } from "@/lib/files";
  */
 export function PollCard({ poll, canVote, signedIn, loginPath, onChange }: { poll: PollView; canVote: boolean; signedIn: boolean; loginPath: string; onChange?: (p: PollView) => void }) {
   const t = useTranslations("extras");
+  const locale = useLocale();
+  const [gone, setGone] = useState(false);
   // What the server just sent wins over my last answer: a fresh poll from props replaces the local copy.
   const [state, setState] = useState<{ base: PollView; local: PollView | null }>({ base: poll, local: null });
   if (state.base !== poll) setState({ base: poll, local: null });
@@ -31,10 +34,11 @@ export function PollCard({ poll, canVote, signedIn, loginPath, onChange }: { pol
     });
   };
 
+  if (gone) return null;
   return (
     <section aria-label={t("pollLabel", { question: shown.question })} className="flex w-full max-w-[420px] flex-col gap-2 border border-ink bg-surface p-3 text-ink">
       <strong className="break-words leading-snug">{shown.question}</strong>
-      <span className="text-xs text-muted">{shown.closed ? t("pollClosed") : shown.multiple ? t("pollMany") : t("pollOne")}</span>
+      <span className="text-xs text-muted">{shown.closed ? t("pollClosed") : shown.multiple ? t("pollMany") : t("pollOne")}{shown.closes_at && !shown.closed ? ` · ${t("pollEnds", { date: dateTime(shown.closes_at, locale) })}` : ""}</span>
       <div role={shown.multiple ? "group" : "radiogroup"} aria-label={shown.question} className="flex flex-col gap-1.5">
         {shown.options.map((o) => {
           const pct = Math.round((100 * o.votes) / total);
@@ -51,6 +55,15 @@ export function PollCard({ poll, canVote, signedIn, loginPath, onChange }: { pol
       <span className="text-xs text-muted">{t("pollVoters", { n: shown.voters })}</span>
       {!signedIn && !shown.closed && <Link href={`/login?next=${encodeURIComponent(loginPath)}`} className="text-sm font-bold">{t("pollSignIn")}</Link>}
       {signedIn && !canVote && !shown.closed && <span className="text-xs text-muted">{t("pollVerify")}</span>}
+      {shown.can_manage && (
+        <span className="flex gap-3 text-xs">
+          {!shown.closed && <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => start(async () => {
+            const res = await closePoll(shown.id);
+            if (res.ok && res.data) { setState({ base: poll, local: res.data }); onChange?.(res.data); } else setError(true);
+          })}>{t("pollEnd")}</button>}
+          <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => { if (confirm(t("pollDeleteConfirm"))) start(async () => { const res = await deletePoll(shown.id); if (res.ok) setGone(true); else setError(true); }); }}>{t("pollDelete")}</button>
+        </span>
+      )}
       {error && <span role="alert" className="text-sm font-bold">{t("pollFailed")}</span>}
     </section>
   );

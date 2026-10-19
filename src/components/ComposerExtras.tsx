@@ -105,6 +105,11 @@ export function ExtrasPreview({ x }: { x: Extras }) {
           {x.poll.options.length < 6 && (
             <button type="button" onClick={() => set({ options: [...x.poll!.options, ""] })} className="inline-flex h-10 items-center gap-1.5 self-start border-0 bg-transparent p-0 text-sm font-bold text-ink"><IconPlus size={14} /> {t("pollAdd")}</button>
           )}
+          <label className="flex flex-wrap items-center gap-2 text-sm">{t("pollDuration")}
+            <select value={x.poll.hours ?? 0} onChange={(e) => set({ hours: Number(e.target.value) })} className={`${field.select} h-10`}>
+              <option value={0}>{t("pollNoEnd")}</option><option value={24}>{t("pollDay")}</option><option value={168}>{t("pollWeek")}</option>
+            </select>
+          </label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={x.poll.multiple} onChange={(e) => set({ multiple: e.target.checked })} className="h-5 w-5 accent-[var(--ink)]" /> {t("pollMultiple")}</label>
           <button type="button" onClick={() => x.setPoll(null)} className="inline-flex h-9 items-center self-start border-0 bg-transparent p-0 text-sm text-muted underline">{t("pollRemove")}</button>
         </fieldset>

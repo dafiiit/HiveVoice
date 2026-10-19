@@ -1231,3 +1231,89 @@ describe("growth: invitations, registration mode, bots", () => {
     expect(Array.isArray(g[0].gaps)).toBe(true);
   }));
 });
+
+describe("polls and the rights matrix", () => {
+  const can = async (tx: postgres.TransactionSql, who: string | null, action: string, object: string | null) =>
+    (await as(tx, who, () => tx<{ c: { allowed: boolean; reason: string | null } }[]>`select app.can(${action}, ${object}::uuid) as c`))[0].c;
+
+  it("gives every row of the matrix a rule, and the rules say yes to the right people and no with a reason to the others", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const [{ id: region }] = await tx<{ id: string }[]>`select id from public.regions where level = 'borough' limit 1`;
+    await as(tx, a, () => tx`select app.set_home_region(${region})`);
+    await as(tx, c, () => tx`select app.set_home_region(${region})`);
+    const rows = await tx<{ action: string }[]>`select action from public.rights_matrix`;
+    expect(rows.length).toBeGreaterThanOrEqual(26);
+    for (const r of rows) expect((await can(tx, b, r.action, randomUUID())).reason).not.toBe("unknown_action");
+    expect((await can(tx, b, "nonsense.action", null)).reason).toBe("unknown_action");
+    expect((await can(tx, null, "group.post", randomUUID())).reason).toBe("not_authenticated");
+
+    const note = (await as(tx, a, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title: "Anleitung Beet", body: "Text" })}) as id`))[0].id;
+    expect((await can(tx, b, "resource.view", note)).allowed).toBe(true);
+    expect(await can(tx, b, "resource.edit", note)).toEqual({ allowed: false, reason: "view_only" });
+    expect(await can(tx, b, "resource.manage", note)).toEqual({ allowed: false, reason: "not_owner" });
+    expect((await can(tx, b, "resource.copy", note)).allowed).toBe(true);        // CC BY-SA
+    expect((await can(tx, a, "resource.manage", note)).allowed).toBe(true);
+    await as(tx, a, () => tx`select app.set_resource_access(${note}, 'me', 'me', false, null)`);
+    expect(await can(tx, b, "resource.view", note)).toEqual({ allowed: false, reason: "not_shared" });
+    expect((await can(tx, b, "resource.download", note)).reason).toBe("not_shared");
+    await as(tx, a, () => tx`select app.set_resource_access(${note}, 'public', 'suggest', false, 'all_rights')`);
+    expect(await can(tx, b, "resource.edit", note)).toEqual({ allowed: false, reason: "suggest_only" });
+    expect((await can(tx, b, "resource.comment", note)).allowed).toBe(true);
+    expect(await can(tx, b, "resource.download", note)).toEqual({ allowed: false, reason: "download_off" });
+    expect(await can(tx, b, "resource.copy", note)).toEqual({ allowed: false, reason: "copy_not_allowed" });
+
+    const ini = (await as(tx, a, async () => tx<{ id: string }[]>`select app.create_initiative(${tx.json({ title: "Mehr Licht im Park", region_id: region, publish: true })}) as id`))[0].id;
+    expect((await can(tx, b, "initiative.support", ini)).allowed).toBe(true);
+    expect(await can(tx, b, "initiative.edit", ini)).toEqual({ allowed: false, reason: "not_author" });
+    expect((await can(tx, a, "initiative.edit", ini)).allowed).toBe(true);
+    expect((await can(tx, a, "initiative.invite_author", ini)).allowed).toBe(true);
+    expect(await can(tx, a, "initiative.start_ballot", ini)).toEqual({ allowed: false, reason: "wrong_phase" });
+    expect((await can(tx, a, "initiative.withdraw", ini)).allowed).toBe(true);
+    expect(await can(tx, b, "initiative.withdraw", ini)).toEqual({ allowed: false, reason: "not_lead" });
+    expect((await can(tx, a, "initiative.delete", ini)).allowed).toBe(true);
+    await as(tx, b, () => tx`insert into public.initiative_supports (initiative_id, profile_id) values (${ini}, ${b})`);
+    expect(await can(tx, a, "initiative.delete", ini)).toEqual({ allowed: false, reason: "has_activity" });
+
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Beetgruppe Nord","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    expect((await can(tx, c, "group.post", gid)).allowed).toBe(true);
+    expect(await can(tx, b, "group.post", gid)).toEqual({ allowed: false, reason: "not_member" });
+    expect((await can(tx, a, "group.archive", gid)).allowed).toBe(true);
+    expect(await can(tx, c, "group.archive", gid)).toEqual({ allowed: false, reason: "not_admin" });
+    expect((await can(tx, a, "group.delete", gid)).allowed).toBe(true);
+    expect(await can(tx, c, "group.transfer", gid)).toEqual({ allowed: false, reason: "not_owner" });
+    expect((await can(tx, a, "group.manage_members", gid)).allowed).toBe(true);
+    expect((await can(tx, c, "group.manage_members", gid)).allowed).toBe(false);
+
+    const resp = (await as(tx, a, async () => tx<{ id: string }[]>`select app.save_responsibility(${tx.json({ title: "Beetpate", description: "Pflege der Beete im Viertel", region_id: region })}) as id`))[0].id;
+    expect((await can(tx, a, "responsibility.answer", resp)).allowed).toBe(true);
+    expect(await can(tx, b, "responsibility.answer", resp)).toEqual({ allowed: false, reason: "not_holder" });
+    expect((await can(tx, c, "responsibility.confirm", resp)).allowed).toBe(true);
+    expect(await can(tx, b, "responsibility.confirm", resp)).toEqual({ allowed: false, reason: "not_affected" });
+    expect(await can(tx, a, "responsibility.dispute", resp)).toEqual({ allowed: false, reason: "own_responsibility" });
+    expect((await can(tx, b, "responsibility.dispute", resp)).allowed).toBe(true);
+    expect((await can(tx, a, "responsibility.edit", resp)).allowed).toBe(true);
+    expect((await can(tx, b, "message.edit", randomUUID())).reason).toBe("not_found");
+    expect((await can(tx, b, "report.appeal", randomUUID())).allowed).toBe(false);
+  }));
+
+  it("gives polls a deadline and lets the creator and the group admins end or delete them, but nobody else", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Umfragerunde","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    const [{ id: post }] = await as(tx, b, () => tx<{ id: string }[]>`insert into public.posts (author_id, group_id, body) values (${b}, ${gid}, 'Was kochen wir?') returning id`);
+    await as(tx, b, () => tx`select app.add_extras('post', ${post}, null, ${tx.json({ question: "Was gibt es zum Fest?", options: ["Suppe", "Kuchen"], hours: 24 })})`);
+    const [{ id: poll, hours }] = await as(tx, b, () => tx<{ id: string; hours: number }[]>`select id, round(extract(epoch from closes_at - now()) / 3600)::int as hours from public.polls where post_id = ${post}`);
+    expect(hours).toBe(24);
+    expect((await can(tx, b, "poll.manage", poll)).allowed).toBe(true);      // the creator
+    expect((await can(tx, a, "poll.manage", poll)).allowed).toBe(true);      // the group's admin
+    expect(await can(tx, c, "poll.manage", poll)).toEqual({ allowed: false, reason: "not_creator" });
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.close_poll(${poll})`))).toMatch(/forbidden/);
+    const view = await as(tx, a, () => tx<{ v: { closed: boolean; can_manage: boolean }[] }[]>`select app.poll_view(${[poll]}::uuid[]) as v`);
+    expect(view[0].v[0].can_manage).toBe(true);
+    await as(tx, a, () => tx`select app.close_poll(${poll})`);
+    expect((await as(tx, a, () => tx<{ v: { closed: boolean }[] }[]>`select app.poll_view(${[poll]}::uuid[]) as v`))[0].v[0].closed).toBe(true);
+    await as(tx, b, () => tx`select app.delete_poll(${poll})`);
+    expect((await as(tx, b, () => tx`select 1 from public.polls where id = ${poll}`)).length).toBe(0);
+  }));
+});

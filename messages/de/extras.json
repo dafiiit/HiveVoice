@@ -35,5 +35,13 @@
     "auth": "Bitte melde dich an.",
     "upload": "Der Upload hat nicht geklappt.",
     "tooMany": "Es sind höchstens {max} Dateien möglich."
-  }
+  },
+  "pollDuration": "Endet",
+  "pollNoEnd": "Nie, ich beende sie selbst",
+  "pollDay": "in 24 Stunden",
+  "pollWeek": "in 7 Tagen",
+  "pollEnds": "endet {date}",
+  "pollEnd": "Jetzt beenden",
+  "pollDelete": "Umfrage löschen",
+  "pollDeleteConfirm": "Umfrage mit allen Stimmen löschen?"
 }

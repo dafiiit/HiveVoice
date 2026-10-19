@@ -4,13 +4,16 @@ import ns_auth from "./auth.json";
 import ns_ballot from "./ballot.json";
 import ns_common from "./common.json";
 import ns_explore from "./explore.json";
+import ns_growth from "./growth.json";
 import ns_initiative from "./initiative.json";
 import ns_market from "./market.json";
 import ns_me from "./me.json";
+import ns_modrights from "./modrights.json";
 import ns_nav from "./nav.json";
 import ns_onboarding from "./onboarding.json";
 import ns_principles from "./principles.json";
 import ns_responsible from "./responsible.json";
+import ns_rights from "./rights.json";
 import ns_welcome from "./welcome.json";
 
 const messages = {
@@ -19,13 +22,16 @@ const messages = {
   "ballot": ns_ballot,
   "common": ns_common,
   "explore": ns_explore,
+  "growth": ns_growth,
   "initiative": ns_initiative,
   "market": ns_market,
   "me": ns_me,
+  "modrights": ns_modrights,
   "nav": ns_nav,
   "onboarding": ns_onboarding,
   "principles": ns_principles,
   "responsible": ns_responsible,
+  "rights": ns_rights,
   "welcome": ns_welcome,
 };
 export default messages;

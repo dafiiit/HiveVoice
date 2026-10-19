@@ -35,5 +35,13 @@
     "auth": "Please sign in.",
     "upload": "The upload did not work.",
     "tooMany": "At most {max} files are possible."
-  }
+  },
+  "pollDuration": "Ends",
+  "pollNoEnd": "Never, I end it myself",
+  "pollDay": "in 24 hours",
+  "pollWeek": "in 7 days",
+  "pollEnds": "ends {date}",
+  "pollEnd": "End now",
+  "pollDelete": "Delete poll",
+  "pollDeleteConfirm": "Delete the poll with all votes?"
 }

@@ -20,6 +20,7 @@ import { DeleteLink } from "@/components/links/DeleteLink";
 import { ShareAccess, CancelTransfer, type GrantRow } from "@/components/links/ShareAccess";
 import { Comments, CopyButton, Suggestions, Versions, type CommentRow, type SuggestionRow, type VersionRow } from "@/components/links/DocExtras";
 import { RestoreResource } from "@/components/links/RestoreResource";
+import { WhyNot } from "@/components/WhyNot";
 
 export async function generateMetadata({ params }: PageProps<"/links/[id]">) {
   const { id } = await params;
@@ -158,6 +159,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
             {level >= 3 && !meta.trashed_at && <Link href={`/links/${r.id}?edit=1`} className="font-bold text-ink">{tk("edit")}</Link>}
             {level === 2 && !meta.trashed_at && <Link href={`/links/${r.id}?suggest=1`} className="font-bold text-ink">{td("page.suggest")}</Link>}
             {meta.lock && !meta.lock.mine && <span className="font-bold text-red">{td("page.locked")}</span>}
+            {level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
           </p>
         </article>
       )}

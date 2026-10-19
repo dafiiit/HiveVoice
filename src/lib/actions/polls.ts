@@ -10,3 +10,16 @@ export async function votePoll(pollId: string, optionIds: string[]) {
     return v[0] ?? null;
   });
 }
+
+/** Ends a poll now: the creator and, in a group, its admins and maintainers. */
+export async function closePoll(pollId: string) {
+  return run(async (tx) => {
+    await tx`select app.close_poll(${pollId})`;
+    const [{ v }] = await tx<{ v: PollView[] }[]>`select app.poll_view(${[pollId]}::uuid[]) as v`;
+    return v[0] ?? null;
+  });
+}
+
+export async function deletePoll(pollId: string) {
+  return run(async (tx) => { await tx`select app.delete_poll(${pollId})`; return null; });
+}

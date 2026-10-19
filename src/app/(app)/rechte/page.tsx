@@ -21,7 +21,11 @@ export default async function RightsPage() {
   const locale = await getLocale();
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
-  const r = await asViewer(viewer, async (tx) => (await tx<{ r: Rights }[]>`select app.my_rights() as r`)[0].r);
+  const { r, matrix } = await asViewer(viewer, async (tx) => ({
+    r: (await tx<{ r: Rights }[]>`select app.my_rights() as r`)[0].r,
+    matrix: await tx<{ action: string; resource: string }[]>`select action, resource from public.rights_matrix order by resource, position`,
+  }));
+  const groups = [...new Set(matrix.map((m) => m.resource))];
   const levels = t.raw("levels") as { name: string; text: string }[];
   const status = (a: Explained) =>
     a.allowed ? t("status.ok") : a.reason === "level_required" ? t("status.level_required", { level: a.min_level }) : t(`status.${a.reason as "banned"}`);
@@ -81,6 +85,19 @@ export default async function RightsPage() {
           </table>
         </div>
         <p className="m-0 text-sm text-muted">{t("limitsHint")}</p>
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <h2 className="m-0 text-xl font-bold md:text-2xl">{t("matrixTitle")}</h2>
+        <p className="m-0 max-w-[720px]">{t("matrixLead")}</p>
+        {groups.map((g) => (
+          <div key={g} className="flex flex-col">
+            <h3 className="m-0 border-b-2 border-ink pb-1 text-base font-bold">{t(`objects.${g}` as "objects.resource")}</h3>
+            <ul className="m-0 list-none p-0">
+              {matrix.filter((m) => m.resource === g).map((m) => <li key={m.action} className="border-b border-line py-2 text-sm">{t(`matrix.${m.action}` as "matrix.resource.view")}</li>)}
+            </ul>
+          </div>
+        ))}
       </section>
 
       <section className="flex flex-col gap-3">

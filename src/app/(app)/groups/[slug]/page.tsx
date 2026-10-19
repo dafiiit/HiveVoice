@@ -162,7 +162,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         {active === "talk" && (
           <section className="flex max-w-[760px] flex-col gap-3">
             <ChatScroll count={data.posts.length} className="flex max-h-[60dvh] min-h-[240px] flex-col overflow-y-auto border border-line bg-surface px-4">
-              <PostList posts={data.posts} path={`${path}?tab=talk`} canWrite={data.can_post} viewerId={me} empty={t("noPosts")} />
+              <PostList posts={data.posts} path={`${path}?tab=talk`} canWrite={data.can_post} viewerId={me} empty={t("noPosts")} canModerate={role === "admin" || role === "maintainer"} />
             </ChatScroll>
             {data.can_post
               ? <Composer ctx={{ groupId: g.id }} path={`${path}?tab=talk`} placeholder={t("talkPlaceholder", { name: g.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} />

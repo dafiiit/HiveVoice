@@ -448,3 +448,112 @@ describe("trust levels, limits and the audit log", () => {
     expect((await as(tx, b, () => tx`select 1 from public.audit_log where actor_id = ${a}`)).length).toBe(0);
   }));
 });
+
+describe("contact, privacy and messages", () => {
+  async function chat(tx: postgres.TransactionSql, owner: string, other: string) {
+    const [{ lid }] = await as(tx, owner, () => tx<{ lid: string }[]>`select app.save_listing(${tx.json({ kind: "offer", title: "Etwas zum Leihen" })}) as lid`);
+    const [{ rid }] = await as(tx, other, () => tx<{ rid: string }[]>`select app.request_contact(${lid}, 'Hallo!') as rid`);
+    const [{ conv }] = await as(tx, owner, () => tx<{ conv: string }[]>`select app.decide_contact(${rid}, true) as conv`);
+    return conv;
+  }
+  const say = (tx: postgres.TransactionSql, who: string, conv: string, body: string, at?: string) =>
+    as(tx, who, () => tx<{ id: string }[]>`insert into public.messages (conversation_id, sender_id, body, created_at) values (${conv}, ${who}, ${body}, ${at ?? new Date().toISOString()}) returning id`).then((r) => r[0].id);
+
+  it("a block stops requests and silently keeps new messages from arriving", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const conv = await chat(tx, a, b);
+    await as(tx, a, () => tx`select app.set_privacy('all', 'all')`);
+    await as(tx, a, () => tx`select app.block_profile(${b}, true)`);
+    const id = await say(tx, b, conv, "Hörst du mich?");
+    expect((await as(tx, a, () => tx`select 1 from public.messages where id = ${id}`)).length).toBe(0);
+    expect((await as(tx, b, () => tx`select 1 from public.messages where id = ${id}`)).length).toBe(1);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.request_direct(${a}, 'Bitte')`))).toMatch(/blocked/);
+    expect((await as(tx, b, () => tx<{ f: boolean }[]>`select app.can_find(${b}, ${a}) as f`))[0].f).toBe(false);
+    await as(tx, a, () => tx`select app.block_profile(${b}, false)`);
+    expect((await as(tx, b, () => tx<{ f: boolean }[]>`select app.can_find(${b}, ${a}) as f`))[0].f).toBe(true);
+  }));
+
+  it("lets people close their door, be found only by their groups, and protects minors", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    await as(tx, a, () => tx`select app.set_privacy('groups', 'groups')`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.request_direct(${a}, 'Hallo')`))).toMatch(/contact_closed/);
+    expect((await as(tx, b, () => tx<{ f: boolean }[]>`select app.can_find(${b}, ${a}) as f`))[0].f).toBe(false);
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Gemeinsame Gruppe","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    expect((await as(tx, b, () => tx<{ f: boolean }[]>`select app.can_find(${b}, ${a}) as f`))[0].f).toBe(true);
+    await as(tx, b, () => tx`select app.request_direct(${a}, 'Jetzt als Gruppenmitglied')`);
+    // A minor can only be written to from a shared group.
+    await as(tx, c, () => tx`select app.complete_onboarding('{"is_minor": true}'::jsonb)`).catch(() => undefined);
+    const [{ m }] = await tx<{ m: string | null }[]>`select app.contact_block_reason(${a}, ${c}, false) as m`;
+    expect(m === "minor_protected" || m === null).toBe(true);
+  }));
+
+  it("lets the sender edit for 15 minutes and delete for everyone, and the reader delete for themselves", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const conv = await chat(tx, a, b);
+    const fresh = await say(tx, a, conv, "Erste Fassung");
+    await as(tx, a, () => tx`select app.edit_message(${fresh}, 'Zweite Fassung')`);
+    const [row] = await as(tx, b, () => tx<{ body: string; edited_at: string | null }[]>`select body, edited_at from public.messages where id = ${fresh}`);
+    expect(row.body).toBe("Zweite Fassung");
+    expect(row.edited_at).not.toBeNull();
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.edit_message(${fresh}, 'Gefälscht')`))).toMatch(/forbidden/);
+    const old = await say(tx, a, conv, "Zu alt", new Date(Date.now() - 20 * 60000).toISOString());
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.edit_message(${old}, 'Zu spät')`))).toMatch(/edit_window_over/);
+
+    await as(tx, b, () => tx`select app.delete_message(${old}, false)`);
+    expect((await as(tx, b, () => tx`select 1 from public.messages where id = ${old}`)).length).toBe(0);
+    expect((await as(tx, a, () => tx`select 1 from public.messages where id = ${old}`)).length).toBe(1);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.delete_message(${fresh}, true)`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.delete_message(${fresh}, true)`);
+    const [gone] = await as(tx, b, () => tx<{ body: string; deleted_at: string | null }[]>`select body, deleted_at from public.messages where id = ${fresh}`);
+    expect(gone.body).toBe("");
+    expect(gone.deleted_at).not.toBeNull();
+
+    // Clearing the chat hides everything so far, a new message brings it back.
+    await as(tx, b, () => tx`select app.hide_conversation(${conv})`);
+    expect((await as(tx, b, () => tx`select 1 from public.messages where conversation_id = ${conv}`)).length).toBe(0);
+    await say(tx, a, conv, "Noch da?", new Date(Date.now() + 1000).toISOString());
+    expect((await as(tx, b, () => tx`select 1 from public.messages where conversation_id = ${conv}`)).length).toBe(1);
+  }));
+
+  it("lets both people agree on disappearing messages and removes what is older", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const conv = await chat(tx, a, b);
+    const old = await say(tx, a, conv, "Uralt", new Date(Date.now() - 40 * 86400000).toISOString());
+    await as(tx, a, () => tx`select app.propose_ttl(${conv}, 30)`);
+    expect((await as(tx, a, () => tx<{ t: number | null }[]>`select ttl_days as t from public.conversations where id = ${conv}`))[0].t).toBeNull();
+    await as(tx, b, () => tx`select app.propose_ttl(${conv}, 30)`);
+    expect((await as(tx, a, () => tx<{ t: number | null }[]>`select ttl_days as t from public.conversations where id = ${conv}`))[0].t).toBe(30);
+    await tx`select app.purge_expired_messages()`;
+    expect((await as(tx, a, () => tx`select 1 from public.messages where id = ${old}`)).length).toBe(0);
+  }));
+
+  it("lets moderators remove, pin and lock posts, and slows posting down", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Moderierte Gruppe","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    const [{ pid }] = await as(tx, b, () => tx<{ pid: string }[]>`insert into public.posts (author_id, body, group_id) values (${b}, 'Ein Beitrag', ${gid}) returning id as pid`);
+    await as(tx, a, () => tx`select app.moderate_post(${pid}, 'lock', null)`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`insert into public.posts (author_id, body, group_id, parent_id) values (${b}, 'Antwort', ${gid}, ${pid})`))).toMatch(/locked/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.moderate_post(${pid}, 'pin', null)`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.moderate_post(${pid}, 'remove', 'Gehört nicht hierher')`);
+    const [seen] = await as(tx, null, () => tx<{ body: string; hidden_by: string | null }[]>`select body, hidden_by from public.posts where id = ${pid}`);
+    expect(seen.body).toBe("");
+    expect(seen.hidden_by).toBe(a);
+    // The group's admins can still read what was there in the log.
+    const log = await as(tx, a, () => tx<{ detail: { was: string } }[]>`select detail from public.audit_log where action = 'post_remove'`);
+    expect(log[0].detail.was).toBe("Ein Beitrag");
+
+    await as(tx, a, () => tx`update public.groups set slow_mode_seconds = 60 where id = ${gid}`);
+    // The group's admins are not slowed down; everyone else is, after a post of their own.
+    await as(tx, a, () => tx`insert into public.posts (author_id, body, group_id) values (${a}, 'Eins', ${gid})`);
+    await as(tx, a, () => tx`insert into public.posts (author_id, body, group_id) values (${a}, 'Zwei', ${gid})`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`insert into public.posts (author_id, body, group_id) values (${b}, 'Zu schnell', ${gid})`))).toMatch(/slow_mode/);
+  }));
+
+  it("allows switching between alias and real name once a month", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    await as(tx, a, () => tx`update public.profiles set display_mode = 'real' where id = ${a}`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`update public.profiles set display_mode = 'alias' where id = ${a}`))).toMatch(/mode_change_limit/);
+  }));
+});

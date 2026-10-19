@@ -124,6 +124,18 @@
     "fallback": {
       "title": "News",
       "body": ""
+    },
+    "vouched": {
+      "title": "{by} vouches for you",
+      "body": "With two vouches you become verified. “Rights and levels” shows where you stand."
+    },
+    "post_removed": {
+      "title": "A post of yours was removed",
+      "body": "In “{group}” by the moderation. {reason}"
+    },
+    "ttl_proposed": {
+      "title": "Disappearing messages",
+      "body": "Someone proposes that messages disappear after {days} days. Open the chat to agree."
     }
   }
 }

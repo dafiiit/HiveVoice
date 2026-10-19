@@ -6,6 +6,7 @@ import { MAX_FILES, cleanPoll, pollReady, type Attachment, type PollDraft, type 
 
 export type Message = {
   id: string; body: string; created_at: string; sender_id: string; sender_name: string; sender_seed: number; sender_path: string | null;
+  edited_at: string | null; deleted_at: string | null;
   /** The message this one answers, as a short quote. */
   reply_to: { id: string; body: string; sender_id: string; sender_name: string; kind: "text" | "photo" | "file" | "poll" } | null;
   attachments: Attachment[];
@@ -36,9 +37,9 @@ export async function fetchMessages(conversationId: string, since: string) {
     if (messages.length) {
       await tx`update public.conversation_participants set last_read_at = now() where conversation_id = ${conversationId} and profile_id = ${s.profile.id}`;
     }
-    const [read] = await tx<{ at: string | null }[]>`
-      select max(last_read_at) as at from public.conversation_participants where conversation_id = ${conversationId} and profile_id <> ${s.profile.id}`;
-    return { messages, otherReadAt: read?.at ?? null };
+    const [read] = await tx<{ at: string | null; now: string }[]>`
+      select max(last_read_at) as at, to_char(clock_timestamp() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as now from public.conversation_participants where conversation_id = ${conversationId} and profile_id <> ${s.profile.id}`;
+    return { messages, otherReadAt: read?.at ?? null, asOf: read?.now ?? new Date().toISOString() };
   });
 }
 

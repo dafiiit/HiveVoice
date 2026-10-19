@@ -125,6 +125,12 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = p.group_id ? "/connect" : p.initiative_id ? `/initiatives/${p.initiative_id}?tab=threads` : "/connect";
     } else if (kind === "jury_invite") {
       href = `/jury/${p.case_id}`; label = t("labels.jury");
+    } else if (kind === "vouched") {
+      href = "/rechte";
+    } else if (kind === "post_removed") {
+      href = p.slug ? `/groups/${p.slug}?tab=talk` : "/connect"; label = t("labels.group");
+    } else if (kind === "ttl_proposed") {
+      href = `/connect?c=d:${p.conversation_id}`; category = "messages"; label = t("labels.message");
     } else if (kind === "report_decided" || kind === "content_hidden") {
       href = "/me?tab=reports"; label = t("labels.jury");
     }

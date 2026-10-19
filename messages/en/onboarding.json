@@ -35,5 +35,8 @@
   "needsPlaceholder": "e.g. rehearsal-room",
   "offersPlaceholder": "e.g. bike-repair",
   "welcome": "You appear as {name}.",
-  "finish": "Let’s go"
+  "finish": "Let’s go",
+  "ageOk": "I am at least 16 years old.",
+  "ageMinor": "I am not 18 yet.",
+  "ageHint": "Under 18 you are better protected: strangers can only reach you through shared groups."
 }

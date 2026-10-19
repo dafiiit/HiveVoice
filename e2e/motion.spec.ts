@@ -82,6 +82,7 @@ test.describe("motion", () => {
     await page.goto(`/initiatives/${RADSPUR}?tab=vote`);
     const status = page.getByRole("status");
     if (!(await status.isVisible())) test.skip(true, "this account cannot vote on the demo ballot");
+    if (!(await status.getByRole("button", { name: "Stimme ändern" }).count())) test.skip(true, "the demo ballot has closed by now");
     await expect(status.locator(".urne-paper")).toHaveCount(0);
     await status.getByRole("button", { name: "Stimme ändern" }).click();
     await page.getByRole("radio", { name: /Ja/ }).click();

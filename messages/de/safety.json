@@ -1,0 +1,85 @@
+{
+  "privacy": {
+    "title": "Wer mich findet und anschreibt",
+    "findableLabel": "Wer darf mich finden?",
+    "findable": {
+      "all": "Alle",
+      "members": "Nur angemeldete Menschen",
+      "groups": "Nur Menschen aus meinen Gruppen"
+    },
+    "contactLabel": "Wer darf mir schreiben?",
+    "contact": {
+      "all": "Alle",
+      "verified": "Nur bestätigte Menschen",
+      "groups": "Nur Menschen aus meinen Gruppen",
+      "none": "Niemand"
+    },
+    "contactHint": "Antworten auf deine eigenen Angebote und Anfragen sind davon ausgenommen.",
+    "minor": "Wegen deines Alters bleibt das geschützt.",
+    "saved": "Gespeichert.",
+    "blockedTitle": "Blockierte Menschen",
+    "noBlocked": "Du hast niemanden blockiert.",
+    "unblock": "Blockade aufheben"
+  },
+  "chat": {
+    "more": "Mehr",
+    "mute": "Benachrichtigungen aus",
+    "unmute": "Benachrichtigungen an",
+    "block": "{name} blockieren",
+    "unblock": "Blockade aufheben",
+    "blockedNote": "Du hast {name} blockiert. Neue Nachrichten von {name} kommen bei dir nicht an.",
+    "clear": "Chat für mich löschen",
+    "clearConfirm": "Der Chat verschwindet nur bei dir. Löschen?",
+    "yes": "Ja, löschen",
+    "no": "Abbrechen",
+    "ttl": "Verschwindende Nachrichten",
+    "ttlOff": "Aus",
+    "ttl7": "Nach 7 Tagen",
+    "ttl30": "Nach 30 Tagen",
+    "ttlActive": "Nachrichten verschwinden nach {days} Tagen.",
+    "ttlMine": "Du hast {days} Tage vorgeschlagen. {name} muss zustimmen.",
+    "ttlTheirs": "{name} schlägt vor: Nachrichten verschwinden nach {days} Tagen.",
+    "ttlAgree": "Zustimmen",
+    "ttlDecline": "Nein, aus lassen",
+    "muted": "Stumm"
+  },
+  "message": {
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edited": "bearbeitet",
+    "deleted": "Nachricht gelöscht",
+    "delete": "Löschen",
+    "deleteForMe": "Für mich",
+    "deleteForAll": "Für alle",
+    "editLabel": "Nachricht bearbeiten"
+  },
+  "profile": {
+    "block": "Blockieren",
+    "blocked": "Blockiert",
+    "unblock": "Blockade aufheben",
+    "guestHint": "Melde dich an, um mehr von {name} zu sehen.",
+    "hidden": "Dieses Profil sehen nur Menschen aus gemeinsamen Gruppen."
+  },
+  "post": {
+    "removed": "Von der Moderation entfernt",
+    "reason": "Grund: {reason}",
+    "moderate": "Moderation",
+    "remove": "Entfernen",
+    "pin": "Anpinnen",
+    "unpin": "Anpinnen aufheben",
+    "lock": "Kommentare sperren",
+    "unlock": "Kommentare freigeben",
+    "reasonLabel": "Grund (sieht die Autorin oder der Autor)",
+    "locked": "Kommentare gesperrt",
+    "pinned": "Angepinnt"
+  },
+  "group": {
+    "slowMode": "Langsamer Modus",
+    "slowOff": "Aus",
+    "slow10": "Alle 10 Sekunden",
+    "slow60": "Jede Minute",
+    "slow300": "Alle 5 Minuten",
+    "slowHint": "Betrifft alle außer Admins und Maintainer."
+  }
+}

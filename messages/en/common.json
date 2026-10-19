@@ -52,7 +52,16 @@
     "rate_limited": "You have done a lot today. You can continue tomorrow.",
     "level_required": "You need a higher level for this. “Rights and levels” shows what is missing.",
     "banned": "Your account is paused at the moment. See “Rights and levels” for details.",
-    "too_many_empty_groups": "You already have three groups without other members. Invite people first."
+    "too_many_empty_groups": "You already have three groups without other members. Invite people first.",
+    "blocked": "You cannot write to this person.",
+    "contact_closed": "This person is not taking requests from you right now.",
+    "minor_protected": "You can only reach this person through shared groups.",
+    "mode_change_limit": "You can switch between alias and real name once a month.",
+    "real_name_required": "You need your real name for this. Change your profile under “Me”.",
+    "edit_window_over": "Editing only works for 15 minutes.",
+    "locked": "Comments are locked.",
+    "slow_mode": "In this group you can only write every few minutes. Try again shortly.",
+    "age_required": "Please confirm that you are at least 16."
   },
   "phase": {
     "idea": "Idea",

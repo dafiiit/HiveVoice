@@ -28,6 +28,8 @@ export function Onboarding({ alias: initialAlias, realName: initialReal, suggest
   const [realName, setRealName] = useState(initialReal);
   const [needs, setNeeds] = useState<string[]>([]);
   const [offers, setOffers] = useState<string[]>([]);
+  const [ageOk, setAgeOk] = useState(false);
+  const [isMinor, setIsMinor] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -54,7 +56,7 @@ export function Onboarding({ alias: initialAlias, realName: initialReal, suggest
 
   const canNext =
     (STEPS[step] === "place" && !!place) ||
-    (STEPS[step] === "appearance" && (mode === "alias" ? alias.trim().length >= 3 : realName.trim().length >= 3)) ||
+    (STEPS[step] === "appearance" && ageOk && (mode === "alias" ? alias.trim().length >= 3 : realName.trim().length >= 3)) ||
     STEPS[step] === "intro" ||
     STEPS[step] === "interests";
 
@@ -63,7 +65,7 @@ export function Onboarding({ alias: initialAlias, realName: initialReal, suggest
     if (STEPS[step] === "intro" && card < cards.length - 1) return setCard(card + 1);
     if (step < STEPS.length - 1) return setStep(step + 1);
     start(async () => {
-      const res = await finishOnboarding({ regionId: borough || place!.id, displayMode: mode, realName, alias, needs, offers });
+      const res = await finishOnboarding({ regionId: borough || place!.id, displayMode: mode, realName, alias, needs, offers, ageOk, isMinor });
       if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
       router.replace("/connect");
       router.refresh();
@@ -176,6 +178,11 @@ export function Onboarding({ alias: initialAlias, realName: initialReal, suggest
                   <button type="button" className={btn.ghost} onClick={() => randomAlias().then(setAlias)}>{t("reroll")}</button>
                 </div>
               )}
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center gap-3"><input type="checkbox" checked={ageOk} onChange={(e) => setAgeOk(e.target.checked)} className="h-6 w-6 accent-[var(--ink)]" />{t("ageOk")}</label>
+                <label className="flex items-center gap-3"><input type="checkbox" checked={isMinor} onChange={(e) => setIsMinor(e.target.checked)} className="h-6 w-6 accent-[var(--ink)]" />{t("ageMinor")}</label>
+                {isMinor && <p className="m-0 text-sm text-muted">{t("ageHint")}</p>}
+              </div>
             </section>
           )}
 

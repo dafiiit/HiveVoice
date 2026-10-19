@@ -13,6 +13,7 @@ import { DisplayToggle, TagEditor } from "@/components/me/ProfileEditor";
 import { Notes } from "@/components/me/Notes";
 import { Responsibilities, type MyResp } from "@/components/me/Responsibilities";
 import { Settings } from "@/components/me/Settings";
+import { PrivacySettings } from "@/components/me/PrivacySettings";
 
 const TABS = ["profile", "notes", "reports", "resp", "settings"] as const;
 
@@ -60,7 +61,11 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
         (select count(*)::int from public.responsibility_requests q where q.responsibility_id = s.id and q.status = 'open') as open_requests
       from public.responsibilities s left join public.regions r on r.id = s.region_id where s.holder_id = ${me} order by s.created_at` : [];
     const [home] = await tx<{ id: string; name: string }[]>`select r.id, r.name from public.profiles p join public.regions r on r.id = p.home_region_id where p.id = ${me}`;
-    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, resps, home: home ?? null };
+    const [privacy] = await tx<{ findable: "all" | "members" | "groups"; contact_from: "all" | "verified" | "groups" | "none"; is_minor: boolean }[]>`
+      select us.findable, us.contact_from, p.is_minor from public.user_settings us join public.profiles p on p.id = us.profile_id where us.profile_id = ${me}`;
+    const blocked = await tx<{ id: string; name: string }[]>`
+      select p.id, p.display_name as name from public.blocks b join public.profiles p on p.id = b.blocked_id where b.blocker_id = ${me} order by b.created_at`;
+    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, resps, home: home ?? null, privacy, blocked };
   });
 
   const s = session.profile.settings;
@@ -151,7 +156,10 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       )}
       {active === "resp" && <Responsibilities items={d.resps} homeRegion={d.home} />}
       {active === "settings" && (
+        <>
+        <PrivacySettings findable={d.privacy?.findable ?? "all"} contactFrom={d.privacy?.contact_from ?? "all"} minor={!!d.privacy?.is_minor} blocked={d.blocked} />
         <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} places={d.places} interests={interests} suggestions={d.suggestions} />
+        </>
       )}
     </div>
   );

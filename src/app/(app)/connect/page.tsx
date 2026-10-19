@@ -11,6 +11,7 @@ import type { Message } from "@/lib/actions/messages";
 import { Avatar } from "@/components/ui/Avatar";
 import { Composer, PostList } from "@/components/PostList";
 import { Conversation } from "@/components/connect/Conversation";
+import { ChatMenu } from "@/components/connect/ChatMenu";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { ChatScroll } from "@/components/ChatScroll";
@@ -37,6 +38,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const me = session?.profile.id ?? null;
   const t = await getTranslations("connect");
   const tl = await getTranslations("levels");
+  const ts = await getTranslations("safety");
   const locale = await getLocale();
   const place = await getPlace();
   const mode = sp.mode === "suggested" ? "suggested" : "chrono";
@@ -67,6 +69,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       join public.conversation_participants mine on mine.conversation_id = c.id and mine.profile_id = ${me}
       join public.conversation_participants o on o.conversation_id = c.id and o.profile_id <> ${me}
       join public.profiles op on op.id = o.profile_id
+      where mine.hidden_at is null or c.last_message_at > mine.hidden_at
       order by c.last_message_at desc` : [];
     // Everything I sent or must answer: requests from offers and needs, first messages, group join requests.
     const requests = me ? await tx<RequestView[]>`
@@ -99,8 +102,8 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
 
     type Pane =
       | { kind: "market"; posts: Awaited<ReturnType<typeof loadPosts>>; tags: string[]; area: string }
-      | { kind: "group"; group: { id: string; slug: string; name: string; member_count: number; can_post: boolean }; posts: Awaited<ReturnType<typeof loadPosts>> }
-      | { kind: "direct"; id: string; other: string; other_id: string; other_seed: number; other_path: string | null; title: string | null; listing_id: string | null; listing_kind: string | null; messages: Message[]; other_read_at: string | null }
+      | { kind: "group"; group: { id: string; slug: string; name: string; member_count: number; can_post: boolean; can_moderate: boolean }; posts: Awaited<ReturnType<typeof loadPosts>> }
+      | { kind: "direct"; id: string; other: string; other_id: string; other_seed: number; other_path: string | null; title: string | null; listing_id: string | null; listing_kind: string | null; messages: Message[]; other_read_at: string | null; muted: boolean; blocked: boolean; ttl_days: number | null; ttl_proposed_days: number | null; ttl_by_me: boolean; as_of: string }
       | { kind: "request"; request: RequestView };
     let pane: Pane | null = null;
     if (sel === "market") {
@@ -109,15 +112,19 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       const scope = area ? { underRegionId: area.id, search: q } : { regionIds, search: q };
       pane = { kind: "market", posts: await loadPosts(tx, scope, me, { sort: mode === "suggested" ? "top" : "new" }), tags: area ? await marketTags(tx, area.id) : [], area: area?.key ?? "" };
     } else if (sel.startsWith("g:")) {
-      const [g] = await tx<{ id: string; slug: string; name: string; member_count: number; can_post: boolean }[]>`
-        select g.id, g.slug::text, g.name, g.member_count, app.has_group_permission(g.id, 'post') as can_post from public.groups g where g.slug = ${sel.slice(2)}`;
+      const [g] = await tx<{ id: string; slug: string; name: string; member_count: number; can_post: boolean; can_moderate: boolean }[]>`
+        select g.id, g.slug::text, g.name, g.member_count, app.has_group_permission(g.id, 'post') as can_post, app.is_group_moderator(g.id) as can_moderate from public.groups g where g.slug = ${sel.slice(2)}`;
       if (g) pane = { kind: "group", group: g, posts: await loadPosts(tx, { groupId: g.id }, me, { sort: "chat", limit: 60 }) };
     } else if (sel.startsWith("d:") && me && /^[0-9a-f-]{36}$/.test(sel.slice(2))) {
       const id = sel.slice(2);
-      const [c] = await tx<{ id: string; title: string | null; other: string; other_id: string; other_seed: number; other_path: string | null; listing_id: string | null; listing_kind: string | null; other_read_at: string | null }[]>`
+      const [c] = await tx<{ id: string; title: string | null; other: string; other_id: string; other_seed: number; other_path: string | null; listing_id: string | null; listing_kind: string | null; other_read_at: string | null; muted: boolean; blocked: boolean; ttl_days: number | null; ttl_proposed_days: number | null; ttl_by_me: boolean; as_of: string }[]>`
         select c.id, c.title, op.display_name as other, op.id as other_id, op.avatar_seed as other_seed, op.avatar_path as other_path,
-               l.id as listing_id, l.kind::text as listing_kind, o.last_read_at as other_read_at
+               l.id as listing_id, l.kind::text as listing_kind, o.last_read_at as other_read_at,
+               mine.muted, exists (select 1 from public.blocks b where b.blocker_id = ${me} and b.blocked_id = op.id) as blocked,
+               c.ttl_days, c.ttl_proposed_days, c.ttl_proposed_by = ${me} as ttl_by_me,
+               to_char(clock_timestamp() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as as_of
         from public.conversations c
+        join public.conversation_participants mine on mine.conversation_id = c.id and mine.profile_id = ${me}
         join public.conversation_participants o on o.conversation_id = c.id and o.profile_id <> ${me}
         join public.profiles op on op.id = o.profile_id
         left join public.contact_requests cr on cr.id = c.contact_request_id
@@ -278,7 +285,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
                 <Link href={`/groups/${pane.group.slug}`} className="text-sm font-bold text-ink">{t("openGroup")}</Link>
               </header>
               <ChatScroll count={pane.posts.length} className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col overflow-y-auto max-md:max-h-none max-md:min-h-0 lg:max-h-none lg:min-h-0">
-                <PostList posts={pane.posts} path="/connect" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} />
+                <PostList posts={pane.posts} path="/connect" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} canModerate={pane.group.can_moderate} />
               </ChatScroll>
               {pane.group.can_post && <div className="flex-none border-t border-line pt-3"><Composer ctx={{ groupId: pane.group.id }} path="/connect" placeholder={t("groupPlaceholder", { name: pane.group.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} /></div>}
             </>
@@ -296,8 +303,11 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
                       : t("about", { title: pane.title })}</span>
                     : <span className="text-sm text-muted">{t("private", { title: "" }).replace(/ · $/, "")}</span>}
                 </div>
+                <ChatMenu conversationId={pane.id} otherId={pane.other_id} otherName={pane.other.split(" ")[0]} muted={pane.muted} blocked={pane.blocked}
+                  ttl={{ days: pane.ttl_days, proposedDays: pane.ttl_proposed_days, proposedByMe: pane.ttl_by_me }} />
               </header>
-              <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} verified={!!session?.profile.verified} />
+              {pane.blocked && <p className="m-0 flex-none border-l-4 border-ink bg-chip px-3 py-2 text-sm">{ts("chat.blockedNote", { name: pane.other.split(" ")[0] })}</p>}
+              <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} verified={!!session?.profile.verified} asOf={pane.as_of} />
             </>
           )}
           {pane?.kind === "request" && <div className="min-h-0 flex-1 overflow-y-auto"><RequestPane key={pane.request.id} r={pane.request} /></div>}

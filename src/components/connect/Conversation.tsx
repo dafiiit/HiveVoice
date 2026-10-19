@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { fetchMessages, sendMessage, type Message } from "@/lib/actions/messages";
+import { deleteMessage, editMessage } from "@/lib/actions/safety";
 import { cleanPoll, isImage, pollReady } from "@/lib/files";
 import { Avatar } from "../ui/Avatar";
 import { btn, field } from "../ui/styles";
@@ -17,11 +18,19 @@ type Quote = NonNullable<Message["reply_to"]>;
 const ms = (d: string | Date) => new Date(d).getTime();
 const dayKey = (d: string | Date) => new Date(d).toDateString();
 
-export function Conversation({ id, initial, viewerId, otherName, otherReadAt: initialRead, verified }: {
-  id: string; initial: Message[]; viewerId: string; otherName: string; otherReadAt: string | Date | null; verified: boolean;
+/** What came back from the server replaces what is shown (edits, deletions, new votes), and unknown messages are added. */
+function merge(shown: Local[], incoming: Message[]): Local[] {
+  const next = shown.map((x) => { const y = incoming.find((z) => z.id === x.id); return y ? { ...x, ...y, key: x.key, fresh: x.fresh } : x; });
+  return [...next, ...incoming.filter((y) => !shown.some((x) => x.id === y.id)).map((y) => ({ ...y, key: y.id, fresh: true }))];
+}
+
+export function Conversation({ id, initial, viewerId, otherName, otherReadAt: initialRead, verified, asOf: initialAsOf }: {
+  id: string; initial: Message[]; viewerId: string; otherName: string; otherReadAt: string | Date | null; verified: boolean; asOf: string;
 }) {
   const t = useTranslations("connect");
   const te = useTranslations("extras");
+  const ts = useTranslations("safety.message");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const [messages, setMessages] = useState<Local[]>(() => initial.map((m) => ({ ...m, key: m.id })));
   const [readAt, setReadAt] = useState<string | Date | null>(initialRead);
@@ -30,6 +39,10 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const [replyTo, setReplyTo] = useState<Quote | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const x = useExtras();
+  const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  const asOf = useRef(initialAsOf);
   const list = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const field_ = useRef<HTMLTextAreaElement>(null);
@@ -37,21 +50,26 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const seq = useRef(0);
   const arrived = useRef(false);
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  const settled = messages.filter((m) => !m.sending);
-  const last = settled[settled.length - 1]?.created_at;
 
-  // Polling keeps the setup portable: no realtime service needed.
+  // Polling keeps the setup portable: no realtime service needed. The server clock of the last answer marks "what is new".
   useEffect(() => {
     const tick = async () => {
       if (document.visibilityState !== "visible") return;
-      const res = await fetchMessages(id, new Date(last ?? 0).toISOString());
+      const res = await fetchMessages(id, new Date(new Date(asOf.current).getTime() - 2000).toISOString());
       if (!res.ok) return;
+      asOf.current = res.data.asOf;
       setReadAt(res.data.otherReadAt);
-      if (res.data.messages.length) setMessages((m) => [...m, ...res.data.messages.filter((y) => !m.some((z) => z.id === y.id)).map((y) => ({ ...y, key: y.id, fresh: true }))]);
+      if (res.data.messages.length) setMessages((m) => merge(m, res.data.messages));
     };
     const h = setInterval(tick, 4000);
     return () => clearInterval(h);
-  }, [id, last]);
+  }, [id]);
+
+  // The "edit" link disappears 15 minutes after sending.
+  useEffect(() => {
+    const h = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(h);
+  }, []);
 
   useEffect(() => {
     const el = list.current;
@@ -100,6 +118,21 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     setTimeout(() => setFlash((f) => (f === messageId ? null : f)), 1500);
   };
 
+  const saveEdit = async () => {
+    const e = editing;
+    if (!e) return;
+    const res = await editMessage(id, e.id, e.text);
+    if (res.ok) { setMessages((m) => merge(m, [res.data])); setEditing(null); setError(null); }
+    else setError(tc(`errors.${res.error}` as "errors.unknown"));
+  };
+  const remove = async (messageId: string, forAll: boolean) => {
+    const res = await deleteMessage(id, messageId, forAll);
+    setDeleting(null);
+    if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+    if (forAll && res.data) setMessages((m) => merge(m, [res.data!]));
+    else setMessages((m) => m.filter((y) => y.id !== messageId));
+  };
+
   const send = async () => {
     const body = draft.trim();
     const poll = x.poll && pollReady(x.poll) ? cleanPoll(x.poll) : null;
@@ -111,7 +144,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     x.clear();
     setReplyTo(null);
     stick.current = true;
-    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true, reply_to: quote, attachments: [], poll: null }]);
+    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true, reply_to: quote, attachments: [], poll: null, edited_at: null, deleted_at: null }]);
     const res = await sendMessage({ conversationId: id, body, replyToId: quote?.id ?? null, files, poll });
     if (res.ok) {
       setMessages((m) => m.some((y) => y.id === res.data.id)
@@ -154,7 +187,19 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
               <div className={`flex items-end gap-2 ${mine ? "justify-end" : "justify-start"}`}>
                 {!mine && (cluster ? <span className="w-7 flex-none" /> : <Avatar name={m.sender_name} seed={m.sender_seed} path={m.sender_path} size={28} />)}
                 <div style={{ "--ox": mine ? "100%" : "0%" } as CSSProperties} className={`flex max-w-[82%] min-w-0 flex-col gap-1 ${m.fresh ? "bubble-in" : ""} ${mine ? "items-end" : "items-start"}`}>
-                  {(m.body || m.reply_to) && (
+                  {m.deleted_at && (
+                    <span className="border border-dashed border-line px-3.5 py-2 text-sm italic text-muted">{ts("deleted")}</span>
+                  )}
+                  {editing?.id === m.id && (
+                    <div className="flex w-full min-w-[240px] flex-col gap-1.5">
+                      <textarea value={editing.text} rows={3} maxLength={5000} aria-label={ts("editLabel")} autoFocus onChange={(e) => setEditing({ id: m.id, text: e.target.value })} className={`${field.textarea} min-h-16 resize-y border-line py-2`} />
+                      <span className="flex gap-2">
+                        <button type="button" onClick={() => void saveEdit()} className={`${btn.primary} h-9 px-3 text-sm`}>{ts("save")}</button>
+                        <button type="button" onClick={() => setEditing(null)} className={`${btn.secondary} h-9 px-3 text-sm`}>{ts("cancel")}</button>
+                      </span>
+                    </div>
+                  )}
+                  {!m.deleted_at && editing?.id !== m.id && (m.body || m.reply_to) && (
                     <div className={`flex min-w-0 flex-col gap-1.5 px-3.5 py-2.5 transition-opacity duration-300 ${mine ? "bg-ink text-on-ink" : "border border-line bg-surface text-ink"} ${m.sending ? "opacity-60" : ""}`}>
                       {m.reply_to && (
                         <button type="button" onClick={() => jump(m.reply_to!.id)} aria-label={te("goToOriginal")}
@@ -171,11 +216,25 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                     <PollCard poll={m.poll} canVote={verified} signedIn loginPath="/connect"
                       onChange={(p) => setMessages((all) => all.map((y) => (y.id === m.id ? { ...y, poll: p } : y)))} />
                   )}
-                  <span className="flex items-center gap-2 text-xs text-muted">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
                     {m.sending ? t("sending") : fmt.time.format(new Date(m.created_at))}
+                    {m.edited_at && !m.deleted_at && <span>· {ts("edited")}</span>}
                     {mine && lastMine?.id === m.id && readAt && ms(readAt) >= ms(m.created_at) - 1000 && <span>· {t("read")}</span>}
-                    {!m.sending && <button type="button" onClick={() => startReply(m)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{te("reply")}</button>}
-                    {!mine && !m.sending && <ReportButton type="message" id={m.id} className="border-0 bg-transparent p-0 text-xs text-muted underline" />}
+                    {!m.sending && !m.deleted_at && <button type="button" onClick={() => startReply(m)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{te("reply")}</button>}
+                    {mine && !m.sending && !m.deleted_at && now - ms(m.created_at) < 15 * 60000 && editing?.id !== m.id && (
+                      <button type="button" onClick={() => setEditing({ id: m.id, text: m.body })} className="border-0 bg-transparent p-0 text-xs text-muted underline">{ts("edit")}</button>
+                    )}
+                    {!m.sending && !m.deleted_at && deleting !== m.id && (
+                      <button type="button" onClick={() => setDeleting(m.id)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{ts("delete")}</button>
+                    )}
+                    {deleting === m.id && (
+                      <span className="flex items-center gap-2">
+                        <button type="button" onClick={() => void remove(m.id, false)} className="border-0 bg-transparent p-0 text-xs font-bold text-ink underline">{ts("deleteForMe")}</button>
+                        {mine && <button type="button" onClick={() => void remove(m.id, true)} className="border-0 bg-transparent p-0 text-xs font-bold text-ink underline">{ts("deleteForAll")}</button>}
+                        <button type="button" onClick={() => setDeleting(null)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{ts("cancel")}</button>
+                      </span>
+                    )}
+                    {!mine && !m.sending && !m.deleted_at && <ReportButton type="message" id={m.id} className="border-0 bg-transparent p-0 text-xs text-muted underline" />}
                   </span>
                 </div>
               </div>

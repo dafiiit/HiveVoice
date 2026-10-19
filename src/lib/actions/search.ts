@@ -33,10 +33,14 @@ export async function quickSearch(q: string): Promise<Hit[]> {
       select g.slug::text, g.name, r.name as region from public.groups g left join public.regions r on r.id = g.region_id
       where g.archived_at is null and (lower(g.name) like ${pattern} or lower(coalesce(g.summary, '')) like ${pattern})
       order by (lower(g.name) like ${prefix}) desc, g.member_count desc limit 3`;
-    const people = await tx<{ id: string; name: string; headline: string | null; region: string | null }[]>`
+    // Names are searched from three letters on, a few times per hour, and only people who may be found are shown.
+    const people = query.length >= 3 && (await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`)[0].ok
+      ? await tx<{ id: string; name: string; headline: string | null; region: string | null }[]>`
       select p.id, p.display_name as name, p.headline, r.name as region from public.profiles p left join public.regions r on r.id = p.home_region_id
-      where p.onboarded_at is not null and (lower(p.display_name) like ${pattern} or lower(coalesce(p.headline, '')) like ${pattern})
-      order by (lower(p.display_name) like ${prefix}) desc, p.helped_count desc limit 3`;
+      where p.onboarded_at is not null and app.can_find(${viewer?.profileId ?? null}::uuid, p.id)
+        and (lower(p.display_name) like ${pattern} or lower(coalesce(p.headline, '')) like ${pattern})
+      order by (lower(p.display_name) like ${prefix}) desc, p.helped_count desc limit 3`
+      : [];
     const resp = await tx<{ id: string; title: string; org: string | null }[]>`
       select s.id, s.title, s.organization_name as org from public.responsibilities s
       where lower(s.title || ' ' || coalesce(s.organization_name, '') || ' ' || s.description) like ${pattern}

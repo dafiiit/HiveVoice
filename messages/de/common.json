@@ -52,7 +52,16 @@
     "rate_limited": "Du hast heute schon viel geschrieben. Morgen geht es weiter.",
     "level_required": "Dafür brauchst du eine höhere Stufe. Unter „Rechte und Stufen“ steht, was dir fehlt.",
     "banned": "Dein Konto ist gerade pausiert. Details stehen unter „Rechte und Stufen“.",
-    "too_many_empty_groups": "Du hast schon drei Gruppen ohne weitere Mitglieder. Lade zuerst Leute ein."
+    "too_many_empty_groups": "Du hast schon drei Gruppen ohne weitere Mitglieder. Lade zuerst Leute ein.",
+    "blocked": "Du kannst dieser Person nicht schreiben.",
+    "contact_closed": "Diese Person nimmt gerade keine Anfragen von dir an.",
+    "minor_protected": "Diese Person erreichst du nur über gemeinsame Gruppen.",
+    "mode_change_limit": "Zwischen Alias und Klarnamen kannst du nur einmal im Monat wechseln.",
+    "real_name_required": "Dafür brauchst du deinen Klarnamen. Stelle dein Profil unter „Für mich“ um.",
+    "edit_window_over": "Bearbeiten geht nur 15 Minuten lang.",
+    "locked": "Die Kommentare sind gesperrt.",
+    "slow_mode": "In dieser Gruppe darfst du nur alle paar Minuten schreiben. Gleich wieder.",
+    "age_required": "Bitte bestätige, dass du mindestens 16 bist."
   },
   "phase": {
     "idea": "Idee",

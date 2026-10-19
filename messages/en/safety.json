@@ -1,0 +1,85 @@
+{
+  "privacy": {
+    "title": "Who finds and writes to me",
+    "findableLabel": "Who may find me?",
+    "findable": {
+      "all": "Everyone",
+      "members": "Signed-in people only",
+      "groups": "People from my groups only"
+    },
+    "contactLabel": "Who may write to me?",
+    "contact": {
+      "all": "Everyone",
+      "verified": "Verified people only",
+      "groups": "People from my groups only",
+      "none": "Nobody"
+    },
+    "contactHint": "Replies to your own offers and requests are not affected.",
+    "minor": "Because of your age this stays protected.",
+    "saved": "Saved.",
+    "blockedTitle": "Blocked people",
+    "noBlocked": "You have not blocked anyone.",
+    "unblock": "Unblock"
+  },
+  "chat": {
+    "more": "More",
+    "mute": "Notifications off",
+    "unmute": "Notifications on",
+    "block": "Block {name}",
+    "unblock": "Unblock",
+    "blockedNote": "You blocked {name}. New messages from {name} do not reach you.",
+    "clear": "Delete chat for me",
+    "clearConfirm": "The chat disappears only for you. Delete?",
+    "yes": "Yes, delete",
+    "no": "Cancel",
+    "ttl": "Disappearing messages",
+    "ttlOff": "Off",
+    "ttl7": "After 7 days",
+    "ttl30": "After 30 days",
+    "ttlActive": "Messages disappear after {days} days.",
+    "ttlMine": "You proposed {days} days. {name} has to agree.",
+    "ttlTheirs": "{name} proposes: messages disappear after {days} days.",
+    "ttlAgree": "Agree",
+    "ttlDecline": "No, keep off",
+    "muted": "Muted"
+  },
+  "message": {
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edited": "edited",
+    "deleted": "Message deleted",
+    "delete": "Delete",
+    "deleteForMe": "For me",
+    "deleteForAll": "For everyone",
+    "editLabel": "Edit message"
+  },
+  "profile": {
+    "block": "Block",
+    "blocked": "Blocked",
+    "unblock": "Unblock",
+    "guestHint": "Sign in to see more of {name}.",
+    "hidden": "Only people from shared groups can see this profile."
+  },
+  "post": {
+    "removed": "Removed by moderation",
+    "reason": "Reason: {reason}",
+    "moderate": "Moderation",
+    "remove": "Remove",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "lock": "Lock comments",
+    "unlock": "Unlock comments",
+    "reasonLabel": "Reason (the author can see it)",
+    "locked": "Comments locked",
+    "pinned": "Pinned"
+  },
+  "group": {
+    "slowMode": "Slow mode",
+    "slowOff": "Off",
+    "slow10": "Every 10 seconds",
+    "slow60": "Every minute",
+    "slow300": "Every 5 minutes",
+    "slowHint": "Applies to everyone except admins and maintainers."
+  }
+}

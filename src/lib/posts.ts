@@ -26,6 +26,10 @@ export type PostView = {
   replies: PostView[];
   attachments: Attachment[];
   poll: PollView | null;
+  /** Taken down by the group's moderators: the post stays as a visible gap. */
+  removed: boolean;
+  hidden_reason: string | null;
+  locked: boolean;
 };
 
 type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[]; underRegionId?: string; search?: string };
@@ -53,7 +57,7 @@ export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, o
     left join public.regions ar on ar.id = a.home_region_id
     left join public.listings l on l.id = p.listing_id
     left join public.initiatives i on i.id = p.initiative_id
-    where ${where} ${filter} and p.parent_id is null and p.hidden_at is null
+    where ${where} ${filter} and p.parent_id is null and (p.hidden_at is null or p.hidden_by is not null)
     order by ${order} limit ${opts.limit ?? 40}`;
   if (opts.sort === "chat") posts.reverse();
   if (!posts.length) return posts;
@@ -63,7 +67,7 @@ export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, o
     left join public.regions ar on ar.id = a.home_region_id
     left join public.listings l on l.id = p.listing_id
     left join public.initiatives i on i.id = p.initiative_id
-    where p.parent_id = any(${posts.map((p) => p.id)}::uuid[]) and p.hidden_at is null
+    where p.parent_id = any(${posts.map((p) => p.id)}::uuid[]) and (p.hidden_at is null or p.hidden_by is not null)
     order by p.created_at asc`;
   for (const p of posts) p.replies = replies.filter((r) => r.parent_id === p.id);
   const ex = await loadExtras(tx, "post", [...posts, ...replies].map((p) => p.id));
@@ -79,6 +83,7 @@ const postColumns = (tx: Tx, viewerId: string | null) => tx`
   a.display_name as author_name, a.avatar_seed as author_seed, a.avatar_path as author_path, a.display_mode as author_mode, ar.name as author_region,
   l.title as listing_title, l.kind::text as listing_kind, i.title as initiative_title,
   ${viewerId ? tx`coalesce((select v.value from public.post_votes v where v.post_id = p.id and v.profile_id = ${viewerId}), 0)` : tx`0`}::int as my_vote,
+  p.hidden_by is not null as removed, p.hidden_reason, p.locked,
   '[]'::jsonb as replies, '[]'::jsonb as attachments, null::jsonb as poll`;
 
 /** Hashtags used most in the marketplace of a region tree: ideas for the filter. */

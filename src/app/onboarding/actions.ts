@@ -45,7 +45,10 @@ export async function finishOnboarding(input: {
   alias: string;
   needs: string[];
   offers: string[];
+  ageOk: boolean;
+  isMinor: boolean;
 }) {
+  if (!input.ageOk) return { ok: false as const, error: "age_required" };
   return run(async (tx) => {
     await tx`select app.complete_onboarding(${tx.json({
       region_id: input.regionId,
@@ -54,6 +57,8 @@ export async function finishOnboarding(input: {
       alias: input.alias,
       needs: input.needs.slice(0, 20),
       offers: input.offers.slice(0, 20),
+      age_ok: true,
+      is_minor: input.isMinor,
     })})`;
     return null;
   });

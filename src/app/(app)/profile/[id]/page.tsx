@@ -13,6 +13,7 @@ import { EndorseButton } from "@/components/EndorseButton";
 import { ContactButton } from "@/components/listings/ContactButton";
 import { MessageButton } from "@/components/connect/MessageButton";
 import { VouchButton } from "@/components/VouchButton";
+import { BlockButton } from "@/components/BlockButton";
 import { priceLabel } from "@/components/listings/price";
 
 type Profile = { id: string; display_name: string; display_mode: string; avatar_seed: number; avatar_path: string | null; headline: string | null; bio: string | null; helped_count: number; region: string | null; onboarded_at: string | null };
@@ -26,6 +27,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
   const tr = await getTranslations("rights");
+  const tsf = await getTranslations("safety.profile");
   const locale = await getLocale();
   const d = await asViewer(viewer, async (tx) => {
     const [p] = await tx<Profile[]>`
@@ -49,11 +51,15 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
           select app.trust_level(${id}) as target, app.trust_level(${me}) as mine, app.verification_mode() as mode,
                  exists (select 1 from public.vouches where voucher_id = ${me} and vouched_id = ${id}) as vouched`)[0]
       : null;
-    return { p, tags, offers, posts, resps, groups, following, endorsed, sentTo, trust };
+    const found = (await tx<{ f: boolean }[]>`select app.can_find(${me ?? null}::uuid, ${id}) as f`)[0].f;
+    const blocked = me && me !== id ? (await tx`select 1 from public.blocks where blocker_id = ${me} and blocked_id = ${id}`).length > 0 : false;
+    return { p, tags, offers, posts, resps, groups, following, endorsed, sentTo, trust, found, blocked };
   });
   if (!d) notFound();
   const { p } = d;
   const self = me === id;
+  // Guests, and everyone for profiles that are only open to shared groups, see name, check mark and headline only.
+  const limited = !self && (!session || !d.found);
   return (
     <div className="grid gap-5 px-4 pb-6 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_320px]">
       <div className="flex min-w-0 flex-col gap-8">
@@ -63,7 +69,10 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
             <h1 className="display m-0 flex items-center gap-3">{p.display_name}{p.display_mode === "real" && <span aria-label={tc("verified")}><IconCheck size={28} /></span>}</h1>
             {p.display_mode === "alias" && <span className="text-sm text-muted">{t("alias")}</span>}
             {p.headline && <span className="text-lg">{p.headline}</span>}
-            <span className="text-muted">{[p.region, t("helped", { n: p.helped_count })].filter(Boolean).join(" · ")}</span>
+            {!limited && <span className="text-muted">{[p.region, t("helped", { n: p.helped_count })].filter(Boolean).join(" · ")}</span>}
+            {limited && (
+              <span className="text-sm text-muted">{session ? tsf("hidden") : tsf("guestHint", { name: p.display_name })}{!session && <> <Link href={`/login?next=/profile/${id}`} className="font-bold">{tc("signInToWrite")}</Link></>}</span>
+            )}
             {!self && p.onboarded_at && (
               <div className="flex flex-wrap gap-2">
                 <MessageButton toId={id} name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} signedIn={!!session} />
@@ -71,6 +80,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
                   <>
                     <FollowButton type="profile" id={id} following={d.following} />
                     <EndorseButton id={id} on={d.endorsed} />
+                    <BlockButton profileId={id} blocked={d.blocked} name={p.display_name} />
                   </>
                 )}
               </div>
@@ -84,7 +94,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
             {self && <Link href="/me" className="text-sm">{t("edit")}</Link>}
           </div>
         </section>
-        {p.bio && <p className="m-0 max-w-[720px] whitespace-pre-line text-lg">{p.bio}</p>}
+        {p.bio && !limited && <p className="m-0 max-w-[720px] whitespace-pre-line text-lg">{p.bio}</p>}
         <section className="flex flex-col gap-3">
           <h2 className="m-0 border-b-2 border-ink pb-2 text-xl font-bold">{t("gives")}</h2>
           {d.offers.length === 0 && d.tags.filter((x) => x.relation === "offers").length === 0 && <p className="m-0 text-muted">{t("nothing")}</p>}
@@ -100,7 +110,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
                 label={o.kind === "offer" ? t("ask") : t("help")} signedIn={!!session} sent={d.sentTo.includes(o.id)} />}
             </div>
           ))}
-          <div className="flex flex-wrap gap-2">{d.tags.filter((x) => x.relation === "offers").map((x) => <span key={x.slug} className={tag}>#{t("offersTag")} {x.slug}</span>)}</div>
+          <div className="flex flex-wrap gap-2">{!limited && d.tags.filter((x) => x.relation === "offers").map((x) => <span key={x.slug} className={tag}>#{t("offersTag")} {x.slug}</span>)}</div>
         </section>
         {d.posts.length > 0 && (
           <section className="flex flex-col gap-3">
@@ -110,7 +120,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
         )}
       </div>
       <aside className="flex flex-col gap-6">
-        {d.tags.some((x) => x.relation !== "offers") && (
+        {!limited && d.tags.some((x) => x.relation !== "offers") && (
           <section className="flex flex-col gap-2 border-t-[6px] border-ink pt-3">
             <h2 className="m-0 text-lg font-bold">{t("looksFor")}</h2>
             <div className="flex flex-wrap gap-2">{d.tags.filter((x) => x.relation !== "offers").map((x) => <span key={x.slug + x.relation} className={tag}>#{x.slug}</span>)}</div>
@@ -127,7 +137,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
             ))}
           </section>
         )}
-        {d.groups.length > 0 && (
+        {!limited && d.groups.length > 0 && (
           <section className="flex flex-col gap-2 border-t border-line pt-3">
             <h2 className="m-0 text-lg font-bold">{t("groups")}</h2>
             {d.groups.map((g) => <Link key={g.slug} href={`/groups/${g.slug}`} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={g.name} size={24} group />{g.name}</Link>)}

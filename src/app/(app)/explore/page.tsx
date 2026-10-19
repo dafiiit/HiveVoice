@@ -98,6 +98,8 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
       };
     }
     if (kind === "people") {
+      // Searching for names needs three letters and is limited per hour (so the member list cannot be scraped).
+      const allowed = !q || (q.length >= 3 && (await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`)[0].ok);
       return {
         people: await tx<Person[]>`
           select p.id, p.display_name, p.avatar_seed, p.avatar_path, p.headline, r.name as region_name,
@@ -106,6 +108,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
             ${viewer ? tx`exists (select 1 from public.follows f where f.follower_id = ${viewer.profileId} and f.target_type = 'profile' and f.target_id = p.id)` : tx`false`} as following
           from public.profiles p left join public.regions r on r.id = p.home_region_id
           where p.onboarded_at is not null ${viewer ? tx`and p.id <> ${viewer.profileId}` : tx``}
+            and app.can_find(${viewer?.profileId ?? null}::uuid, p.id) and ${allowed}
             ${inPlace(tx`p.home_region_id`)}
             ${q ? tx`and (lower(p.display_name) like ${like} or lower(coalesce(p.headline, '')) like ${like}
                      or exists (select 1 from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = p.id and t.slug like ${like}))` : tx``}

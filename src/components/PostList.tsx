@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { PostView } from "@/lib/posts";
 import { createPost, deletePost, votePost } from "@/lib/actions/posts";
+import { moderatePost } from "@/lib/actions/safety";
 import { relTime } from "@/lib/format";
 import { Avatar } from "./ui/Avatar";
 import { IconCheck, IconDown, IconReply, IconUp } from "./ui/Icons";
@@ -58,9 +59,10 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   );
 }
 
-function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: string; canWrite: boolean; viewerId?: string; compact?: boolean }) {
+function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostView; path: string; canWrite: boolean; viewerId?: string; compact?: boolean; canModerate?: boolean }) {
   const t = useTranslations("posts");
   const tc = useTranslations("common");
+  const ts = useTranslations("safety");
   const locale = useLocale();
   const [vote, setVote] = useOptimistic(p.my_vote);
   const [, start] = useTransition();
@@ -74,6 +76,19 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
     start(async () => { setVote(next); await votePost(p.id, next, path); });
   };
   const verified = p.author_mode === "real";
+  if (p.removed) {
+    return (
+      <article className="flex flex-col gap-1 py-4 text-sm text-muted">
+        <strong className="font-bold italic">{ts("post.removed")}</strong>
+        {p.hidden_reason && <span>{ts("post.reason", { reason: p.hidden_reason })}</span>}
+        {!compact && p.replies.length > 0 && (
+          <div className="mt-1 flex flex-col border-l-2 border-line pl-4">
+            {p.replies.map((r) => <Post key={r.id} p={r} path={path} canWrite={canWrite} viewerId={viewerId} compact canModerate={canModerate} />)}
+          </div>
+        )}
+      </article>
+    );
+  }
   return (
     <article className="flex gap-3 py-4">
       <Link href={`/profile/${p.author_id}`} aria-hidden="true" tabIndex={-1} className="flex-none">
@@ -86,6 +101,7 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
           {p.author_region && <span className="text-muted">{p.author_region}</span>}
           <span className="text-muted">{relTime(p.created_at, locale)}</span>
           {p.is_pinned && <span className="font-bold">{t("pinned")}</span>}
+          {p.locked && <span className="text-muted">· {ts("post.locked")}</span>}
         </div>
         {p.body && <p className="m-0 whitespace-pre-line">{p.body}</p>}
         <Attachments items={p.attachments} />
@@ -110,6 +126,7 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
               className="inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 text-muted">
               <IconReply /> {tc("replies", { n: p.replies.length })}
             </button>
+            {canModerate && <Moderation post={p} path={path} />}
             {viewerId === p.author_id ? (
               <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} className="border-0 bg-transparent p-0 text-muted underline">{tc("delete")}</button>
             ) : canWrite ? <ReportButton type="post" id={p.id} /> : null}
@@ -117,8 +134,8 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
         )}
         {open && (
           <div className="mt-1 flex flex-col border-l-2 border-line pl-4">
-            {p.replies.map((r) => <Post key={r.id} p={r} path={path} canWrite={canWrite} viewerId={viewerId} compact />)}
-            {canWrite && <Composer ctx={{ parentId: p.id }} path={path} placeholder={t("replyTo", { name: p.author_name })} />}
+            {p.replies.map((r) => <Post key={r.id} p={r} path={path} canWrite={canWrite} viewerId={viewerId} compact canModerate={canModerate} />)}
+            {canWrite && (!p.locked || canModerate) && <Composer ctx={{ parentId: p.id }} path={path} placeholder={t("replyTo", { name: p.author_name })} />}
           </div>
         )}
       </div>
@@ -126,11 +143,42 @@ function Post({ p, path, canWrite, viewerId, compact }: { p: PostView; path: str
   );
 }
 
-export function PostList({ posts, path, canWrite, viewerId, empty }: { posts: PostView[]; path: string; canWrite: boolean; viewerId?: string; empty?: string }) {
+export function PostList({ posts, path, canWrite, viewerId, empty, canModerate }: { posts: PostView[]; path: string; canWrite: boolean; viewerId?: string; empty?: string; canModerate?: boolean }) {
   if (!posts.length) return <p className="m-0 py-6 text-muted">{empty}</p>;
   return (
     <div className="flex flex-col divide-y divide-line">
-      {posts.map((p) => <Post key={p.id} p={p} path={path} canWrite={canWrite} viewerId={viewerId} />)}
+      {posts.map((p) => <Post key={p.id} p={p} path={path} canWrite={canWrite} viewerId={viewerId} canModerate={canModerate} />)}
     </div>
+  );
+}
+
+/** Moderators of a group: take a post down (with a reason the author sees), pin it, or lock its comments. */
+function Moderation({ post, path }: { post: PostView; path: string }) {
+  const ts = useTranslations("safety.post");
+  const tc = useTranslations("common");
+  const [reason, setReason] = useState("");
+  const [asking, setAsking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const run = (action: "remove" | "pin" | "unpin" | "lock" | "unlock") => start(async () => {
+    const res = await moderatePost(post.id, action, reason, path);
+    setError(res.ok ? null : tc(`errors.${res.error}` as "errors.unknown"));
+    if (res.ok) setAsking(false);
+  });
+  const link = "border-0 bg-transparent p-0 text-muted underline";
+  return (
+    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <button type="button" disabled={pending} className={link} onClick={() => run(post.is_pinned ? "unpin" : "pin")}>{post.is_pinned ? ts("unpin") : ts("pin")}</button>
+      <button type="button" disabled={pending} className={link} onClick={() => run(post.locked ? "unlock" : "lock")}>{post.locked ? ts("unlock") : ts("lock")}</button>
+      {!asking ? (
+        <button type="button" className={link} onClick={() => setAsking(true)}>{ts("remove")}</button>
+      ) : (
+        <span className="flex w-full flex-wrap items-center gap-2">
+          <input value={reason} maxLength={300} onChange={(e) => setReason(e.target.value)} aria-label={ts("reasonLabel")} placeholder={ts("reasonLabel")} className={`${field.inputSm} min-w-0 flex-1`} />
+          <button type="button" disabled={pending} className={`${btn.red} h-11`} onClick={() => run("remove")}>{ts("remove")}</button>
+        </span>
+      )}
+      {error && <span role="alert" className="font-bold">{error}</span>}
+    </span>
   );
 }

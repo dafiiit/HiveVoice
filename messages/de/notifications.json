@@ -124,6 +124,18 @@
     "fallback": {
       "title": "Neuigkeit",
       "body": ""
+    },
+    "vouched": {
+      "title": "{by} bürgt für dich",
+      "body": "Mit zwei Bürgschaften wirst du bestätigt. Unter „Rechte und Stufen“ siehst du den Stand."
+    },
+    "post_removed": {
+      "title": "Ein Beitrag von dir wurde entfernt",
+      "body": "In „{group}“ von der Moderation. {reason}"
+    },
+    "ttl_proposed": {
+      "title": "Verschwindende Nachrichten",
+      "body": "Es wird vorgeschlagen, dass Nachrichten nach {days} Tagen verschwinden. Öffne den Chat, um zuzustimmen."
     }
   }
 }

@@ -35,5 +35,8 @@
   "needsPlaceholder": "z. B. proberaum",
   "offersPlaceholder": "z. B. fahrrad-reparatur",
   "welcome": "Du trittst auf als {name}.",
-  "finish": "Los geht’s"
+  "finish": "Los geht’s",
+  "ageOk": "Ich bin mindestens 16 Jahre alt.",
+  "ageMinor": "Ich bin noch nicht 18.",
+  "ageHint": "Unter 18 bist du besser geschützt: Fremde erreichen dich nur über gemeinsame Gruppen."
 }

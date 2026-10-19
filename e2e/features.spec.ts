@@ -228,7 +228,8 @@ test.describe("signed in", () => {
     await url.fill(mine);
     await page.getByRole("button", { name: "Prüfen" }).click();
     await expect(page.getByText("Bekannter Dienst").first()).toBeVisible({ timeout: 20_000 });
-    await page.getByLabel("Titel", { exact: true }).fill("E2E Testlink (wird gleich gelöscht)");
+    const title = `E2E Testlink ${Date.now()} (wird gleich gelöscht)`;
+    await page.getByLabel("Titel", { exact: true }).fill(title);
     await page.getByRole("button", { name: "Teilen", exact: true }).click();
     await page.waitForURL(/\/links\/[0-9a-f-]{36}/);
     await expect(page.getByRole("heading", { name: /E2E Testlink/ })).toBeVisible();
@@ -236,10 +237,10 @@ test.describe("signed in", () => {
     await page.getByRole("button", { name: "Nützlich", exact: true }).click();
     await expect(page.getByRole("group", { name: "Bewertung" }).getByText("1", { exact: true })).toBeVisible();
     page.once("dialog", (d) => d.accept());
-    await page.getByRole("button", { name: "Löschen" }).click();
+    await page.getByRole("button", { name: "In den Papierkorb" }).click();
     await page.waitForURL(/kind=links/);
     await expect(page.getByRole("tab", { name: "Wissen" })).toHaveAttribute("aria-selected", "true");
-    await expect(page.getByText("E2E Testlink")).toHaveCount(0);
+    await expect(page.getByText(title)).toHaveCount(0);
   });
 
   test("Wissen lists shared links with previews, votes and a search that finds them", async ({ page }) => {

@@ -1,6 +1,6 @@
 # Rechte und Verantwortung: offene Fragen mit Vorschlägen
 
-Stand: 19.10.2026. Entwurf zum Durcharbeiten, nichts davon ist umgesetzt. Zu jeder Frage steht, **was heute gilt**, und ein **Vorschlag**.
+Stand: 19.10.2026. Fragen und Vorschläge zum Durcharbeiten. **Umgesetzt sind alle Vorschläge, was davon wie gilt, steht in [rechte.md](rechte.md).** Die Tabelle „Was heute gilt“ beschreibt den Stand *vor* der Umsetzung. Zu jeder Frage steht, **was damals galt**, und ein **Vorschlag**.
 Wo der Vorschlag keine Alternative nennt, ist er die einfachste Lösung, die zum Rest der App passt.
 
 ## Was heute gilt (Kurzfassung)

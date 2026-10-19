@@ -53,12 +53,14 @@ test.describe("documents: who sees what", () => {
       // Into the trash: closed for everybody else, restorable.
       page.once("dialog", (d) => void d.accept());
       await page.getByRole("button", { name: "In den Papierkorb" }).click();
-      await expect(page).toHaveURL(/tab=docs/, { timeout: 60_000 });
+      await expect(page).toHaveURL(/kind=links/, { timeout: 60_000 });
+      await page.goto("/me?tab=docs");
       await expect(page.getByText(marker)).toBeVisible();
       await gp.reload();
       await expect(gp.getByRole("heading", { name: marker, level: 1 })).toHaveCount(0);
-      await page.getByRole("button", { name: "Wiederherstellen" }).first().click();
-      await expect(page.getByRole("button", { name: "Wiederherstellen" })).toHaveCount(0, { timeout: 60_000 });
+      // Other trashed items of earlier runs may sit in the trash too: restore this one only.
+      await page.getByText(marker).locator("xpath=ancestor::div[1]").getByRole("button", { name: "Wiederherstellen" }).click();
+      await expect(page.getByRole("link", { name: new RegExp(marker) })).toBeVisible({ timeout: 60_000 });
       await guest.close();
     } finally {
       await exec(`delete from public.resources where title = '${marker}'`);

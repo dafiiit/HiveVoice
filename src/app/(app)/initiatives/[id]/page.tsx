@@ -122,12 +122,12 @@ export default async function InitiativePage({ params, searchParams }: PageProps
     const adminGroups = isAuthorNow && me ? await tx<{ id: string; name: string }[]>`
       select g.id, g.name from public.group_members m join public.groups g on g.id = m.group_id
       where m.profile_id = ${me} and m.role = 'admin' and g.archived_at is null order by g.name limit 30` : [];
-    const [{ deletable }] = await tx<{ deletable: boolean }[]>`
+    const deletable = !isAuthorNow ? false : (await tx<{ deletable: boolean }[]>`
       select not (
         exists (select 1 from public.initiative_supports s where s.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = s.profile_id))
         or exists (select 1 from public.ballots b where b.initiative_id = ${id})
         or exists (select 1 from public.arguments x where x.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = x.author_id))
-        or exists (select 1 from public.posts x where x.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = x.author_id))) as deletable`;
+        or exists (select 1 from public.posts x where x.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = x.author_id))) as deletable`)[0].deletable;
     const [{ frozen }] = await tx<{ frozen: boolean }[]>`select app.initiative_frozen(${id}) as frozen`;
     const similar = await tx<{ id: string; title: string; region_name: string; phase: string }[]>`
       select i2.id, i2.title, r.name as region_name, i2.phase::text from public.initiatives i2 join public.regions r on r.id = i2.region_id

@@ -92,32 +92,46 @@
   "vouchTakeBack": "Bürgschaft für {name} zurückziehen",
   "vouchHint": "{name} ist noch nicht bestätigt. Bürge nur für Menschen, die du wirklich kennst.",
   "matrix": {
-    "resource.view": "Ansehen: je nach Sichtbarkeit alle, die Gruppe, Eingeladene oder wer den Link kennt.",
-    "resource.comment": "Kommentieren und Änderungen vorschlagen: Menschen mit dem Recht „Kommentieren“, bei „Vorschläge“ alle bestätigten Lesenden.",
-    "resource.edit": "Bearbeiten: die Eigentümer:in, Eingeladene mit dem Recht „Bearbeiten“, bei „Gruppe bearbeitet“ alle mit dem Gruppenrecht für Dateien.",
-    "resource.manage": "Verwalten (Rechte, Eigentum, Papierkorb): die Eigentümer:in, Eingeladene mit „Verwalten“, die Admins der Gruppe.",
-    "resource.download": "Herunterladen: wenn der Schalter an ist. Wer bearbeiten darf, kann immer herunterladen.",
-    "resource.copy": "Kopie in das eigene Wissen: bei einer CC-Lizenz, oder wenn Herunterladen erlaubt und nicht „Alle Rechte vorbehalten“ gilt.",
-    "initiative.support": "Unterstützen: bestätigte Menschen, solange die Initiative offen und nicht gesperrt ist.",
-    "initiative.edit": "Bearbeiten: die Autor:innen (und die Admins der zugeordneten Gruppe, wenn die Gruppe es erlaubt), mit Vermerk.",
-    "initiative.invite_author": "Mit-Autor:in einladen: die Autor:innen, bis zu fünf zusammen mit offenen Einladungen.",
-    "initiative.start_ballot": "Abstimmung starten: die Autor:innen, nach der Debatte und mit genug Unterstützenden für den Ort.",
-    "initiative.withdraw": "Zurückziehen: die Leitung der Initiative.",
-    "initiative.delete": "Löschen: die Leitung, solange nur Autor:innen beteiligt sind.",
-    "group.post": "Schreiben: Mitglieder mit dem Recht „Schreiben“.",
-    "group.invite": "Einladen: je nach Rolle und Einladungsregel der Gruppe.",
-    "group.manage_members": "Mitglieder verwalten: die Admins und wer das Recht bekommen hat.",
-    "group.archive": "Archivieren: die Admins.",
-    "group.transfer": "Eigentum übergeben: die Eigentümer:in.",
-    "group.delete": "Löschen: die Eigentümer:in, mit 14 Tagen Wartezeit.",
-    "responsibility.confirm": "Bestätigen: bestätigte Menschen aus dem Ort der Zuständigkeit.",
-    "responsibility.dispute": "Widersprechen: bestätigte Menschen. Amtliche Stellen sind ausgenommen, dort zählt die Prüfung der Mail-Adresse.",
-    "responsibility.answer": "Anfragen beantworten: wer die Zuständigkeit betreut oder vertritt.",
-    "responsibility.edit": "Bearbeiten und übergeben: die Hauptverantwortliche.",
-    "poll.manage": "Umfrage beenden oder löschen: wer sie erstellt hat, und die Admins und Maintainer der Gruppe.",
-    "message.edit": "Nachricht ändern: nur die Absender:in, 15 Minuten lang.",
-    "message.delete": "Nachricht löschen: nur die Absender:in.",
-    "report.appeal": "Einspruch gegen eine Entscheidung: die betroffene Person, einmal und in den ersten 14 Tagen."
+    "resource": {
+      "view": "Ansehen: je nach Sichtbarkeit alle, die Gruppe, Eingeladene oder wer den Link kennt.",
+      "comment": "Kommentieren und Änderungen vorschlagen: Menschen mit dem Recht „Kommentieren“, bei „Vorschläge“ alle bestätigten Lesenden.",
+      "edit": "Bearbeiten: die Eigentümer:in, Eingeladene mit dem Recht „Bearbeiten“, bei „Gruppe bearbeitet“ alle mit dem Gruppenrecht für Dateien.",
+      "manage": "Verwalten (Rechte, Eigentum, Papierkorb): die Eigentümer:in, Eingeladene mit „Verwalten“, die Admins der Gruppe.",
+      "download": "Herunterladen: wenn der Schalter an ist. Wer bearbeiten darf, kann immer herunterladen.",
+      "copy": "Kopie in das eigene Wissen: bei einer CC-Lizenz, oder wenn Herunterladen erlaubt und nicht „Alle Rechte vorbehalten“ gilt."
+    },
+    "initiative": {
+      "support": "Unterstützen: bestätigte Menschen, solange die Initiative offen und nicht gesperrt ist.",
+      "edit": "Bearbeiten: die Autor:innen (und die Admins der zugeordneten Gruppe, wenn die Gruppe es erlaubt), mit Vermerk.",
+      "invite_author": "Mit-Autor:in einladen: die Autor:innen, bis zu fünf zusammen mit offenen Einladungen.",
+      "start_ballot": "Abstimmung starten: die Autor:innen, nach der Debatte und mit genug Unterstützenden für den Ort.",
+      "withdraw": "Zurückziehen: die Leitung der Initiative.",
+      "delete": "Löschen: die Leitung, solange nur Autor:innen beteiligt sind."
+    },
+    "group": {
+      "post": "Schreiben: Mitglieder mit dem Recht „Schreiben“.",
+      "invite": "Einladen: je nach Rolle und Einladungsregel der Gruppe.",
+      "manage_members": "Mitglieder verwalten: die Admins und wer das Recht bekommen hat.",
+      "archive": "Archivieren: die Admins.",
+      "transfer": "Eigentum übergeben: die Eigentümer:in.",
+      "delete": "Löschen: die Eigentümer:in, mit 14 Tagen Wartezeit."
+    },
+    "responsibility": {
+      "confirm": "Bestätigen: bestätigte Menschen aus dem Ort der Zuständigkeit.",
+      "dispute": "Widersprechen: bestätigte Menschen. Amtliche Stellen sind ausgenommen, dort zählt die Prüfung der Mail-Adresse.",
+      "answer": "Anfragen beantworten: wer die Zuständigkeit betreut oder vertritt.",
+      "edit": "Bearbeiten und übergeben: die Hauptverantwortliche."
+    },
+    "poll": {
+      "manage": "Umfrage beenden oder löschen: wer sie erstellt hat, und die Admins und Maintainer der Gruppe."
+    },
+    "message": {
+      "edit": "Nachricht ändern: nur die Absender:in, 15 Minuten lang.",
+      "delete": "Nachricht löschen: nur die Absender:in."
+    },
+    "report": {
+      "appeal": "Einspruch gegen eine Entscheidung: die betroffene Person, einmal und in den ersten 14 Tagen."
+    }
   },
   "why": {
     "not_authenticated": "Melde dich an, dann geht das vielleicht.",

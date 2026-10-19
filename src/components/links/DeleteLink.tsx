@@ -11,6 +11,6 @@ export function DeleteLink({ id, groupSlug }: { id: string; groupSlug: string | 
   const [pending, start] = useTransition();
   return (
     <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-sm text-muted underline"
-      onClick={() => { if (confirm(t("trashConfirm", { days: 30 }))) start(async () => { await deleteResource(id); router.push(groupSlug ? `/groups/${groupSlug}?tab=links` : "/me?tab=docs"); }); }}>{t("trash")}</button>
+      onClick={() => { if (confirm(t("trashConfirm", { days: 30 }))) start(async () => { await deleteResource(id); router.push(groupSlug ? `/groups/${groupSlug}?tab=links` : "/explore?kind=links"); }); }}>{t("trash")}</button>
   );
 }

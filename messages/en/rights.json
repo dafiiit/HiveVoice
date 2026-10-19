@@ -92,32 +92,46 @@
   "vouchTakeBack": "Take back vouch for {name}",
   "vouchHint": "{name} is not verified yet. Only vouch for people you really know.",
   "matrix": {
-    "resource.view": "View: depending on visibility everybody, the group, invited people or whoever knows the link.",
-    "resource.comment": "Comment and suggest changes: people with the right to comment, with “suggestions” every verified reader.",
-    "resource.edit": "Edit: the owner, invited people with the right to edit, with “the group edits” everybody with the group right for files.",
-    "resource.manage": "Manage (rights, ownership, trash): the owner, invited people with “manage”, the group's admins.",
-    "resource.download": "Download: when the switch is on. Whoever may edit can always download.",
-    "resource.copy": "Copy into one's own Wissen: with a CC licence, or when downloading is allowed and “all rights reserved” does not apply.",
-    "initiative.support": "Support: verified people, as long as the initiative is open and not blocked.",
-    "initiative.edit": "Edit: the authors (and the admins of the attached group when the group allows it), with a note.",
-    "initiative.invite_author": "Invite a co-author: the authors, up to five including open invitations.",
-    "initiative.start_ballot": "Start a vote: the authors, after the debate and with enough supporters for the place.",
-    "initiative.withdraw": "Withdraw: the lead of the initiative.",
-    "initiative.delete": "Delete: the lead, as long as only authors took part.",
-    "group.post": "Write: members with the right to write.",
-    "group.invite": "Invite: depending on the role and the invitation rule of the group.",
-    "group.manage_members": "Manage members: the admins and whoever was given the right.",
-    "group.archive": "Archive: the admins.",
-    "group.transfer": "Hand over ownership: the owner.",
-    "group.delete": "Delete: the owner, with 14 days of waiting.",
-    "responsibility.confirm": "Confirm: verified people from the place of the responsibility.",
-    "responsibility.dispute": "Dispute: verified people. Official bodies are excepted, there the check of the mail address counts.",
-    "responsibility.answer": "Answer requests: whoever runs or represents the responsibility.",
-    "responsibility.edit": "Edit and hand over: the main person responsible.",
-    "poll.manage": "End or delete a poll: whoever created it, and the admins and maintainers of the group.",
-    "message.edit": "Change a message: only the sender, for 15 minutes.",
-    "message.delete": "Delete a message: only the sender.",
-    "report.appeal": "Appeal a decision: the person concerned, once and within the first 14 days."
+    "resource": {
+      "view": "View: depending on visibility everybody, the group, invited people or whoever knows the link.",
+      "comment": "Comment and suggest changes: people with the right to comment, with “suggestions” every verified reader.",
+      "edit": "Edit: the owner, invited people with the right to edit, with “the group edits” everybody with the group right for files.",
+      "manage": "Manage (rights, ownership, trash): the owner, invited people with “manage”, the group's admins.",
+      "download": "Download: when the switch is on. Whoever may edit can always download.",
+      "copy": "Copy into one's own Wissen: with a CC licence, or when downloading is allowed and “all rights reserved” does not apply."
+    },
+    "initiative": {
+      "support": "Support: verified people, as long as the initiative is open and not blocked.",
+      "edit": "Edit: the authors (and the admins of the attached group when the group allows it), with a note.",
+      "invite_author": "Invite a co-author: the authors, up to five including open invitations.",
+      "start_ballot": "Start a vote: the authors, after the debate and with enough supporters for the place.",
+      "withdraw": "Withdraw: the lead of the initiative.",
+      "delete": "Delete: the lead, as long as only authors took part."
+    },
+    "group": {
+      "post": "Write: members with the right to write.",
+      "invite": "Invite: depending on the role and the invitation rule of the group.",
+      "manage_members": "Manage members: the admins and whoever was given the right.",
+      "archive": "Archive: the admins.",
+      "transfer": "Hand over ownership: the owner.",
+      "delete": "Delete: the owner, with 14 days of waiting."
+    },
+    "responsibility": {
+      "confirm": "Confirm: verified people from the place of the responsibility.",
+      "dispute": "Dispute: verified people. Official bodies are excepted, there the check of the mail address counts.",
+      "answer": "Answer requests: whoever runs or represents the responsibility.",
+      "edit": "Edit and hand over: the main person responsible."
+    },
+    "poll": {
+      "manage": "End or delete a poll: whoever created it, and the admins and maintainers of the group."
+    },
+    "message": {
+      "edit": "Change a message: only the sender, for 15 minutes.",
+      "delete": "Delete a message: only the sender."
+    },
+    "report": {
+      "appeal": "Appeal a decision: the person concerned, once and within the first 14 days."
+    }
   },
   "why": {
     "not_authenticated": "Sign in, then it may work.",

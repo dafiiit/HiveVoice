@@ -12,6 +12,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { EndorseButton } from "@/components/EndorseButton";
 import { ContactButton } from "@/components/listings/ContactButton";
 import { MessageButton } from "@/components/connect/MessageButton";
+import { VouchButton } from "@/components/VouchButton";
 import { priceLabel } from "@/components/listings/price";
 
 type Profile = { id: string; display_name: string; display_mode: string; avatar_seed: number; avatar_path: string | null; headline: string | null; bio: string | null; helped_count: number; region: string | null; onboarded_at: string | null };
@@ -24,6 +25,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
   const me = session?.profile.id;
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
+  const tr = await getTranslations("rights");
   const locale = await getLocale();
   const d = await asViewer(viewer, async (tx) => {
     const [p] = await tx<Profile[]>`
@@ -42,7 +44,12 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     const following = me ? (await tx`select 1 from public.follows where follower_id = ${me} and target_type = 'profile' and target_id = ${id}`).length > 0 : false;
     const endorsed = me ? (await tx`select 1 from public.endorsements where from_profile_id = ${me} and to_profile_id = ${id}`).length > 0 : false;
     const sentTo = me ? (await tx<{ listing_id: string }[]>`select listing_id from public.contact_requests where from_profile_id = ${me} and status in ('pending', 'accepted')`).map((r) => r.listing_id) : [];
-    return { p, tags, offers, posts, resps, groups, following, endorsed, sentTo };
+    const trust = me && me !== id
+      ? (await tx<{ target: number; mine: number; mode: string; vouched: boolean }[]>`
+          select app.trust_level(${id}) as target, app.trust_level(${me}) as mine, app.verification_mode() as mode,
+                 exists (select 1 from public.vouches where voucher_id = ${me} and vouched_id = ${id}) as vouched`)[0]
+      : null;
+    return { p, tags, offers, posts, resps, groups, following, endorsed, sentTo, trust };
   });
   if (!d) notFound();
   const { p } = d;
@@ -66,6 +73,12 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
                     <EndorseButton id={id} on={d.endorsed} />
                   </>
                 )}
+              </div>
+            )}
+            {d.trust && d.trust.mode === "vouch" && d.trust.target < 2 && d.trust.mine >= 2 && (
+              <div className="flex flex-col gap-1.5 border-l-4 border-ink bg-surface p-3">
+                <span className="text-sm">{tr("vouchHint", { name: p.display_name })}</span>
+                <VouchButton profileId={id} vouched={d.trust.vouched} name={p.display_name} />
               </div>
             )}
             {self && <Link href="/me" className="text-sm">{t("edit")}</Link>}

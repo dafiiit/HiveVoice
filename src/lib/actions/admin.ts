@@ -28,7 +28,7 @@ export async function claimAdmin() {
   return { ok: true as const, data: null };
 }
 
-export async function setVerificationMode(mode: "login" | "eid") {
+export async function setVerificationMode(mode: "login" | "vouch" | "eid") {
   return guard(() => sql`select app.admin_set_setting('verification_mode', ${sql.json(mode)})`);
 }
 

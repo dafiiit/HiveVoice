@@ -1,0 +1,86 @@
+{
+  "title": "Rights and levels",
+  "lead": "See what you may do in HiveVoice, why, and what you need for the next level.",
+  "leadShort": "What you may do and why.",
+  "yourLevel": "Your level: {name}",
+  "levels": [
+    {
+      "name": "Guest",
+      "text": "You can read. Sign in to take part."
+    },
+    {
+      "name": "Account",
+      "text": "You can react, send requests, join groups and attach files. You may write in groups with open entry after the first day."
+    },
+    {
+      "name": "Verified",
+      "text": "You may write everywhere, found groups, start initiatives, vote, register responsibilities and share."
+    },
+    {
+      "name": "Official",
+      "text": "You speak for an office. Your role is confirmed by an official email."
+    },
+    {
+      "name": "Moderation",
+      "text": "You look after running the platform, such as bans and settings. This is logged."
+    }
+  ],
+  "modes": {
+    "login": "In the test phase a login counts as verified.",
+    "vouch": "You are verified when two verified people vouch for you and your account is a day old.",
+    "eid": "You are verified with the online ID."
+  },
+  "vouchProgress": "Vouches: {n} of 2",
+  "vouchedBy": "Vouching for you: {names}",
+  "vouchNone": "Nobody vouches for you yet. Ask people who know you to vouch on your profile.",
+  "ageWait": "Your account is {hours} hours old. After 24 hours the vouches count.",
+  "vouchGiven": "In the last 30 days you gave {n} of 5 possible vouches.",
+  "sanction": "Your account is paused ({kind}). Until {date}.",
+  "sanctionOpen": "Your account is paused ({kind}) until it is lifted.",
+  "kinds": {
+    "pause": "writing pause",
+    "ban": "ban"
+  },
+  "actionsTitle": "What you may do",
+  "columns": {
+    "action": "Action",
+    "needs": "Needs",
+    "today": "Today"
+  },
+  "actions": {
+    "message": "Send messages",
+    "post": "Write posts and replies",
+    "contact_request": "Send a request to a stranger",
+    "group_join": "Join or ask to join groups",
+    "upload": "Upload photos and files",
+    "vouch": "Vouch for others",
+    "group_create": "Found a group",
+    "group_invite": "Invite people to groups",
+    "initiative_create": "Start an initiative",
+    "initiative_support": "Support initiatives",
+    "vote": "Vote",
+    "listing_create": "Post requests and offers",
+    "share": "Share links, files and notes",
+    "report": "Report content",
+    "jury": "Decide in the citizen jury",
+    "responsibility_self": "Register a responsibility",
+    "responsibility_official": "Speak officially for an office",
+    "moderate_platform": "Moderate the platform",
+    "admin": "Run the platform"
+  },
+  "status": {
+    "ok": "Yes",
+    "level_required": "Level {level} needed",
+    "rate_limited": "Used up for today",
+    "banned": "Paused",
+    "not_authenticated": "Sign in needed"
+  },
+  "usage": "{used} of {limit}",
+  "levelsTitle": "The levels",
+  "youAreHere": "You are here",
+  "more": "More in the principles",
+  "limitsHint": "The daily limits protect everyone from spam. New accounts get half on their first day.",
+  "vouchFor": "Vouch for {name}",
+  "vouchTakeBack": "Take back vouch for {name}",
+  "vouchHint": "{name} is not verified yet. Only vouch for people you really know."
+}

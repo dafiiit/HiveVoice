@@ -49,7 +49,10 @@
     "not_found": "Not found.",
     "unknown": "That did not work. Please try again.",
     "own_profile": "That is you.",
-    "rate_limited": "You have shared a lot of links today. Try again tomorrow."
+    "rate_limited": "You have done a lot today. You can continue tomorrow.",
+    "level_required": "You need a higher level for this. “Rights and levels” shows what is missing.",
+    "banned": "Your account is paused at the moment. See “Rights and levels” for details.",
+    "too_many_empty_groups": "You already have three groups without other members. Invite people first."
   },
   "phase": {
     "idea": "Idea",

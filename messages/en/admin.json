@@ -16,10 +16,11 @@
     "regions": "Regions"
   },
   "verification": "Verification",
-  "verificationText": "During the test phase a sign-in counts as verified. Once ID card verification is connected, only that counts.",
+  "verificationText": "In the test phase a login counts as verified. With “vouching” two verified people must vouch and the account must be a day old. Once the online ID is connected, only that counts.",
   "modes": {
-    "login": "Sign-in is enough (test phase)",
-    "eid": "ID card only"
+    "login": "A login is enough (test phase)",
+    "eid": "Online ID only",
+    "vouch": "Vouching (two verified people)"
   },
   "domains": "Official email domains",
   "domainsText": "Whoever confirms an address with one of these domains (or a subdomain) gets the official check mark for their responsibility.",

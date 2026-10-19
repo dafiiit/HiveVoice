@@ -38,7 +38,7 @@ export function AdminPanel({ o, me }: { o: Overview; me: string }) {
         <h2 className="m-0 text-2xl font-bold">{t("verification")}</h2>
         <p className="m-0 max-w-[720px]">{t("verificationText")}</p>
         <div className="flex gap-2">
-          {(["login", "eid"] as const).map((m) => <button key={m} type="button" aria-pressed={mode === m} disabled={pending} onClick={() => act(() => setVerificationMode(m))} className={chip(mode === m)}>{t(`modes.${m}`)}</button>)}
+          {(["login", "vouch", "eid"] as const).map((m) => <button key={m} type="button" aria-pressed={mode === m} disabled={pending} onClick={() => act(() => setVerificationMode(m))} className={chip(mode === m)}>{t(`modes.${m}`)}</button>)}
         </div>
       </section>
       <section className="flex flex-col gap-3">

@@ -27,6 +27,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const me = session.profile.id;
   const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "profile";
   const t = await getTranslations("me");
+  const tr = await getTranslations("rights");
   const locale = await getLocale();
 
   const d = await asViewer(viewer, async (tx) => {
@@ -77,6 +78,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           <span className="text-muted">{d.places}</span>
           <DisplayToggle mode={d.p.display_mode} realName={session.profile.real_name ?? ""} alias={d.p.alias ?? ""} headline={d.p.headline ?? ""} bio={d.p.bio ?? ""} />
           <Link href={`/profile/${me}`} className="self-start text-sm">{t("publicProfile")}</Link>
+          <Link href="/rechte" className="self-start text-sm">{tr("title")}</Link>
         </div>
       </section>
       <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">

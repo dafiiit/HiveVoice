@@ -313,14 +313,15 @@ describe("shared links", () => {
     await as(tx, b, () => fails(tx, (sp) => sp`select app.share_resource(${sp.json({ url: "https://example.org/x", host: "example.org", title: "Fremder Link", group_id: gid })})`));
   }));
 
-  it("lets only the owner or a group admin remove it, and limits sharing to 30 a day", () => scenario(async (tx) => {
+  it("lets only the owner or a group admin remove it, and limits sharing per day", () => scenario(async (tx) => {
     const a = await person(tx, "Ada"), b = await person(tx, "Ben");
     const id = await share(tx, a, "https://example.org/mein-link");
     await as(tx, b, () => tx`delete from public.resources where id = ${id}`);
     expect((await as(tx, a, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(1);
     await as(tx, a, () => tx`delete from public.resources where id = ${id}`);
     expect((await as(tx, a, () => tx`select 1 from public.resources where id = ${id}`)).length).toBe(0);
-    for (let i = 0; i < 30; i++) await share(tx, a, `https://example.org/seite-${i}`);
+    // A new account gets half of the daily limit of 30.
+    for (let i = 0; i < 14; i++) await share(tx, a, `https://example.org/seite-${i}`);
     await as(tx, a, () => fails(tx, (sp) => sp`select app.share_resource(${sp.json({ url: "https://example.org/zu-viel", host: "example.org", title: "Einer zu viel" })})`));
   }));
 
@@ -406,5 +407,44 @@ describe("replies, polls and files", () => {
     // A path in someone else's folder is refused before the store is even asked.
     const foreign = [{ path: `${authIds.get(b)}/${"b".repeat(32)}.pdf`, name: "x.pdf", mime: "application/pdf", size: 1000 }];
     expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.add_extras('post', ${pid}, ${sp.json(foreign)}, null)`))).toMatch(/invalid/);
+  }));
+});
+
+describe("trust levels, limits and the audit log", () => {
+  it("levels follow the verification mode, and young accounts stay below vouch and eid thresholds", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const level = async (id: string | null, mode: string) => (await tx<{ l: number }[]>`select app.trust_level_in_mode(${id}, ${mode}) as l`)[0].l;
+    expect(await level(null, "login")).toBe(0);
+    expect(await level(a, "login")).toBe(2);
+    expect(await level(a, "eid")).toBe(1);
+    expect(await level(a, "vouch")).toBe(1);
+    await as(tx, b, () => tx`select app.vouch_for(${a})`);
+    await as(tx, c, () => tx`select app.vouch_for(${a})`);
+    // Two vouches are not enough on their own: the account must also be a day old.
+    expect(await level(a, "vouch")).toBe(1);
+    const rights = (await as(tx, a, () => tx<{ r: { level: number; vouches: { name: string }[] } }[]>`select app.my_rights() as r`))[0].r;
+    expect(rights.level).toBe(2);
+    expect(rights.vouches.length).toBe(2);
+  }));
+
+  it("limits a new account and says why", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    await as(tx, a, () => tx`select app.create_group('{"name":"Erste Gruppe"}'::jsonb)`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.create_group('{"name":"Zweite Gruppe"}'::jsonb)`))).toMatch(/rate_limited/);
+    const why = (await as(tx, a, () => tx<{ w: { allowed: boolean; reason: string } }[]>`select app.explain('group_create') as w`))[0].w;
+    expect(why.allowed).toBe(false);
+    expect(why.reason).toBe("rate_limited");
+    const guest = (await as(tx, null, () => tx<{ w: { reason: string } }[]>`select app.explain('group_create') as w`))[0].w;
+    expect(guest.reason).toBe("not_authenticated");
+  }));
+
+  it("refuses to vouch for oneself and records who did what", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.vouch_for(${a})`))).toMatch(/own_profile/);
+    await as(tx, a, () => tx`select app.vouch_for(${b})`);
+    const rows = await as(tx, a, () => tx<{ action: string }[]>`select action from public.audit_log order by id`);
+    expect(rows.map((r) => r.action)).toContain("vouch");
+    // Other people do not see someone else's log.
+    expect((await as(tx, b, () => tx`select 1 from public.audit_log where actor_id = ${a}`)).length).toBe(0);
   }));
 });

@@ -1,0 +1,86 @@
+{
+  "title": "Rechte und Stufen",
+  "lead": "Hier siehst du, was du in HiveVoice darfst, warum, und was dir zur nächsten Stufe fehlt.",
+  "leadShort": "Was du darfst und warum.",
+  "yourLevel": "Deine Stufe: {name}",
+  "levels": [
+    {
+      "name": "Gast",
+      "text": "Du kannst lesen. Zum Mitmachen meldest du dich an."
+    },
+    {
+      "name": "Konto",
+      "text": "Du kannst reagieren, Anfragen schicken, Gruppen beitreten und Dateien anhängen. Schreiben darfst du in Gruppen mit offenem Beitritt nach dem ersten Tag."
+    },
+    {
+      "name": "Bestätigt",
+      "text": "Du darfst überall schreiben, Gruppen gründen, Initiativen starten, abstimmen, Zuständigkeiten eintragen und teilen."
+    },
+    {
+      "name": "Amtlich",
+      "text": "Du sprichst für eine Behörde. Dein Amt ist über eine Dienst-Mail bestätigt."
+    },
+    {
+      "name": "Moderation",
+      "text": "Du kümmerst dich um den Betrieb der Plattform, etwa um Sperren und Einstellungen. Das wird protokolliert."
+    }
+  ],
+  "modes": {
+    "login": "Im Testbetrieb zählt ein Login als bestätigt.",
+    "vouch": "Bestätigt bist du, wenn zwei bestätigte Personen für dich bürgen und dein Konto einen Tag alt ist.",
+    "eid": "Bestätigt bist du mit dem Online-Ausweis."
+  },
+  "vouchProgress": "Bürgschaften: {n} von 2",
+  "vouchedBy": "Es bürgen für dich: {names}",
+  "vouchNone": "Noch niemand bürgt für dich. Bitte Menschen, die dich kennen, auf deinem Profil für dich zu bürgen.",
+  "ageWait": "Dein Konto ist {hours} Stunden alt. Nach 24 Stunden gilt die Bürgschaft.",
+  "vouchGiven": "Du hast in den letzten 30 Tagen {n} von 5 möglichen Bürgschaften gegeben.",
+  "sanction": "Dein Konto ist pausiert ({kind}). Bis {date}.",
+  "sanctionOpen": "Dein Konto ist pausiert ({kind}), bis es aufgehoben wird.",
+  "kinds": {
+    "pause": "Schreibpause",
+    "ban": "Sperre"
+  },
+  "actionsTitle": "Was du darfst",
+  "columns": {
+    "action": "Aktion",
+    "needs": "Braucht",
+    "today": "Heute"
+  },
+  "actions": {
+    "message": "Nachrichten schicken",
+    "post": "Beiträge und Antworten schreiben",
+    "contact_request": "Fremden eine Anfrage schicken",
+    "group_join": "Gruppen beitreten oder anfragen",
+    "upload": "Fotos und Dateien hochladen",
+    "vouch": "Für andere bürgen",
+    "group_create": "Gruppe gründen",
+    "group_invite": "Leute in Gruppen einladen",
+    "initiative_create": "Initiative starten",
+    "initiative_support": "Initiativen unterstützen",
+    "vote": "Abstimmen",
+    "listing_create": "Anfragen und Angebote einstellen",
+    "share": "Links, Dateien und Notizen teilen",
+    "report": "Inhalte melden",
+    "jury": "In der Bürgerjury mitentscheiden",
+    "responsibility_self": "Zuständigkeit eintragen",
+    "responsibility_official": "Amtlich für eine Stelle sprechen",
+    "moderate_platform": "Plattform moderieren",
+    "admin": "Plattform verwalten"
+  },
+  "status": {
+    "ok": "Ja",
+    "level_required": "Stufe {level} nötig",
+    "rate_limited": "Für heute ausgeschöpft",
+    "banned": "Pausiert",
+    "not_authenticated": "Anmelden nötig"
+  },
+  "usage": "{used} von {limit}",
+  "levelsTitle": "Die Stufen",
+  "youAreHere": "Du bist hier",
+  "more": "Mehr dazu in den Grundsätzen",
+  "limitsHint": "Die Tageslimits schützen alle vor Spam. Neue Konten haben im ersten Tag nur die Hälfte.",
+  "vouchFor": "Für {name} bürgen",
+  "vouchTakeBack": "Bürgschaft für {name} zurückziehen",
+  "vouchHint": "{name} ist noch nicht bestätigt. Bürge nur für Menschen, die du wirklich kennst."
+}

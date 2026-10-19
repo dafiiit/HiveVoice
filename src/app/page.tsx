@@ -18,6 +18,7 @@ export default async function Welcome() {
   if (session) redirect(session.profile.onboarded ? "/connect" : "/onboarding");
   const t = await getTranslations("welcome");
   const tp = await getTranslations("principles");
+  const tr = await getTranslations("rights");
 
   const [live, pairs] = await asViewer(null, async (tx) => [
     await tx<Card[]>`
@@ -128,6 +129,7 @@ export default async function Welcome() {
         <strong>HiveVoice</strong>
         <span>{t("nonpartisan")}</span>
         <Link href="/principles">{tp("nav")}</Link>
+        <Link href="/rechte">{tr("title")}</Link>
         <Link href="/legal/imprint">{t("imprint")}</Link>
         <Link href="/legal/privacy">{t("privacy")}</Link>
         <a href="https://github.com/dafiiit/HiveVoice">{t("source")}</a>

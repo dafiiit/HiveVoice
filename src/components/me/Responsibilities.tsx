@@ -2,13 +2,23 @@
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { deleteResponsibility, saveResponsibility, startOfficialVerification } from "@/lib/actions/responsible";
+import { useRouter } from "next/navigation";
+import {
+  cancelTransfer, clearSubstitute, decideTransfer, deleteResponsibility, leaveResponsibility, proposeTransfer, saveResponsibility,
+  searchPeopleFor, setSubstitute, startOfficialVerification, type PersonHit,
+} from "@/lib/actions/responsible";
+import { dateLong, relTime } from "@/lib/format";
+import { LevelBadge } from "../responsible/LevelBadge";
 import { searchPlaces, type Place } from "@/app/onboarding/actions";
-import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
 
-export type MyResp = { id: string; title: string; organization_name: string | null; description: string; region_id: string | null; region_name: string | null; is_official: boolean; official_domain: string | null; tags: string[]; open_requests: number };
+export type MyResp = {
+  id: string; title: string; organization_name: string | null; description: string; region_id: string | null; region_name: string | null; is_official: boolean; official_domain: string | null; tags: string[]; open_requests: number;
+  state: "active" | "pending_official" | "withdrawn"; level: "official" | "community" | "self"; confirm_count: number; confirm_min: number; is_primary: boolean;
+  substitute_name: string | null; substitute_until: string | null; reconfirm_due: string | null; holders: string[]; transfer_id: string | null; transfer_to: string | null;
+  dispute_id: string | null; history: { kind: string; at: string; name: string | null }[];
+};
 
 function Form({ initial, onDone, homeRegion }: { initial?: MyResp; onDone: () => void; homeRegion: { id: string; name: string } | null }) {
   const t = useTranslations("me.resp");
@@ -50,7 +60,7 @@ function Form({ initial, onDone, homeRegion }: { initial?: MyResp; onDone: () =>
   );
 }
 
-function Verify({ id }: { id: string }) {
+function Verify({ id, label }: { id: string; label?: string }) {
   const t = useTranslations("me.resp");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -58,7 +68,7 @@ function Verify({ id }: { id: string }) {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondary}>{t("verify")}</button>;
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondary}>{label ?? t("verify")}</button>;
   return (
     <div className="flex flex-col gap-2 border border-line p-3">
       <span className="text-sm">{t("verifyText")}</span>
@@ -74,29 +84,175 @@ function Verify({ id }: { id: string }) {
   );
 }
 
-export function Responsibilities({ items, homeRegion }: { items: MyResp[]; homeRegion: { id: string; name: string } | null }) {
-  const t = useTranslations("me.resp");
+function People({ onPick, label }: { onPick: (p: PersonHit) => void; label: string }) {
+  const t = useTranslations("resprights.mine");
+  const [q, setQ] = useState("");
+  const [hits, setHits] = useState<PersonHit[] | null>(null);
+  useEffect(() => {
+    const h = setTimeout(() => { if (q.trim().length >= 3) searchPeopleFor(q).then(setHits); else setHits(null); }, 300);
+    return () => clearTimeout(h);
+  }, [q]);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("search")} aria-label={label} className={`${field.inputSm} max-w-[420px]`} />
+      {hits && hits.map((p) => (
+        <button key={p.id} type="button" onClick={() => { onPick(p); setQ(""); setHits(null); }} className="max-w-[520px] border-0 border-b border-line bg-transparent py-1.5 text-left text-ink">
+          <strong>{p.name}</strong>{p.headline && <span className="text-sm text-muted"> · {p.headline}</span>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function HandOver({ r }: { r: MyResp }) {
+  const t = useTranslations("resprights.mine");
   const tc = useTranslations("common");
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  if (r.transfer_id) {
+    return (
+      <span className="flex flex-wrap items-center gap-2 text-sm">
+        {t("pending", { name: r.transfer_to ?? "?" })}
+        <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => start(async () => { await cancelTransfer(r.transfer_id!); router.refresh(); })}>{t("cancel")}</button>
+      </span>
+    );
+  }
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.ghost}>{t("handOver")}</button>;
+  return (
+    <div className="flex flex-col gap-2 border border-line p-3">
+      <span className="text-sm">{t("handOverText")}</span>
+      <People label={t("send")} onPick={(p) => start(async () => {
+        const res = await proposeTransfer(r.id, p.id);
+        if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+        setOpen(false); router.refresh();
+      })} />
+      {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}
+    </div>
+  );
+}
+
+function Substitute({ r }: { r: MyResp }) {
+  const t = useTranslations("resprights.mine");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [person, setPerson] = useState<PersonHit | null>(null);
+  const [until, setUntil] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  if (r.substitute_name) {
+    return (
+      <span className="flex flex-wrap items-center gap-2 text-sm">
+        {t("substituteNow", { name: r.substitute_name, date: r.substitute_until ? dateLong(r.substitute_until, locale) : "–" })}
+        <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => start(async () => { await clearSubstitute(r.id); router.refresh(); })}>{t("clearSubstitute")}</button>
+      </span>
+    );
+  }
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.ghost}>{t("substitute")}</button>;
+  return (
+    <div className="flex flex-col gap-2 border border-line p-3">
+      <span className="text-sm">{t("substituteText")}</span>
+      {person ? <strong>{person.name}</strong> : <People label={t("substitute")} onPick={setPerson} />}
+      <label className={field.label}>{t("until")}<input type="date" value={until} onChange={(e) => setUntil(e.target.value)} className={`${field.inputSm} max-w-[200px]`} /></label>
+      {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}
+      <span className="flex gap-2">
+        <button type="button" disabled={pending || !person || !until} className={btn.primary} onClick={() => start(async () => {
+          const res = await setSubstitute(r.id, person!.id, until);
+          if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+          setOpen(false); router.refresh();
+        })}>{t("setSubstitute")}</button>
+        <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>
+      </span>
+    </div>
+  );
+}
+
+function Incoming({ items }: { items: { id: string; title: string; by: string }[] }) {
+  const t = useTranslations("resprights.mine");
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const tc = useTranslations("common");
+  return (
+    <>
+      {items.map((x) => (
+        <div key={x.id} role="status" className="flex flex-col gap-2 border-2 border-ink bg-surface p-4">
+          <strong>{t("transferTitle", { by: x.by, title: x.title })}</strong>
+          <span className="flex gap-2">
+            <button type="button" disabled={pending} className={btn.primary} onClick={() => start(async () => {
+              const res = await decideTransfer(x.id, true);
+              if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+              router.refresh();
+            })}>{t("accept")}</button>
+            <button type="button" disabled={pending} className={btn.secondary} onClick={() => start(async () => { await decideTransfer(x.id, false); router.refresh(); })}>{t("decline")}</button>
+          </span>
+        </div>
+      ))}
+      {error && <p role="alert" className="m-0 font-bold">{error}</p>}
+    </>
+  );
+}
+
+export function Responsibilities({ items, homeRegion, incoming, substituting }: {
+  items: MyResp[]; homeRegion: { id: string; name: string } | null; incoming: { id: string; title: string; by: string }[]; substituting: { id: string; title: string; until: string | null }[];
+}) {
+  const t = useTranslations("me.resp");
+  const tr = useTranslations("resprights.mine");
+  const tc = useTranslations("common");
+  const locale = useLocale();
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   const [pending, start] = useTransition();
   return (
     <div className="flex max-w-[760px] flex-col gap-4">
       <p className="m-0">{t("intro")}</p>
+      <Incoming items={incoming} />
+      {substituting.map((x) => (
+        <span key={x.id} className="flex flex-wrap items-center gap-2 text-sm">
+          {tr("substituting", { title: x.title, date: x.until ? dateLong(x.until, locale) : "–" })}
+          <button type="button" className="border-0 bg-transparent p-0 text-muted underline" onClick={() => start(async () => { await clearSubstitute(x.id); router.refresh(); })}>{tr("clearSubstitute")}</button>
+        </span>
+      ))}
       {items.length > 0 && <Link href="/responsible?view=intake" className="self-start font-bold">{t("openIntake")}</Link>}
       {items.map((r) => editing === r.id ? <Form key={r.id} initial={r} onDone={() => setEditing(null)} homeRegion={homeRegion} /> : (
         <article key={r.id} className="flex flex-col gap-2 border-t border-line pt-3">
-          <strong className="flex items-center gap-2 text-lg">{r.organization_name ? `${r.organization_name} · ${r.title}` : r.title}
-            {r.is_official && <span className="inline-flex items-center gap-1 text-sm text-red"><IconCheck size={12} /> {t("official", { domain: r.official_domain ?? "" })}</span>}</strong>
+          <strong className="flex flex-wrap items-center gap-2 text-lg">{r.organization_name ? `${r.organization_name} · ${r.title}` : r.title}
+            <LevelBadge level={r.level} domain={r.official_domain} /></strong>
           <span>{r.description}</span>
           <span className="text-sm text-muted">{[r.region_name, r.tags.map((x) => `#${x}`).join(" "), r.open_requests ? t("openRequests", { n: r.open_requests }) : null].filter(Boolean).join(" · ")}</span>
+          {r.state !== "active" && <p role="status" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{tr(`state_${r.state}` as "state_withdrawn")}</p>}
+          {r.level === "self" && r.state === "active" && <span className="text-sm text-muted">{tr("confirmations", { n: r.confirm_count, min: r.confirm_min })}</span>}
+          {r.dispute_id && <Link href={`/responsible/dispute/${r.dispute_id}`} className="text-sm font-bold text-red">{tr("dispute")}</Link>}
+          {r.is_official && r.holders.length > 0 && <span className="text-sm text-muted">{tr("holders", { names: r.holders.join(", ") })}</span>}
+          {r.is_official && r.reconfirm_due && <span className="text-sm">{tr("reconfirmDue", { date: dateLong(r.reconfirm_due, locale) })}</span>}
           <div className="flex flex-wrap items-start gap-2">
-            {!r.is_official && <Verify id={r.id} />}
-            <button type="button" onClick={() => setEditing(r.id)} className={btn.ghost}>{tc("edit")}</button>
-            <button type="button" disabled={pending} onClick={() => { if (confirm(t("deleteConfirm"))) start(async () => { await deleteResponsibility(r.id); }); }} className={btn.ghost}>{tc("delete")}</button>
+            {r.is_primary && (!r.is_official || r.state !== "active") && <Verify id={r.id} />}
+            {r.is_official && r.state === "active" && <Verify id={r.id} label={tr("reconfirm")} />}
+            {r.is_official && r.state === "active" && <Verify id={r.id} label={tr("joinOfficial")} />}
+            {r.is_primary && <button type="button" onClick={() => setEditing(r.id)} className={btn.ghost}>{tc("edit")}</button>}
+            {r.is_primary && !r.is_official && r.state === "active" && <HandOver r={r} />}
+            {r.state === "active" && <Substitute r={r} />}
+            {!r.is_primary || r.holders.length > 1 ? (
+              <button type="button" disabled={pending} onClick={() => { if (confirm(tr("leaveConfirm"))) start(async () => { const res = await leaveResponsibility(r.id); setError(res.ok ? null : tc(`errors.${res.error}` as "errors.unknown")); router.refresh(); }); }} className={btn.ghost}>{tr("leave")}</button>
+            ) : null}
+            {r.is_primary && <button type="button" disabled={pending} onClick={() => { if (confirm(t("deleteConfirm"))) start(async () => { await deleteResponsibility(r.id); }); }} className={btn.ghost}>{tc("delete")}</button>}
           </div>
+          {r.history.length > 0 && (
+            <details className="text-sm">
+              <summary className="cursor-pointer text-muted">{tr("history")}</summary>
+              <ul className="m-0 mt-1 list-none p-0">
+                {r.history.map((h, i) => <li key={i}>{tr(`historyKind.${h.kind}` as "historyKind.created")}{h.name ? ` · ${h.name}` : ""} · {relTime(h.at, locale)}</li>)}
+              </ul>
+            </details>
+          )}
         </article>
       ))}
+      {error && <p role="alert" className="m-0 font-bold">{error}</p>}
       {adding ? <Form onDone={() => setAdding(false)} homeRegion={homeRegion} /> : <button type="button" onClick={() => setAdding(true)} className={`${btn.secondary} self-start border-ink`}>+ {t("add")}</button>}
     </div>
   );

@@ -252,6 +252,46 @@
     "initiative_unblocked": {
       "title": "Sperre aufgehoben",
       "body": "„{title}“ ist wieder frei."
+    },
+    "responsibility_confirmed": {
+      "title": "Deine Zuständigkeit ist bestätigt",
+      "body": "„{title}“ wurde von der Gemeinschaft bestätigt."
+    },
+    "responsibility_transfer": {
+      "title": "{by} möchte dir eine Zuständigkeit übergeben",
+      "body": "„{title}“. Öffne „Für mich“, um anzunehmen."
+    },
+    "responsibility_transfer_answer": {
+      "title": "Antwort zur Übergabe",
+      "body": "{name} hat die Übergabe von „{title}“ beantwortet."
+    },
+    "responsibility_substitute": {
+      "title": "Du bist Vertretung",
+      "body": "Für „{title}“ bis {until}."
+    },
+    "responsibility_unanswered": {
+      "title": "Anfrage als unbeantwortet markiert",
+      "body": "Eine Anfrage an dich ist überfällig und wird öffentlich als unbeantwortet gezeigt."
+    },
+    "responsibility_dispute": {
+      "title": "Widerspruch gegen deine Zuständigkeit",
+      "body": "„{title}“. Du hast Zeit, Belege zu zeigen."
+    },
+    "responsibility_dispute_decided": {
+      "title": "Streitfall entschieden",
+      "body": "„{title}“."
+    },
+    "dispute_jury_invite": {
+      "title": "Du bist in einer Jury",
+      "body": "Es geht um die Zuständigkeit „{title}“. Bitte entscheide."
+    },
+    "responsibility_reconfirm": {
+      "title": "Zuständigkeit neu bestätigen",
+      "body": "„{title}“ muss bald neu bestätigt werden."
+    },
+    "responsibility_lapsed": {
+      "title": "Amtliche Bestätigung abgelaufen",
+      "body": "„{title}“ ist nicht mehr amtlich bestätigt."
     }
   }
 }

@@ -12,10 +12,11 @@ export async function findResponsible(q: string): Promise<RespHit[]> {
   return asViewer(null, (tx) => tx<RespHit[]>`
     select s.id, s.title, s.organization_name as org, s.description, s.is_official as official, r.name as region, s.avg_response_days as days
     from public.responsibilities s left join public.regions r on r.id = s.region_id
-    ${words.length ? tx`where exists (select 1 from unnest(${words}::text[]) w where
+    where s.state = 'active'
+    ${words.length ? tx`and exists (select 1 from unnest(${words}::text[]) w where
         lower(s.title || ' ' || s.description || ' ' || coalesce(s.organization_name, '')) like '%' || w || '%'
         or exists (select 1 from public.responsibility_tags rt join public.tags t on t.id = rt.tag_id where rt.responsibility_id = s.id and t.slug like w || '%'))` : tx``}
-    order by s.is_official desc, s.avg_response_days asc nulls last limit 8`);
+    order by (case app.responsibility_level(s.id) when 'official' then 0 when 'community' then 1 else 2 end), s.avg_response_days asc nulls last limit 8`);
 }
 
 export async function createRequest(input: { responsibilityId: string; body: string; initiativeId?: string; groupId?: string }) {
@@ -86,4 +87,110 @@ export async function startOfficialVerification(responsibilityId: string, email:
   } catch (e) {
     return { ok: false as const, error: errorCode(e) };
   }
+}
+
+const touch = () => { revalidatePath("/responsible"); revalidatePath("/me"); };
+
+export async function confirmResponsibility(id: string, on: boolean) {
+  const res = await run(async (tx) => { await tx`select app.confirm_responsibility(${id}, ${on})`; return null; });
+  touch();
+  return res;
+}
+
+export async function recommendResponsibility(id: string, groupId: string, on: boolean) {
+  const res = await run(async (tx) => { await tx`select app.recommend_responsibility(${id}, ${groupId}, ${on})`; return null; });
+  touch();
+  return res;
+}
+
+export async function leaveResponsibility(id: string) {
+  const res = await run(async (tx) => { await tx`select app.leave_responsibility(${id})`; return null; });
+  touch();
+  return res;
+}
+
+export async function proposeTransfer(id: string, to: string) {
+  const res = await run(async (tx) => { await tx`select app.propose_responsibility_transfer(${id}, ${to})`; return null; });
+  touch();
+  return res;
+}
+
+export async function decideTransfer(transferId: string, accept: boolean) {
+  const res = await run(async (tx) => { await tx`select app.decide_responsibility_transfer(${transferId}, ${accept})`; return null; });
+  touch();
+  return res;
+}
+
+export async function cancelTransfer(transferId: string) {
+  const res = await run(async (tx) => { await tx`select app.cancel_responsibility_transfer(${transferId})`; return null; });
+  touch();
+  return res;
+}
+
+export async function setSubstitute(id: string, sub: string, until: string) {
+  const res = await run(async (tx) => { await tx`select app.set_substitute(${id}, ${sub}, ${until}::date)`; return null; });
+  touch();
+  return res;
+}
+
+export async function clearSubstitute(id: string) {
+  const res = await run(async (tx) => { await tx`select app.clear_substitute(${id})`; return null; });
+  touch();
+  return res;
+}
+
+export async function redirectRequest(id: string, to: string) {
+  const res = await run(async (tx) => { await tx`select app.redirect_request(${id}, ${to})`; return null; });
+  touch();
+  return res;
+}
+
+export async function markUnanswered(id: string) {
+  const res = await run(async (tx) => { await tx`select app.mark_unanswered(${id})`; return null; });
+  touch();
+  return res;
+}
+
+export type PersonHit = { id: string; name: string; headline: string | null };
+/** People a role can be handed to or shared with: findable and verified. */
+export async function searchPeopleFor(q: string): Promise<PersonHit[]> {
+  const query = q.trim();
+  if (query.length < 3) return [];
+  const res = await run(async (tx, s) => {
+    const [{ ok }] = await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`;
+    if (!ok) return [] as PersonHit[];
+    return tx<PersonHit[]>`
+      select p.id, p.display_name as name, p.headline from public.profiles p
+      where p.onboarded_at is not null and p.id <> ${s.profile.id} and lower(p.display_name) like ${`%${query.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`}
+        and app.can_find(${s.profile.id}, p.id) and app.profile_is_verified(p.id)
+      order by p.helped_count desc limit 6`;
+  });
+  return res.ok ? res.data : [];
+}
+
+export async function disputeResponsibility(id: string, claim: string) {
+  const res = await run(async (tx) => {
+    const [{ did }] = await tx<{ did: string }[]>`select app.dispute_responsibility(${id}, ${claim}) as did`;
+    return did;
+  });
+  touch();
+  return res;
+}
+
+export async function addDisputeStatement(disputeId: string, body: string) {
+  const res = await run(async (tx) => { await tx`select app.add_dispute_statement(${disputeId}, ${body})`; return null; });
+  revalidatePath(`/responsible/dispute/${disputeId}`);
+  return res;
+}
+
+export async function voteDispute(disputeId: string, choice: "ok" | "not_ok", reason: string) {
+  const res = await run(async (tx) => { await tx`select app.vote_dispute(${disputeId}, ${choice}, ${reason || null})`; return null; });
+  revalidatePath(`/responsible/dispute/${disputeId}`);
+  return res;
+}
+
+export async function declineDisputeJury(disputeId: string) {
+  const res = await run(async (tx) => { await tx`select app.decline_dispute_jury(${disputeId})`; return null; });
+  revalidatePath(`/responsible/dispute/${disputeId}`);
+  return res;
 }

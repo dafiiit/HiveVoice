@@ -120,8 +120,12 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       if (kind === "initiative_author_invite" || kind === "initiative_removal") category = "requests";
     } else if (kind === "request_answered" || kind === "request_forwarded") {
       href = p.initiative_id ? `/initiatives/${p.initiative_id}` : "/responsible"; label = t("labels.request");
-    } else if (kind === "responsibility_request") {
+    } else if (kind === "responsibility_request" || kind === "responsibility_unanswered") {
       href = "/responsible?view=intake"; category = "requests"; label = t("labels.request");
+    } else if (kind === "responsibility_dispute" || kind === "dispute_jury_invite" || kind === "responsibility_dispute_decided") {
+      href = `/responsible/dispute/${p.dispute_id}`; label = t("labels.jury"); category = kind === "dispute_jury_invite" ? "requests" : "other";
+    } else if (kind.startsWith("responsibility_")) {
+      href = "/me?tab=resp"; label = t("labels.request"); if (kind === "responsibility_transfer") category = "requests";
     } else if (kind === "post_reply") {
       href = p.group_id ? "/connect" : p.initiative_id ? `/initiatives/${p.initiative_id}?tab=threads` : "/connect";
     } else if (kind === "jury_invite") {

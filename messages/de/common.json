@@ -78,7 +78,13 @@
     "too_big_change": "Während der Abstimmung sind nur kleine Korrekturen erlaubt. Für größere Änderungen brich die Abstimmung ab.",
     "frozen": "Adressat und Kosten sind eingefroren.",
     "has_activity": "Löschen geht nicht mehr, weil schon jemand unterstützt, abgestimmt oder mitdiskutiert hat.",
-    "lead_must_hand_over": "Die Leitung muss zuerst an eine andere Autor:in übergeben werden."
+    "lead_must_hand_over": "Die Leitung muss zuerst an eine andere Autor:in übergeben werden.",
+    "too_many_responsibilities": "Du hast schon so viele Selbsterklärungen, wie erlaubt sind. Lass dich von der Gemeinschaft bestätigen oder gib eine ab.",
+    "not_affected": "Das können nur Menschen aus dem Ort der Zuständigkeit.",
+    "official_role": "Amtliche Zuständigkeiten gehören der Stelle und lassen sich so nicht ändern.",
+    "last_holder": "Du bist die einzige Person dieser Zuständigkeit. Übergib sie oder lösche sie.",
+    "not_overdue": "Das geht erst, wenn die Antwortzeit vorbei ist.",
+    "cooldown": "Du hast dazu kürzlich schon widersprochen. Warte bitte etwas."
   },
   "phase": {
     "idea": "Idee",

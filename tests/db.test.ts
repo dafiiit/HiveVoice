@@ -837,3 +837,109 @@ describe("initiatives: authors, editing, thresholds, withdrawing, blocking", () 
     await as(tx, b, () => tx`insert into public.initiative_supports (initiative_id, profile_id) values (${other}, ${b})`);
   }));
 });
+
+describe("responsibilities: levels, limits, requests, hand-over, disputes", () => {
+  const region = async (tx: postgres.TransactionSql) => (await tx<{ id: string }[]>`select id from public.regions where level = 'borough' limit 1`)[0].id;
+  const save = async (tx: postgres.TransactionSql, who: string, title: string, extra: Record<string, unknown> = {}) =>
+    (await as(tx, who, async () => tx<{ id: string }[]>`select app.save_responsibility(${tx.json({
+      title, description: "Pflege der Grünflächen im Viertel", region_id: await region(tx), ...extra })}) as id`))[0].id;
+  const resident = async (tx: postgres.TransactionSql, name: string) => {
+    const p = await person(tx, name);
+    await as(tx, p, async () => tx`select app.set_home_region(${await region(tx)})`);
+    return p;
+  };
+
+  it("shows self-declared, community-confirmed through five residents, and keeps outsiders and the holder out", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    const rid = await save(tx, a, "Gartenbau Nord");
+    const level = async () => (await tx<{ l: string }[]>`select app.responsibility_level(${rid}) as l`)[0].l;
+    expect(await level()).toBe("self");
+    const outsider = await person(tx, "Olli");
+    expect(await fails(tx, (sp) => as(sp, outsider, () => sp`select app.confirm_responsibility(${rid}, true)`))).toMatch(/not_affected/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.confirm_responsibility(${rid}, true)`))).toMatch(/own_responsibility|not_affected/);
+    for (let i = 0; i < 4; i++) { const p = await resident(tx, `Nachbar ${i}`); await as(tx, p, () => tx`select app.confirm_responsibility(${rid}, true)`); }
+    expect(await level()).toBe("self");
+    const fifth = await resident(tx, "Nachbar 4");
+    await as(tx, fifth, () => tx`select app.confirm_responsibility(${rid}, true)`);
+    expect(await level()).toBe("community");
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'responsibility_confirmed'`)).length).toBe(1);
+    await as(tx, fifth, () => tx`select app.confirm_responsibility(${rid}, false)`);
+    expect(await level()).toBe("self");
+  }));
+
+  it("allows three self-declarations and holds back titles that sound like an office", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    await save(tx, a, "Spielplatzpate");
+    await save(tx, a, "Hausmeisterin Ost");
+    await save(tx, a, "Baumpflege");
+    expect(await fails(tx, async (sp) => as(sp, a, async () => sp`select app.save_responsibility(${sp.json({ title: "Fahrradbeauftragte", description: "Radwege im Viertel", region_id: await region(sp) })})`))).toMatch(/too_many_responsibilities/);
+    const office = await save(tx, b, "Bürgermeister", { organization_name: "Gemeinde Musterstadt" });
+    expect((await tx<{ state: string }[]>`select state from public.responsibilities where id = ${office}`)[0].state).toBe("pending_official");
+    const c = await person(tx, "Cem");
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.create_request(${sp.json({ responsibility_id: office, body: "Bitte um einen Termin im Rathaus." })})`))).toMatch(/not_found/);
+    expect((await tx<{ s: boolean }[]>`select app.sounds_official('Ordnungsamt Süd') as s`)[0].s).toBe(true);
+    expect((await tx<{ s: boolean }[]>`select app.sounds_official('Samt und Seide') as s`)[0].s).toBe(false);
+  }));
+
+  it("sets a 14 day target, lets substitutes answer, and lets the requester act only when the target passed", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), s = await person(tx, "Sia");
+    const rid = await save(tx, a, "Gartenbau Süd");
+    const other = await save(tx, s, "Grünflächen Mitte");
+    const [{ id: qid }] = await as(tx, b, () => tx<{ id: string }[]>`select app.create_request(${tx.json({ responsibility_id: rid, body: "Wann wird das Beet bepflanzt?" })}) as id`);
+    const [q] = await tx<{ days: number }[]>`select round(extract(epoch from due_at - created_at) / 86400)::int as days from public.responsibility_requests where id = ${qid}`;
+    expect(q.days).toBe(14);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.mark_unanswered(${qid})`))).toMatch(/not_overdue/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.redirect_request(${qid}, ${other})`))).toMatch(/not_overdue/);
+    expect(await fails(tx, (sp) => as(sp, s, () => sp`select app.respond_request(${qid}, 'accepted', 'Wir kümmern uns darum.')`))).toMatch(/forbidden/);
+    const until = new Date(Date.now() + 5 * 86400000).toISOString().slice(0, 10);
+    await as(tx, a, () => tx`select app.set_substitute(${rid}, ${s}, ${until}::date)`);
+    await as(tx, s, () => tx`select app.respond_request(${qid}, 'accepted', 'Wir kümmern uns darum.')`);
+    expect((await tx<{ status: string }[]>`select status::text from public.responsibility_requests where id = ${qid}`)[0].status).toBe("answered");
+    await as(tx, a, () => tx`select app.clear_substitute(${rid})`);
+    expect(await fails(tx, (sp) => as(sp, s, () => sp`select app.set_substitute(${rid}, ${b}, ${until}::date)`))).toMatch(/forbidden/);
+  }));
+
+  it("hands a responsibility over only with acceptance and keeps the history; official roles stay with the role", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const rid = await save(tx, a, "Spielplatzpate");
+    const [{ id: tid }] = await as(tx, a, () => tx<{ id: string }[]>`select app.propose_responsibility_transfer(${rid}, ${b}) as id`);
+    expect((await tx<{ holder_id: string }[]>`select holder_id from public.responsibilities where id = ${rid}`)[0].holder_id).toBe(a);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.decide_responsibility_transfer(${tid}, true)`))).toMatch(/not_found/);
+    await as(tx, b, () => tx`select app.decide_responsibility_transfer(${tid}, true)`);
+    expect((await tx<{ holder_id: string }[]>`select holder_id from public.responsibilities where id = ${rid}`)[0].holder_id).toBe(b);
+    const kinds = (await tx<{ kind: string }[]>`select kind from public.responsibility_history where responsibility_id = ${rid}`).map((r) => r.kind);
+    expect(kinds).toEqual(expect.arrayContaining(["created", "handover"]));
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.leave_responsibility(${rid})`))).toMatch(/forbidden/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.leave_responsibility(${rid})`))).toMatch(/last_holder/);
+  }));
+
+  it("opens a dispute against a self-declaration, lets both sides add evidence, and the jury decides", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const boss = await person(tx, "Admin");
+    await tx`select app.admin_grant(${boss}, true)`;
+    await as(tx, boss, () => tx`select app.set_param('resp_dispute_days', 0)`);
+    const rid = await save(tx, a, "Wasserwacht Nord");
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.dispute_responsibility(${rid}, 'Ich widerspreche mir selbst')`))).toMatch(/own_responsibility/);
+    const [{ id: did }] = await as(tx, b, () => tx<{ id: string }[]>`select app.dispute_responsibility(${rid}, 'Für das Gewässer ist das Wasserwirtschaftsamt zuständig.') as id`);
+    const d = await person(tx, "Dora");
+    expect(await fails(tx, (sp) => as(sp, d, () => sp`select app.dispute_responsibility(${rid}, 'Noch ein zweiter Widerspruch dazu')`))).toMatch(/duplicate|unique/);
+    await as(tx, a, () => tx`select app.add_dispute_statement(${did}, 'Ich betreue die Badestelle seit Jahren, das belegt der Verein.')`);
+    const c = await person(tx, "Cem");
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.add_dispute_statement(${did}, 'Ich mische mich einfach ein')`))).toMatch(/forbidden/);
+    expect((await tx<{ n: number }[]>`select count(*)::int as n from public.responsibility_dispute_statements where dispute_id = ${did}`)[0].n).toBe(2);
+    await tx`select app.dispute_tick()`;
+    expect((await tx<{ status: string }[]>`select status from public.responsibility_disputes where id = ${did}`)[0].status).toBe("jury");
+    // Only the drawn people have a seat: everybody else is refused, the parties are never drawn.
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.vote_dispute(${did}, 'ok', null)`))).toMatch(/forbidden/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.vote_dispute(${did}, 'ok', null)`))).toMatch(/forbidden/);
+    const everybody = await tx<{ id: string }[]>`select id from public.profiles where onboarded_at is not null and id not in (${a}, ${b})`;
+    for (const who of everybody) {
+      const [{ status }] = await tx<{ status: string }[]>`select status from public.responsibility_disputes where id = ${did}`;
+      if (status !== "jury") break;
+      await tx.savepoint(async (sp) => { await as(sp, who.id, () => sp`select app.vote_dispute(${did}, 'not_ok', 'Das Amt ist zuständig')`); }).catch(() => null);
+    }
+    expect((await tx<{ status: string }[]>`select status from public.responsibility_disputes where id = ${did}`)[0].status).toBe("upheld");
+    expect((await tx<{ state: string }[]>`select state from public.responsibilities where id = ${rid}`)[0].state).toBe("withdrawn");
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'responsibility_dispute_decided'`)).length).toBe(1);
+  }));
+});

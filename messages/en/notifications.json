@@ -252,6 +252,46 @@
     "initiative_unblocked": {
       "title": "Block lifted",
       "body": "“{title}” is free again."
+    },
+    "responsibility_confirmed": {
+      "title": "Your responsibility is confirmed",
+      "body": "“{title}” was confirmed by the community."
+    },
+    "responsibility_transfer": {
+      "title": "{by} wants to hand a responsibility over to you",
+      "body": "“{title}”. Open “For me” to accept."
+    },
+    "responsibility_transfer_answer": {
+      "title": "Answer to the hand-over",
+      "body": "{name} answered the hand-over of “{title}”."
+    },
+    "responsibility_substitute": {
+      "title": "You are a substitute",
+      "body": "For “{title}” until {until}."
+    },
+    "responsibility_unanswered": {
+      "title": "Request marked as unanswered",
+      "body": "A request to you is overdue and shows publicly as unanswered."
+    },
+    "responsibility_dispute": {
+      "title": "Dispute against your responsibility",
+      "body": "“{title}”. You have time to show evidence."
+    },
+    "responsibility_dispute_decided": {
+      "title": "Dispute decided",
+      "body": "“{title}”."
+    },
+    "dispute_jury_invite": {
+      "title": "You are on a jury",
+      "body": "It is about the responsibility “{title}”. Please decide."
+    },
+    "responsibility_reconfirm": {
+      "title": "Confirm a responsibility again",
+      "body": "“{title}” has to be confirmed again soon."
+    },
+    "responsibility_lapsed": {
+      "title": "Official confirmation expired",
+      "body": "“{title}” is no longer officially confirmed."
     }
   }
 }

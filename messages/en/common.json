@@ -78,7 +78,13 @@
     "too_big_change": "During the vote only small corrections are allowed. For bigger changes call off the vote.",
     "frozen": "Addressee and costs are frozen.",
     "has_activity": "Deleting is no longer possible because somebody has supported, voted or discussed.",
-    "lead_must_hand_over": "The lead has to be handed to another author first."
+    "lead_must_hand_over": "The lead has to be handed to another author first.",
+    "too_many_responsibilities": "You already have as many self-declarations as allowed. Get one confirmed by the community or give one up.",
+    "not_affected": "Only people from the place of the responsibility can do this.",
+    "official_role": "Official responsibilities belong to the office and cannot be changed this way.",
+    "last_holder": "You are the only person of this responsibility. Hand it over or delete it.",
+    "not_overdue": "This works only after the time to answer has passed.",
+    "cooldown": "You disputed this recently. Please wait a little."
   },
   "phase": {
     "idea": "Idea",

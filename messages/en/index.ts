@@ -31,6 +31,7 @@ import ns_principles from "./principles.json";
 import ns_profile from "./profile.json";
 import ns_report from "./report.json";
 import ns_responsible from "./responsible.json";
+import ns_resprights from "./resprights.json";
 import ns_rights from "./rights.json";
 import ns_safety from "./safety.json";
 import ns_social from "./social.json";
@@ -69,6 +70,7 @@ const messages = {
   "profile": ns_profile,
   "report": ns_report,
   "responsible": ns_responsible,
+  "resprights": ns_resprights,
   "rights": ns_rights,
   "safety": ns_safety,
   "social": ns_social,

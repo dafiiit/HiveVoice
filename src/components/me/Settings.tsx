@@ -24,6 +24,8 @@ export function Settings({ language, easy, theme, places, interests, suggestions
   const [picked, setPicked] = useState<Place | null>(null);
   const [tags, setTags] = useState(interests);
   const [leave, setLeave] = useState(0);
+  const [keepGroupItems, setKeepGroupItems] = useState(true);
+  const td = useTranslations("docrights.deleteAccount");
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -110,9 +112,11 @@ export function Settings({ language, easy, theme, places, interests, suggestions
           <div role="alertdialog" aria-label={t("leaveConfirm")} className="flex flex-col gap-3 border-2 border-red bg-surface p-4">
             <strong>{t("leaveConfirm")}</strong>
             <span>{t("leaveConfirmText")}</span>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={keepGroupItems} onChange={() => setKeepGroupItems(!keepGroupItems)} className="h-5 w-5 accent-[var(--ink)]" />{td("keep")}</label>
+            <span className="text-sm text-muted">{td("keepHint")}</span>
             <div className="flex gap-2">
               <button type="button" onClick={() => setLeave(0)} className={btn.secondary}>{tc("cancel")}</button>
-              <button type="button" disabled={pending} onClick={() => start(async () => { await deleteAccount(); })} className={btn.red}>{t("leaveFinal")}</button>
+              <button type="button" disabled={pending} onClick={() => start(async () => { await deleteAccount(keepGroupItems); })} className={btn.red}>{t("leaveFinal")}</button>
             </div>
           </div>
         )}

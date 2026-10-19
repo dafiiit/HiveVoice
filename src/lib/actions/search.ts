@@ -47,7 +47,7 @@ export async function quickSearch(q: string): Promise<Hit[]> {
       order by s.is_official desc limit 2`;
     const links = await tx<{ id: string; title: string; host: string }[]>`
       select r.id, r.title, r.host from public.resources r
-      where r.hidden_at is null and (lower(r.title) like ${pattern} or lower(coalesce(r.description, '')) like ${pattern} or r.host like ${pattern}
+      where r.hidden_at is null and r.trashed_at is null and r.visibility in ('public', 'group') and (lower(r.title) like ${pattern} or lower(coalesce(r.description, '')) like ${pattern} or r.host like ${pattern}
         or exists (select 1 from public.resource_tags rt join public.tags t on t.id = rt.tag_id where rt.resource_id = r.id and t.slug like ${prefix.replace(/^#/, "")}))
       order by r.score desc, r.created_at desc limit 3`;
     return [

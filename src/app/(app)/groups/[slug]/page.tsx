@@ -95,7 +95,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       goals.push({ ...go, ballot });
     }
     const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "goals";
-    const links = active === "links" ? await tx<ResourceRow[]>`select ${resourceColumns(tx, me ?? null)} from ${resourceFrom(tx)} where r.group_id = ${g.id} and r.hidden_at is null order by r.score desc, r.created_at desc limit 100` : [];
+    const links = active === "links" ? await tx<ResourceRow[]>`select ${resourceColumns(tx, me ?? null)} from ${resourceFrom(tx)} where r.group_id = ${g.id} and r.hidden_at is null and r.trashed_at is null and r.visibility in ('public', 'group') order by r.score desc, r.created_at desc limit 100` : [];
     const posts = active === "talk" ? await loadPosts(tx, { groupId: g.id }, me ?? null, { sort: "chat", limit: 60 }) : [];
     const needs = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.group_id = ${g.id} and l.kind = 'need' and l.status = 'active' order by l.created_at desc`;
     const sentTo = me ? (await tx<{ listing_id: string }[]>`select listing_id from public.contact_requests where from_profile_id = ${me} and status = 'pending'`).map((x) => x.listing_id) : [];

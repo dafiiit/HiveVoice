@@ -83,11 +83,11 @@ export async function deleteNote(id: string) {
 }
 
 /** Removes the profile with all its content and the login. Votes were never linked to the person. */
-export async function deleteAccount() {
+export async function deleteAccount(keepGroupItems = true) {
   const session = await getSession();
   if (!session) return { ok: false as const, error: "not_authenticated" };
   try {
-    await sql`select app.delete_account(${session.profile.id})`;
+    await sql`select app.delete_account(${session.profile.id}, ${keepGroupItems})`;
   } catch (e) {
     return { ok: false as const, error: errorCode(e) };
   }

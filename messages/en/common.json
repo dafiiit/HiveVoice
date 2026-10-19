@@ -59,7 +59,7 @@
     "mode_change_limit": "You can switch between alias and real name once a month.",
     "real_name_required": "You need your real name for this. Change your profile under “Me”.",
     "edit_window_over": "Editing only works for 15 minutes.",
-    "locked": "Comments are locked.",
+    "locked": "Somebody else is editing this document right now.",
     "slow_mode": "In this group you can only write every few minutes. Try again shortly.",
     "age_required": "Please confirm that you are at least 16.",
     "invite_only": "This group can only be joined by invitation.",
@@ -84,7 +84,11 @@
     "official_role": "Official responsibilities belong to the office and cannot be changed this way.",
     "last_holder": "You are the only person of this responsibility. Hand it over or delete it.",
     "not_overdue": "This works only after the time to answer has passed.",
-    "cooldown": "You disputed this recently. Please wait a little."
+    "cooldown": "You disputed this recently. Please wait a little.",
+    "license_required": "Public documents need a licence.",
+    "copy_not_allowed": "This document may not be copied.",
+    "outdated": "The document changed since the suggestion. Please suggest it again.",
+    "quota_exceeded": "Your storage is full. Delete something or get verified for more room."
   },
   "phase": {
     "idea": "Idea",

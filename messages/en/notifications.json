@@ -292,6 +292,26 @@
     "responsibility_lapsed": {
       "title": "Official confirmation expired",
       "body": "“{title}” is no longer officially confirmed."
+    },
+    "resource_shared": {
+      "title": "{by} shared a document with you",
+      "body": "“{title}”"
+    },
+    "resource_suggestion": {
+      "title": "Suggestion from {by}",
+      "body": "For “{title}”. You can accept or decline it."
+    },
+    "resource_suggestion_decided": {
+      "title": "Answer to your suggestion",
+      "body": "“{title}”."
+    },
+    "resource_transfer": {
+      "title": "{by} wants to hand a document over to you",
+      "body": "“{title}”. Open “For me” → Documents."
+    },
+    "resource_transfer_answer": {
+      "title": "Answer to the hand-over",
+      "body": "{name} answered the hand-over of “{title}”."
     }
   }
 }

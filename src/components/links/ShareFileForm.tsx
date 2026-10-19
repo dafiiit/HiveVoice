@@ -8,6 +8,7 @@ import { FILE_ACCEPT, formatSize, isImage, mimeOf, type UploadedFile } from "@/l
 import { TagPicker } from "../TagPicker";
 import { IconFile } from "../ui/Icons";
 import { btn, field } from "../ui/styles";
+import { AccessPicker, type Access } from "./AccessPicker";
 
 type Group = { id: string; slug: string; name: string };
 
@@ -26,6 +27,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [groupId, setGroupId] = useState(groups.find((g) => g.slug === initialGroup)?.id ?? "");
+  const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "public", license: "all_rights" });
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -49,7 +51,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const share = () => start(async () => {
     if (!file) return;
     setError(null);
-    const res = await shareFile({ file, title, description, tags, groupId: groupId || null });
+    const res = await shareFile({ file, title, description, tags, groupId: groupId || null, visibility: access.visibility, license: access.visibility === "public" ? access.license : undefined });
     if (!res.ok) return setError(t.has(`errors.${res.error}`) ? t(`errors.${res.error}` as "errors.invalid") : tc(`errors.${res.error}` as "errors.unknown"));
     const group = groups.find((g) => g.id === groupId);
     router.push(group ? `/groups/${group.slug}?tab=links` : `/links/${res.data}`);
@@ -84,12 +86,13 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
           <TagPicker label={tl("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={tl("tagsPlaceholder")} max={10} />
           {groups.length > 0 && (
             <label className={field.label}>{tl("groupLabel")}
-              <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className={`${field.select} h-12`}>
+              <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "public" })); }} className={`${field.select} h-12`}>
                 <option value="">{tl("everyone")}</option>
                 {groups.map((g) => <option key={g.id} value={g.id}>{tl("inGroup", { name: g.name })}</option>)}
               </select>
             </label>
           )}
+          <AccessPicker value={access} onChange={setAccess} inGroup={!!groupId} />
           <div>
             <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primaryLg}>{pending ? tl("publishing") : tl("publish")}</button>
           </div>

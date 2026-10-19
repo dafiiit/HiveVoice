@@ -57,7 +57,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
       return {
         links: await tx<ResourceRow[]>`
           select ${resourceColumns(tx, session?.profile.id ?? null)} from ${resourceFrom(tx)}
-          where r.hidden_at is null
+          where r.hidden_at is null and r.trashed_at is null and r.visibility in ('public', 'group')
             ${rk ? tx`and r.kind = ${rk}` : tx``}
             ${q ? tx`and (lower(r.title) like ${like} or lower(coalesce(r.description, '')) like ${like} or r.host like ${like} or lower(coalesce(r.body_md, '')) like ${like}
                      or exists (select 1 from public.resource_tags rt join public.tags t on t.id = rt.tag_id where rt.resource_id = r.id and t.slug like ${qq + "%"}))` : tx``}

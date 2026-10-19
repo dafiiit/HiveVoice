@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const items = await tx`
       select r.title, r.description, r.origin, r.url, r.body_md, r.created_at, o.display_name as author,
              (select jsonb_agg(jsonb_build_object('name', a.name, 'mime', a.mime, 'size', a.size_bytes, 'link', '/api/files/' || a.id)) from public.attachments a where a.resource_id = r.id) as files
-      from public.resources r join public.profiles o on o.id = r.owner_id where r.group_id = ${g.id} and r.hidden_at is null order by r.created_at`;
+      from public.resources r join public.profiles o on o.id = r.owner_id where r.group_id = ${g.id} and r.hidden_at is null and r.trashed_at is null order by r.created_at`;
     return { exported_at: new Date().toISOString(), group: { name: g.name, summary: g.summary, description: g.description, kind: g.kind, visibility: g.visibility, created_at: g.created_at }, members, goals, tasks, posts, items };
   });
   if (!data) return new NextResponse("Not found", { status: 404 });

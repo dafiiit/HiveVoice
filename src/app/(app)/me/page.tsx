@@ -12,10 +12,12 @@ import { PhaseRail } from "@/components/InitiativeCard";
 import { DisplayToggle, TagEditor } from "@/components/me/ProfileEditor";
 import { Notes } from "@/components/me/Notes";
 import { Responsibilities, type MyResp } from "@/components/me/Responsibilities";
+import { MyDocuments, type DocRow, type SharedRow, type IncomingTransfer } from "@/components/me/MyDocuments";
+import { formatSize } from "@/lib/files";
 import { Settings } from "@/components/me/Settings";
 import { PrivacySettings } from "@/components/me/PrivacySettings";
 
-const TABS = ["profile", "notes", "reports", "resp", "settings"] as const;
+const TABS = ["profile", "notes", "docs", "reports", "resp", "settings"] as const;
 
 export async function generateMetadata() {
   return { title: (await getTranslations("nav"))("me") };
@@ -71,6 +73,15 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
         (select m.confirm_min from (select app.param('resp_confirm_min') as confirm_min) m) as confirm_min
       from public.responsibilities s left join public.regions r on r.id = s.region_id left join public.profiles sp on sp.id = s.substitute_id
       where exists (select 1 from public.responsibility_holders hh where hh.responsibility_id = s.id and hh.profile_id = ${me}) order by s.created_at` : [];
+    const docs = active === "docs" ? await tx<DocRow[]>`
+      select id, title, origin, visibility, license, version_no, trashed_at, updated_at from public.resources where owner_id = ${me} order by trashed_at nulls first, updated_at desc limit 200` : [];
+    const sharedDocs = active === "docs" ? await tx<SharedRow[]>`
+      select r.id, r.title, g.level, o.display_name as owner from public.resource_grants g join public.resources r on r.id = g.resource_id join public.profiles o on o.id = r.owner_id
+      where g.profile_id = ${me} and (g.expires_at is null or g.expires_at > now()) and r.trashed_at is null order by g.created_at desc limit 100` : [];
+    const docTransfers = active === "docs" ? await tx<IncomingTransfer[]>`
+      select t.id, r.title, p.display_name as by from public.resource_transfers t join public.resources r on r.id = t.resource_id join public.profiles p on p.id = t.from_id
+      where t.to_id = ${me} and t.status = 'proposed'` : [];
+    const [usage] = active === "docs" ? await tx<{ u: { used: number; limit: number } }[]>`select app.storage_usage() as u` : [{ u: { used: 0, limit: 0 } }];
     const incoming = active === "resp" ? await tx<{ id: string; title: string; by: string }[]>`
       select t.id, s.title, p.display_name as by from public.responsibility_transfers t join public.responsibilities s on s.id = t.responsibility_id
       join public.profiles p on p.id = t.from_id where t.to_id = ${me} and t.status = 'proposed'` : [];
@@ -82,7 +93,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       select us.findable, us.contact_from, p.is_minor from public.user_settings us join public.profiles p on p.id = us.profile_id where us.profile_id = ${me}`;
     const blocked = await tx<{ id: string; name: string }[]>`
       select p.id, p.display_name as name from public.blocks b join public.profiles p on p.id = b.blocked_id where b.blocker_id = ${me} order by b.created_at`;
-    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, resps, incoming, substituting, home: home ?? null, privacy, blocked };
+    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, resps, incoming, substituting, docs, sharedDocs, docTransfers, usage: usage.u, home: home ?? null, privacy, blocked };
   });
 
   const s = session.profile.settings;
@@ -171,6 +182,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           </section>
         </div>
       )}
+      {active === "docs" && <MyDocuments docs={d.docs} shared={d.sharedDocs} incoming={d.docTransfers} trashDays={30} usage={{ used: formatSize(d.usage.used), limit: formatSize(d.usage.limit) }} />}
       {active === "resp" && <Responsibilities items={d.resps} homeRegion={d.home} incoming={d.incoming} substituting={d.substituting} />}
       {active === "settings" && (
         <>

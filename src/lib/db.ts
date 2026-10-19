@@ -32,11 +32,12 @@ export type Viewer = { authId: string; profileId: string } | null;
  * "authenticated" (or "anon" for guests) and carries the identity in
  * request.jwt.claims.
  */
-export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>): Promise<T> {
+export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, opts?: { linkToken?: string | null }): Promise<T> {
   return sql.begin(async (tx) => {
     const role = viewer ? "authenticated" : "anon";
     const claims = viewer ? JSON.stringify({ sub: viewer.authId, profile_id: viewer.profileId, role }) : "{}";
-    await tx`select set_config('request.jwt.claims', ${claims}, true), set_config('role', ${role}, true)`;
+    // A link key opens a document that is shared "with everybody who has the link"; without it that document stays closed.
+    await tx`select set_config('request.jwt.claims', ${claims}, true), set_config('role', ${role}, true), set_config('app.link_token', ${opts?.linkToken ?? ""}, true)`;
     return fn(tx);
   }) as Promise<T>;
 }

@@ -292,6 +292,26 @@
     "responsibility_lapsed": {
       "title": "Amtliche Bestätigung abgelaufen",
       "body": "„{title}“ ist nicht mehr amtlich bestätigt."
+    },
+    "resource_shared": {
+      "title": "{by} hat ein Dokument mit dir geteilt",
+      "body": "„{title}“"
+    },
+    "resource_suggestion": {
+      "title": "Änderungsvorschlag von {by}",
+      "body": "Zu „{title}“. Du kannst ihn übernehmen oder ablehnen."
+    },
+    "resource_suggestion_decided": {
+      "title": "Antwort auf deinen Vorschlag",
+      "body": "„{title}“."
+    },
+    "resource_transfer": {
+      "title": "{by} möchte dir ein Dokument übergeben",
+      "body": "„{title}“. Öffne „Für mich“ → Dokumente."
+    },
+    "resource_transfer_answer": {
+      "title": "Antwort zur Übergabe",
+      "body": "{name} hat die Übergabe von „{title}“ beantwortet."
     }
   }
 }

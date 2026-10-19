@@ -59,7 +59,7 @@
     "mode_change_limit": "Zwischen Alias und Klarnamen kannst du nur einmal im Monat wechseln.",
     "real_name_required": "Dafür brauchst du deinen Klarnamen. Stelle dein Profil unter „Für mich“ um.",
     "edit_window_over": "Bearbeiten geht nur 15 Minuten lang.",
-    "locked": "Die Kommentare sind gesperrt.",
+    "locked": "Das Dokument wird gerade von jemand anderem bearbeitet.",
     "slow_mode": "In dieser Gruppe darfst du nur alle paar Minuten schreiben. Gleich wieder.",
     "age_required": "Bitte bestätige, dass du mindestens 16 bist.",
     "invite_only": "In diese Gruppe kommt man nur mit Einladung.",
@@ -84,7 +84,11 @@
     "official_role": "Amtliche Zuständigkeiten gehören der Stelle und lassen sich so nicht ändern.",
     "last_holder": "Du bist die einzige Person dieser Zuständigkeit. Übergib sie oder lösche sie.",
     "not_overdue": "Das geht erst, wenn die Antwortzeit vorbei ist.",
-    "cooldown": "Du hast dazu kürzlich schon widersprochen. Warte bitte etwas."
+    "cooldown": "Du hast dazu kürzlich schon widersprochen. Warte bitte etwas.",
+    "license_required": "Öffentliche Dokumente brauchen eine Lizenz.",
+    "copy_not_allowed": "Dieses Dokument darf nicht kopiert werden.",
+    "outdated": "Das Dokument hat sich seit dem Vorschlag geändert. Bitte schlage es neu vor.",
+    "quota_exceeded": "Dein Speicher ist voll. Lösche etwas oder lass dich bestätigen, dann gibt es mehr Platz."
   },
   "phase": {
     "idea": "Idee",

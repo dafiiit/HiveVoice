@@ -140,6 +140,10 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       kind = `group_motion_result_${String(p.passed) === "true" ? "yes" : "no"}`; href = `/groups/${p.slug}?tab=team`; label = t("labels.group");
     } else if (kind === "group_removed" || kind === "group_delete_requested" || kind === "group_archived" || kind === "group_rule_changed") {
       href = kind === "group_removed" ? "/connect" : `/groups/${p.slug}`; label = t("labels.group");
+    } else if (kind === "resource_transfer" || kind === "resource_transfer_answer") {
+      href = "/me?tab=docs"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
+    } else if (kind.startsWith("resource_")) {
+      href = `/links/${p.resource_id}`; label = t("labels.other");
     } else if (kind === "vouched") {
       href = "/rechte";
     } else if (kind === "post_removed") {

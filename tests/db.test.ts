@@ -943,3 +943,119 @@ describe("responsibilities: levels, limits, requests, hand-over, disputes", () =
     expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'responsibility_dispute_decided'`)).length).toBe(1);
   }));
 });
+
+describe("documents: visibility, rights, versions, suggestions, copies, trash", () => {
+  const note = async (tx: postgres.TransactionSql, who: string, title = "Anleitung für das Beet", extra: Record<string, unknown> = {}) =>
+    (await as(tx, who, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title, body: "# Beet\nErst graben, dann säen.", ...extra })}) as id`))[0].id;
+  const visible = async (tx: postgres.TransactionSql, who: string | null, id: string) =>
+    (await as(tx, who, () => tx`select 1 from public.resources where id = ${id}`)).length === 1;
+
+  it("starts public with a CC BY-SA licence, can be made private, and is shared per person with a level that can expire", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const id = await note(tx, a);
+    const [r] = await tx<{ visibility: string; license: string; edit_mode: string }[]>`select visibility, license, edit_mode from public.resources where id = ${id}`;
+    expect(r).toEqual({ visibility: "public", license: "cc_by_sa", edit_mode: "me" });
+    expect(await visible(tx, null, id)).toBe(true);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'me', 'me', false, null)`);
+    expect(await visible(tx, null, id)).toBe(false);
+    expect(await visible(tx, b, id)).toBe(false);
+    expect(await visible(tx, a, id)).toBe(true);
+    // a licence is required for a public document
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.set_resource_access(${id}, 'public', 'me', true, null)`))).toMatch(/license_required/);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'invited', 'me', false, null)`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.grant_resource(${id}, ${b}, null, 'view', now() - interval '1 day')`))).toMatch(/invalid/);
+    await as(tx, a, () => tx`select app.grant_resource(${id}, ${b}, null, 'view', now() + interval '2 days')`);
+    expect(await visible(tx, b, id)).toBe(true);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.save_note(${sp.json({ id, title: "Neue Fassung", body: "Anders" })})`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.grant_resource(${id}, ${b}, null, 'edit', null)`);
+    await as(tx, b, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung für das Beet", body: "# Beet\nErst graben, dann säen und gießen.", note: "gießen ergänzt" })})`);
+    expect((await as(tx, a, () => tx<{ version_no: number }[]>`select version_no from public.resources where id = ${id}`))[0].version_no).toBe(2);
+    const [g] = await as(tx, a, () => tx<{ id: string }[]>`select id from public.resource_grants where resource_id = ${id} and profile_id = ${b}`);
+    await as(tx, a, () => tx`select app.revoke_resource_grant(${g.id})`);
+    expect(await visible(tx, b, id)).toBe(false);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.save_note(${sp.json({ id, title: "Wieder ich", body: "Anders" })})`))).toMatch(/forbidden/);
+  }));
+
+  it("keeps a link-only document out of reach without the link and opens it with it", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const id = await note(tx, a);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'link', 'me', true, 'cc_by')`);
+    const [{ link_token: token }] = await as(tx, a, () => tx<{ link_token: string }[]>`select link_token from public.resources where id = ${id}`);
+    expect(token).toMatch(/^[0-9a-f]{32}$/);
+    expect(await visible(tx, null, id)).toBe(false);
+    expect(await visible(tx, b, id)).toBe(false);
+    await tx`select set_config('app.link_token', ${token}, true)`;
+    expect(await visible(tx, null, id)).toBe(true);
+    expect(await visible(tx, b, id)).toBe(true);
+    await tx`select set_config('app.link_token', 'falsch', true)`;
+    expect(await visible(tx, b, id)).toBe(false);
+    // a new link makes the old one useless
+    await tx`select set_config('app.link_token', ${token}, true)`;
+    await as(tx, a, () => tx`select app.renew_resource_link(${id})`);
+    expect(await visible(tx, b, id)).toBe(false);
+  }));
+
+  it("takes suggestions that the owner approves, keeps every version, restores one, and locks while somebody edits", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const id = await note(tx, a);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.suggest_change(${id}, ${sp.json({ title: "Anleitung für das Beet", body: "Neu", note: "Besser so" })})`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'public', 'suggest', true, 'cc_by_sa')`);
+    const [{ sid }] = await as(tx, b, () => tx<{ sid: string }[]>`select app.suggest_change(${id}, ${tx.json({ title: "Anleitung für das Beet", body: "# Beet\nErst graben, dann säen und mulchen.", note: "Mulchen ergänzt" })}) as sid`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.decide_suggestion(${sid}, true)`))).toMatch(/forbidden/);
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'resource_suggestion'`)).length).toBe(1);
+    await as(tx, a, () => tx`select app.decide_suggestion(${sid}, true)`);
+    const versions = await as(tx, a, () => tx<{ version_no: number; note: string | null }[]>`select version_no, note from public.resource_versions where resource_id = ${id} order by version_no`);
+    expect(versions.map((v) => v.version_no)).toEqual([1, 2]);
+    expect(versions[1].note).toMatch(/Mulchen ergänzt/);
+    // an older base cannot be applied
+    const [{ sid: old }] = await as(tx, c, () => tx<{ sid: string }[]>`select app.suggest_change(${id}, ${tx.json({ title: "Anleitung für das Beet", body: "Etwas anderes", note: "Alles neu gemacht" })}) as sid`);
+    await as(tx, a, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung für das Beet", body: "Noch eine Fassung" })})`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.decide_suggestion(${old}, true)`))).toMatch(/outdated/);
+    // back to the first version
+    await as(tx, a, () => tx`select app.restore_resource_version(${id}, 1)`);
+    expect((await as(tx, a, () => tx<{ body_md: string; version_no: number }[]>`select body_md, version_no from public.resources where id = ${id}`))[0]).toEqual({ body_md: "# Beet\nErst graben, dann säen.", version_no: 4 });
+    // the lock
+    await as(tx, a, () => tx`select app.grant_resource(${id}, ${b}, null, 'edit', null)`);
+    await as(tx, a, () => tx`select app.lock_resource(${id})`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.lock_resource(${id})`))).toMatch(/locked/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.save_note(${sp.json({ id, title: "Anleitung für das Beet", body: "Dazwischen" })})`))).toMatch(/locked/);
+    await as(tx, a, () => tx`select app.release_resource(${id})`);
+    await as(tx, b, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung für das Beet", body: "Jetzt bin ich dran" })})`);
+  }));
+
+  it("copies only what the licence or the download switch allows, and points to the original", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const id = await note(tx, a);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'public', 'me', true, 'all_rights')`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.copy_resource(${id}, null, null)`))).toMatch(/copy_not_allowed/);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'public', 'me', true, 'cc_by_sa')`);
+    const [{ cid }] = await as(tx, b, () => tx<{ cid: string }[]>`select app.copy_resource(${id}, null, null) as cid`);
+    const [copy] = await as(tx, b, () => tx<{ copied_from: string; owner_id: string; visibility: string; license: string }[]>`select copied_from, owner_id, visibility, license from public.resources where id = ${cid}`);
+    expect(copy).toEqual({ copied_from: id, owner_id: b, visibility: "me", license: "cc_by_sa" });
+  }));
+
+  it("hands a document over with consent, throws it into the trash for 30 days, and keeps group documents with the group", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const id = await note(tx, a);
+    const [{ tid }] = await as(tx, a, () => tx<{ tid: string }[]>`select app.propose_resource_transfer(${id}, ${b}) as tid`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.decide_resource_transfer(${tid}, true)`))).toMatch(/not_found/);
+    await as(tx, b, () => tx`select app.decide_resource_transfer(${tid}, true)`);
+    expect((await as(tx, b, () => tx<{ owner_id: string }[]>`select owner_id from public.resources where id = ${id}`))[0].owner_id).toBe(b);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.trash_resource(${id})`))).toMatch(/forbidden/);
+    await as(tx, b, () => tx`select app.trash_resource(${id})`);
+    expect(await visible(tx, null, id)).toBe(false);
+    expect(await visible(tx, b, id)).toBe(true);
+    await as(tx, b, () => tx`select app.restore_resource(${id})`);
+    expect(await visible(tx, null, id)).toBe(true);
+
+    // a group document: the group's admin manages it; when the author leaves, the group keeps it
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Gartengruppe Nord","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    const gdoc = await note(tx, c, "Gießplan", { group_id: gid });
+    expect((await tx<{ visibility: string }[]>`select visibility from public.resources where id = ${gdoc}`)[0].visibility).toBe("group");
+    expect((await tx<{ l: number }[]>`select app.resource_level(${gdoc}, ${a}) as l`)[0].l).toBe(4);
+    await tx`select app.delete_account(${c}, true)`;
+    const [kept] = await tx<{ owner_id: string }[]>`select owner_id from public.resources where id = ${gdoc}`;
+    expect(kept.owner_id).toBe(a);
+  }));
+});

@@ -12,6 +12,7 @@ import { PhaseRail } from "@/components/InitiativeCard";
 import { DisplayToggle, TagEditor } from "@/components/me/ProfileEditor";
 import { Notes } from "@/components/me/Notes";
 import { Responsibilities, type MyResp } from "@/components/me/Responsibilities";
+import { Appeal } from "@/components/me/Appeal";
 import { MyDocuments, type DocRow, type SharedRow, type IncomingTransfer } from "@/components/me/MyDocuments";
 import { formatSize } from "@/lib/files";
 import { Settings } from "@/components/me/Settings";
@@ -30,6 +31,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const me = session.profile.id;
   const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "profile";
   const t = await getTranslations("me");
+  const tm = await getTranslations("modrights");
   const tr = await getTranslations("rights");
   const locale = await getLocale();
 
@@ -51,9 +53,14 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
     const groups = active === "profile" ? await tx<{ slug: string; name: string; role: string }[]>`
       select g.slug::text, g.name, m.role::text from public.group_members m join public.groups g on g.id = m.group_id where m.profile_id = ${me} order by g.name` : [];
     const notes = active === "notes" ? await tx<{ id: string; body: string; updated_at: string }[]>`select id, body, updated_at from public.notes where profile_id = ${me} order by updated_at desc` : [];
-    const reports = active === "reports" ? await tx<{ id: string; rule: string; status: string; created_at: string; case_no: string | null; mine: boolean }[]>`
-      select r.id, r.rule::text, r.status::text, r.created_at, c.case_no, r.reporter_id = ${me} as mine
-      from public.reports r left join public.jury_cases c on c.report_id = r.id order by r.created_at desc` : [];
+    const reports = active === "reports" ? await tx<{ id: string; rule: string; status: string; created_at: string; case_no: string | null; mine: boolean; emergency: boolean; can_appeal: boolean; appealed: boolean }[]>`
+      select r.id, r.rule::text, r.status::text, r.created_at, r.case_no, r.reporter_id = ${me} as mine, r.emergency,
+             app.can_appeal(r.id) as can_appeal, exists (select 1 from public.appeals a where a.report_id = r.id) as appealed
+      from public.reports r order by r.created_at desc` : [];
+    const violations = active === "reports" ? await tx<{ id: string; outcome: string; created_at: string; revoked_at: string | null }[]>`
+      select id, outcome, created_at, revoked_at from public.violations where profile_id = ${me} order by created_at desc` : [];
+    const [rules] = active === "reports" ? await tx<{ hours: number; days: number; months: number; appeal: number }[]>`
+      select app.param('pause_hours') as hours, app.param('ban_days') as days, app.param('violation_months') as months, app.param('appeal_days') as appeal` : [{ hours: 24, days: 7, months: 12, appeal: 14 }];
     const seats = active === "reports" ? await tx<{ case_id: string; case_no: string; status: string; choice: string | null; declined: boolean; invited_at: string }[]>`
       select s.case_id, c.case_no, c.status::text, s.choice::text, s.declined, s.invited_at from public.jury_seats s join public.jury_cases c on c.id = s.case_id
       where s.juror_id = ${me} order by s.invited_at desc` : [];
@@ -93,7 +100,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       select us.findable, us.contact_from, p.is_minor from public.user_settings us join public.profiles p on p.id = us.profile_id where us.profile_id = ${me}`;
     const blocked = await tx<{ id: string; name: string }[]>`
       select p.id, p.display_name as name from public.blocks b join public.profiles p on p.id = b.blocked_id where b.blocker_id = ${me} order by b.created_at`;
-    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, resps, incoming, substituting, docs, sharedDocs, docTransfers, usage: usage.u, home: home ?? null, privacy, blocked };
+    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, violations, rules, resps, incoming, substituting, docs, sharedDocs, docTransfers, usage: usage.u, home: home ?? null, privacy, blocked };
   });
 
   const s = session.profile.settings;
@@ -177,8 +184,26 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
               <div key={r.id} className="flex flex-col gap-1 border-b border-line py-3">
                 <strong>{t(r.mine ? "reportedBy" : "reportedAbout", { rule: t(`rules.${r.rule}`) })}</strong>
                 <span className="text-sm">{t(`caseStatus.${r.status}`)} · {r.case_no ? t("case", { no: r.case_no }) : ""} · {relTime(r.created_at, locale)}</span>
+                {r.emergency && !r.mine && <span className="text-sm text-muted">{tm("mine.emergencyNote")}</span>}
+                {r.appealed && !r.mine && <span className="text-sm font-bold">{tm("mine.appealing")}</span>}
+                {r.can_appeal && <Appeal reportId={r.id} days={d.rules.appeal} />}
               </div>
             ))}
+          </section>
+          <section className="flex flex-col lg:col-span-2">
+            <h2 className="m-0 mb-2 text-xl font-bold">{tm("mine.violations")}</h2>
+            {d.violations.length === 0 && <p className="m-0 text-muted">{tm("mine.none")}</p>}
+            {d.violations.map((v) => (
+              <div key={v.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line py-2 text-sm">
+                <strong>{tm(`mine.outcome_${v.outcome}` as "mine.outcome_notice")}</strong>
+                <span className="text-muted">{relTime(v.created_at, locale)}{v.revoked_at ? ` · ${tm("mine.revoked")}` : ""}</span>
+              </div>
+            ))}
+            <div className="mt-3 flex flex-col gap-1 text-sm">
+              <strong>{tm("ladder.title")}</strong>
+              <span>{tm("ladder.s1")}</span><span>{tm("ladder.s2", { hours: d.rules.hours })}</span><span>{tm("ladder.s3", { days: d.rules.days })}</span><span>{tm("ladder.s4")}</span>
+              <span className="text-muted">{tm("ladder.expiry", { months: d.rules.months })} {tm("ladder.appeal")}</span>
+            </div>
           </section>
         </div>
       )}

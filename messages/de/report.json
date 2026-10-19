@@ -26,6 +26,18 @@
     "unsafe_link": {
       "label": "Unsicherer Link",
       "hint": "Betrug, Schadsoftware oder ein Link, der etwas anderes verspricht"
+    },
+    "illegal": {
+      "label": "Strafbarer Inhalt",
+      "hint": "Wird sofort ausgeblendet und von der Plattform geprüft"
+    },
+    "child_safety": {
+      "label": "Gefahr für Kinder",
+      "hint": "Wird sofort ausgeblendet und von der Plattform geprüft"
+    },
+    "harassment": {
+      "label": "Belästigung",
+      "hint": "Wiederholtes Bedrängen oder Nachstellen"
     }
   },
   "disagree": "Anderer Meinung? Dafür sind Argumente da. Widerspruch kann einen Beitrag nach unten sortieren, aber nie entfernen.",
@@ -38,5 +50,6 @@
   "how1": "Bis zu sieben Menschen werden ausgelost.",
   "how2": "Sie sehen den Beitrag ohne Namen, mit Zusammenhang und der gemeldeten Regel.",
   "how3": "Die Mehrheit entscheidet. Beide Seiten erfahren das Ergebnis.",
-  "track": "Status verfolgen"
+  "track": "Status verfolgen",
+  "emergencyHint": "Bei Gefahr oder Strafbarem wird der Beitrag sofort ausgeblendet und von der Plattform geprüft, ohne dass die Jury warten muss."
 }

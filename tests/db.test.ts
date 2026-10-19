@@ -828,12 +828,23 @@ describe("initiatives: authors, editing, thresholds, withdrawing, blocking", () 
 
     const other = await create(tx, d, "Ein Fall für die Moderation");
     expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.block_initiative(${other}, 'Verstößt gegen die Regeln der Plattform', true)`))).toMatch(/level_required|forbidden/);
+    const boss = await person(tx, "Boss");
     await tx`select app.admin_grant(${c}, true)`;
+    await tx`select app.admin_grant(${boss}, true)`;
     expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.block_initiative(${other}, 'kurz', true)`))).toMatch(/reason_required/);
-    await as(tx, c, () => tx`select app.block_initiative(${other}, 'Verstößt gegen die Regeln der Plattform', true)`);
+    // with several admins a second one has to agree
+    const [{ r: asked }] = await as(tx, c, () => tx<{ r: string }[]>`select app.block_initiative(${other}, 'Verstößt gegen die Regeln der Plattform', true) as r`);
+    expect(asked).toBe("pending");
+    expect((await tx<{ blocked_at: string | null }[]>`select blocked_at from public.initiatives where id = ${other}`)[0].blocked_at).toBeNull();
+    const [prop] = await as(tx, c, () => tx<{ id: string }[]>`select id from public.admin_proposals where subject_id = ${other} and status = 'pending'`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.decide_admin_proposal(${prop.id}, true)`))).toMatch(/second_admin_needed/);
+    await as(tx, boss, () => tx`select app.decide_admin_proposal(${prop.id}, true)`);
     expect(await fails(tx, (sp) => as(sp, b, () => sp`insert into public.initiative_supports (initiative_id, profile_id) values (${other}, ${b})`))).toMatch(/row-level security|violates/);
     expect((await as(tx, d, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'initiative_blocked'`)).length).toBe(1);
-    await as(tx, c, () => tx`select app.block_initiative(${other}, null, false)`);
+    const [{ r: lifted }] = await as(tx, c, () => tx<{ r: string }[]>`select app.block_initiative(${other}, null, false) as r`);
+    expect(lifted).toBe("pending");
+    const [prop2] = await as(tx, c, () => tx<{ id: string }[]>`select id from public.admin_proposals where subject_id = ${other} and status = 'pending'`);
+    await as(tx, boss, () => tx`select app.decide_admin_proposal(${prop2.id}, true)`);
     await as(tx, b, () => tx`insert into public.initiative_supports (initiative_id, profile_id) values (${other}, ${b})`);
   }));
 });
@@ -1057,5 +1068,117 @@ describe("documents: visibility, rights, versions, suggestions, copies, trash", 
     await tx`select app.delete_account(${c}, true)`;
     const [kept] = await tx<{ owner_id: string }[]>`select owner_id from public.resources where id = ${gdoc}`;
     expect(kept.owner_id).toBe(a);
+  }));
+});
+
+describe("moderation: emergency path, ladder, appeals, juries, admins", () => {
+  const group = async (tx: postgres.TransactionSql, who: string) =>
+    (await as(tx, who, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Nachbarschaft Ost","join_policy":"open"}'::jsonb) as gid`))[0].gid;
+  const post = async (tx: postgres.TransactionSql, who: string, gid: string, body: string) =>
+    (await as(tx, who, () => tx<{ id: string }[]>`insert into public.posts (author_id, group_id, body) values (${who}, ${gid}, ${body}) returning id`))[0].id;
+  const hidden = async (tx: postgres.TransactionSql, author: string, id: string) => (await as(tx, author, () => tx<{ h: string | null }[]>`select hidden_at as h from public.posts where id = ${id}`))[0].h !== null;
+  const isAdmin = async (tx: postgres.TransactionSql, id: string) => (await tx<{ l: number }[]>`select app.trust_level(${id}) as l`)[0].l >= 4;
+  const admin = async (tx: postgres.TransactionSql, name: string) => { const a = await person(tx, name); await tx`select app.admin_grant(${a}, true)`; return a; };
+
+  it("hides dangerous content at once without a jury, lets a platform admin decide, and counts a violation", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const boss = await admin(tx, "Boss");
+    const gid = await group(tx, a);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    const pid = await post(tx, a, gid, "Ich weiß, wo du wohnst, und ich komme vorbei.");
+    const [{ no }] = await as(tx, b, () => tx<{ no: string }[]>`select app.create_report('post', ${pid}, 'threat', 'Drohung') as no`);
+    expect(no).toMatch(/^\d{4}-\d{4}$/);
+    expect(await hidden(tx, a, pid)).toBe(true);
+    expect((await as(tx, b, () => tx<{ n: number }[]>`select count(*)::int as n from public.jury_cases where case_no = ${no}`))[0].n).toBe(0);
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'emergency_hidden'`)).length).toBe(1);
+    expect((await as(tx, boss, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'emergency_review'`)).length).toBe(1);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.decide_emergency((select id from public.reports where case_no = ${no}), true, 'Eindeutige Drohung')`))).toMatch(/level_required|forbidden/);
+    const [rep] = await as(tx, b, () => tx<{ id: string }[]>`select id from public.reports where case_no = ${no}`);
+    expect(await fails(tx, (sp) => as(sp, boss, () => sp`select app.decide_emergency(${rep.id}, true, 'zu kurz')`))).toMatch(/reason_required/);
+    await as(tx, boss, () => tx`select app.decide_emergency(${rep.id}, true, 'Eindeutige Drohung gegen eine Person')`);
+    expect(await hidden(tx, a, pid)).toBe(true);
+    const v = await as(tx, a, () => tx<{ outcome: string }[]>`select outcome from public.violations`);
+    expect(v.map((x) => x.outcome)).toEqual(["notice"]);
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'violation_notice'`)).length).toBe(1);
+    // a dismissed emergency brings the content back
+    const pid2 = await post(tx, a, gid, "Der Zaun am Spielplatz ist kaputt.");
+    const [{ no: no2 }] = await as(tx, b, () => tx<{ no: string }[]>`select app.create_report('post', ${pid2}, 'illegal', 'vielleicht') as no`);
+    expect(await hidden(tx, a, pid2)).toBe(true);
+    const [rep2] = await as(tx, b, () => tx<{ id: string }[]>`select id from public.reports where case_no = ${no2}`);
+    await as(tx, boss, () => tx`select app.decide_emergency(${rep2.id}, false, 'Kein Verstoß erkennbar, nur eine Meldung')`);
+    expect(await hidden(tx, a, pid2)).toBe(false);
+  }));
+
+  it("climbs the ladder: notice, warning with a pause, seven days, then a review; an appeal to a different jury can undo it", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const boss = await admin(tx, "Boss");
+    const gid = await group(tx, a);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    const ids: string[] = [];
+    const posts: string[] = [];
+    for (let i = 0; i < 3; i++) posts.push(await post(tx, a, gid, `Strafbarer Inhalt Nummer ${i}`));
+    for (const pid of posts) {
+      const [{ no }] = await as(tx, b, () => tx<{ no: string }[]>`select app.create_report('post', ${pid}, 'illegal', 'strafbar') as no`);
+      const [rep] = await as(tx, b, () => tx<{ id: string }[]>`select id from public.reports where case_no = ${no}`);
+      await as(tx, boss, () => tx`select app.decide_emergency(${rep.id}, true, 'Eindeutig strafbarer Inhalt')`);
+      ids.push(rep.id);
+    }
+    const steps = (await as(tx, a, () => tx<{ outcome: string }[]>`select outcome from public.violations order by step`)).map((x) => x.outcome);
+    expect(steps).toEqual(["notice", "warning", "suspension"]);
+    const sanctions = await as(tx, a, () => tx<{ kind: string; ends_at: string | null }[]>`select kind, ends_at from public.sanctions where lifted_at is null order by created_at`);
+    expect(sanctions.map((s) => s.kind)).toEqual(["pause", "ban"]);
+    expect((await tx<{ banned: boolean }[]>`select app.is_banned(${a}) as banned`)[0].banned).toBe(true);
+    // only the person concerned can appeal, once
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.appeal_report(${ids[2]}, 'Das war nicht strafbar, ich war es nicht')`))).toMatch(/forbidden/);
+    const num = (await as(tx, a, () => tx<{ no: string }[]>`select app.appeal_report(${ids[2]}, 'Das war ein Zitat und ist nicht strafbar.') as no`))[0].no;
+    expect(num).toMatch(/-E$/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.appeal_report(${ids[2]}, 'Noch einmal bitte, ganz sicher')`))).toMatch(/duplicate|unique/);
+    // the second jury says: no violation
+    const [{ cid }] = await as(tx, a, () => tx<{ cid: string }[]>`select appeal_case_id as cid from public.appeals where report_id = ${ids[2]}`);
+    const everybody = await tx<{ id: string }[]>`select id from public.profiles where onboarded_at is not null and id not in (${a}, ${b})`;
+    for (const who of everybody) {
+      const [{ status }] = await as(tx, a, () => tx<{ status: string }[]>`select status::text from public.reports where id = ${ids[2]}`);
+      if (status !== "upheld") break;
+      await tx.savepoint(async (sp) => { await as(sp, who.id, () => sp`select app.decide_jury(${cid}, 'no_violation', 'zulässiges Zitat')`); }).catch(() => null);
+    }
+    expect((await as(tx, a, () => tx<{ status: string }[]>`select status::text from public.reports where id = ${ids[2]}`))[0].status).toBe("dismissed");
+    expect((await as(tx, a, () => tx<{ n: number }[]>`select count(*)::int as n from public.violations where profile_id = ${a} and revoked_at is null`))[0].n).toBe(2);
+    expect((await tx<{ banned: boolean }[]>`select app.is_banned(${a}) as banned`)[0].banned).toBe(true);   // the pause from the second violation still runs
+    expect((await as(tx, a, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'appeal_decided'`)).length).toBe(1);
+  }));
+
+  it("never seats the people from a group or chat of those involved on the jury", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), j = await person(tx, "Jule");
+    const gid = await group(tx, a);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, j, () => tx`select app.join_group(${gid}, null)`);
+    const pid = await post(tx, a, gid, "Du bist so dumm, wirklich!");
+    const [{ no }] = await as(tx, b, () => tx<{ no: string }[]>`select app.create_report('post', ${pid}, 'insult', 'Beleidigung') as no`);
+    expect(await hidden(tx, a, pid)).toBe(false);
+    const [{ cid }] = await as(tx, b, () => tx<{ cid: string }[]>`select id as cid from public.jury_cases where case_no = ${no}`);
+    expect(await fails(tx, (sp) => as(sp, j, () => sp`select app.decide_jury(${cid}, 'violation', 'ja')`))).toMatch(/forbidden/);
+  }));
+
+  it("asks a second admin to agree to changes of rights and blocks, logs them without names, and keeps a yearly report", () => scenario(async (tx) => {
+    const x = await admin(tx, "Admin Eins"), y = await admin(tx, "Admin Zwei"), z = await person(tx, "Zoe");
+    const [{ r }] = await as(tx, x, () => tx<{ r: string }[]>`select app.admin_action('grant_admin', ${z}, '') as r`);
+    expect(r).toBe("pending");
+    expect(await isAdmin(tx, z)).toBe(false);
+    const [prop] = await as(tx, y, () => tx<{ id: string }[]>`select id from public.admin_proposals where subject_id = ${z} and status = 'pending'`);
+    expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.decide_admin_proposal(${prop.id}, true)`))).toMatch(/second_admin_needed/);
+    await as(tx, y, () => tx`select app.decide_admin_proposal(${prop.id}, true)`);
+    expect(await isAdmin(tx, z)).toBe(true);
+    const log = await as(tx, null, () => tx<{ kind: string }[]>`select kind from public.admin_actions order by id desc limit 1`);
+    expect(log[0].kind).toBe("grant_admin");
+    expect(Object.keys((await as(tx, null, () => tx<{ columns: string[] }[]>`select array_agg(column_name::text) as columns from information_schema.columns where table_name = 'admin_actions' and table_schema = 'public'`))[0].columns).sort())
+      .toEqual(["0", "1", "2"]);
+    await as(tx, x, () => tx`select app.log_disclosure('AZ 12 Gs 345/26', 'Amtsgericht Beispielstadt', 'Bestandsdaten zu einem Konto')`);
+    const [{ t }] = await tx<{ t: { year: number; disclosures: number; reports: number } }[]>`select app.transparency(extract(year from now())::int) as t`;
+    expect(t.disclosures).toBe(1);
+    expect(typeof t.reports).toBe("number");
+    // emergency access to a chat needs a reason, a second admin, and tells the people in the chat
+    const cv = randomUUID();
+    expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.emergency_messages(${cv})`))).toMatch(/forbidden/);
+    expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.admin_action('chat_access', ${cv}, 'zu knapp')`))).toMatch(/reason_required/);
   }));
 });

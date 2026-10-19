@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { sql, errorCode } from "../db";
+import { run } from "../action";
 import { adminState, viaAdminGate } from "../admin";
 import { getSession } from "../session";
 
@@ -42,10 +43,39 @@ export async function removeDomain(domain: string) {
   return guard(() => sql`select app.admin_remove_domain(${domain})`);
 }
 
+/** With more than one admin a second admin has to agree: the answer is "done" or "pending". */
 export async function grantAdmin(profileRef: string, on: boolean) {
   const id = profileRef.match(/[0-9a-f-]{36}/)?.[0];
   if (!id) return { ok: false as const, error: "invalid" };
-  return guard(() => sql`select app.admin_grant(${id}, ${on})`);
+  const res = await run(async (tx) => (await tx<{ r: string }[]>`select app.admin_action(${on ? "grant_admin" : "revoke_admin"}, ${id}, '') as r`)[0].r);
+  revalidatePath("/sysadmin");
+  return res;
+}
+
+export async function banPerson(profileRef: string, reason: string) {
+  const id = profileRef.match(/[0-9a-f-]{36}/)?.[0];
+  if (!id) return { ok: false as const, error: "invalid" };
+  const res = await run(async (tx) => (await tx<{ r: string }[]>`select app.admin_action('ban', ${id}, ${reason}) as r`)[0].r);
+  revalidatePath("/sysadmin");
+  return res;
+}
+
+export async function decideProposal(id: string, approve: boolean) {
+  const res = await run(async (tx) => { await tx`select app.decide_admin_proposal(${id}, ${approve})`; return null; });
+  revalidatePath("/sysadmin");
+  return res;
+}
+
+export async function decideEmergency(reportId: string, upheld: boolean, reason: string) {
+  const res = await run(async (tx) => { await tx`select app.decide_emergency(${reportId}, ${upheld}, ${reason})`; return null; });
+  revalidatePath("/sysadmin");
+  return res;
+}
+
+export async function logDisclosure(reference: string, authority: string, scope: string) {
+  const res = await run(async (tx) => { await tx`select app.log_disclosure(${reference}, ${authority}, ${scope})`; return null; });
+  revalidatePath("/sysadmin");
+  return res;
 }
 
 export async function setDemoChats(on: boolean) {

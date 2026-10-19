@@ -312,6 +312,50 @@
     "resource_transfer_answer": {
       "title": "Antwort zur Übergabe",
       "body": "{name} hat die Übergabe von „{title}“ beantwortet."
+    },
+    "violation_notice": {
+      "title": "Hinweis zu einem Beitrag",
+      "body": "Fall {case_no}: Ein Beitrag hat gegen eine Regel verstoßen. Das ist dein erster Verstoß. Du kannst einmal Einspruch einlegen."
+    },
+    "violation_warning": {
+      "title": "Verwarnung",
+      "body": "Fall {case_no}: zweiter Verstoß. Du hast jetzt eine kurze Schreibpause. Einspruch ist möglich."
+    },
+    "violation_suspension": {
+      "title": "Sperre",
+      "body": "Fall {case_no}: dritter Verstoß. Dein Konto ist für einige Tage gesperrt. Einspruch ist möglich."
+    },
+    "violation_review": {
+      "title": "Prüfung durch die Plattform",
+      "body": "Fall {case_no}: weitere Verstöße. Eine Plattform-Admin prüft deinen Fall."
+    },
+    "emergency_hidden": {
+      "title": "Beitrag vorläufig ausgeblendet",
+      "body": "Fall {case_no}: Wegen einer Notfallmeldung wird ein Beitrag von dir von der Plattform geprüft."
+    },
+    "emergency_cleared": {
+      "title": "Beitrag wieder sichtbar",
+      "body": "Fall {case_no}: Die Prüfung hat keinen Verstoß ergeben."
+    },
+    "emergency_review": {
+      "title": "Notfallmeldung",
+      "body": "Fall {case_no}: Bitte prüfen. Der Inhalt ist ausgeblendet."
+    },
+    "appeal_decided": {
+      "title": "Einspruch entschieden",
+      "body": "Fall {case_no}."
+    },
+    "admin_proposal": {
+      "title": "Freigabe nötig",
+      "body": "Eine Admin schlägt eine Änderung vor, die eine zweite Admin bestätigen muss."
+    },
+    "platform_ban": {
+      "title": "Dein Konto ist gesperrt",
+      "body": "{reason}"
+    },
+    "emergency_access": {
+      "title": "Notfallzugriff auf einen Chat",
+      "body": "Zwei Admins haben mit Begründung kurz in einen Chat von dir gesehen. Das ist im Protokoll vermerkt."
     }
   }
 }

@@ -7,3 +7,11 @@ export async function createReport(type: string, id: string, rule: string, note:
     return case_no;
   });
 }
+
+/** One appeal for the person concerned: a different jury looks at the case again. */
+export async function appealReport(reportId: string, reason: string) {
+  return run(async (tx) => {
+    const [{ no }] = await tx<{ no: string }[]>`select app.appeal_report(${reportId}, ${reason}) as no`;
+    return no;
+  });
+}

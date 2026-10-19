@@ -312,6 +312,50 @@
     "resource_transfer_answer": {
       "title": "Answer to the hand-over",
       "body": "{name} answered the hand-over of “{title}”."
+    },
+    "violation_notice": {
+      "title": "Notice about a post",
+      "body": "Case {case_no}: a post broke a rule. This is your first violation. You can appeal once."
+    },
+    "violation_warning": {
+      "title": "Warning",
+      "body": "Case {case_no}: second violation. You now have a short write pause. You can appeal."
+    },
+    "violation_suspension": {
+      "title": "Suspension",
+      "body": "Case {case_no}: third violation. Your account is suspended for some days. You can appeal."
+    },
+    "violation_review": {
+      "title": "Review by the platform",
+      "body": "Case {case_no}: further violations. A platform admin looks at your case."
+    },
+    "emergency_hidden": {
+      "title": "Post hidden for now",
+      "body": "Case {case_no}: because of an emergency report the platform reviews a post of yours."
+    },
+    "emergency_cleared": {
+      "title": "Post visible again",
+      "body": "Case {case_no}: the review found no violation."
+    },
+    "emergency_review": {
+      "title": "Emergency report",
+      "body": "Case {case_no}: please review. The content is hidden."
+    },
+    "appeal_decided": {
+      "title": "Appeal decided",
+      "body": "Case {case_no}."
+    },
+    "admin_proposal": {
+      "title": "Approval needed",
+      "body": "An admin proposes a change that a second admin has to confirm."
+    },
+    "platform_ban": {
+      "title": "Your account is suspended",
+      "body": "{reason}"
+    },
+    "emergency_access": {
+      "title": "Emergency access to a chat",
+      "body": "Two admins looked briefly into a chat of yours, with a reason. This is noted in the log."
     }
   }
 }

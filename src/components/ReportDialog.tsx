@@ -6,7 +6,7 @@ import { createReport } from "@/lib/actions/reports";
 import { IconClose } from "./ui/Icons";
 import { btn, field } from "./ui/styles";
 
-const RULES = ["insult", "threat", "spam", "misinformation", "personal_data", "unsafe_link"] as const;
+const RULES = ["insult", "harassment", "threat", "illegal", "child_safety", "spam", "misinformation", "personal_data", "unsafe_link"] as const;
 
 /** "Melden": a three-step dialog that hands the content to a citizen jury. */
 export function ReportButton({ type, id, className }: { type: "post" | "argument" | "argument_reply" | "listing" | "message" | "resource"; id: string; className?: string }) {
@@ -20,6 +20,7 @@ export function ReportButton({ type, id, className }: { type: "post" | "argument
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
+  const emergency = !!rule && ["illegal", "child_safety", "threat"].includes(rule) && type !== "message";
   const close = () => { setOpen(false); setStep(0); setRule(null); setNote(""); setError(null); };
   const send = () => start(async () => {
     const res = await createReport(type, id, rule!, note);
@@ -61,6 +62,7 @@ export function ReportButton({ type, id, className }: { type: "post" | "argument
             {step === 1 && (
               <>
                 <span>{t("rule")}: <strong>{t(`rules.${rule}.label` as "rules.insult.label")}</strong></span>
+                {emergency && <p role="status" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{t("emergencyHint")}</p>}
                 <label className={field.label}>{t("note")}
                   <textarea rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("notePlaceholder")} className={field.textarea} />
                 </label>

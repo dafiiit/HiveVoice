@@ -88,7 +88,9 @@
     "license_required": "Öffentliche Dokumente brauchen eine Lizenz.",
     "copy_not_allowed": "Dieses Dokument darf nicht kopiert werden.",
     "outdated": "Das Dokument hat sich seit dem Vorschlag geändert. Bitte schlage es neu vor.",
-    "quota_exceeded": "Dein Speicher ist voll. Lösche etwas oder lass dich bestätigen, dann gibt es mehr Platz."
+    "quota_exceeded": "Dein Speicher ist voll. Lösche etwas oder lass dich bestätigen, dann gibt es mehr Platz.",
+    "appeal_window_over": "Die Frist für den Einspruch ist vorbei.",
+    "second_admin_needed": "Eine zweite Admin muss zustimmen."
   },
   "phase": {
     "idea": "Idee",

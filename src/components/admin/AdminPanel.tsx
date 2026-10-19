@@ -19,9 +19,10 @@ export function AdminPanel({ o, me }: { o: Overview; me: string }) {
   const [label, setLabel] = useState("");
   const [ref, setRef] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
+  const tm = useTranslations("modrights.admin");
   const act = (fn: () => Promise<{ ok: boolean; error?: string }>, ok?: string) => start(async () => {
     const r = await fn();
-    setMsg(r.ok ? ok ?? t("done") : tc(`errors.${r.error}` as "errors.unknown"));
+    setMsg(r.ok ? ((r as { data?: unknown }).data === "pending" ? tm("pending") : ok ?? t("done")) : tc(`errors.${r.error}` as "errors.unknown"));
     router.refresh();
   });
   const mode = String(o.settings.verification_mode ?? "login");

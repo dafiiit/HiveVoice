@@ -49,7 +49,10 @@
     "threat": "Threat",
     "spam": "Spam",
     "misinformation": "Misinformation",
-    "personal_data": "Personal data"
+    "personal_data": "Personal data",
+    "illegal": "Illegal content",
+    "child_safety": "Danger for children",
+    "harassment": "Harassment"
   },
   "caseStatus": {
     "open": "Under review by the citizen jury",

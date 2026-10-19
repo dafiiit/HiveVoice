@@ -26,6 +26,18 @@
     "unsafe_link": {
       "label": "Unsafe link",
       "hint": "Fraud, malware or a link that promises something else"
+    },
+    "illegal": {
+      "label": "Illegal content",
+      "hint": "Hidden at once and checked by the platform"
+    },
+    "child_safety": {
+      "label": "Danger for children",
+      "hint": "Hidden at once and checked by the platform"
+    },
+    "harassment": {
+      "label": "Harassment",
+      "hint": "Repeatedly pestering or stalking"
     }
   },
   "disagree": "Disagree? That is what arguments are for. Disagreement can push a post down, but never remove it.",
@@ -38,5 +50,6 @@
   "how1": "Up to seven people are drawn by lot.",
   "how2": "They see the post without names, with context and the reported rule.",
   "how3": "The majority decides. Both sides learn the result.",
-  "track": "Track status"
+  "track": "Track status",
+  "emergencyHint": "For danger or crimes the post is hidden at once and checked by the platform, without waiting for the jury."
 }

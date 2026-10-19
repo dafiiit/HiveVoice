@@ -150,6 +150,10 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = p.slug ? `/groups/${p.slug}?tab=talk` : "/connect"; label = t("labels.group");
     } else if (kind === "ttl_proposed") {
       href = `/connect?c=d:${p.conversation_id}`; category = "messages"; label = t("labels.message");
+    } else if (kind.startsWith("violation_") || kind === "appeal_decided" || kind === "emergency_hidden" || kind === "emergency_cleared" || kind === "platform_ban") {
+      href = "/me?tab=reports"; label = t("labels.jury");
+    } else if (kind === "emergency_review" || kind === "admin_proposal" || kind === "emergency_access") {
+      href = "/notifications"; label = t("labels.other");
     } else if (kind === "report_decided" || kind === "content_hidden") {
       href = "/me?tab=reports"; label = t("labels.jury");
     }

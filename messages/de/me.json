@@ -49,7 +49,10 @@
     "threat": "Bedrohung",
     "spam": "Spam",
     "misinformation": "Falschinformation",
-    "personal_data": "Persönliche Daten"
+    "personal_data": "Persönliche Daten",
+    "illegal": "Strafbarer Inhalt",
+    "child_safety": "Gefahr für Kinder",
+    "harassment": "Belästigung"
   },
   "caseStatus": {
     "open": "In Prüfung durch die Bürgerjury",

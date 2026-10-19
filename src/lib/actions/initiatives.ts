@@ -103,8 +103,9 @@ export async function deleteInitiative(id: string) {
   return res;
 }
 
+/** "done", or "pending" when a second admin still has to agree. */
 export async function blockInitiative(id: string, reason: string, on: boolean) {
-  const res = await run(async (tx) => { await tx`select app.block_initiative(${id}, ${reason}, ${on})`; return null; });
+  const res = await run(async (tx) => (await tx<{ r: string }[]>`select app.block_initiative(${id}, ${reason}, ${on}) as r`)[0].r);
   revalidatePath(path(id));
   return res;
 }

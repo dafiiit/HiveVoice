@@ -88,7 +88,9 @@
     "license_required": "Public documents need a licence.",
     "copy_not_allowed": "This document may not be copied.",
     "outdated": "The document changed since the suggestion. Please suggest it again.",
-    "quota_exceeded": "Your storage is full. Delete something or get verified for more room."
+    "quota_exceeded": "Your storage is full. Delete something or get verified for more room.",
+    "appeal_window_over": "The time for an appeal has passed.",
+    "second_admin_needed": "A second admin has to agree."
   },
   "phase": {
     "idea": "Idea",

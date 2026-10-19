@@ -23,6 +23,7 @@ import ns_listings from "./listings.json";
 import ns_market from "./market.json";
 import ns_me from "./me.json";
 import ns_meta from "./meta.json";
+import ns_modrights from "./modrights.json";
 import ns_nav from "./nav.json";
 import ns_new from "./new.json";
 import ns_notifications from "./notifications.json";
@@ -63,6 +64,7 @@ const messages = {
   "market": ns_market,
   "me": ns_me,
   "meta": ns_meta,
+  "modrights": ns_modrights,
   "nav": ns_nav,
   "new": ns_new,
   "notifications": ns_notifications,

@@ -204,6 +204,54 @@
     "group_rule_changed": {
       "title": "“{group}” became more open",
       "body": "Visibility, joining or rights changed."
+    },
+    "initiative_author_invite": {
+      "title": "{by} invites you as a co-author",
+      "body": "On “{title}”. Open the initiative to accept or decline."
+    },
+    "initiative_author_joined": {
+      "title": "{name} now writes along",
+      "body": "On “{title}”."
+    },
+    "initiative_author_declined": {
+      "title": "{name} declined",
+      "body": "The invitation to “{title}” was not accepted."
+    },
+    "initiative_author_left": {
+      "title": "{name} is no longer an author",
+      "body": "On “{title}”."
+    },
+    "initiative_author_removed": {
+      "title": "You were removed as an author",
+      "body": "The authors of “{title}” decided so by majority."
+    },
+    "initiative_removal": {
+      "title": "Vote among authors",
+      "body": "Remove {name} from “{title}”? Your vote counts."
+    },
+    "initiative_lead": {
+      "title": "You now lead an initiative",
+      "body": "“{title}” was handed over to you."
+    },
+    "initiative_correction": {
+      "title": "Correction to an initiative",
+      "body": "“{title}”: {note}"
+    },
+    "initiative_ballot_cancelled": {
+      "title": "Vote called off",
+      "body": "“{title}”: {reason}"
+    },
+    "initiative_withdrawn": {
+      "title": "Initiative withdrawn",
+      "body": "“{title}” was withdrawn. {note}"
+    },
+    "initiative_blocked": {
+      "title": "Initiative blocked",
+      "body": "“{title}”: {reason}"
+    },
+    "initiative_unblocked": {
+      "title": "Block lifted",
+      "body": "“{title}” is free again."
     }
   }
 }

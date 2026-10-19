@@ -23,7 +23,7 @@ export default async function Welcome() {
   const [live, pairs] = await asViewer(null, async (tx) => [
     await tx<Card[]>`
       select ${initiativeCardColumns(tx)} from ${initiativeCardFrom(tx)}
-      where i.published_at is not null and i.outcome is null
+      where i.published_at is not null and i.outcome is null and i.blocked_at is null
       order by (i.phase in ('debate', 'addressee', 'implementation')) desc, i.support_count desc limit 3`,
     await tx<Pair[]>`
       select n.title as need, o.title as offer

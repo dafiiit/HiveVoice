@@ -13,10 +13,11 @@ import { btn, field } from "../ui/styles";
 
 const STEPS = ["idea", "text", "place", "addressee", "review"] as const;
 
-type Initial = { id: string; title: string; summary: string; body: string; bodyEasy: string; addresseeId: string; addresseeLabel: string; addresseeText: string; costEuro: string };
+type Initial = { id: string; title: string; summary: string; body: string; bodyEasy: string; addresseeId: string; addresseeLabel: string; addresseeText: string; costEuro: string; noteMode: "none" | "debate" | "frozen" };
 
 export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: string; name: string; level: string }[]; initial?: Initial; ideas?: string[] }) {
   const t = useTranslations("new.initiative");
+  const tn = useTranslations("inirights.note");
   const tc = useTranslations("common");
   const tl = useTranslations("levels");
   const editing = !!initial;
@@ -35,6 +36,7 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
   const [similar, setSimilar] = useState<{ id: string; title: string; region: string; supports: number }[]>([]);
   const [dismissed, setDismissed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState("");
   const [pending, start] = useTransition();
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
 
   const submit = () => start(async () => {
     const payload = { title, summary, body, bodyEasy: easy, addresseeResponsibilityId: addressee?.id ?? "", addresseeText: addressee ? "" : addresseeText, costEuro: cost };
-    const res = editing ? await updateInitiative(initial!.id, payload) : await createInitiative({ ...payload, regionId: region!.id, tags });
+    const res = editing ? await updateInitiative(initial!.id, payload, note) : await createInitiative({ ...payload, regionId: region!.id, tags });
     if (res && !res.ok) setError(tc(`errors.${res.error}` as "errors.unknown"));
   });
 
@@ -150,6 +152,12 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
               <dt className="font-bold">{t("addressee")}</dt><dd className="m-0">{addressee?.label ?? (addresseeText || "–")}</dd>
               <dt className="font-bold">{t("cost")}</dt><dd className="m-0">{cost ? `${cost} €` : "–"}</dd>
             </dl>
+            {editing && initial!.noteMode !== "none" && (
+              <label className={field.label}>{tn("label")}
+                <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={tn("placeholder")} className={field.inputSm} />
+                <span className={field.hint}>{initial!.noteMode === "frozen" ? tn("hintFrozen") : tn("hintDebate")}</span>
+              </label>
+            )}
             <span className="text-sm text-muted">{t("reviewHint")}</span>
           </section>
         )}
@@ -158,7 +166,7 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
           {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={btn.secondaryLg}>{tc("back")}</button>}
           {step < steps.length - 1
             ? <button type="button" disabled={!canNext} onClick={() => setStep(step + 1)} className={btn.primaryLg}>{tc("next")}</button>
-            : <button type="button" disabled={pending} onClick={submit} className={btn.primaryLg}>{editing ? tc("save") : t("publish")}</button>}
+            : <button type="button" disabled={pending || (editing && initial!.noteMode !== "none" && note.trim().length < 5)} onClick={submit} className={btn.primaryLg}>{editing ? tc("save") : t("publish")}</button>}
         </div>
       </div>
       <aside className="flex flex-col gap-6">

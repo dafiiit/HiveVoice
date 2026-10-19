@@ -75,7 +75,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
       return {
         initiatives: await tx<Card[]>`
           select ${initiativeCardColumns(tx)} from ${initiativeCardFrom(tx)}
-          where i.published_at is not null
+          where i.published_at is not null and i.blocked_at is null
             ${level !== "all" ? tx`and r.level = ${level}` : tx``}
             ${mine ? tx`and i.region_id = any(${regions}::uuid[])` : tx``}
             ${inPlace(tx`i.region_id`)}

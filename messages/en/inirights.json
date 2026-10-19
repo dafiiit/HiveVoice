@@ -1,0 +1,75 @@
+{
+  "authors": {
+    "title": "Authors",
+    "lead": "Lead",
+    "leave": "Stop being an author",
+    "leaveConfirm": "You will no longer write on this initiative.",
+    "handOver": "Hand over the lead",
+    "handOverConfirm": "You give up the lead and stay an author. The new lead can withdraw or delete the initiative.",
+    "remove": "Propose removal",
+    "removalTitle": "Authors vote: remove {name}",
+    "removalText": "More than half of all authors are needed. With two authors both must agree.",
+    "removalCount": "{yes} for, {no} against",
+    "yes": "Yes, remove",
+    "no": "No, keep",
+    "invite": "Invite a co-author",
+    "inviteText": "Co-authors may change the text and start the vote. They have to agree. Their real name then shows on the initiative.",
+    "max": "At most {n} authors, open invitations count.",
+    "search": "Search by name (at least 3 letters)",
+    "send": "Invite",
+    "sent": "Invitation sent to",
+    "noHits": "Nobody found. Only verified people who want to be found show up here.",
+    "pending": "Open invitations",
+    "withdrawInvite": "Withdraw",
+    "group": "Group",
+    "groupNone": "No group",
+    "groupText": "You can attach the initiative to a group where you are an admin. If the group allows it, its admins help manage the initiative.",
+    "groupSave": "Attach",
+    "groupSaved": "Saved"
+  },
+  "invited": {
+    "title": "{by} invited you to write on “{title}”.",
+    "text": "Co-authors may change the text and start the vote. Your real name shows publicly on the initiative.",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "tools": {
+    "needed": "The vote needs {needed} supporters. Now: {have}.",
+    "debateUntil": "The debate runs until {date}. The vote cannot start before.",
+    "ready": "The thresholds for the vote are met.",
+    "cancelVote": "Call off the vote",
+    "cancelReason": "Reason (everybody sees it)",
+    "cancelHint": "Whoever wants to change the text substantially calls off the vote and starts a new one. Everybody who supported or voted learns the reason. Votes cast are discarded.",
+    "cancelConfirm": "Call off the vote now",
+    "frozen": "The text is frozen. During and after the vote only small corrections are possible, with a note.",
+    "withdrawNote": "Why are you withdrawing? (optional, public)",
+    "withdrawConfirm": "Withdraw",
+    "withdrawHint": "The initiative stays visible with a note. Only the lead can withdraw.",
+    "delete": "Delete",
+    "deleteHint": "Deleting works only while nobody has supported, voted or discussed. After that the initiative stays in the archive.",
+    "deleteConfirm": "Delete this initiative for good?",
+    "more": "More"
+  },
+  "note": {
+    "label": "What changed?",
+    "hintDebate": "Required during the debate. The note shows in the history.",
+    "hintFrozen": "The text is frozen. Small corrections (a few words) are allowed. The note shows in the history and supporters receive it.",
+    "placeholder": "e.g. fixed a typo in paragraph 2"
+  },
+  "banner": {
+    "blocked": "This initiative is blocked: {reason}",
+    "blockedText": "It stays visible. Supporting and editing are not possible. The authors can appeal.",
+    "withdrawn": "Withdrawn on {date}",
+    "withdrawnNote": "Note from the lead: {note}"
+  },
+  "history": {
+    "correction": "Correction: {note}",
+    "note": "Note: {note}"
+  },
+  "block": {
+    "title": "Platform moderation",
+    "reason": "Reason (at least 10 characters, the authors see it)",
+    "block": "Block",
+    "unblock": "Lift the block"
+  }
+}

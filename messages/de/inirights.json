@@ -1,0 +1,75 @@
+{
+  "authors": {
+    "title": "Autor:innen",
+    "lead": "Leitung",
+    "leave": "Als Autor:in aufhören",
+    "leaveConfirm": "Du schreibst dann nicht mehr an dieser Initiative mit.",
+    "handOver": "Leitung übergeben",
+    "handOverConfirm": "Du gibst die Leitung ab und bleibst Autor:in. Die neue Leitung kann die Initiative zurückziehen oder löschen.",
+    "remove": "Entfernen vorschlagen",
+    "removalTitle": "Abstimmung der Autor:innen: {name} entfernen",
+    "removalText": "Es braucht mehr als die Hälfte aller Autor:innen. Bei zwei Autor:innen müssen beide zustimmen.",
+    "removalCount": "{yes} dafür, {no} dagegen",
+    "yes": "Ja, entfernen",
+    "no": "Nein, behalten",
+    "invite": "Mit-Autor:in einladen",
+    "inviteText": "Mit-Autor:innen dürfen den Text ändern und die Abstimmung starten. Sie müssen zustimmen. Ihr echter Name steht dann auf der Initiative.",
+    "max": "Höchstens {n} Autor:innen, offene Einladungen zählen mit.",
+    "search": "Name suchen (mindestens 3 Buchstaben)",
+    "send": "Einladen",
+    "sent": "Einladung gesendet an",
+    "noHits": "Niemand gefunden. Nur bestätigte Personen, die gefunden werden wollen, erscheinen hier.",
+    "pending": "Offene Einladungen",
+    "withdrawInvite": "Zurückziehen",
+    "group": "Gruppe",
+    "groupNone": "Keine Gruppe",
+    "groupText": "Du kannst die Initiative einer Gruppe zuordnen, in der du Admin bist. Wenn die Gruppe es erlaubt, verwalten deren Admins die Initiative mit.",
+    "groupSave": "Zuordnen",
+    "groupSaved": "Gespeichert"
+  },
+  "invited": {
+    "title": "{by} hat dich eingeladen, an „{title}“ mitzuschreiben.",
+    "text": "Mit-Autor:innen dürfen den Text ändern und die Abstimmung starten. Dein echter Name steht öffentlich auf der Initiative.",
+    "accept": "Annehmen",
+    "decline": "Ablehnen"
+  },
+  "tools": {
+    "needed": "Für die Abstimmung braucht es {needed} Unterstützende. Aktuell: {have}.",
+    "debateUntil": "Die Debatte läuft bis {date}. Davor kann die Abstimmung nicht beginnen.",
+    "ready": "Die Hürden für die Abstimmung sind erreicht.",
+    "cancelVote": "Abstimmung abbrechen",
+    "cancelReason": "Grund (alle sehen ihn)",
+    "cancelHint": "Wer den Text wesentlich ändern will, bricht die Abstimmung ab und startet sie neu. Wer unterstützt oder abgestimmt hat, erfährt den Grund. Abgegebene Stimmen werden verworfen.",
+    "cancelConfirm": "Abstimmung jetzt abbrechen",
+    "frozen": "Der Text ist eingefroren. Während der Abstimmung und danach gehen nur kleine Korrekturen, mit Vermerk.",
+    "withdrawNote": "Warum ziehst du zurück? (freiwillig, sichtbar)",
+    "withdrawConfirm": "Zurückziehen",
+    "withdrawHint": "Die Initiative bleibt mit Vermerk sichtbar. Nur die Leitung kann zurückziehen.",
+    "delete": "Löschen",
+    "deleteHint": "Löschen geht nur, solange noch niemand unterstützt, abgestimmt oder mitdiskutiert hat. Danach bleibt die Initiative im Archiv.",
+    "deleteConfirm": "Initiative endgültig löschen?",
+    "more": "Mehr"
+  },
+  "note": {
+    "label": "Was hat sich geändert?",
+    "hintDebate": "Pflicht in der Debatte. Der Vermerk steht im Verlauf.",
+    "hintFrozen": "Der Text ist eingefroren. Erlaubt sind kleine Korrekturen (wenige Wörter). Der Vermerk steht im Verlauf, und Unterstützende bekommen ihn.",
+    "placeholder": "z. B. Tippfehler in Absatz 2 berichtigt"
+  },
+  "banner": {
+    "blocked": "Diese Initiative ist gesperrt: {reason}",
+    "blockedText": "Sie bleibt sichtbar. Unterstützen und Bearbeiten sind nicht möglich. Die Autor:innen können Einspruch einlegen.",
+    "withdrawn": "Zurückgezogen am {date}",
+    "withdrawnNote": "Vermerk der Leitung: {note}"
+  },
+  "history": {
+    "correction": "Korrektur: {note}",
+    "note": "Vermerk: {note}"
+  },
+  "block": {
+    "title": "Plattform-Moderation",
+    "reason": "Begründung (mindestens 10 Zeichen, die Autor:innen sehen sie)",
+    "block": "Sperren",
+    "unblock": "Sperre aufheben"
+  }
+}

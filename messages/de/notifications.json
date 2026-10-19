@@ -204,6 +204,54 @@
     "group_rule_changed": {
       "title": "„{group}“ ist offener geworden",
       "body": "Sichtbarkeit, Beitritt oder Rechte haben sich geändert."
+    },
+    "initiative_author_invite": {
+      "title": "{by} lädt dich als Mit-Autor:in ein",
+      "body": "Bei „{title}“. Öffne die Initiative, um anzunehmen oder abzulehnen."
+    },
+    "initiative_author_joined": {
+      "title": "{name} schreibt jetzt mit",
+      "body": "An „{title}“."
+    },
+    "initiative_author_declined": {
+      "title": "{name} hat abgelehnt",
+      "body": "Die Einladung zu „{title}“ wurde nicht angenommen."
+    },
+    "initiative_author_left": {
+      "title": "{name} ist kein:e Autor:in mehr",
+      "body": "Bei „{title}“."
+    },
+    "initiative_author_removed": {
+      "title": "Du wurdest als Autor:in entfernt",
+      "body": "Die Autor:innen von „{title}“ haben es mehrheitlich so entschieden."
+    },
+    "initiative_removal": {
+      "title": "Abstimmung unter Autor:innen",
+      "body": "Soll {name} bei „{title}“ entfernt werden? Deine Stimme zählt."
+    },
+    "initiative_lead": {
+      "title": "Du leitest jetzt eine Initiative",
+      "body": "„{title}“ wurde dir übergeben."
+    },
+    "initiative_correction": {
+      "title": "Korrektur an einer Initiative",
+      "body": "„{title}“: {note}"
+    },
+    "initiative_ballot_cancelled": {
+      "title": "Abstimmung abgebrochen",
+      "body": "„{title}“: {reason}"
+    },
+    "initiative_withdrawn": {
+      "title": "Initiative zurückgezogen",
+      "body": "„{title}“ wurde zurückgezogen. {note}"
+    },
+    "initiative_blocked": {
+      "title": "Initiative gesperrt",
+      "body": "„{title}“: {reason}"
+    },
+    "initiative_unblocked": {
+      "title": "Sperre aufgehoben",
+      "body": "„{title}“ ist wieder frei."
     }
   }
 }

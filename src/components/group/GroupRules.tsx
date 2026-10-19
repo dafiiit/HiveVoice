@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { updateGroup } from "@/lib/actions/groups";
 
 /** Visibility, who may join, adults only and slow mode: changes are logged, and openings are announced to the members. */
-export function GroupRules({ slug, groupId, visibility, joinPolicy, adultsOnly, slowMode }: { slug: string; groupId: string; visibility: string; joinPolicy: string; adultsOnly: boolean; slowMode: number }) {
+export function GroupRules({ slug, groupId, visibility, joinPolicy, adultsOnly, slowMode, adminsManageInitiatives }: { slug: string; groupId: string; visibility: string; joinPolicy: string; adultsOnly: boolean; slowMode: number; adminsManageInitiatives: boolean }) {
   const t = useTranslations("grouprights");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -37,6 +37,7 @@ export function GroupRules({ slug, groupId, visibility, joinPolicy, adultsOnly, 
         <span className="text-sm text-muted">{t(`join.${joinPolicy}Text` as "join.openText")}</span>
       </div>
       <label className="flex items-center gap-2"><input type="checkbox" checked={adultsOnly} disabled={pending} onChange={() => set({ adultsOnly: !adultsOnly })} className="h-5 w-5 accent-[var(--ink)]" />{t("rules.adults")}</label>
+      <label className="flex items-center gap-2"><input type="checkbox" checked={adminsManageInitiatives} disabled={pending} onChange={() => set({ adminsManageInitiatives: !adminsManageInitiatives })} className="h-5 w-5 accent-[var(--ink)]" />{t("rules.initiatives")}</label>
       <label className="flex flex-wrap items-center gap-3"><span className="font-bold">{t("rules.slow")}</span>
         <select value={slowMode} disabled={pending} onChange={(e) => set({ slowMode: Number(e.target.value) })} className="h-10 border border-ink bg-surface px-2 text-ink">
           <option value={0}>{t("rules.slowOff")}</option><option value={10}>{t("rules.slow10")}</option><option value={60}>{t("rules.slow60")}</option><option value={300}>{t("rules.slow300")}</option>

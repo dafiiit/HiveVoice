@@ -32,7 +32,7 @@ type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
   join_policy: "open" | "request" | "invite"; member_count: number; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
   owner_id: string | null; owner_name: string | null; orphaned_at: string | null; delete_requested_at: string | null; archived_at: string | null;
-  slow_mode_seconds: number; adults_only: boolean; can_takeover: boolean;
+  slow_mode_seconds: number; adults_only: boolean; admins_manage_initiatives: boolean; can_takeover: boolean;
 };
 
 export async function generateMetadata({ params }: PageProps<"/groups/[slug]">) {
@@ -58,7 +58,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     const [g] = await tx<Group[]>`
       select g.id, g.slug::text, g.name, g.summary, g.description, g.kind::text, g.visibility::text, g.join_policy::text, g.member_count,
              g.cover_seed, g.cover_path, g.mod_tasks, g.created_at, r.name as region_name,
-             g.owner_id, op.display_name as owner_name, g.orphaned_at, g.delete_requested_at, g.archived_at, g.slow_mode_seconds, g.adults_only,
+             g.owner_id, op.display_name as owner_name, g.orphaned_at, g.delete_requested_at, g.archived_at, g.slow_mode_seconds, g.adults_only, g.admins_manage_initiatives,
              (g.orphaned_at is not null or g.owner_id is null or app.last_activity(g.owner_id) < now() - interval '30 days') as can_takeover
       from public.groups g left join public.regions r on r.id = g.region_id left join public.profiles op on op.id = g.owner_id where g.slug = ${slug}`;
     if (!g) return null;
@@ -252,7 +252,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
               perms={data.perms} myRole={role} canManage={data.can_manage} viewerId={me} />
             {role === "admin" && (
               <>
-                <GroupRules slug={slug} groupId={g.id} visibility={g.visibility} joinPolicy={g.join_policy} adultsOnly={g.adults_only} slowMode={g.slow_mode_seconds} />
+                <GroupRules slug={slug} groupId={g.id} visibility={g.visibility} joinPolicy={g.join_policy} adultsOnly={g.adults_only} slowMode={g.slow_mode_seconds} adminsManageInitiatives={g.admins_manage_initiatives} />
                 <section aria-label={tr("log.title")} className="flex flex-col gap-2">
                   <h2 className="m-0 text-2xl font-bold">{tr("log.title")}</h2>
                   <span className="text-sm text-muted">{tr("log.text")}</span>

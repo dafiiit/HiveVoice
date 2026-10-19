@@ -687,3 +687,153 @@ describe("groups: owner, invitations, removal, hand-over, motions", () => {
     expect(await fails(tx, (sp) => as(sp, young, () => sp`select app.join_group(${gid}, null)`))).toMatch(/adults_only/);
   }));
 });
+
+describe("initiatives: authors, editing, thresholds, withdrawing, blocking", () => {
+  const region = async (tx: postgres.TransactionSql) => (await tx<{ id: string }[]>`select id from public.regions where level = 'borough' limit 1`)[0].id;
+  const create = async (tx: postgres.TransactionSql, who: string, title = "Mehr Bänke im Stadtpark", extra: Record<string, unknown> = {}) =>
+    (await as(tx, who, async () => tx<{ id: string }[]>`select app.create_initiative(${tx.json({
+      title, summary: "Kurz", body: "Im Stadtpark fehlen Bänke. Wir wollen zwölf neue Bänke mit Lehne.", region_id: await region(tx), publish: true, ...extra })}) as id`))[0].id;
+  const open = (tx: postgres.TransactionSql, who: string) => as(tx, who, () => tx`select app.set_privacy('all', 'all')`);
+  const authorsOf = async (tx: postgres.TransactionSql, iid: string) =>
+    (await tx<{ profile_id: string }[]>`select profile_id from public.initiative_authors where initiative_id = ${iid}`).map((r) => r.profile_id);
+  const invite = async (tx: postgres.TransactionSql, iid: string, from: string, to: string) => {
+    await open(tx, to);
+    await as(tx, from, () => tx`select app.invite_author(${iid}, ${to})`);
+    return (await as(tx, to, () => tx<{ id: string }[]>`select id from public.initiative_author_invites where initiative_id = ${iid} and profile_id = ${to} and status = 'pending'`))[0].id;
+  };
+
+  it("asks for the real name, counts creations, and makes the creator the lead", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    const iid = await create(tx, a);
+    expect((await tx<{ lead_id: string }[]>`select lead_id from public.initiatives where id = ${iid}`)[0].lead_id).toBe(a);
+    const alias = randomUUID();
+    const [{ id: shy }] = await tx<{ id: string }[]>`select app.ensure_profile(${alias}, 'Schatten') as id`;
+    await as(tx, shy, () => tx`select app.complete_onboarding('{"display_mode":"alias","alias":"Leisefuchs","age_ok":true}'::jsonb)`);
+    expect(await fails(tx, async (sp) => as(sp, shy, async () => sp`select app.create_initiative(${sp.json({ title: "Neue Bushaltestelle", region_id: await region(sp) })})`))).toMatch(/real_name_required/);
+  }));
+
+  it("adds co-authors only with their consent, up to the limit, and removes them by majority", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem"), d = await person(tx, "Dora"), e = await person(tx, "Eva"), f = await person(tx, "Finn");
+    const iid = await create(tx, a);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.invite_author(${iid}, ${c})`))).toMatch(/forbidden/);
+    const vb = await invite(tx, iid, a, b);
+    expect(await authorsOf(tx, iid)).toEqual([a]);
+    await as(tx, b, () => tx`select app.decide_author_invite(${vb}, true)`);
+    const vc = await invite(tx, iid, a, c);
+    await as(tx, c, () => tx`select app.decide_author_invite(${vc}, true)`);
+    expect((await authorsOf(tx, iid)).sort()).toEqual([a, b, c].sort());
+    // someone who says no stays out
+    const vd = await invite(tx, iid, b, d);
+    await as(tx, d, () => tx`select app.decide_author_invite(${vd}, false)`);
+    expect(await authorsOf(tx, iid)).not.toContain(d);
+    // authors + open invitations may not exceed five
+    await invite(tx, iid, a, d);
+    await open(tx, e);
+    await as(tx, a, () => tx`select app.invite_author(${iid}, ${e})`);
+    await open(tx, f);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.invite_author(${iid}, ${f})`))).toMatch(/too_many_authors/);
+
+    // the lead cannot be voted out and cannot just leave
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.propose_author_removal(${iid}, ${a})`))).toMatch(/lead_must_hand_over/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.leave_initiative(${iid})`))).toMatch(/lead_must_hand_over/);
+    // one vote in three is not enough, two are
+    const [{ rid }] = await as(tx, a, () => tx<{ rid: string }[]>`select app.propose_author_removal(${iid}, ${c}) as rid`);
+    expect(await authorsOf(tx, iid)).toContain(c);
+    await as(tx, b, () => tx`select app.vote_author_removal(${rid}, true)`);
+    expect(await authorsOf(tx, iid)).not.toContain(c);
+    expect((await as(tx, c, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'initiative_author_removed'`)).length).toBe(1);
+    // handing over the lead lets the former lead leave
+    await as(tx, a, () => tx`select app.hand_over_lead(${iid}, ${b})`);
+    await as(tx, a, () => tx`select app.leave_initiative(${iid})`);
+    expect(await authorsOf(tx, iid)).toEqual([b]);
+  }));
+
+  it("needs both of two authors to remove one of them", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const iid = await create(tx, a);
+    const vb = await invite(tx, iid, a, b);
+    await as(tx, b, () => tx`select app.decide_author_invite(${vb}, true)`);
+    const [{ rid }] = await as(tx, a, () => tx<{ rid: string }[]>`select app.propose_author_removal(${iid}, ${b}) as rid`);
+    expect(await authorsOf(tx, iid)).toContain(b);
+    await as(tx, b, () => tx`select app.vote_author_removal(${rid}, false)`);
+    expect(await authorsOf(tx, iid)).toContain(b);
+    expect((await as(tx, a, () => tx<{ status: string }[]>`select status from public.initiative_removals where id = ${rid}`))[0].status).toBe("kept");
+  }));
+
+  it("notes every change in the debate, freezes the text during the vote and allows small corrections only", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const iid = await create(tx, a);
+    const patch = (title: string, body: string, extra: Record<string, unknown> = {}) => tx.json({ title, summary: "Kurz", body, ...extra });
+    const oldBody = "Im Stadtpark fehlen Bänke. Wir wollen zwölf neue Bänke mit Lehne.";
+    // an idea can be changed freely
+    await as(tx, a, () => tx`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", oldBody + " Danke.")}, null)`);
+    // two people discuss: it becomes a debate and every change needs a note
+    await as(tx, a, () => tx`insert into public.arguments (initiative_id, side, body, author_id) values (${iid}, 'pro', 'Alte Menschen brauchen Pausen', ${a})`);
+    await as(tx, b, () => tx`insert into public.arguments (initiative_id, side, body, author_id) values (${iid}, 'contra', 'Es kostet Geld', ${b})`);
+    expect((await tx<{ phase: string }[]>`select phase::text from public.initiatives where id = ${iid}`)[0].phase).toBe("debate");
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", oldBody + " Danke sehr.")}, '')`))).toMatch(/note_required/);
+    await as(tx, a, () => tx`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", oldBody + " Danke sehr.")}, 'Dank ergänzt')`);
+    const notes = async () => (await tx<{ note: string | null }[]>`select note from public.initiative_revisions where initiative_id = ${iid} and note is not null`).map((r) => r.note);
+    expect(await notes()).toContain("Dank ergänzt");
+    // strangers cannot edit
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.update_initiative(${iid}, ${patch("Etwas ganz anderes", "Text")}, 'Ich mache das')`))).toMatch(/forbidden/);
+
+    // the vote: the debate must have run, support must have gathered
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.start_initiative_ballot(${iid}, 'Sollen Bänke aufgestellt werden?', 7, 0)`))).toMatch(/debate_too_short/);
+    await as(tx, a, () => tx`update public.initiatives set published_at = now() - interval '10 days' where id = ${iid}`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.start_initiative_ballot(${iid}, 'Sollen Bänke aufgestellt werden?', 7, 0)`))).toMatch(/not_enough_support/);
+    const [{ need }] = await tx<{ need: number }[]>`select app.support_threshold(region_id) as need from public.initiatives where id = ${iid}`;
+    let fan = "";
+    for (let i = 0; i < need; i++) {
+      const p = await person(tx, `Fan ${i}`);
+      fan = p;
+      await as(tx, p, () => tx`insert into public.initiative_supports (initiative_id, profile_id) values (${iid}, ${p})`);
+    }
+    await as(tx, a, () => tx`select app.start_initiative_ballot(${iid}, 'Sollen Bänke aufgestellt werden?', 7, 0)`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.start_initiative_ballot(${iid}, 'Nochmal?', 7, 0)`))).toMatch(/ballot_running/);
+
+    // frozen: big changes and a new addressee are refused, a typo correction goes through with its note
+    const newBody = "Im Stadtpark brauchen wir viele Dinge, die völlig anders sind als zuvor geplant und beschlossen wurden von allen.";
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", newBody)}, 'Alles neu gemacht')`))).toMatch(/too_big_change/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", oldBody + " Danke sehr.", { addressee_text: "Stadtrat" })}, 'Adressat ergänzt')`))).toMatch(/frozen/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", oldBody.replace("zwölf", "zwoelf") + " Danke sehr.")}, '')`))).toMatch(/note_required/);
+    await as(tx, a, () => tx`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", oldBody.replace("Lehne", "Lehnen") + " Danke sehr.")}, 'Tippfehler berichtigt')`);
+    expect(await notes()).toContain("correction: Tippfehler berichtigt");
+    expect((await as(tx, fan, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'initiative_correction'`)).length).toBe(1);
+
+    // a substantial change means calling off the vote, with a reason; then the text is open again
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.cancel_initiative_ballot(${iid}, 'zu kurz')`))).toMatch(/reason_required/);
+    await as(tx, a, () => tx`select app.cancel_initiative_ballot(${iid}, 'Der Text wird grundlegend überarbeitet')`);
+    expect((await tx<{ status: string }[]>`select status::text from public.ballots where initiative_id = ${iid}`)[0].status).toBe("cancelled");
+    await as(tx, a, () => tx`select app.update_initiative(${iid}, ${patch("Mehr Bänke im Stadtpark", newBody)}, 'Text neu gefasst')`);
+  }));
+
+  it("only the lead withdraws, deleting stops once anything happened, and only platform admins block", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem"), d = await person(tx, "Dora");
+    const lone = await create(tx, a, "Eine Idee ohne Echo");
+    await as(tx, a, () => tx`select app.delete_initiative(${lone})`);
+    expect((await tx`select 1 from public.initiatives where id = ${lone}`).length).toBe(0);
+
+    const iid = await create(tx, a);
+    const vb = await invite(tx, iid, a, b);
+    await as(tx, b, () => tx`select app.decide_author_invite(${vb}, true)`);
+    await as(tx, c, () => tx`insert into public.initiative_supports (initiative_id, profile_id) values (${iid}, ${c})`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.delete_initiative(${iid})`))).toMatch(/has_activity/);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.withdraw_initiative(${iid}, 'Ich will nicht mehr')`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.withdraw_initiative(${iid}, 'Das Thema hat sich erledigt')`);
+    const [row] = await tx<{ outcome: string; withdrawn_note: string }[]>`select outcome::text, withdrawn_note from public.initiatives where id = ${iid}`;
+    expect(row).toEqual({ outcome: "withdrawn", withdrawn_note: "Das Thema hat sich erledigt" });
+    expect((await as(tx, c, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'initiative_withdrawn'`)).length).toBe(1);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.update_initiative(${iid}, '{"title":"Neuer Titel hier"}'::jsonb, 'x')`))).toMatch(/closed/);
+
+    const other = await create(tx, d, "Ein Fall für die Moderation");
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.block_initiative(${other}, 'Verstößt gegen die Regeln der Plattform', true)`))).toMatch(/level_required|forbidden/);
+    await tx`select app.admin_grant(${c}, true)`;
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`select app.block_initiative(${other}, 'kurz', true)`))).toMatch(/reason_required/);
+    await as(tx, c, () => tx`select app.block_initiative(${other}, 'Verstößt gegen die Regeln der Plattform', true)`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`insert into public.initiative_supports (initiative_id, profile_id) values (${other}, ${b})`))).toMatch(/row-level security|violates/);
+    expect((await as(tx, d, () => tx<{ kind: string }[]>`select kind from public.notifications where kind = 'initiative_blocked'`)).length).toBe(1);
+    await as(tx, c, () => tx`select app.block_initiative(${other}, null, false)`);
+    await as(tx, b, () => tx`insert into public.initiative_supports (initiative_id, profile_id) values (${other}, ${b})`);
+  }));
+});

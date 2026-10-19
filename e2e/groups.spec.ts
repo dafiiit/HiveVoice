@@ -39,6 +39,8 @@ test.describe("groups: ownership, invitations, rules", () => {
       await page.getByRole("button", { name: "Link erstellen" }).click();
       const link = await page.getByLabel("Einladungslink").inputValue();
       expect(link).toMatch(/\/join\/[0-9a-f]{32}$/);
+      // Let the list refresh finish before a second browser asks for the same server (the dev server stalls on three parallel renders).
+      await expect(page.getByRole("button", { name: "Widerrufen" }).first()).toBeVisible({ timeout: 60_000 });
       const guest = await browser.newContext();
       const gp = await guest.newPage();
       await gp.goto(link);
@@ -53,13 +55,13 @@ test.describe("groups: ownership, invitations, rules", () => {
 
       // A rule change shows up in the log.
       await page.getByRole("radio", { name: "Geheim, nur auf Einladung" }).click();
-      await expect(page.getByRole("radio", { name: "Geheim, nur auf Einladung" })).toHaveAttribute("aria-checked", "true");
+      await expect(page.getByRole("radio", { name: "Geheim, nur auf Einladung" })).toHaveAttribute("aria-checked", "true", { timeout: 30_000 });
       await page.reload();
-      await expect(page.getByText(/Regeln geändert/).first()).toBeVisible();
+      await expect(page.getByText(/Regeln geändert/).first()).toBeVisible({ timeout: 30_000 });
 
       // Deletion is scheduled, with a date, and can be cancelled.
       await page.getByRole("button", { name: "Löschen vormerken" }).click();
-      await expect(page.getByText(/Wird am .* gelöscht\./)).toBeVisible();
+      await expect(page.getByText(/Wird am .* gelöscht\./)).toBeVisible({ timeout: 30_000 });
       await page.getByRole("button", { name: "Löschen abbrechen" }).click();
       await expect(page.getByRole("button", { name: "Löschen vormerken" })).toBeVisible({ timeout: 20_000 });
     } finally {

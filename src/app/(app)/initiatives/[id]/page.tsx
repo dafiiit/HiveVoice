@@ -14,6 +14,9 @@ import { tab, tag } from "@/components/ui/styles";
 import { SupportButton } from "@/components/initiative/SupportButton";
 import { ArgumentBoard, type ArgumentView } from "@/components/initiative/ArgumentBoard";
 import { AuthorTools } from "@/components/initiative/AuthorTools";
+import { CoAuthors, type AuthorRow, type PendingInvite, type RemovalRow } from "@/components/initiative/CoAuthors";
+import { AuthorInviteBanner } from "@/components/initiative/AuthorInviteBanner";
+import { BlockInitiative } from "@/components/initiative/BlockInitiative";
 import { BallotPanel, type BallotView } from "@/components/BallotPanel";
 import { Composer, PostList } from "@/components/PostList";
 
@@ -25,6 +28,8 @@ type Ini = {
   cost_estimate_cents: number | null; cover_seed: number; cover_path: string | null; created_at: string; updated_at: string; response_due_at: string | null;
   region_id: string; region_name: string; region_level: string; addressee_text: string | null; resp_id: string | null; resp_title: string | null;
   resp_org: string | null; resp_official: boolean | null; resp_days: number | null; group_slug: string | null; group_name: string | null;
+  group_id: string | null; lead_id: string | null; blocked_at: string | null; blocked_reason: string | null; withdrawn_at: string | null; withdrawn_note: string | null;
+  published_at: string | null;
 };
 
 export async function generateMetadata({ params }: PageProps<"/initiatives/[id]">) {
@@ -45,6 +50,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
   const me = session?.profile.id;
   const t = await getTranslations("initiative");
   const tl = await getTranslations("levels");
+  const tr = await getTranslations("inirights");
   const locale = await getLocale();
   const path = `/initiatives/${id}`;
 
@@ -63,7 +69,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
     if (!ini) return null;
     const authors = await tx<{ id: string; display_name: string; avatar_seed: number; avatar_path: string | null; display_mode: string }[]>`
       select p.id, p.display_name, p.avatar_seed, p.avatar_path, p.display_mode from public.initiative_authors a join public.profiles p on p.id = a.profile_id
-      where a.initiative_id = ${id} order by p.display_name`;
+      where a.initiative_id = ${id} order by (p.id = ${ini.lead_id}) desc, p.display_name`;
     const tags = await tx<{ slug: string }[]>`select t.slug::text from public.initiative_tags it join public.tags t on t.id = it.tag_id where it.initiative_id = ${id}`;
     const supported = me ? (await tx`select 1 from public.initiative_supports where initiative_id = ${id} and profile_id = ${me}`).length > 0 : false;
     const [ballot] = await tx<BallotView[]>`
@@ -91,13 +97,43 @@ export default async function InitiativePage({ params, searchParams }: PageProps
       left join public.profiles p on p.id = v.editor_id where v.initiative_id = ${id} order by v.created_at desc limit 30` : [];
     const tasks = ini.group_slug && active === "implementation" ? await tx<{ title: string; status: string }[]>`
       select tk.title, tk.status::text from public.tasks tk join public.groups g on g.id = tk.group_id where g.slug = ${ini.group_slug} order by tk.position` : [];
+    const isAuthorNow = me ? authors.some((a) => a.id === me) : false;
+    const [{ needed, debate_pending, debate_until }] = await tx<{ needed: number; debate_pending: boolean; debate_until: Date | null }[]>`
+      select app.support_threshold(${ini.region_id}) as needed,
+             (i.published_at is null or now() < i.published_at + make_interval(days => app.param('debate_min_days'))) as debate_pending,
+             i.published_at + make_interval(days => app.param('debate_min_days')) as debate_until
+      from public.initiatives i where i.id = ${id}`;
+    const [{ max }] = await tx<{ max: number }[]>`select app.param('authors_max') as max`;
+    const invites = isAuthorNow ? await tx<{ id: string; name: string }[]>`
+      select v.id, p.display_name as name from public.initiative_author_invites v join public.profiles p on p.id = v.profile_id
+      where v.initiative_id = ${id} and v.status = 'pending' order by v.created_at` : [];
+    const myInvite = me && !isAuthorNow ? (await tx<{ id: string; by: string | null }[]>`
+      select v.id, p.display_name as by from public.initiative_author_invites v left join public.profiles p on p.id = v.invited_by
+      where v.initiative_id = ${id} and v.profile_id = ${me} and v.status = 'pending' limit 1`)[0] ?? null : null;
+    const removals = isAuthorNow ? await tx<RemovalRow[]>`
+      select r.id, r.subject_id, sp.display_name as subject_name,
+             (select count(*)::int from public.initiative_removal_votes v where v.removal_id = r.id and v.yes) as yes,
+             (select count(*)::int from public.initiative_removal_votes v where v.removal_id = r.id and not v.yes) as no,
+             (select v.yes from public.initiative_removal_votes v where v.removal_id = r.id and v.voter_id = ${me ?? null}) as mine
+      from public.initiative_removals r join public.profiles sp on sp.id = r.subject_id
+      where r.initiative_id = ${id} and r.status = 'open' order by r.created_at` : [];
+    const adminGroups = isAuthorNow && me ? await tx<{ id: string; name: string }[]>`
+      select g.id, g.name from public.group_members m join public.groups g on g.id = m.group_id
+      where m.profile_id = ${me} and m.role = 'admin' and g.archived_at is null order by g.name limit 30` : [];
+    const [{ deletable }] = await tx<{ deletable: boolean }[]>`
+      select not (
+        exists (select 1 from public.initiative_supports s where s.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = s.profile_id))
+        or exists (select 1 from public.ballots b where b.initiative_id = ${id})
+        or exists (select 1 from public.arguments x where x.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = x.author_id))
+        or exists (select 1 from public.posts x where x.initiative_id = ${id} and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = x.author_id))) as deletable`;
+    const [{ frozen }] = await tx<{ frozen: boolean }[]>`select app.initiative_frozen(${id}) as frozen`;
     const similar = await tx<{ id: string; title: string; region_name: string; phase: string }[]>`
       select i2.id, i2.title, r.name as region_name, i2.phase::text from public.initiatives i2 join public.regions r on r.id = i2.region_id
       where i2.id <> ${id} and i2.published_at is not null and i2.region_id <> ${ini.region_id}
         and exists (select 1 from public.initiative_tags a join public.initiative_tags b on a.tag_id = b.tag_id
                     where a.initiative_id = i2.id and b.initiative_id = ${id})
       order by i2.support_count desc limit 2`;
-    return { ini, authors, tags, supported, ballot, participation, turnout, affected, args, posts, requests, revisions, tasks, similar };
+    return { ini, authors, tags, supported, ballot, participation, turnout, affected, args, posts, requests, revisions, tasks, similar, needed, debate_pending, debate_until, max, invites, myInvite, removals, adminGroups, deletable, frozen };
   });
   if (!data) notFound();
   const { ini, authors, ballot } = data;
@@ -145,6 +181,19 @@ export default async function InitiativePage({ params, searchParams }: PageProps
           </span>
           <span className="text-muted">{t("dates", { created: dateLong(ini.created_at, locale), updated: dateLong(ini.updated_at, locale) })}</span>
         </div>
+        {data.myInvite && <AuthorInviteBanner id={id} inviteId={data.myInvite.id} by={data.myInvite.by ?? "?"} title={ini.title} />}
+        {ini.blocked_at && (
+          <div role="status" className="flex max-w-[720px] flex-col gap-1 border-l-4 border-red bg-surface p-4">
+            <strong>{tr("banner.blocked", { reason: ini.blocked_reason ?? "" })}</strong>
+            <span className="text-sm">{tr("banner.blockedText")}</span>
+          </div>
+        )}
+        {ini.withdrawn_at && (
+          <div role="status" className="flex max-w-[720px] flex-col gap-1 border-l-4 border-ink bg-surface p-4">
+            <strong>{tr("banner.withdrawn", { date: dateLong(ini.withdrawn_at, locale) })}</strong>
+            {ini.withdrawn_note && <span className="text-sm">{tr("banner.withdrawnNote", { note: ini.withdrawn_note })}</span>}
+          </div>
+        )}
         <div className="max-w-[720px]"><PhaseRail phase={ini.phase} outcome={ini.outcome} /></div>
         {milestone && <p className="m-0 text-xl font-bold leading-snug">{milestone}</p>}
         {answered && (
@@ -158,12 +207,21 @@ export default async function InitiativePage({ params, searchParams }: PageProps
           </section>
         )}
         <div className="flex flex-wrap items-center gap-4">
-          {!ini.outcome && (ini.phase === "idea" || ini.phase === "debate") && !ballotOpen && <SupportButton id={id} supported={data.supported} signedIn={signedIn} />}
+          {!ini.outcome && !ini.blocked_at && (ini.phase === "idea" || ini.phase === "debate") && !ballotOpen && <SupportButton id={id} supported={data.supported} signedIn={signedIn} />}
           {ballotOpen && <Link href={`${path}?tab=vote`} className="inline-flex h-[52px] items-center bg-ink px-6 font-bold text-on-ink no-underline">{t("voteNow")}</Link>}
           {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className="inline-flex h-[52px] items-center bg-ink px-6 font-bold text-on-ink no-underline">{t("help")}</Link>}
           <span className="tabular">{t("supports", { n: ini.support_count, formatted: num(ini.support_count, locale) })}</span>
         </div>
-        {isAuthor && <AuthorTools id={id} phase={ini.phase} outcome={ini.outcome} hasBallot={ballotOpen} hasGroup={!!ini.group_slug} title={ini.title} />}
+        {isAuthor && !ini.blocked_at && (
+          <AuthorTools id={id} phase={ini.phase} outcome={ini.outcome} hasBallot={ballotOpen} hasGroup={!!ini.group_slug} title={ini.title}
+            isLead={ini.lead_id === me} supports={ini.support_count} needed={data.needed} debateUntil={data.debate_pending && data.debate_until ? dateLong(data.debate_until, locale) : null}
+            frozen={data.frozen} deletable={data.deletable} />
+        )}
+        {isAuthor && !ini.outcome && (
+          <CoAuthors id={id} authors={authors.map((a): AuthorRow => ({ id: a.id, name: a.display_name, seed: a.avatar_seed, path: a.avatar_path }))} leadId={ini.lead_id} me={me!}
+            invites={data.invites as PendingInvite[]} removals={data.removals} max={data.max} groups={data.adminGroups} groupId={ini.group_id} />
+        )}
+        {session?.profile.is_admin && <BlockInitiative id={id} blocked={!!ini.blocked_at} />}
 
         <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">
           {TABS.map((k) => (
@@ -246,6 +304,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
                 <div key={v.id} className="flex flex-col gap-1.5 border-b border-line py-4">
                   <span className="text-sm text-muted">{t("version", { n: data.revisions.length - i })} · {dateLong(v.created_at, locale)} · {v.editor ?? "–"}</span>
                   <span className="font-bold">{v.note === "created" ? t("created") : changed.length ? t("changed", { fields: changed.map((k) => t(`fields.${k}`)).join(", ") }) : t("noChange")}</span>
+                  {v.note && v.note !== "created" && <span className="text-sm">{v.note.startsWith("correction: ") ? tr("history.correction", { note: v.note.slice(12) }) : tr("history.note", { note: v.note })}</span>}
                   {changed.filter((k) => k !== "body" && k !== "body_easy").map((k) => (
                     <div key={k} className="flex flex-col gap-0.5 text-sm">
                       <span className="text-muted line-through">− {String(prev![k] ?? "–")}</span>

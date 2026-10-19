@@ -24,7 +24,7 @@ export async function createGroup(input: GroupInput) {
   return res;
 }
 
-export async function updateGroup(slug: string, id: string, input: Partial<{ name: string; summary: string; description: string; visibility: string; joinPolicy: string; modTasks: boolean; slowMode: number; adultsOnly: boolean }>) {
+export async function updateGroup(slug: string, id: string, input: Partial<{ name: string; summary: string; description: string; visibility: string; joinPolicy: string; modTasks: boolean; slowMode: number; adultsOnly: boolean; adminsManageInitiatives: boolean }>) {
   const res = await run(async (tx) => {
     await tx`update public.groups set
       name = coalesce(${input.name ?? null}, name), summary = coalesce(${input.summary ?? null}, summary),
@@ -33,7 +33,8 @@ export async function updateGroup(slug: string, id: string, input: Partial<{ nam
       join_policy = coalesce(${input.joinPolicy ?? null}::public.join_policy, join_policy),
       mod_tasks = coalesce(${input.modTasks ?? null}::boolean, mod_tasks),
       slow_mode_seconds = coalesce(${input.slowMode ?? null}::int, slow_mode_seconds),
-      adults_only = coalesce(${input.adultsOnly ?? null}::boolean, adults_only)
+      adults_only = coalesce(${input.adultsOnly ?? null}::boolean, adults_only),
+      admins_manage_initiatives = coalesce(${input.adminsManageInitiatives ?? null}::boolean, admins_manage_initiatives)
       where id = ${id}`;
     return null;
   });

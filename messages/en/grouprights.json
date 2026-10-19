@@ -126,7 +126,8 @@
     "slow60": "Every minute",
     "slow300": "Every 5 minutes",
     "slowHint": "Applies to everyone except admins and maintainers.",
-    "announce": "If the group becomes more open, all members are told."
+    "announce": "If the group becomes more open, all members are told.",
+    "initiatives": "Admins may help manage initiatives attached to this group"
   },
   "danger": {
     "title": "Archive and delete",

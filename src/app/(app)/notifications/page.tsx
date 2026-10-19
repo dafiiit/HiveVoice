@@ -117,6 +117,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = `/groups/${p.slug}`; label = t("labels.group");
     } else if (kind.startsWith("initiative_")) {
       href = `/initiatives/${p.initiative_id}${kind === "initiative_vote" ? "?tab=vote" : ""}`; label = t("labels.initiative");
+      if (kind === "initiative_author_invite" || kind === "initiative_removal") category = "requests";
     } else if (kind === "request_answered" || kind === "request_forwarded") {
       href = p.initiative_id ? `/initiatives/${p.initiative_id}` : "/responsible"; label = t("labels.request");
     } else if (kind === "responsibility_request") {

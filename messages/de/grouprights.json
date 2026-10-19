@@ -126,7 +126,8 @@
     "slow60": "Jede Minute",
     "slow300": "Alle 5 Minuten",
     "slowHint": "Gilt für alle außer Admins und Maintainer.",
-    "announce": "Wird die Gruppe offener, erfahren das alle Mitglieder."
+    "announce": "Wird die Gruppe offener, erfahren das alle Mitglieder.",
+    "initiatives": "Admins dürfen Initiativen mitverwalten, die dieser Gruppe zugeordnet sind"
   },
   "danger": {
     "title": "Archivieren und löschen",

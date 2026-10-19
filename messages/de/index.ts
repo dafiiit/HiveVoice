@@ -11,6 +11,7 @@ import ns_extras from "./extras.json";
 import ns_group from "./group.json";
 import ns_grouprights from "./grouprights.json";
 import ns_images from "./images.json";
+import ns_inirights from "./inirights.json";
 import ns_initiative from "./initiative.json";
 import ns_jury from "./jury.json";
 import ns_knowledge from "./knowledge.json";
@@ -48,6 +49,7 @@ const messages = {
   "group": ns_group,
   "grouprights": ns_grouprights,
   "images": ns_images,
+  "inirights": ns_inirights,
   "initiative": ns_initiative,
   "jury": ns_jury,
   "knowledge": ns_knowledge,

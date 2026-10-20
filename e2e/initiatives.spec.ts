@@ -43,8 +43,8 @@ test.describe("initiatives: authors and rights", () => {
       await page.getByRole("searchbox", { name: /Name suchen/ }).fill("zz");
       await expect(page.getByText("Niemand gefunden")).toHaveCount(0);
 
-      page.once("dialog", (d) => void d.accept());
       await page.getByRole("button", { name: "Löschen", exact: true }).click();
+      await page.getByRole("button", { name: "Ja", exact: true }).click();
       await expect(page).toHaveURL(/\/me/, { timeout: 60_000 });
       const gone = await page.request.get(href!);
       expect(gone.status()).toBe(404);

@@ -39,8 +39,8 @@
   "member": "Mitglied",
   "offers": "bietet",
   "needs": "sucht",
-  "followPrivate": "Folgen ist privat. Follower-Zahlen gibt es nicht.",
-  "official": "Offiziell bestätigt",
+  "followPrivate": "Folgen ist privat.",
+  "official": "Amtlich bestätigt",
   "responds": "antwortet im Schnitt in {days, plural, one {1 Tag} other {# Tagen}}",
   "filter": "Filter",
   "removeFilter": "{what} entfernen",
@@ -77,5 +77,9 @@
     "mapAt": "{n, plural, one {1 Eintrag} other {# Einträge}} in {place}",
     "mapAll": "Alle in {place} zeigen",
     "mapPrivacy": "Einträge erscheinen nur am Mittelpunkt ihres Ortes, nie an einer Adresse."
+  },
+  "create": {
+    "initiatives": "Initiative starten",
+    "groups": "Gruppe gründen"
   }
 }

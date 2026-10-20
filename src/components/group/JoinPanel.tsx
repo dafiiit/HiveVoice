@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { joinGroup, leaveGroup } from "@/lib/actions/groups";
 import { btn, field } from "../ui/styles";
+import { ConfirmAction } from "../ui/Action";
 
 export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdmin }: {
   slug: string; id: string; policy: "open" | "request" | "invite"; role: string | null; requested: boolean; signedIn: boolean; lastAdmin: boolean;
@@ -23,7 +24,7 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
       <div className="flex flex-wrap items-center gap-3">
         <span className="text-sm font-bold">{t("youAre", { role: t(`roles.${role}`) })}</span>
         {!lastAdmin && (
-          <button type="button" disabled={pending} onClick={() => { if (confirm(t("leaveConfirm"))) start(async () => { await leaveGroup(slug, id); }); }} className={btn.ghost}>{t("leave")}</button>
+          <ConfirmAction disabled={pending} look={btn.ghost} question={t("leaveConfirm")} onConfirm={() => start(async () => { await leaveGroup(slug, id); })} label={t("leave")} />
         )}
       </div>
     );
@@ -32,7 +33,7 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
     return (
       <span role="status" className="flex flex-wrap items-center gap-x-3 text-sm">
         <strong>{t("requested")}</strong>
-        <Link href="/connect?f=requests" className="text-ink">{tcn("dm.seeInConnect")}</Link>
+        <Link href="/connect?f=requests" className="text-ink underline">{tcn("dm.seeInConnect")}</Link>
       </span>
     );
   }
@@ -54,7 +55,7 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
             <textarea rows={3} value={msg} onChange={(e) => setMsg(e.target.value)} className={field.textarea} />
           </label>
           <div className="flex gap-2">
-            <button type="button" disabled={pending} onClick={join} className={btn.primary}>{t("sendRequest")}</button>
+            <button type="button" disabled={pending} onClick={join} className={btn.primary}>{tc("send")}</button>
             <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>
           </div>
         </div>

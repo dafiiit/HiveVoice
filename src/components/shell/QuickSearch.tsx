@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { quickSearch, type Hit } from "@/lib/actions/search";
 import { IconSearch } from "../ui/Icons";
+import { searchBox, searchInput } from "../ui/styles";
 
 const ORDER = ["initiative", "group", "person", "link", "responsible", "place"] as const;
 const TAB: Record<string, string> = { initiative: "initiatives", group: "groups", person: "people", responsible: "responsible", link: "links" };
@@ -82,13 +83,13 @@ function SearchBox({ initial, className }: { initial: string; className: string 
   const shown = open && query.length >= 2;
   return (
     <form ref={root} action="/explore" role="search" onSubmit={(e) => { e.preventDefault(); if (query) full(); }} className={`relative min-w-0 flex-1 md:max-w-[560px] ${className}`}>
-      <div className="flex h-11 items-center gap-2.5 border border-line-strong bg-surface px-3.5 focus-within:border-ink">
+      <div className={searchBox("md")}>
         <IconSearch />
         <label className="sr-only" htmlFor={`${list}-q`}>{t("search")}</label>
         <input id={`${list}-q`} name="q" type="search" value={q} autoComplete="off" placeholder={wide ? t("searchPlaceholder") : t("searchPlaceholderShort")}
           role="combobox" aria-expanded={shown} aria-controls={list} aria-autocomplete="list" aria-activedescendant={active >= 0 ? `${list}-${active}` : undefined}
           onChange={(e) => { setQ(e.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onKeyDown={onKey}
-          className="min-w-0 flex-1 border-0 bg-transparent text-base text-ink outline-none" />
+          className={searchInput} />
       </div>
       {shown && (
         <ul id={list} role="listbox" aria-label={t("search")} className="absolute left-0 right-0 top-full z-40 m-0 mt-1 flex max-h-[70dvh] list-none flex-col overflow-y-auto border border-ink bg-surface p-0">

@@ -9,8 +9,8 @@ export type NavItem = { href: string; label: string; short?: string; badge?: num
 
 const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/anliegen": IconShare, "/connect": IconChat, "/inhalte": IconFolder };
 
-// "Anliegen" also covers the pages of single offers and requests.
-const ALSO: Record<string, string[]> = { "/anliegen": ["/offers", "/needs"] };
+// Sections that also cover pages under other paths (none at the moment).
+const ALSO: Record<string, string[]> = {};
 const isActive = (path: string, href: string) => [href, ...(ALSO[href] ?? [])].some((h) => path === h || path.startsWith(h + "/"));
 
 export function SideLinks({ items }: { items: NavItem[] }) {

@@ -51,7 +51,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
           <LogoMark size={96} />
           <span className="text-[30px] leading-none tracking-[-0.04em]"><span className="font-bold">hive</span>voice</span>
         </Link>
-        <Link href="/new" className="flex h-12 items-center gap-2.5 bg-ink px-4 font-bold text-on-ink no-underline">
+        <Link href="/new" className="flex h-11 items-center gap-2.5 bg-ink px-4 font-bold text-on-ink no-underline">
           <IconPlus /> {t("new")}
         </Link>
         <SideLinks items={items} />

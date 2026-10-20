@@ -28,7 +28,7 @@
     "secret": "Secret"
   },
   "visText": {
-    "public": "Everyone can read the conversation, goals and history.",
+    "public": "Everyone can read the chat, goals and history.",
     "members": "Only members see content. The group does not appear in search."
   },
   "visibility": "Visibility",
@@ -36,20 +36,20 @@
   "join": "Join",
   "requestJoin": "Ask to join",
   "whyJoin": "Why do you want to join? (optional)",
-  "sendRequest": "Send request",
+  "sendRequest": "Ask to join",
   "requested": "Requested · the group decides",
   "youAre": "You are {role}",
   "leave": "Leave group",
   "leaveConfirm": "Really leave the group?",
   "roles": {
-    "admin": "Admin",
-    "maintainer": "Maintainer",
-    "contributor": "Contributor",
+    "admin": "Organiser",
+    "maintainer": "Steward",
+    "contributor": "Member",
     "guest": "Guest"
   },
   "holders": {
-    "maintainer": "Maintainer",
-    "contributor": "Contributor",
+    "maintainer": "Steward",
+    "contributor": "Member",
     "guest": "Guest",
     "public": "Public"
   },
@@ -57,22 +57,21 @@
   "tabs": {
     "goals": "Goals",
     "goalsVoting": "Goals · {n} vote",
-    "talk": "Conversation",
-    "needs": "Needs · {n}",
+    "talk": "Chat",
+    "needs": "Wanted · {n}",
     "tasks": "Tasks",
     "team": "Members and rights",
     "about": "About",
-    "links": "Links"
+    "links": "Knowledge"
   },
   "talkPlaceholder": "Write in “{name}” …",
   "joinToPost": "Join the group to write here.",
   "noPosts": "No posts yet.",
   "needsIntro": "What the group is missing. Contact only happens when both sides agree.",
   "noNeeds": "No open needs right now.",
-  "needsTag": "needs",
   "forGoal": "for: {goal}",
-  "canHelp": "I can help",
-  "needsAside": "Needs",
+  "canHelp": "Help",
+  "needsAside": "Wanted",
   "similar": "Similar groups",
   "noDescription": "No description yet.",
   "kind": "Kind",
@@ -81,16 +80,16 @@
   "members": "Members · {n}",
   "roleOf": "Role of {name}",
   "remove": "Remove",
-  "onlyAdmin": "Only admin, role locked",
+  "onlyAdmin": "Only organiser, role locked",
   "wantToJoin": "Want to join",
-  "accept": "Accept as contributor",
+  "accept": "Accept as member",
   "decline": "Decline",
   "rights": "Rights per role",
-  "rightsText": "Admins can adjust the rights of maintainers, contributors and guests. Admins can always do everything.",
+  "rightsText": "Organisers can adjust the rights of stewards, members and guests. Organisers can always do everything.",
   "right": "Right",
   "perms": {
     "read": "Read and comment",
-    "post": "Post in the group",
+    "post": "Write in the group chat",
     "propose_goals": "Propose goals",
     "vote_goals": "Vote on goals (outsiders as resonance)",
     "edit_tasks": "Edit tasks",
@@ -113,7 +112,7 @@
     "until": "By when",
     "untilPlaceholder": "e.g. June 2027",
     "subgoals": "Sub-goals, one per line",
-    "needs": "What is missing? Listed under requests.",
+    "needs": "What is missing? Posted as wanted.",
     "needsPlaceholder": "e.g. projector, 300 €, someone who can edit video",
     "rule": "The group votes for 7 days. The goal is adopted with a majority of voting members, if at least half of the members vote.",
     "submit": "Put to a vote"
@@ -144,8 +143,9 @@
     "tags": "Topics",
     "focus": "Your role in the group",
     "focusPlaceholder": "e.g. organisation, finances",
-    "modTasks": "Task board",
-    "submit": "Start group"
+    "modTasks": "Tasks",
+    "submit": "Start group",
+    "settings": "Adjust settings"
   },
   "presets": {
     "title": "Who is the group for?",

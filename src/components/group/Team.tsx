@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { decideJoin, removeMemberWithReason, setPermission, setRole } from "@/lib/actions/groups";
 import { Avatar } from "../ui/Avatar";
-import { btn } from "../ui/styles";
+import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 const PERMS = ["read", "post", "propose_goals", "vote_goals", "edit_tasks", "edit_files", "approve_changes", "manage_members", "manage_finances", "archive"] as const;
 const HOLDERS = ["maintainer", "contributor", "guest", "public"] as const;
@@ -31,7 +32,7 @@ export function Team({ slug, groupId, ownerId, members, requests, perms, myRole,
     <div className="flex flex-col gap-8">
       <section className="flex flex-col">
         <h2 className="m-0 mb-3 text-2xl font-bold">{t("members", { n: members.length })}</h2>
-        {error && <p role="alert" className="m-0 mb-2 border-l-4 border-red pl-3 font-bold">{error}</p>}
+        {error && <Notice tone="error" className="mb-2">{error}</Notice>}
         {members.map((m) => {
           const locked = m.role === "admin" && admins === 1;
           const owner = m.id === ownerId;
@@ -45,13 +46,13 @@ export function Team({ slug, groupId, ownerId, members, requests, perms, myRole,
               {canManage && (
                 <>
                   <label className="flex items-center gap-2 text-sm"><span className="sr-only">{t("roleOf", { name: m.name })}</span>
-                    <select value={m.role} disabled={pending || locked || owner || (!isOwner && m.role === "admin")} className="h-10 border border-ink bg-surface px-2 text-ink"
+                    <select value={m.role} disabled={pending || locked || owner || (!isOwner && m.role === "admin")} className={field.select}
                       onChange={(e) => start(async () => { const r = await setRole(slug, groupId, m.id, e.target.value); setError(r.ok ? null : tc(`errors.${r.error}` as "errors.unknown")); })}>
                       {(["admin", "maintainer", "contributor", "guest"] as const).filter((r) => isOwner || r !== "admin").map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
                     </select>
                   </label>
                   {canRemove && removing !== m.id && (
-                    <button type="button" disabled={pending} onClick={() => { setRemoving(m.id); setReason(""); setBan("none"); }} className="border-0 bg-transparent text-sm text-muted underline">{t("remove")}</button>
+                    <button type="button" disabled={pending} onClick={() => { setRemoving(m.id); setReason(""); setBan("none"); }} className={`${btn.linkMuted} text-sm`}>{t("remove")}</button>
                   )}
                 </>
               )}

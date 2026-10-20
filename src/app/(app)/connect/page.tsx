@@ -20,6 +20,7 @@ import { ListSearch } from "@/components/connect/ListSearch";
 import { Popover } from "@/components/ui/Popover";
 import { IconBack, IconCheck, IconPlus } from "@/components/ui/Icons";
 import { btn } from "@/components/ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("connect"))("title") };
@@ -39,6 +40,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("connect");
+  const te = await getTranslations("explore");
   const tl = await getTranslations("levels");
   const ts = await getTranslations("safety");
   const locale = await getLocale();
@@ -206,18 +208,16 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} />
       <div className="flex flex-wrap items-end justify-between gap-4 px-6 md:px-0">
         <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
-        <div className="flex flex-wrap items-center gap-4 max-md:hidden">
-          {session && <Link href="/new/group" className={`${btn.secondary} gap-1.5`}><IconPlus size={16} /> {t("newGroup")}</Link>}
-        </div>
+        {session && <Link href="/new/group" className={`${btn.primarySm} max-md:hidden`}><IconPlus size={14} /> {t("newGroup")}</Link>}
       </div>
-      {!session && <p className="m-0 border-l-4 border-ink bg-surface px-3 py-2 text-sm md:mx-0 md:px-4 md:py-3 md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/connect" className="font-bold">{t("signIn")}</Link></p>}
+      {!session && <Notice tone="status" className="text-sm font-normal md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/connect" className="font-bold text-ink underline">{t("signIn")}</Link></Notice>}
       <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface max-md:min-h-0 max-md:flex-1 lg:min-h-0 lg:flex-1 lg:flex-row lg:border">
         <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line max-md:min-h-0 max-md:flex-1 lg:w-[360px] lg:border-r`}>
           {session && (
             <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 grid flex-none grid-cols-[repeat(4,minmax(0,1fr))_44px] border-b border-line bg-surface md:grid-cols-4 md:gap-1 md:p-2">
               {FILTERS.map((f) => (
                 <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f}
-                  className={`relative inline-flex h-11 items-center justify-center gap-1 border-r border-line px-1 text-sm no-underline md:h-8 md:border-0 md:text-[13px] ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-surface text-ink md:bg-chip"}`}>
+                  className={`relative inline-flex h-11 items-center justify-center gap-1 border-r border-line px-1 text-sm no-underline md:h-9 md:border-0 ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-surface text-ink md:bg-chip"}`}>
                   {t(`filter.${f}`)}
                   {counts[f] > 0 && <span className={`inline-flex h-4 min-w-4 items-center justify-center px-1 text-[10px] font-bold leading-none ${filter === f ? "bg-on-ink text-ink" : "bg-ink text-on-ink"}`}>{counts[f]}</span>}
                 </Link>
@@ -229,7 +229,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
           <div className="flex flex-none items-center gap-2 border-b border-line px-3 py-2 md:px-4">
             <ListSearch listId="chat-list" value={s} label={t("listSearch")}
               keep={{ ...(mode !== "chrono" ? { mode } : {}), ...(filter !== "all" ? { f: filter } : {}) }} />
-            <Popover align="right" label={t(`mode.${mode}`)}>
+            <Popover align="right" label={<>{te("sort")} <span className="font-normal">{t(`mode.${mode}`)}</span></>}>
               <div className="flex flex-col" role="group" aria-label={t("order")}>
                 {(["chrono", "suggested"] as const).map((m) => (
                   <Link key={m} href={href({ mode: m })} aria-current={mode === m ? "true" : undefined}
@@ -258,12 +258,6 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
           <p data-search-none hidden={!(s && shown.length === 0)} className="m-0 px-4 py-6 text-sm text-muted">{t("listNone")}</p>
           {!s && session && shown.length <= (filter === "all" || filter === "groups" ? 1 : 0) && (
             <p className="m-0 px-4 py-6 text-sm text-muted">{hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyList")}</p>
-          )}
-          {session && (filter === "all" || filter === "groups") && (
-            <Link href="/new/group" className="flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline">
-              <span className="inline-flex h-11 w-11 flex-none items-center justify-center border border-dashed border-ink"><IconPlus size={18} /></span>
-              <span className="flex min-w-0 flex-col"><strong>{t("newGroup")}</strong><span className="text-xs text-muted">{t("newGroupHint")}</span></span>
-            </Link>
           )}
           {data.suggestions.length > 0 && (
             <>
@@ -297,7 +291,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
             <>
               <header className="flex flex-none items-center justify-between gap-2 border-b border-line pb-2 md:gap-3 md:pb-3">
                 <div className="flex min-w-0 items-center gap-1">{back}<Link href={`/groups/${pane.group.slug}`} className="flex min-w-0 flex-col text-ink no-underline"><strong className="truncate text-lg leading-tight">{pane.group.name}</strong><span className="text-sm text-muted">{t("groupSub", { n: pane.group.member_count })}</span></Link></div>
-                <Link href={`/groups/${pane.group.slug}`} className="text-sm font-bold text-ink">{t("openGroup")}</Link>
+                <Link href={`/groups/${pane.group.slug}`} className={btn.secondarySm}>{t("openGroup")}</Link>
               </header>
               <ChatScroll count={pane.posts.length} className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col overflow-y-auto max-md:max-h-none max-md:min-h-0 lg:max-h-none lg:min-h-0">
                 <PostList posts={pane.posts} path="/connect" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} canModerate={pane.group.can_moderate} />
@@ -314,14 +308,14 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
                   <Link href={`/profile/${pane.other_id}`} className="truncate text-lg font-bold text-ink no-underline">{pane.other}</Link>
                   {pane.title
                     ? <span className="truncate text-sm text-muted">{pane.listing_id
-                      ? <Link href={`/${pane.listing_kind === "need" ? "needs" : "offers"}/${pane.listing_id}`} className="text-muted">{t("about", { title: pane.title })}</Link>
+                      ? <Link href={`/anliegen/${pane.listing_id}`} className="text-muted">{t("about", { title: pane.title })}</Link>
                       : t("about", { title: pane.title })}</span>
                     : <span className="text-sm text-muted">{t("private", { title: "" }).replace(/ · $/, "")}</span>}
                 </div>
                 <ChatMenu conversationId={pane.id} otherId={pane.other_id} otherName={pane.other.split(" ")[0]} muted={pane.muted} blocked={pane.blocked}
                   ttl={{ days: pane.ttl_days, proposedDays: pane.ttl_proposed_days, proposedByMe: pane.ttl_by_me }} />
               </header>
-              {pane.blocked && <p className="m-0 flex-none border-l-4 border-ink bg-chip px-3 py-2 text-sm">{ts("chat.blockedNote", { name: pane.other.split(" ")[0] })}</p>}
+              {pane.blocked && <Notice tone="status" className="flex-none text-sm font-normal">{ts("chat.blockedNote", { name: pane.other.split(" ")[0] })}</Notice>}
               <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} verified={!!session?.profile.verified} asOf={pane.as_of} />
             </>
           )}

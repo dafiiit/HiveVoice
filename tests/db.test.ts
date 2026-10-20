@@ -1161,15 +1161,15 @@ describe("moderation: emergency path, ladder, appeals, juries, admins", () => {
 
   it("asks a second admin to agree to changes of rights and blocks, logs them without names, and keeps a yearly report", () => scenario(async (tx) => {
     const x = await admin(tx, "Admin Eins"), y = await admin(tx, "Admin Zwei"), z = await person(tx, "Zoe");
-    const [{ r }] = await as(tx, x, () => tx<{ r: string }[]>`select app.admin_action('grant_admin', ${z}, '') as r`);
+    // admins come from ADMIN_EMAILS, not from each other
+    expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.admin_action('grant_admin', ${z}, '')`))).toMatch(/admins_from_config/);
+    const [{ r }] = await as(tx, x, () => tx<{ r: string }[]>`select app.admin_action('ban', ${z}, 'Wiederholt Spam verschickt') as r`);
     expect(r).toBe("pending");
-    expect(await isAdmin(tx, z)).toBe(false);
     const [prop] = await as(tx, y, () => tx<{ id: string }[]>`select id from public.admin_proposals where subject_id = ${z} and status = 'pending'`);
     expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.decide_admin_proposal(${prop.id}, true)`))).toMatch(/second_admin_needed/);
     await as(tx, y, () => tx`select app.decide_admin_proposal(${prop.id}, true)`);
-    expect(await isAdmin(tx, z)).toBe(true);
     const log = await as(tx, null, () => tx<{ kind: string }[]>`select kind from public.admin_actions order by id desc limit 1`);
-    expect(log[0].kind).toBe("grant_admin");
+    expect(log[0].kind).toBe("ban");
     expect(Object.keys((await as(tx, null, () => tx<{ columns: string[] }[]>`select array_agg(column_name::text) as columns from information_schema.columns where table_name = 'admin_actions' and table_schema = 'public'`))[0].columns).sort())
       .toEqual(["0", "1", "2"]);
     await as(tx, x, () => tx`select app.log_disclosure('AZ 12 Gs 345/26', 'Amtsgericht Beispielstadt', 'Bestandsdaten zu einem Konto')`);
@@ -1180,6 +1180,14 @@ describe("moderation: emergency path, ladder, appeals, juries, admins", () => {
     const cv = randomUUID();
     expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.emergency_messages(${cv})`))).toMatch(/forbidden/);
     expect(await fails(tx, (sp) => as(sp, x, () => sp`select app.admin_action('chat_access', ${cv}, 'zu knapp')`))).toMatch(/reason_required/);
+  }));
+
+  it("takes server admins from the configured email list only", () => scenario(async (tx) => {
+    const a = await admin(tx, "Ada");
+    // test people have no login account, so no address of theirs is confirmed: off the list means no admin
+    await tx`select app.sync_server_admins(${["niemand@example.org"]}::text[])`;
+    expect(await isAdmin(tx, a)).toBe(false);
+    expect((await tx<{ n: number }[]>`select count(*)::int as n from public.server_admins`)[0].n).toBe(0);
   }));
 });
 

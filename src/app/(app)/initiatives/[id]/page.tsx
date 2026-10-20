@@ -10,7 +10,8 @@ import { Cover } from "@/components/ui/Cover";
 import { Avatar } from "@/components/ui/Avatar";
 import { Glyph } from "@/components/ui/Glyph";
 import { IconCheck } from "@/components/ui/Icons";
-import { btn, tab, tag } from "@/components/ui/styles";
+import { asideBlock, btn, tag } from "@/components/ui/styles";
+import { BackLink, Notice, Page, Tabs } from "@/components/ui/Page";
 import { SupportButton } from "@/components/initiative/SupportButton";
 import { ArgumentBoard, type ArgumentView } from "@/components/initiative/ArgumentBoard";
 import { AuthorTools } from "@/components/initiative/AuthorTools";
@@ -159,18 +160,49 @@ export default async function InitiativePage({ params, searchParams }: PageProps
   const tabLabel = (k: (typeof TABS)[number]) =>
     k === "threads" ? t("tabs.threadsN", { n: ini.thread_count }) : k === "arguments" ? t("tabs.argumentsN", { n: data.args.length }) : t(`tabs.${k}`);
 
+  const tex = await getTranslations("explore");
+  const aside = (
+    <>
+      <div className={asideBlock}>
+        <span className="text-sm font-bold">{t("addressee")}</span>
+        {addressee ? (
+          ini.resp_id
+            ? <Link href={`/responsible?id=${ini.resp_id}`} className="text-lg font-bold text-ink no-underline hover:underline">{addressee}{ini.resp_official && <span className="ml-1.5 inline-flex align-middle" aria-label={tex("official")} title={tex("official")}><IconCheck /></span>}</Link>
+            : <strong className="text-lg">{addressee}</strong>
+        ) : <span className="text-muted">{t("noAddressee")}</span>}
+        <span className="text-sm">{ini.phase === "idea" || ini.phase === "debate" ? t("addresseeLater") : ini.resp_days ? t("respondsIn", { days: ini.resp_days }) : ""}</span>
+      </div>
+      <div className={asideBlock}>
+        <span className="text-sm font-bold">{t("costs")}</span>
+        <strong className="text-lg">{ini.cost_estimate_cents ? t("about", { amount: euro(ini.cost_estimate_cents, locale) }) : "–"}</strong>
+        <span className="text-sm">{t("costsNote")}</span>
+      </div>
+      <div className={asideBlock}>
+        <span className="text-sm font-bold">{t("workingGroup")}</span>
+        {ini.group_slug ? <Link href={`/groups/${ini.group_slug}`} className="font-bold text-ink no-underline hover:underline">{ini.group_name}</Link> : <span className="text-sm">{t("noGroup")}</span>}
+      </div>
+      {data.similar.length > 0 && (
+        <div className={asideBlock}>
+          <span className="text-sm font-bold">{t("elsewhere")}</span>
+          {data.similar.map((s) => (
+            <Link key={s.id} href={`/initiatives/${s.id}`} className="text-sm text-ink no-underline hover:underline">
+              <strong>{s.title}</strong> · {s.region_name}
+            </Link>
+          ))}
+        </div>
+      )}
+      </>
+  );
+
   return (
-    <div className="grid gap-5 px-4 pb-6 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="flex min-w-0 flex-col gap-6">
-        <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
-          <Link href="/explore" className="text-ink">{t("explore")}</Link><span aria-hidden="true">/</span><span>{ini.region_name}</span>
-        </nav>
+    <Page aside={aside}>
+        <BackLink href="/explore" label={t("explore")} />
         <Cover seed={ini.cover_seed} src={ini.cover_path} ratio="21 / 9" />
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="inline-flex h-8 items-center bg-ink px-3 font-bold text-on-ink">{ini.region_name} · {tl(ini.region_level as "municipality")}</span>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className={tag}>{ini.region_name} · {tl(ini.region_level as "municipality")}</span>
           {data.tags.map((x) => <Link key={x.slug} href={`/explore?q=${x.slug}`} className={`${tag} text-ink no-underline`}>#{x.slug}</Link>)}
         </div>
-        <h1 className="display m-0 max-w-[960px]">{ini.title}</h1>
+        <h1 className="display m-0 max-w-[960px] break-words">{ini.title}</h1>
         <div className="flex flex-col gap-1 text-sm">
           <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {t("by")}
@@ -185,16 +217,16 @@ export default async function InitiativePage({ params, searchParams }: PageProps
         </div>
         {data.myInvite && <AuthorInviteBanner id={id} inviteId={data.myInvite.id} by={data.myInvite.by ?? "?"} title={ini.title} />}
         {ini.blocked_at && (
-          <div role="status" className="flex max-w-[720px] flex-col gap-1 border-l-4 border-red bg-surface p-4">
+          <Notice tone="warning" className="flex max-w-[720px] flex-col gap-1">
             <strong>{tr("banner.blocked", { reason: ini.blocked_reason ?? "" })}</strong>
-            <span className="text-sm">{tr("banner.blockedText")}</span>
-          </div>
+            <span className="text-sm font-normal">{tr("banner.blockedText")}</span>
+          </Notice>
         )}
         {ini.withdrawn_at && (
-          <div role="status" className="flex max-w-[720px] flex-col gap-1 border-l-4 border-ink bg-surface p-4">
+          <Notice tone="status" className="flex max-w-[720px] flex-col gap-1">
             <strong>{tr("banner.withdrawn", { date: dateLong(ini.withdrawn_at, locale) })}</strong>
-            {ini.withdrawn_note && <span className="text-sm">{tr("banner.withdrawnNote", { note: ini.withdrawn_note })}</span>}
-          </div>
+            {ini.withdrawn_note && <span className="text-sm font-normal">{tr("banner.withdrawnNote", { note: ini.withdrawn_note })}</span>}
+          </Notice>
         )}
         <div className="max-w-[720px]"><PhaseRail phase={ini.phase} outcome={ini.outcome} /></div>
         {milestone && <p className="m-0 text-xl font-bold leading-snug">{milestone}</p>}
@@ -208,14 +240,12 @@ export default async function InitiativePage({ params, searchParams }: PageProps
             </div>
           </section>
         )}
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           {!ini.outcome && !ini.blocked_at && (ini.phase === "idea" || ini.phase === "debate") && !ballotOpen && <SupportButton id={id} supported={data.supported} signedIn={signedIn} />}
-          {ballotOpen && <Link href={`${path}?tab=vote`} className={btn.primaryLg}>{t("voteNow")}</Link>}
-          {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className={btn.primaryLg}>{t("help")}</Link>}
-          <span className="tabular">{t("supports", { n: ini.support_count, formatted: num(ini.support_count, locale) })}</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
+          {ballotOpen && <Link href={`${path}?tab=vote`} className={btn.primary}>{t("voteNow")}</Link>}
+          {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className={btn.primary}>{t("help")}</Link>}
           <ShareBlock path={path} title={ini.title} isPublic={!!ini.published_at && !ini.blocked_at} item={signedIn ? { type: "initiative", id } : null} />
+          <span className="tabular text-sm">{t("supports", { n: ini.support_count, formatted: num(ini.support_count, locale) })}</span>
         </div>
         {signedIn && !isAuthor && !ini.outcome && <WhyNot action="initiative.edit" objectId={id} />}
         {isAuthor && !ini.blocked_at && (
@@ -229,11 +259,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
         )}
         {session?.profile.is_admin && <BlockInitiative id={id} blocked={!!ini.blocked_at} />}
 
-        <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">
-          {TABS.map((k) => (
-            <Link key={k} role="tab" aria-selected={active === k} href={`${path}${k === "about" ? "" : `?tab=${k}`}`} scroll={false} className={tab(active === k)}>{tabLabel(k)}</Link>
-          ))}
-        </div>
+        <Tabs label={t("sections")} items={TABS.map((k) => ({ href: `${path}${k === "about" ? "" : `?tab=${k}`}`, label: tabLabel(k), on: active === k }))} />
 
         {active === "about" && (
           <section className="flex max-w-[720px] flex-col gap-4">
@@ -254,7 +280,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
           <section className="flex max-w-[760px] flex-col gap-4">
             {canWrite
               ? <Composer ctx={{ initiativeId: id }} path={path} placeholder={t("threadPlaceholder")} viewerName={session!.profile.display_name} viewerSeed={session!.profile.avatar_seed} viewerPath={session!.profile.avatar_path} />
-              : <p className="m-0 text-muted"><Link href={`/login?next=${path}`}>{t("signInToJoin")}</Link></p>}
+              : <Link href={`/login?next=${path}`} className={`${btn.secondary} self-start`}>{t("signInToJoin")}</Link>}
             <PostList posts={data.posts} path={`${path}?tab=threads`} canWrite={canWrite} viewerId={me} empty={t("noThreads")} />
           </section>
         )}
@@ -295,7 +321,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
                     </li>
                   ))}
                 </ul>
-                {ini.group_slug && <Link href={`/groups/${ini.group_slug}?tab=tasks`} className="font-bold">{t("toGroup")}</Link>}
+                {ini.group_slug && <Link href={`/groups/${ini.group_slug}?tab=tasks`} className={`${btn.secondarySm} self-start`}>{t("toGroup")}</Link>}
               </div>
             )}
           </section>
@@ -322,38 +348,6 @@ export default async function InitiativePage({ params, searchParams }: PageProps
             })}
           </section>
         )}
-      </div>
-
-      <aside aria-label={t("context")} className="flex flex-col gap-6 xl:pt-[calc(21/9*0px)]">
-        <div className="flex flex-col gap-1.5 border-t-[6px] border-ink pt-3">
-          <span className="text-sm font-bold">{t("addressee")}</span>
-          {addressee ? (
-            ini.resp_id
-              ? <Link href={`/responsible?id=${ini.resp_id}`} className="flex items-center gap-1.5 text-lg font-bold text-ink no-underline">{addressee}{ini.resp_official && <IconCheck />}</Link>
-              : <strong className="text-lg">{addressee}</strong>
-          ) : <span className="text-muted">{t("noAddressee")}</span>}
-          <span className="text-sm">{ini.phase === "idea" || ini.phase === "debate" ? t("addresseeLater") : ini.resp_days ? t("respondsIn", { days: ini.resp_days }) : ""}</span>
-        </div>
-        <div className="flex flex-col gap-1.5 border-t border-line pt-3">
-          <span className="text-sm font-bold">{t("costs")}</span>
-          <strong className="text-lg">{ini.cost_estimate_cents ? t("about", { amount: euro(ini.cost_estimate_cents, locale) }) : "–"}</strong>
-          <span className="text-sm">{t("costsNote")}</span>
-        </div>
-        <div className="flex flex-col gap-1.5 border-t border-line pt-3">
-          <span className="text-sm font-bold">{t("workingGroup")}</span>
-          {ini.group_slug ? <Link href={`/groups/${ini.group_slug}`} className="font-bold text-ink">{ini.group_name}</Link> : <span className="text-sm">{t("noGroup")}</span>}
-        </div>
-        {data.similar.length > 0 && (
-          <div className="flex flex-col gap-1.5 border-t border-line pt-3">
-            <span className="text-sm font-bold">{t("elsewhere")}</span>
-            {data.similar.map((s) => (
-              <Link key={s.id} href={`/initiatives/${s.id}`} className="text-sm text-ink">
-                <strong>{s.title}</strong> · {s.region_name}
-              </Link>
-            ))}
-          </div>
-        )}
-      </aside>
-    </div>
+    </Page>
   );
 }

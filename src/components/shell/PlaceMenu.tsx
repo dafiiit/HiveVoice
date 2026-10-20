@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -7,6 +7,7 @@ import { boroughsOf, searchPlaces, type Place } from "@/app/onboarding/actions";
 import { setHomeRegion } from "@/lib/actions/settings";
 import { setGuestPlace } from "@/lib/actions/place";
 import { IconPin } from "../ui/Icons";
+import { Popover } from "../ui/Popover";
 import { btn, chip, field } from "../ui/styles";
 
 type Step = { id: string; name: string; level: string };
@@ -26,19 +27,9 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
   const [picked, setPicked] = useState<Place | null>(null);
   const [boroughs, setBoroughs] = useState<{ id: string; name: string }[]>([]);
   const [pending, start] = useTransition();
-  const root = useRef<HTMLDivElement>(null);
   const editing = changing || !place;
   const query = q.trim();
   const shown = editing && !picked && query.length >= 2 ? hits : [];
-
-  useEffect(() => {
-    if (!open) return;
-    const away = (e: MouseEvent) => { if (!root.current?.contains(e.target as Node)) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    document.addEventListener("mousedown", away);
-    document.addEventListener("keydown", esc);
-    return () => { document.removeEventListener("mousedown", away); document.removeEventListener("keydown", esc); };
-  }, [open]);
 
   useEffect(() => {
     if (!editing || query.length < 2) return;
@@ -59,16 +50,12 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
   };
 
   return (
-    <div ref={root} className={`relative ${className}`}>
-      <button type="button" aria-haspopup="true" aria-expanded={open} onClick={() => setOpen(!open)}
-        aria-label={place ? `${t(signedIn ? "yours" : "chosen")}: ${place.name}` : t("choose")}
-        className="inline-flex h-11 max-w-[220px] items-center gap-2 border border-line-strong bg-surface px-3 text-sm text-ink md:max-w-[260px]">
-        <IconPin size={16} />
-        <strong className="min-w-0 truncate">{place?.name ?? t("choose")}</strong>
-        <span aria-hidden="true" className="text-xs">▾</span>
-      </button>
+    <Popover size="md" open={open} onOpenChange={setOpen} className={className}
+      ariaLabel={place ? `${t(signedIn ? "yours" : "chosen")}: ${place.name}` : t("choose")}
+      label={<><IconPin size={16} /><span className="min-w-0 max-w-[160px] truncate md:max-w-[200px]">{place?.name ?? t("choose")}</span></>}
+      panelClassName="absolute right-0 top-full z-40 mt-1 flex w-[min(340px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-4 md:left-0 md:right-auto">
       {open && (
-        <div className="absolute right-0 top-full z-40 mt-1 flex w-[min(340px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-4 md:left-0 md:right-auto">
+        <>
           {place && !editing && (
             <>
               <div className="flex flex-col gap-0.5">
@@ -88,9 +75,9 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
               )}
               <p className="m-0 text-sm">{t(signedIn ? "explain" : "explainGuest")}</p>
               <div className="flex flex-wrap gap-2">
-                <Link href={`/explore?place=${place.id}`} onClick={() => setOpen(false)} className={`${btn.primary} h-10 text-sm`}>{t("discover", { name: place.name })}</Link>
-                <button type="button" onClick={() => setChanging(true)} className={`${btn.secondary} h-10 text-sm`}>{t("change")}</button>
-                {!signedIn && <button type="button" disabled={pending} onClick={() => apply(null)} className={`${btn.ghost} h-10 text-sm`}>{t("forget")}</button>}
+                <Link href={`/explore?place=${place.id}`} onClick={() => setOpen(false)} className={`${btn.primarySm}`}>{t("discover", { name: place.name })}</Link>
+                <button type="button" onClick={() => setChanging(true)} className={`${btn.secondarySm}`}>{t("change")}</button>
+                {!signedIn && <button type="button" disabled={pending} onClick={() => apply(null)} className={`${btn.linkMuted} text-sm`}>{t("forget")}</button>}
               </div>
             </>
           )}
@@ -98,7 +85,7 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
             <>
               {!place && <p className="m-0 text-sm">{t(signedIn ? "explain" : "explainGuest")}</p>}
               <input type="search" autoFocus value={q} onChange={(e) => { setQ(e.target.value); setPicked(null); setBoroughs([]); }} placeholder={t("searchPlaceholder")}
-                aria-label={t("change")} autoComplete="off" className={field.inputSm} />
+                aria-label={t("change")} autoComplete="off" className={field.input} />
               {shown.length > 0 && (
                 <ul className="m-0 flex max-h-[240px] list-none flex-col overflow-y-auto border-t border-line p-0">
                   {shown.map((h) => (
@@ -124,8 +111,8 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
               {place && <button type="button" onClick={() => { setChanging(false); setPicked(null); setQ(""); }} className={`${btn.ghost} h-9 self-start text-sm`}>←</button>}
             </>
           )}
-        </div>
+        </>
       )}
-    </div>
+    </Popover>
   );
 }

@@ -6,7 +6,7 @@ const signedIn = !!process.env.TEST_USER_EMAIL;
 
 test("guests can pass the app on and see how invitations work", async ({ page }) => {
   await page.goto("/teilen");
-  await expect(page.getByRole("heading", { name: "Teilen und einladen", level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Einladen", level: 1 })).toBeVisible();
   await page.getByRole("button", { name: "QR-Code zeigen" }).click();
   const qr = page.getByRole("img", { name: /QR-Code zu HiveVoice/ });
   await expect(qr).toBeVisible();

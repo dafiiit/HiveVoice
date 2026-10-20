@@ -110,16 +110,3 @@ export async function revokeAccess(type: "listing" | "task", id: string, profile
   return res;
 }
 
-/** People one may find, for adding them to an object (same limits as the people search). */
-export async function findPeople(q: string) {
-  return run<{ id: string; name: string; seed: number }[]>(async (tx, s) => {
-    if (q.trim().length < 3) return [];
-    const [{ ok }] = await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`;
-    if (!ok) return [];
-    return tx<{ id: string; name: string; seed: number }[]>`
-      select p.id, p.display_name as name, p.avatar_seed as seed from public.profiles p
-      where p.onboarded_at is not null and p.id <> ${s.profile.id} and app.can_find(${s.profile.id}::uuid, p.id)
-        and lower(p.display_name) like ${`%${q.trim().toLowerCase()}%`}
-      order by p.display_name limit 8`;
-  });
-}

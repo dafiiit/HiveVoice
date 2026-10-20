@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { decideEmergency, decideProposal, logDisclosure } from "@/lib/actions/admin";
 import { relTime } from "@/lib/format";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export type Queue = {
   proposals: { id: string; kind: string; reason: string | null; mine: boolean; at: string; subject: string }[];
@@ -32,7 +33,7 @@ export function AdminQueue({ q }: { q: Queue }) {
   });
   return (
     <div className="flex flex-col gap-10">
-      {q.admins < 2 && <p role="status" className="m-0 border-l-4 border-red pl-3 font-bold">{t("only_one")}</p>}
+      {q.admins < 2 && <Notice tone="warning">{t("only_one")}</Notice>}
       {msg && <p role="alert" className="m-0 font-bold">{msg}</p>}
 
       <section className="flex flex-col gap-3">
@@ -44,7 +45,7 @@ export function AdminQueue({ q }: { q: Queue }) {
             {e.text && <p className="m-0 whitespace-pre-line">{e.text}</p>}
             {e.note && <p className="m-0 text-sm text-muted">{e.note}</p>}
             <span className="text-sm">{t("emergencyText")}</span>
-            <label className={field.label}>{t("reason")}<input value={reasons[e.id] ?? ""} onChange={(ev) => setReasons({ ...reasons, [e.id]: ev.target.value })} className={field.inputSm} /></label>
+            <label className={field.label}>{t("reason")}<input value={reasons[e.id] ?? ""} onChange={(ev) => setReasons({ ...reasons, [e.id]: ev.target.value })} className={field.input} /></label>
             <span className="flex flex-wrap gap-2">
               <button type="button" disabled={pending || (reasons[e.id] ?? "").trim().length < 10} className={btn.red} onClick={() => act(() => decideEmergency(e.id, true, reasons[e.id]))}>{t("upheld")}</button>
               <button type="button" disabled={pending || (reasons[e.id] ?? "").trim().length < 10} className={btn.secondary} onClick={() => act(() => decideEmergency(e.id, false, reasons[e.id]))}>{t("dismissed")}</button>
@@ -79,9 +80,9 @@ export function AdminQueue({ q }: { q: Queue }) {
           e.preventDefault();
           act(async () => { const r = await logDisclosure(ref, authority, scope); if (r.ok) { setRef(""); setAuthority(""); setScope(""); } return r; });
         }}>
-          <input value={ref} onChange={(e) => setRef(e.target.value)} placeholder={t("reference")} aria-label={t("reference")} className={field.inputSm} />
-          <input value={authority} onChange={(e) => setAuthority(e.target.value)} placeholder={t("authority")} aria-label={t("authority")} className={field.inputSm} />
-          <input value={scope} onChange={(e) => setScope(e.target.value)} placeholder={t("scope")} aria-label={t("scope")} className={field.inputSm} />
+          <input value={ref} onChange={(e) => setRef(e.target.value)} placeholder={t("reference")} aria-label={t("reference")} className={field.input} />
+          <input value={authority} onChange={(e) => setAuthority(e.target.value)} placeholder={t("authority")} aria-label={t("authority")} className={field.input} />
+          <input value={scope} onChange={(e) => setScope(e.target.value)} placeholder={t("scope")} aria-label={t("scope")} className={field.input} />
           <button type="submit" disabled={pending} className={`${btn.secondary} self-start`}>{t("log")}</button>
         </form>
         <Link href="/transparenz" className="font-bold">{t("transparency")}</Link>

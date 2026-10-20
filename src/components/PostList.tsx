@@ -15,6 +15,7 @@ import { PollCard } from "./PollCard";
 import { ExtrasButtons, ExtrasPreview, useExtras } from "./ComposerExtras";
 import { btn, field } from "./ui/styles";
 import { RefCardView } from "./refs/RefCardView";
+import { Notice } from "@/components/ui/Page";
 
 const press = "inline-flex h-9 items-center border-0 bg-transparent p-0 transition-transform duration-150 ease-out active:scale-90";
 
@@ -59,7 +60,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
           <button type="submit" disabled={!canSend} className={btn.primary}>{reply ? tc("reply") : tc("post")}</button>
         </div>
       )}
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
+      {error && <Notice tone="error" className="text-sm">{error}</Notice>}
     </form>
   );
 }
@@ -113,7 +114,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
         {p.poll && <PollCard poll={p.poll} canVote={canWrite} signedIn={!!viewerId} loginPath={path} />}
         <RefCardView card={p.ref} />
         {p.listing_id && (
-          <Link href={`/${p.listing_kind === "offer" ? "offers" : "needs"}/${p.listing_id}`} className="flex flex-col gap-0.5 border border-ink bg-surface p-3 text-ink no-underline">
+          <Link href={`/anliegen/${p.listing_id}`} className="flex flex-col gap-0.5 border border-ink bg-surface p-3 text-ink no-underline">
             <span className="text-xs font-bold">{p.listing_kind === "offer" ? t("offer") : t("need")}</span>
             <strong>{p.listing_title}</strong>
           </Link>
@@ -134,7 +135,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
             </button>
             {canModerate && <Moderation post={p} path={path} />}
             {viewerId === p.author_id ? (
-              <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} className="border-0 bg-transparent p-0 text-muted underline">{tc("delete")}</button>
+              <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} className={btn.linkMuted}>{tc("delete")}</button>
             ) : canWrite ? <ReportButton type="post" id={p.id} /> : null}
           </div>
         )}
@@ -180,8 +181,8 @@ function Moderation({ post, path }: { post: PostView; path: string }) {
         <button type="button" className={link} onClick={() => setAsking(true)}>{ts("remove")}</button>
       ) : (
         <span className="flex w-full flex-wrap items-center gap-2">
-          <input value={reason} maxLength={300} onChange={(e) => setReason(e.target.value)} aria-label={ts("reasonLabel")} placeholder={ts("reasonLabel")} className={`${field.inputSm} min-w-0 flex-1`} />
-          <button type="button" disabled={pending} className={`${btn.red} h-11`} onClick={() => run("remove")}>{ts("remove")}</button>
+          <input value={reason} maxLength={300} onChange={(e) => setReason(e.target.value)} aria-label={ts("reasonLabel")} placeholder={ts("reasonLabel")} className={`${field.input} min-w-0 flex-1`} />
+          <button type="button" disabled={pending} className={`${btn.red}`} onClick={() => run("remove")}>{ts("remove")}</button>
         </span>
       )}
       {error && <span role="alert" className="font-bold">{error}</span>}

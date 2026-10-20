@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { IconSearch } from "../ui/Icons";
+import { searchBox, searchInput } from "../ui/styles";
 
 /**
  * Search field above the conversation list. Filters the rows while typing
@@ -26,11 +27,11 @@ export function ListSearch({ listId, value, keep, label }: { listId: string; val
   return (
     <form method="get" action="/connect" role="search" className="flex min-w-0 flex-1" onSubmit={(e) => { e.preventDefault(); input.current?.blur(); }}>
       {Object.entries(keep).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
-      <label className="flex h-9 min-w-0 flex-1 items-center gap-2 border border-line-strong bg-surface px-2.5 text-muted focus-within:border-ink">
+      <label className={`${searchBox("sm")} flex-1`}>
         <IconSearch size={16} />
         <span className="sr-only">{label}</span>
         <input ref={input} type="search" name="s" defaultValue={value} placeholder={`${label} …`} autoComplete="off" enterKeyHint="search"
-          onInput={(e) => filter(e.currentTarget.value)} className="min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-ink outline-none placeholder:text-muted md:text-sm" />
+          onInput={(e) => filter(e.currentTarget.value)} className={`${searchInput} md:text-sm`} />
       </label>
     </form>
   );

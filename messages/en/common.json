@@ -7,13 +7,13 @@
   "delete": "Delete",
   "edit": "Edit",
   "send": "Send",
-  "post": "Post",
+  "post": "Send",
   "reply": "Reply",
   "replies": "{n, plural, =0 {Reply} one {1 reply} other {# replies}}",
   "more": "More",
   "loadMore": "Load more",
   "verified": "verified",
-  "anonymous": "anonymous",
+  "anonymous": "pseudonym",
   "you": "You",
   "optional": "optional",
   "report": "Report",
@@ -39,7 +39,7 @@
     "ballot_closed": "The vote has ended.",
     "ballot_running": "A vote is already running.",
     "wrong_phase": "Not possible in this phase.",
-    "last_admin": "The group needs at least one admin.",
+    "last_admin": "The group needs at least one organiser.",
     "already_reported": "You already reported this.",
     "own_content": "You cannot report your own posts.",
     "own_listing": "This is your own listing.",
@@ -54,7 +54,7 @@
     "banned": "Your account is paused at the moment. See “Rights and levels” for details.",
     "too_many_empty_groups": "You already have three groups without other members. Invite people first.",
     "blocked": "You cannot write to this person.",
-    "contact_closed": "This person is not taking requests from you right now.",
+    "contact_closed": "This person is not taking contact requests from you right now.",
     "minor_protected": "You can only reach this person through shared groups.",
     "mode_change_limit": "You can switch between alias and real name once a month.",
     "real_name_required": "You need your real name for this. Change your profile under “Me”.",
@@ -66,7 +66,7 @@
     "invite_invalid": "This invitation link is no longer valid.",
     "banned_from_group": "You cannot join this group.",
     "adults_only": "This group is for adults only.",
-    "owner_must_transfer": "The owner has to hand the group over first.",
+    "owner_must_transfer": "The lead has to hand the group over first.",
     "reason_required": "Please give a reason.",
     "name_protected": "This name is reserved for public bodies and parties.",
     "not_allowed": "That is not possible right now.",
@@ -76,7 +76,7 @@
     "debate_too_short": "The debate has to run a few days before a vote may start.",
     "note_required": "Please say briefly what changed (at least 5 characters).",
     "too_big_change": "During the vote only small corrections are allowed. For bigger changes call off the vote.",
-    "frozen": "Addressee and costs are frozen.",
+    "frozen": "Responsible office and costs are frozen.",
     "has_activity": "Deleting is no longer possible because somebody has supported, voted or discussed.",
     "lead_must_hand_over": "The lead has to be handed to another author first.",
     "too_many_responsibilities": "You already have as many self-declarations as allowed. Get one confirmed by the community or give one up.",
@@ -94,19 +94,20 @@
     "no_invites_left": "You have no invitations left.",
     "already_member": "You are in already.",
     "email_not_allowed": "You cannot sign up with this address (disposable address).",
-    "spam_detected": "This looks like spam: the same text or many links in a short time. Please wait a little."
+    "spam_detected": "This looks like spam: the same text or many links in a short time. Please wait a little.",
+    "admins_from_config": "Admins are set in ADMIN_EMAILS."
   },
   "phase": {
     "idea": "Idea",
     "debate": "Debate",
-    "addressee": "With the addressee",
+    "addressee": "With the office",
     "implementation": "Being implemented",
     "done": "Done",
     "now": "Phase {n} of 5 · {label}"
   },
   "outcome": {
     "rejected_vote": "Rejected in the vote",
-    "rejected_addressee": "Rejected by the addressee",
+    "rejected_addressee": "Rejected by the office",
     "withdrawn": "Withdrawn"
   },
   "tags": {
@@ -124,5 +125,10 @@
     "en": "English"
   },
   "perMonth": "{amount}/month",
-  "offline": "Offline – you see what was last loaded. Messages go out once you are back online."
+  "offline": "Offline – you see what was last loaded. Messages go out once you are back online.",
+  "yes": "Yes",
+  "searchPerson": "Search a name (at least 3 letters)",
+  "nobodyFound": "Nobody found.",
+  "copied": "Copied",
+  "copyLink": "Copy link"
 }

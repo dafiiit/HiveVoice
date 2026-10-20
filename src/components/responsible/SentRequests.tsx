@@ -1,10 +1,12 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { markUnanswered, redirectRequest } from "@/lib/actions/responsible";
 import { dateLong } from "@/lib/format";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
+import { useAction } from "../ui/Action";
 
 export type SentItem = { id: string; body: string; created_at: string; due_at: string; status: string; response_body: string | null; unanswered_at: string | null;
   overdue: boolean; resp_title: string; org: string | null; initiative_id: string | null; initiative_title: string | null };
@@ -15,13 +17,8 @@ function Row({ r, others }: { r: SentItem; others: { id: string; label: string }
   const locale = useLocale();
   const [mode, setMode] = useState(false);
   const [to, setTo] = useState(others[0]?.id ?? "");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
-  const act = (fn: () => Promise<{ ok: boolean; error?: string }>) => start(async () => {
-    const res = await fn();
-    setError(res.ok ? null : tc(`errors.${res.error}` as "errors.unknown"));
-    if (res.ok) setMode(false);
-  });
+  const { run: exec, pending, error } = useAction();
+  const act = (fn: () => Promise<{ ok: boolean; error?: string }>) => exec(fn, { refresh: false, onOk: () => setMode(false) });
   return (
     <article className="flex flex-col gap-2 border-b border-line py-4">
       <div className="flex flex-wrap justify-between gap-2 text-sm">
@@ -32,7 +29,7 @@ function Row({ r, others }: { r: SentItem; others: { id: string; label: string }
       </div>
       {r.initiative_title && <Link href={`/initiatives/${r.initiative_id}`} className="text-lg font-bold text-ink">{r.initiative_title}</Link>}
       <p className="m-0">{r.body}</p>
-      {r.response_body && <p className="m-0 border-l-4 border-ink pl-3">{r.response_body}</p>}
+      {r.response_body && <Notice tone="status" className="font-normal">{r.response_body}</Notice>}
       {r.status === "open" && r.overdue && !mode && (
         <div className="flex flex-wrap items-center gap-2">
           {others.length > 0 && <button type="button" onClick={() => setMode(true)} className={btn.secondary}>{t("redirect")}</button>}

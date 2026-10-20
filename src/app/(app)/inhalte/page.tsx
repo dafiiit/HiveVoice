@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Notice, Page, PageHeader, Tabs } from "@/components/ui/Page";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
@@ -8,7 +9,7 @@ import { Notes } from "@/components/me/Notes";
 import { MyDocuments, type DocRow, type SharedRow, type IncomingTransfer } from "@/components/me/MyDocuments";
 import { NewList } from "@/components/mine/TodoList";
 import { IconLock, IconPlus } from "@/components/ui/Icons";
-import { btn, tab } from "@/components/ui/styles";
+import { btn } from "@/components/ui/styles";
 
 const FILTERS = ["all", "docs", "lists", "notes", "projects", "listings"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -55,7 +56,7 @@ export default async function Mine({ searchParams }: PageProps<"/inhalte">) {
     ...d.docs.filter((x) => !x.trashed_at).map((x) => ({ key: `r${x.id}`, href: `/links/${x.id}`, title: x.title, kind: x.origin === "note" ? "doc" : x.origin === "file" ? "file" : "link", vis: x.visibility, at: x.updated_at })),
     ...d.lists.map((x) => ({ key: `l${x.id}`, href: `/inhalte/listen/${x.id}`, title: x.title, kind: "list", vis: x.visibility, at: x.updated_at, extra: x.total ? t("listCount", { done: x.done, total: x.total }) : undefined })),
     ...d.projects.map((x) => ({ key: `i${x.id}`, href: `/initiatives/${x.id}`, title: x.title, kind: "project", vis: "public", at: x.updated_at })),
-    ...d.listings.map((x) => ({ key: `o${x.id}`, href: `/${x.kind === "need" ? "needs" : "offers"}/${x.id}`, title: x.title, kind: x.kind === "need" ? "need" : "offer", vis: x.read_scope, at: x.created_at })),
+    ...d.listings.map((x) => ({ key: `o${x.id}`, href: `/anliegen/${x.id}`, title: x.title, kind: x.kind === "need" ? "need" : "offer", vis: x.read_scope, at: x.created_at })),
   ];
   const shown = items
     .filter((x) => f === "all" || (f === "docs" && ["doc", "file", "link"].includes(x.kind)) || (f === "lists" && x.kind === "list") || (f === "projects" && x.kind === "project") || (f === "listings" && (x.kind === "offer" || x.kind === "need")))
@@ -66,24 +67,15 @@ export default async function Mine({ searchParams }: PageProps<"/inhalte">) {
   };
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="display m-0">{t("title")}</h1>
-          <p className="m-0 flex items-center gap-2 text-sm text-muted"><IconLock size={14} /> {t("lead")}</p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/new/link?mode=note" className={btn.primary}><IconPlus size={16} /> {t("newDoc")}</Link>
-          <NewList label={t("newList")} />
-        </div>
-      </div>
-      <nav aria-label={t("filterLabel")} className="flex overflow-x-auto border-b border-line">
-        {FILTERS.map((k) => (
-          <Link key={k} href={k === "all" ? "/inhalte" : `/inhalte?f=${k}`} aria-current={f === k ? "page" : undefined} className={tab(f === k)}>
-            {t(`filters.${k}`)}{counts[k] > 0 && <span className="ml-1.5 text-xs font-normal text-muted">{counts[k]}</span>}
-          </Link>
-        ))}
-      </nav>
+    <Page>
+      <PageHeader title={t("title")} mobileHidden
+        actions={<><Link href="/new/link?mode=note" className={btn.primarySm}><IconPlus size={14} /> {t("newDoc")}</Link><NewList label={t("newList")} /></>}>
+        <p className="m-0 flex items-center gap-2 text-sm text-muted"><IconLock size={14} /> {t("lead")}</p>
+      </PageHeader>
+      <Tabs label={t("filterLabel")} items={FILTERS.map((k) => ({
+        href: k === "all" ? "/inhalte" : `/inhalte?f=${k}`, on: f === k,
+        label: <>{t(`filters.${k}`)}{counts[k] > 0 && <span className="ml-1.5 text-xs font-normal text-muted">{counts[k]}</span>}</>,
+      }))} />
 
       {f === "notes" ? <Notes notes={d.notes} />
         : f === "docs" ? (
@@ -106,9 +98,9 @@ export default async function Mine({ searchParams }: PageProps<"/inhalte">) {
                 <span className={`flex-none px-1.5 py-0.5 text-xs font-bold ${x.vis === "me" ? "border border-line-strong" : "bg-chip"}`}>{t(`vis.${x.vis}` as "vis.me")}</span>
               </Link>
             ))}
-            {shown.length === 0 && !(f === "all" && d.notes.length) && <p className="m-0 py-6 text-muted">{f === "all" ? t("empty") : t("emptyFilter")}</p>}
+            {shown.length === 0 && !(f === "all" && d.notes.length) && <Notice tone="hint" className="py-6 text-base">{f === "all" ? t("empty") : t("emptyFilter")}</Notice>}
           </div>
         )}
-    </div>
+    </Page>
   );
 }

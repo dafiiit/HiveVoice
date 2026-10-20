@@ -19,7 +19,7 @@ async function keys(force = false) {
   return cache.keys;
 }
 
-type Claims = { sub?: string; email?: string; user_metadata?: Record<string, string> };
+type Claims = { sub?: string; email?: string; aal?: string; user_metadata?: Record<string, string> };
 
 /**
  * The signed-in person's verified claims, or null. Refreshes an expired session on the way

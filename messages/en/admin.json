@@ -2,15 +2,15 @@
   "title": "Server administration",
   "loginFirst": "Please sign in first.",
   "login": "Sign in",
-  "bootstrap": "No admin is registered for this instance yet. Whoever knows this path runs the server. Register yourself as the first admin.",
-  "claim": "Make me admin",
+  "unconfigured": "No admin is registered for this instance yet. The operator sets admins at the hosting provider: the setting ADMIN_EMAILS with confirmed email addresses, separated by commas. Then reload.",
+  "mfaRequired": "The admin area needs a login with a second factor. Sign out and sign in again with your second factor.",
   "done": "Saved.",
   "stats": {
     "profiles": "Accounts",
     "demo_profiles": "Demo profiles",
     "groups": "Groups",
     "initiatives": "Initiatives",
-    "listings": "Requests and offers",
+    "listings": "Offers and wanted",
     "open_ballots": "Running votes",
     "open_cases": "Open jury cases",
     "regions": "Regions"
@@ -18,7 +18,7 @@
   "verification": "Verification",
   "verificationText": "In the test phase a login counts as verified. With “vouching” two verified people must vouch and the account must be a day old. Once the online ID is connected, only that counts.",
   "modes": {
-    "login": "A login is enough (test phase)",
+    "login": "Signing in is enough (test phase)",
     "eid": "Online ID only",
     "vouch": "Vouching (two verified people)"
   },
@@ -30,10 +30,7 @@
   "labelPlaceholder": "e.g. City of Munich",
   "addDomain": "Add",
   "admins": "Admins",
-  "revoke": "Revoke",
-  "profileRef": "Profile",
-  "profilePlaceholder": "Profile link or ID, e.g. https://…/profile/…",
-  "grant": "Make admin",
+  "adminsFromConfig": "Who is admin is set in ADMIN_EMAILS at the hosting provider. It cannot be changed here.",
   "demo": "Demo data",
   "demoText": "{n} demo profiles with their groups, initiatives, posts and offers from the prototype.",
   "demoRemove": "Delete all demo data",
@@ -42,5 +39,5 @@
   "demoChats": "Demo chats for new accounts",
   "on": "On",
   "off": "Off",
-  "demoChatsText": "On: whoever opens Connect for the first time gets a few sample chats and requests from demo profiles. Turn off and delete the demo data before the real launch."
+  "demoChatsText": "On: whoever opens Connect for the first time gets a few sample chats and contact requests from demo profiles. Turn off and delete the demo data before the real launch."
 }

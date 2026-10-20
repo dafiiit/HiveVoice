@@ -2,15 +2,15 @@
   "title": "Server-Verwaltung",
   "loginFirst": "Bitte melde dich zuerst an.",
   "login": "Anmelden",
-  "bootstrap": "Für diese Instanz ist noch niemand als Admin eingetragen. Wer diesen Pfad kennt, betreibt den Server. Trag dich als ersten Admin ein.",
-  "claim": "Mich als Admin eintragen",
+  "unconfigured": "Für diese Instanz ist noch niemand als Admin eingetragen. Admins legt der Betreiber beim Hosting-Anbieter fest: die Einstellung ADMIN_EMAILS mit bestätigten E-Mail-Adressen, durch Komma getrennt. Danach neu laden.",
+  "mfaRequired": "Für die Verwaltung brauchst du eine Anmeldung mit zweitem Faktor. Melde dich ab und mit zweitem Faktor wieder an.",
   "done": "Gespeichert.",
   "stats": {
     "profiles": "Konten",
     "demo_profiles": "Demo-Profile",
     "groups": "Gruppen",
     "initiatives": "Initiativen",
-    "listings": "Anfragen und Angebote",
+    "listings": "Angebote und Gesuche",
     "open_ballots": "Laufende Abstimmungen",
     "open_cases": "Offene Jury-Fälle",
     "regions": "Regionen"
@@ -18,7 +18,7 @@
   "verification": "Bestätigung",
   "verificationText": "Im Testbetrieb gilt eine Anmeldung als bestätigt. Mit „Bürgschaft“ müssen zwei bestätigte Personen bürgen und das Konto muss einen Tag alt sein. Sobald der Online-Ausweis angebunden ist, zählt nur noch er.",
   "modes": {
-    "login": "Login reicht (Testbetrieb)",
+    "login": "Anmeldung reicht (Testbetrieb)",
     "eid": "Nur Online-Ausweis",
     "vouch": "Bürgschaft (zwei Bestätigte)"
   },
@@ -30,10 +30,7 @@
   "labelPlaceholder": "z. B. Landeshauptstadt München",
   "addDomain": "Hinzufügen",
   "admins": "Admins",
-  "revoke": "Entziehen",
-  "profileRef": "Profil",
-  "profilePlaceholder": "Profil-Link oder ID, z. B. https://…/profile/…",
-  "grant": "Zum Admin machen",
+  "adminsFromConfig": "Wer Admin ist, steht in der Einstellung ADMIN_EMAILS beim Hosting-Anbieter. Hier lässt sich das nicht ändern.",
   "demo": "Demo-Daten",
   "demoText": "{n} Demo-Profile mit ihren Gruppen, Initiativen, Beiträgen und Angeboten aus dem Prototyp.",
   "demoRemove": "Alle Demo-Daten löschen",
@@ -42,5 +39,5 @@
   "demoChats": "Demo-Chats für neue Konten",
   "on": "An",
   "off": "Aus",
-  "demoChatsText": "An: Wer Verbinden zum ersten Mal öffnet, bekommt ein paar Beispiel-Chats und -Anfragen von Demo-Profilen. Vor dem echten Start ausschalten und die Demo-Daten löschen."
+  "demoChatsText": "An: Wer Verbinden zum ersten Mal öffnet, bekommt ein paar Beispiel-Chats und Kontaktanfragen von Demo-Profilen. Vor dem echten Start ausschalten und die Demo-Daten löschen."
 }

@@ -60,7 +60,7 @@ begin
   perform 1 from app.ensure_tags(array['radverkehr','sport','garten','musik','film','klima','bildung','wasser','verkehr',
     'umwelt','gesundheit','freizeit','3d-modellierung','blender','sprechen','angel-investment','mentoring','cad-konstruktion',
     'werkstatt','proberaum','genehmigung','stadtteilbudget','foerderung','nachhilfe','umzug','ausleihen','essen',
-    'uebernachtung','bewegung','gesellschaft','fahrrad-reparatur','vorfuehrort','handwerk']);
+    'übernachtung','bewegung','gesellschaft','fahrrad-reparatur','vorführort','handwerk']);
   insert into public.user_interests (profile_id, tag_id, relation)
   select (p ->> x.who)::uuid, t2.id, x.rel from (values
     ('Katrin Albers','angel-investment','offers'), ('Katrin Albers','mentoring','offers'), ('Katrin Albers','klima','interest'),
@@ -68,7 +68,7 @@ begin
     ('Lukas Becker','3d-modellierung','offers'), ('Ben Koch','ausleihen','offers'), ('Ben Koch','umzug','offers'),
     ('Clara Neumann','nachhilfe','offers'), ('Moritz Huber','proberaum','needs'), ('Moritz Huber','musik','interest'),
     ('Lea Hofmann','sport','interest'), ('Sabine Krüger','radverkehr','interest'), ('Anna Lehmann','garten','interest'),
-    ('Mehmet Aydın','essen','offers'), ('Lena Schmid','uebernachtung','offers'), ('Aylin Demir','bewegung','offers')
+    ('Mehmet Aydın','essen','offers'), ('Lena Schmid','übernachtung','offers'), ('Aylin Demir','bewegung','offers')
   ) as x(who, tag, rel) join public.tags t2 on t2.slug = x.tag;
 
   -- Responsibilities ("Wer ist zuständig?")
@@ -164,7 +164,7 @@ begin
   insert into public.listings (kind, owner_id, group_id, goal_id, title, description, region_id)
   values ('need', (p ->> 'Nora Fischer')::uuid, g_film, goal, 'Raum für die Premiere mit Beamer, etwa 80 Plätze', null, muc)
   returning id into l;
-  insert into public.listing_tags select l, id from public.tags where slug in ('vorfuehrort');
+  insert into public.listing_tags select l, id from public.tags where slug in ('vorführort');
 
   insert into public.goals (group_id, title, status, timeline, proposed_by, adopted_at, created_at)
   values (g_film, 'Film frei im Netz veröffentlichen', 'adopted', 'nach der Premiere', (p ->> 'Clara Neumann')::uuid, now() - interval '40 days', now() - interval '47 days')
@@ -372,7 +372,7 @@ begin
   select li.id, t2.id from public.listings li join (values
     ('Bohrmaschine und Werkzeugkiste zum Ausleihen','ausleihen'), ('Kuchen backen und Leute kennenlernen, sonntags','gesellschaft'),
     ('Kuchen backen und Leute kennenlernen, sonntags','essen'), ('Übrig gebliebener Salat und Fladenbrot von meinem Dönerstand','essen'),
-    ('Schlafsofa im Wohnzimmer für Durchreisende','uebernachtung'), ('Yoga in meinem Garten','bewegung'),
+    ('Schlafsofa im Wohnzimmer für Durchreisende','übernachtung'), ('Yoga in meinem Garten','bewegung'),
     ('Fahrrad reparieren, mit Anleitung und Werkzeug','fahrrad-reparatur'), ('Fahrrad reparieren, mit Anleitung und Werkzeug','werkstatt'),
     ('Eine Stunde Feedback zur Finanzierung deiner Gründung','mentoring'), ('Nachhilfe in Mathe bis zur 10. Klasse','nachhilfe'),
     ('3D-Modellierung in Blender','3d-modellierung'), ('3D-Modellierung in Blender','blender'), ('Sprechen und Vertonen','sprechen'),

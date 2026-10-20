@@ -122,7 +122,7 @@ export async function saveNote(input: NoteInput) {
 const touch = (id: string) => { revalidatePath(`/links/${id}`); revalidatePath("/me");
  revalidatePath("/inhalte"); revalidatePath("/explore"); };
 
-export async function setAccess(id: string, visibility: string, editMode: string, allowDownload: boolean, license: string | null) {
+export async function setResourceAccess(id: string, visibility: string, editMode: string, allowDownload: boolean, license: string | null) {
   const res = await run(async (tx) => { await tx`select app.set_resource_access(${id}, ${visibility}, ${editMode}, ${allowDownload}, ${license})`; return null; });
   touch(id);
   return res;
@@ -134,7 +134,7 @@ export async function renewLink(id: string) {
   return res;
 }
 
-export async function grantAccess(id: string, target: { profileId?: string; groupId?: string }, level: string, expires: string | null) {
+export async function grantResourceAccess(id: string, target: { profileId?: string; groupId?: string }, level: string, expires: string | null) {
   const res = await run(async (tx) => {
     await tx`select app.grant_resource(${id}, ${target.profileId ?? null}, ${target.groupId ?? null}, ${level}, ${expires ? new Date(expires).toISOString() : null}::timestamptz)`;
     return null;

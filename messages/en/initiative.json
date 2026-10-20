@@ -12,19 +12,31 @@
     "idea": "As soon as more than one person joins the discussion, the debate begins.",
     "debate": "Debate running · {n, plural, one {1 argument} other {# arguments}}. The authors can start the vote.",
     "vote": "Vote running · {days, plural, =0 {ends today} one {1 day left} other {# days left}}",
-    "addressee": "With the addressee · answer due by {date}",
+    "addressee": "With the office · answer due by {date}",
     "implementation": "Being implemented · {done} of {total} tasks done",
     "done": "Done."
   },
   "officialAnswer": "Official answer",
   "answerFrom": "Answer · {who} · {date}",
-  "decision": { "accepted": "Accepted", "partial": "Partly accepted", "rejected": "Rejected", "info": "Interim answer" },
+  "decision": {
+    "accepted": "Accepted",
+    "partial": "Partly accepted",
+    "rejected": "Rejected",
+    "info": "Interim answer"
+  },
   "support": "Support",
   "supported": "Supported",
   "voteNow": "Vote",
   "help": "Get involved",
   "sections": "Sections of the initiative",
-  "tabs": { "about": "About", "threadsN": "Threads · {n}", "argumentsN": "Arguments · {n}", "vote": "Vote", "implementation": "Implementation", "history": "History" },
+  "tabs": {
+    "about": "About",
+    "threadsN": "Discussion · {n}",
+    "argumentsN": "Arguments · {n}",
+    "vote": "Vote",
+    "implementation": "Implementation",
+    "history": "History"
+  },
   "easyLanguage": "Easy German",
   "noBody": "No description yet.",
   "threadPlaceholder": "Add something to the initiative …",
@@ -34,8 +46,13 @@
   "noVoteYet": "The authors have not started the vote yet.",
   "whoVotes": "Everyone can vote. Votes from {place} are binding.",
   "nothingYet": "Nothing to implement yet.",
-  "nothingYetText": "When the addressee agrees, tasks and a working group appear here.",
-  "requestStatus": { "open": "awaiting answer", "answered": "answered", "forwarded": "forwarded", "declined": "not responsible" },
+  "nothingYetText": "When the office agrees, tasks and a working group appear here.",
+  "requestStatus": {
+    "open": "awaiting answer",
+    "answered": "answered",
+    "forwarded": "forwarded",
+    "declined": "not responsible"
+  },
   "dueBy": "Answer due: {date}",
   "tasks": "Tasks · {done} of {total} done",
   "toGroup": "To the working group",
@@ -43,10 +60,17 @@
   "created": "Initiative created",
   "changed": "Changed: {fields}",
   "noChange": "Saved",
-  "fields": { "title": "Title", "summary": "Summary", "body": "Description", "body_easy": "Easy German", "addressee_text": "Addressee", "cost_estimate_cents": "Costs" },
+  "fields": {
+    "title": "Title",
+    "summary": "Summary",
+    "body": "Description",
+    "body_easy": "Easy German",
+    "addressee_text": "Responsible office",
+    "cost_estimate_cents": "Costs"
+  },
   "context": "Context",
-  "addressee": "Addressee",
-  "noAddressee": "No addressee yet.",
+  "addressee": "Responsible office",
+  "noAddressee": "No responsible office yet.",
   "addresseeLater": "After a successful vote the addressee has 6 weeks to answer.",
   "respondsIn": "Responds in {days, plural, one {1 day} other {# days}} on average.",
   "costs": "Costs",
@@ -68,5 +92,6 @@
     "days": "Duration in days",
     "quorum": "Minimum turnout in %",
     "voteHint": "Everyone can vote. The votes of those affected are binding. Results stay hidden until the end."
-  }
+  },
+  "back": "Back to the initiative"
 }

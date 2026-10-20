@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { removeFromGroup } from "@/lib/actions/share";
 import type { RefCard, RefType } from "@/lib/refs";
 import { RefCardView } from "./RefCardView";
+import { btn } from "../ui/styles";
 
 export type CollectionItem = { card: RefCard; note: string | null; byName: string | null; mine: boolean };
 
@@ -32,7 +33,7 @@ export function Collection({ groupId, items, canRemoveAll }: { groupId: string; 
                     {i.byName && <span>{t("collection.by", { name: i.byName })}</span>}
                     {(i.mine || canRemoveAll) && (
                       <button type="button" disabled={pending} onClick={() => start(async () => { await removeFromGroup(groupId, { type: i.card.type, id: i.card.id }); })}
-                        className="border-0 bg-transparent p-0 text-sm text-muted underline">{t("collection.remove")}</button>
+                        className={`${btn.linkMuted} text-sm`}>{t("collection.remove")}</button>
                     )}
                   </span>
                 </div>

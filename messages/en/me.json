@@ -5,7 +5,7 @@
   "appear": "You appear",
   "modes": {
     "real": "with real name",
-    "alias": "anonymously"
+    "alias": "pseudonym"
   },
   "aliasNote": "Others only see your pseudonym marked “verified”.",
   "realNote": "Your name appears on posts and in groups.",
@@ -23,11 +23,10 @@
     "settings": "Settings",
     "docs": "Documents"
   },
-  "offers": "What I offer",
-  "needs": "What I am looking for",
-  "tagsHint": "We use this to suggest matching requests and offers. Set details here:",
-  "toOffers": "Offer",
-  "toNeeds": "Request",
+  "offers": "I offer",
+  "needs": "I look for",
+  "tagsHint": "This is how fitting offers and wanted posts are suggested to you. For more detail, post under",
+  "toOffers": "Listings",
   "initiatives": "Initiatives started",
   "noInitiatives": "None yet.",
   "start": "Start an initiative",

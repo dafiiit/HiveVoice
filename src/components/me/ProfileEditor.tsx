@@ -38,9 +38,9 @@ export function DisplayToggle({ mode, realName, alias, headline, bio }: { mode: 
       <span className="text-sm text-muted">{m === "alias" ? t("aliasNote") : t("realNote")}</span>
       {edit && (
         <div className="flex max-w-[560px] flex-col gap-3 border border-line bg-surface p-4">
-          <label className={field.label}>{t("realName")}<input value={real} onChange={(e) => setReal(e.target.value)} className={field.inputSm} /></label>
-          <label className={field.label}>{t("alias")}<input value={al} onChange={(e) => setAl(e.target.value)} className={field.inputSm} /></label>
-          <label className={field.label}>{t("headline")}<input value={hl} onChange={(e) => setHl(e.target.value)} placeholder={t("headlinePlaceholder")} className={field.inputSm} /></label>
+          <label className={field.label}>{t("realName")}<input value={real} onChange={(e) => setReal(e.target.value)} className={field.input} /></label>
+          <label className={field.label}>{t("alias")}<input value={al} onChange={(e) => setAl(e.target.value)} className={field.input} /></label>
+          <label className={field.label}>{t("headline")}<input value={hl} onChange={(e) => setHl(e.target.value)} placeholder={t("headlinePlaceholder")} className={field.input} /></label>
           <label className={field.label}>{t("bio")}<textarea rows={3} value={b} onChange={(e) => setB(e.target.value)} className={field.textarea} /></label>
           {error && <p role="alert" className="m-0 font-bold">{error}</p>}
           <button type="button" disabled={pending} onClick={() => save(m)} className={`${btn.primary} self-start`}>{tc("save")}</button>

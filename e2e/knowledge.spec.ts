@@ -76,7 +76,7 @@ test.describe("knowledge: notes, files and images", () => {
       await page.locator("input[type=file]").setInputFiles({ name: "skizze.png", mimeType: "image/png", buffer: PNG });
       await expect(page.getByText("skizze.jpg").first()).toBeVisible();
       await page.getByLabel("Titel", { exact: true }).fill(photoTitle);
-      await page.getByRole("button", { name: "Teilen", exact: true }).click();
+      await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
       await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
       const img = page.locator("main img[src^='/api/files/']");
       await expect(img).toBeVisible();
@@ -91,7 +91,7 @@ test.describe("knowledge: notes, files and images", () => {
       await page.locator("input[type=file]").setInputFiles({ name: "bericht.pdf", mimeType: "application/pdf", buffer: PDF });
       await expect(page.getByText("bericht.pdf").first()).toBeVisible();
       await page.getByLabel("Titel", { exact: true }).fill(pdfTitle);
-      await page.getByRole("button", { name: "Teilen", exact: true }).click();
+      await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
       await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
       const open = page.getByRole("link", { name: "Datei öffnen" });
       await expect(open).toBeVisible();

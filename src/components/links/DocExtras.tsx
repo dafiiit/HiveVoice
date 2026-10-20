@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { commentOn, copyResource, decideSuggestion, deleteComment, restoreVersion } from "@/lib/actions/links";
 import { relTime } from "@/lib/format";
 import { btn, field } from "../ui/styles";
+import { ConfirmAction } from "../ui/Action";
 
 export type VersionRow = { version_no: number; note: string | null; editor: string | null; created_at: string };
 export type SuggestionRow = { id: string; author: string; note: string; created_at: string; stale: boolean };
@@ -52,8 +53,7 @@ export function Versions({ id, versions, canRestore }: { id: string; versions: V
             <span>{t("version", { n: v.version_no })} · {relTime(v.created_at, locale)}{v.editor ? ` · ${t("by", { name: v.editor })}` : ""}
               {v.note && v.note !== "created" ? ` · ${t("note", { note: v.note.replace(/^suggestion: |^restored:/, "") })}` : ""}</span>
             {canRestore && i > 0 && (
-              <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline"
-                onClick={() => { if (confirm(t("restoreConfirm"))) start(async () => { await restoreVersion(id, v.version_no); router.refresh(); }); }}>{t("restore")}</button>
+              <ConfirmAction disabled={pending} look={btn.linkMuted} question={t("restoreConfirm")} onConfirm={() => start(async () => { await restoreVersion(id, v.version_no); router.refresh(); })} label={t("restore")} />
             )}
           </li>
         ))}
@@ -108,7 +108,7 @@ export function Comments({ id, items, canComment, me, canModerate }: { id: strin
           <span className="text-sm text-muted">{c.author} · {relTime(c.created_at, locale)}</span>
           <p className="m-0 whitespace-pre-line">{c.body}</p>
           {(c.author_id === me || canModerate) && (
-            <button type="button" disabled={pending} className="self-start border-0 bg-transparent p-0 text-sm text-muted underline" onClick={() => start(async () => { await deleteComment(id, c.id); router.refresh(); })}>{t("deleteComment")}</button>
+            <button type="button" disabled={pending} className={`${btn.linkMuted} self-start text-sm`} onClick={() => start(async () => { await deleteComment(id, c.id); router.refresh(); })}>{t("deleteComment")}</button>
           )}
         </article>
       ))}

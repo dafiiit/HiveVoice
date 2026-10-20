@@ -1,9 +1,10 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { blockProfile, hideChat, muteChat, proposeTtl } from "@/lib/actions/safety";
 import { Popover } from "../ui/Popover";
+import { useAction } from "../ui/Action";
 
 export type TtlState = { days: number | null; proposedDays: number | null; proposedByMe: boolean };
 
@@ -12,17 +13,10 @@ export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, t
   conversationId: string; otherId: string; otherName: string; muted: boolean; blocked: boolean; ttl: TtlState;
 }) {
   const t = useTranslations("safety.chat");
-  const tc = useTranslations("common");
   const router = useRouter();
-  const [pending, start] = useTransition();
   const [confirm, setConfirm] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => start(async () => {
-    const res = await fn();
-    setError(res.ok ? null : tc(`errors.${res.error}` as "errors.unknown"));
-    setConfirm(false);
-    router.refresh();
-  });
+  const { run: exec, pending, error } = useAction();
+  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => { setConfirm(false); exec(fn); };
   const item = "flex h-10 w-full items-center justify-between gap-2 border-0 border-b border-line bg-transparent px-0 text-left text-ink last:border-b-0";
   return (
     <Popover label={<span>{t("more")}</span>} align="right">

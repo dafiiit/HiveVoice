@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Standalone output lets the app run in a plain Docker container for self-hosting.
   output: "standalone",
+  // Addresses that moved; old links (and query parameters such as the secret link key ?k=) keep working.
+  redirects: async () => [
+    { source: "/offers/:id", destination: "/anliegen/:id", permanent: true },
+    { source: "/needs/:id", destination: "/anliegen/:id", permanent: true },
+    { source: "/join/:code", destination: "/einladung/:code", permanent: true },
+    { source: "/groups", destination: "/explore?kind=groups", permanent: true },
+    { source: "/new/group", has: [{ type: "query", key: "purpose", value: "demand" }], destination: "/new/initiative", permanent: true },
+  ],
   turbopack: {
     root: process.cwd(),
     rules: {

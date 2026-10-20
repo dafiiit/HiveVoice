@@ -1,5 +1,5 @@
 {
-  "title": "Share and invite",
+  "title": "Invite",
   "lead": "HiveVoice grows when people take each other along. Here you share the app, invite people and see where somebody is still missing near you.",
   "share": {
     "share": "Share",
@@ -8,9 +8,9 @@
     "qr": "Show QR code",
     "qrAlt": "QR code for {title}",
     "qrHint": "Scan it with the camera of a phone.",
-    "app": "Pass on HiveVoice",
+    "app": "Share HiveVoice",
     "appText": "I use HiveVoice: people from our area propose things, discuss fairly and vote in secret. Join us:",
-    "content": "Pass this on",
+    "content": "Share",
     "contentPrivate": "This is not public. Whoever should see it gets an invitation.",
     "contentText": "Have a look at this on HiveVoice:"
   },

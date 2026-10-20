@@ -7,6 +7,7 @@ import { relTime } from "@/lib/format";
 import { Avatar } from "@/components/ui/Avatar";
 import { Glyph } from "@/components/ui/Glyph";
 import { MarkAllRead } from "@/components/MarkAllRead";
+import { Notice, Page, PageHeader } from "@/components/ui/Page";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("notifications"))("title") };
@@ -161,7 +162,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = `/r/${p.type}/${p.id}`; category = "requests"; label = t("labels.other");
     } else if (kind === "listing_match") {
       kind = `listing_match_${p.kind === "need" ? "need" : "offer"}`;
-      href = `/${p.kind === "need" ? "needs" : "offers"}/${p.listing_id}`; label = t("labels.request");
+      href = `/anliegen/${p.listing_id}`; label = t("labels.request");
     } else if (kind === "report_decided" || kind === "content_hidden") {
       href = "/me?tab=reports"; label = t("labels.jury");
     }
@@ -198,21 +199,18 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
   );
 
   return (
-    <div className="flex max-w-[860px] flex-col gap-4 px-4 pb-6 pt-4 md:gap-5 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="display m-0">{t("title")}</h1>
-        {hasUnread && <MarkAllRead label={t("markAll")} />}
-      </div>
+    <Page width="narrow">
+      <PageHeader title={t("title")} actions={hasUnread ? <MarkAllRead label={t("markAll")} /> : undefined} />
       <div role="group" aria-label={t("filter.label")} className="flex flex-wrap gap-1.5">
         {FILTERS.map((f) => (
           <Link key={f} href={f === "all" ? "/notifications" : `/notifications?f=${f}`} aria-pressed={filter === f}
-            className={`${chip(filter === f)} gap-1.5 no-underline`}>
+            className={`${chip(filter === f)} gap-1.5`}>
             {t(`filter.${f}`)}
             {counts[f] > 0 && f !== "all" && <span className={`inline-flex h-4 min-w-4 items-center justify-center px-1 text-[10px] font-bold ${filter === f ? "bg-on-ink text-ink" : "bg-ink text-on-ink"}`}>{counts[f]}</span>}
           </Link>
         ))}
       </div>
-      {shown.length === 0 && <p className="m-0 text-muted">{items.length === 0 ? t("empty") : t("emptyFilter")}</p>}
+      {shown.length === 0 && <Notice tone="hint" className="text-base">{items.length === 0 ? t("empty") : t("emptyFilter")}</Notice>}
       {fresh.length > 0 && (
         <section className="flex flex-col">
           <h2 className="m-0 border-b-2 border-ink pb-2 text-sm font-bold">{t("sections.new")} · {fresh.length}</h2>
@@ -225,6 +223,6 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
           {earlier.map((i) => <Row key={i.id} i={i} />)}
         </section>
       )}
-    </div>
+    </Page>
   );
 }

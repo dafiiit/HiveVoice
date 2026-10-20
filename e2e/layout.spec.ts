@@ -64,14 +64,14 @@ test.describe("Verbinden on a desktop screen", () => {
     test.skip(info.project.name === "mobile", "the fixed board is for wide screens");
     await login(page);
     await page.goto("/connect");
-    await expect(page.getByText("Marktplatz").first()).toBeVisible();
+    await expect(page.getByText("Pinnwand").first()).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
     expect(overflow).toBeLessThanOrEqual(1);
 
-    const header = page.locator("section[aria-label='Gespräch'] header, section header").filter({ hasText: "Marktplatz" }).first();
+    const header = page.locator("section[aria-label='Gespräch'] header, section header").filter({ hasText: "Pinnwand" }).first();
     const before = (await header.boundingBox())!.y;
     const scrolled = await page.evaluate(() => {
-      const pane = [...document.querySelectorAll("section")].find((s) => s.querySelector("header")?.textContent?.includes("Marktplatz"));
+      const pane = [...document.querySelectorAll("section")].find((s) => s.querySelector("header")?.textContent?.includes("Pinnwand"));
       const box = [...(pane?.querySelectorAll("div") ?? [])].find((d) => getComputedStyle(d).overflowY === "auto" && d.scrollHeight > d.clientHeight);
       if (!box) return null;
       box.scrollTop = box.scrollHeight;
@@ -132,7 +132,8 @@ test.describe("on a phone", () => {
     await page.goto("/needs?tab=near");
     await expect(page).toHaveURL(/\/anliegen\?as=need&tab=offers/);
     await expect(page.getByRole("radio", { name: "Ich suche" })).toBeChecked();
-    for (const name of ["Passt zu dir", "Angebote", "Gesuche", "Eingang"]) await expect(page.getByRole("tab", { name: new RegExp(`^${name}`) })).toBeVisible();
+    for (const name of ["Passt zu dir", "Angebote", "Gesuche"]) await expect(page.getByRole("tab", { name: new RegExp(`^${name}`) })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /^Eingang/ })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Anfragen", exact: true })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Anliegen", exact: true }).first()).toHaveAttribute("aria-current", "page");
   });
@@ -141,7 +142,7 @@ test.describe("on a phone", () => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
     await page.goto("/connect");
-    const list = page.getByRole("region", { name: "Unterhaltungen" });
+    const list = page.getByRole("region", { name: "Chats" });
     await expect(list.getByRole("link").first()).toBeVisible();
     const first = (await list.getByRole("link").nth(5).boundingBox())!;
     expect(first.y, "several conversations are visible without scrolling").toBeLessThan(500);
@@ -160,8 +161,8 @@ test.describe("on a phone", () => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
     await page.goto("/connect");
-    const list = page.getByRole("region", { name: "Unterhaltungen" });
-    const search = list.getByRole("searchbox", { name: "Unterhaltungen durchsuchen" });
+    const list = page.getByRole("region", { name: "Chats" });
+    const search = list.getByRole("searchbox", { name: "Chats durchsuchen" });
     const order = list.locator("summary", { hasText: "Chronologisch" });
     const [sb, ob] = [(await search.boundingBox())!, (await order.boundingBox())!];
     expect(sb.x, "search on the left").toBeLessThan(ob.x);
@@ -193,18 +194,12 @@ test.describe("on a phone", () => {
     expect(box.x + box.width).toBeLessThanOrEqual(width);
   });
 
-  test("texts are short on a phone and in full on a wide screen", async ({ page }, info) => {
+  test("the main areas start with their content, not with an explanation", async ({ page }) => {
     await login(page);
     await page.goto("/anliegen");
-    const short = page.getByText("Bieten und suchen an einem Ort.", { exact: true });
-    const long = page.getByText(/Wir bringen beides zusammen/);
-    if (info.project.name === "mobile") {
-      await expect(short).toBeVisible();
-      await expect(long).toBeHidden();
-    } else {
-      await expect(long).toBeVisible();
-      await expect(short).toBeHidden();
-    }
+    await expect(page.getByRole("radio", { name: "Ich biete" })).toBeVisible();
+    await expect(page.getByText(/Wir bringen beides zusammen/)).toHaveCount(0);
+    await expect(page.getByText("Bieten und suchen an einem Ort.", { exact: true })).toHaveCount(0);
   });
 });
 

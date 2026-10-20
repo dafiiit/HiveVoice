@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { addTodoItem, createTodoList, deleteTodoItem, deleteTodoList, setTodoItem, updateTodoList } from "@/lib/actions/todos";
 import { IconClose, IconPlus } from "../ui/Icons";
 import { btn, field } from "../ui/styles";
+import { ConfirmAction } from "../ui/Action";
 
 /** "Liste" next to "Dokument": opens a small form for the name, then goes to the new list. */
 export function NewList({ label }: { label: string }) {
@@ -15,7 +16,7 @@ export function NewList({ label }: { label: string }) {
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondary}><IconPlus size={16} /> {label}</button>;
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.primarySm}><IconPlus size={14} /> {label}</button>;
   return (
     <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => {
       e.preventDefault();
@@ -26,7 +27,7 @@ export function NewList({ label }: { label: string }) {
         else setError(tc(`errors.${res.error}` as "errors.unknown"));
       });
     }}>
-      <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} aria-label={t("titleLabel")} placeholder={t("titlePlaceholder")} className={`${field.inputSm} w-64 max-w-full border-ink`} />
+      <input autoFocus value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} aria-label={t("titleLabel")} placeholder={t("titlePlaceholder")} className={`${field.input} w-64 max-w-full border-ink`} />
       <button type="submit" disabled={pending || !title.trim()} className={btn.primary}>{t("create")}</button>
       <button type="button" onClick={() => setOpen(false)} aria-label={t("cancel")} className="inline-flex h-11 w-11 items-center justify-center border-0 bg-transparent text-ink"><IconClose size={16} /></button>
       {error && <p role="alert" className="m-0 w-full text-sm font-bold">{error}</p>}
@@ -92,7 +93,7 @@ export function TodoList({ id, title, visibility, items, editable }: { id: strin
           act(() => addTodoItem(id, text), { type: "add", item: { id: `tmp-${Date.now()}`, title: text, done: false } });
           input.current?.focus();
         }}>
-          <input ref={input} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={500} placeholder={t("addPlaceholder")} aria-label={t("addLabel")} className={`${field.inputSm} min-w-0 flex-1 border-ink`} />
+          <input ref={input} value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={500} placeholder={t("addPlaceholder")} aria-label={t("addLabel")} className={`${field.input} min-w-0 flex-1 border-ink`} />
           <button type="submit" disabled={!draft.trim()} className={btn.primary}>{t("add")}</button>
         </form>
       )}
@@ -115,10 +116,8 @@ export function TodoList({ id, title, visibility, items, editable }: { id: strin
           <button type="button" disabled={pending} onClick={() => act(() => updateTodoList(id, { visibility: visibility === "me" ? "public" : "me" }))} className={btn.secondarySm}>
             {visibility === "me" ? t("makePublic") : t("makePrivate")}
           </button>
-          <button type="button" disabled={pending} className={btn.secondarySm} onClick={() => {
-            if (!confirm(t("deleteConfirm"))) return;
-            start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/inhalte?f=lists"); });
-          }}>{t("delete")}</button>
+          <ConfirmAction disabled={pending} size="sm" question={t("deleteConfirm")} label={t("delete")}
+            onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/inhalte?f=lists"); })} />
         </div>
       )}
     </div>

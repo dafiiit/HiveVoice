@@ -1,17 +1,5 @@
 {
   "title": "New",
-  "need": {
-    "title": "Make a request",
-    "text": "Big or small. You’ll find others with the same concern there."
-  },
-  "offer": {
-    "title": "Make an offer",
-    "text": "Skills, time, things and knowledge. Also as a link to files and folders."
-  },
-  "group": {
-    "title": "Start a group",
-    "text": "A shared purpose: a project, a club or a demand to an authority. With goals, people in charge and votes."
-  },
   "initiative": {
     "title": "Title",
     "editTitle": "Edit initiative",
@@ -21,7 +9,7 @@
       "idea": "Idea",
       "text": "Description",
       "place": "Place and level",
-      "addressee": "Addressee",
+      "addressee": "Office",
       "review": "Review"
     },
     "ideaTitle": "What should change?",
@@ -44,11 +32,11 @@
     "place": "Place",
     "affected": "Affected: everyone living in {place}.",
     "addresseeTitle": "Who decides?",
-    "addresseeText": "After a successful vote, the addressee receives your initiative with a 6-week deadline to answer.",
+    "addresseeText": "After a successful vote, the responsible office receives your initiative with a 6-week deadline to answer.",
     "addresseeSearch": "Search responsible office",
     "addresseeFree": "Not listed? Name of the office",
     "addresseeFreePlaceholder": "e.g. Munich public utilities",
-    "addressee": "Addressee",
+    "addressee": "Responsible office",
     "cost": "Estimated costs in €",
     "reviewTitle": "Review",
     "reviewHint": "You can keep editing after publishing. Every change stays visible in the history.",
@@ -73,27 +61,43 @@
         "name": "justified",
         "hint": "A few sentences on why it matters."
       }
-    }
+    },
+    "pageTitle": "Start an initiative",
+    "pageLead": "A demand to a responsible office: with debate, a secret vote and a duty to answer."
   },
   "region": {
     "level": "Level",
     "other": "Other place",
     "placeholder": "Postcode or place"
   },
-  "voice": {
-    "title": "Voice an opinion",
-    "text": "Make yourself heard and get talking with people in your area."
-  },
   "purpose": {
-    "title": "What is the group for?",
-    "project": {
-      "title": "Getting something done together",
+    "toInitiative": "You want to demand something from an office? Start an initiative",
+    "toGroup": "You want to make something happen together? Found a group"
+  },
+  "tiles": {
+    "need": {
+      "title": "Post wanted",
+      "text": "Big or small: what you are missing. Whoever has something that fits gets in touch."
+    },
+    "offer": {
+      "title": "Create offer",
+      "text": "Skills, time or things, free, as a swap or paid."
+    },
+    "group": {
+      "title": "Found a group",
       "text": "A project, a club, a neighbourhood. With goals, tasks and roles."
     },
-    "demand": {
-      "title": "Demand something",
-      "text": "A demand to a responsible body, with debate, secret ballot and a duty to answer. If it passes, a group forms to carry it out."
+    "initiative": {
+      "title": "Start an initiative",
+      "text": "Demand something from a responsible office, with debate, a vote and a duty to answer."
     },
-    "later": "The purpose may evolve: goals can be changed at any time, and an initiative turns into a group."
+    "knowledge": {
+      "title": "Add knowledge",
+      "text": "A link, a file or a note for others."
+    },
+    "voice": {
+      "title": "Write on the noticeboard",
+      "text": "A question or news for everyone in your place."
+    }
   }
 }

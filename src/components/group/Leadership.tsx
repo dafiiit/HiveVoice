@@ -1,10 +1,11 @@
 "use client";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { cancelTransfer, openMotion, proposeTransfer, respondTransfer, voteMotion } from "@/lib/actions/groups";
 import { dateTime } from "@/lib/format";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
+import { useAction } from "../ui/Action";
 
 export type TransferView = { id: string; status: "proposed" | "accepted"; to_id: string; to_name: string; from_id: string; from_name: string; executes_at: string | null };
 export type MotionView = { id: string; kind: "takeover" | "recall"; subject_name: string; closes_at: string; yes: number; no: number; members: number; mine: boolean | null };
@@ -16,18 +17,11 @@ export function Leadership({ slug, groupId, ownerId, ownerName, orphaned, viewer
 }) {
   const t = useTranslations("grouprights.lead");
   const tm = useTranslations("grouprights.motion");
-  const tc = useTranslations("common");
   const locale = useLocale();
-  const router = useRouter();
-  const [pending, start] = useTransition();
   const [to, setTo] = useState(candidates[0]?.id ?? "");
-  const [error, setError] = useState<string | null>(null);
   const isOwner = !!viewerId && viewerId === ownerId;
-  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => start(async () => {
-    const res = await fn();
-    setError(res.ok ? null : tc(`errors.${res.error}` as "errors.unknown"));
-    router.refresh();
-  });
+  const { run: exec, pending, error } = useAction();
+  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => exec(fn);
   return (
     <section aria-label={t("title")} className="flex flex-col gap-3">
       <h2 className="m-0 text-2xl font-bold">{t("title")}</h2>
@@ -93,7 +87,7 @@ export function Leadership({ slug, groupId, ownerId, ownerName, orphaned, viewer
           </>
         )}
       </div>
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
     </section>
   );
 }

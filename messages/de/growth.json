@@ -1,5 +1,5 @@
 {
-  "title": "Teilen und einladen",
+  "title": "Einladen",
   "lead": "HiveVoice wächst, wenn Menschen einander mitnehmen. Hier teilst du die App, lädst Menschen ein und siehst, wo bei dir noch jemand fehlt.",
   "share": {
     "share": "Teilen",
@@ -8,9 +8,9 @@
     "qr": "QR-Code zeigen",
     "qrAlt": "QR-Code zu {title}",
     "qrHint": "Mit der Kamera des Handys scannen.",
-    "app": "HiveVoice weitergeben",
+    "app": "HiveVoice teilen",
     "appText": "Ich nutze HiveVoice: Menschen aus unserer Gegend schlagen Dinge vor, diskutieren fair und stimmen geheim ab. Komm dazu:",
-    "content": "Das weitergeben",
+    "content": "Teilen",
     "contentPrivate": "Dieses ist nicht öffentlich. Wer es sehen soll, bekommt eine Einladung.",
     "contentText": "Schau dir das auf HiveVoice an:"
   },

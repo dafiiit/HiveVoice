@@ -51,7 +51,7 @@ export function Settings({ language, easy, theme, places, interests, suggestions
         </div>
         {moving && (
           <div className="flex flex-col gap-2">
-            <input type="search" value={q} onChange={(e) => { setQ(e.target.value); setPicked(null); }} placeholder={t("placePlaceholder")} aria-label={t("places")} className={field.inputSm} />
+            <input type="search" value={q} onChange={(e) => { setQ(e.target.value); setPicked(null); }} placeholder={t("placePlaceholder")} aria-label={t("places")} className={field.input} />
             {!picked && hits.map((h) => (
               <button key={h.id} type="button" onClick={() => { setPicked(h); if (h.boroughs) boroughsOf(h.id).then(setBoroughs); else move(h.id); }}
                 className="flex justify-between border-0 border-b border-line bg-transparent py-2 text-left text-ink">

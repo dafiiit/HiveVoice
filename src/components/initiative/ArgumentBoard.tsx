@@ -9,6 +9,7 @@ import { Glyph } from "../ui/Glyph";
 import { IconCheck } from "../ui/Icons";
 import { ReportButton } from "../ReportDialog";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export type ArgumentView = {
   id: string;
@@ -83,7 +84,7 @@ function Argument({ a, initiativeId, canWrite, viewerId }: { a: ArgumentView; in
           ))}
           {canWrite && (
             <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); if (!reply.trim()) return; start(async () => { await replyToArgument(initiativeId, a.id, reply); setReply(""); }); }}>
-              <input value={reply} onChange={(e) => setReply(e.target.value)} aria-label={tc("reply")} className={field.inputSm} />
+              <input value={reply} onChange={(e) => setReply(e.target.value)} aria-label={tc("reply")} className={field.input} />
               <button type="submit" disabled={pending} className={btn.primary}>{tc("reply")}</button>
             </form>
           )}
@@ -117,7 +118,7 @@ function AddArgument({ side, initiativeId }: { side: "pro" | "contra"; initiativ
         <textarea rows={3} value={body} onChange={(e) => { setBody(e.target.value); setTone(false); }} placeholder={t("placeholder")} className={field.textarea} />
       </label>
       <label className={field.label}>{t("source")} <span className={field.hint}>{tc("optional")}</span>
-        <input value={source} onChange={(e) => setSource(e.target.value)} placeholder={t("sourcePlaceholder")} className={field.inputSm} />
+        <input value={source} onChange={(e) => setSource(e.target.value)} placeholder={t("sourcePlaceholder")} className={field.input} />
       </label>
       <span className={field.hint}>{t("rule")}</span>
       {tone && (
@@ -130,7 +131,7 @@ function AddArgument({ side, initiativeId }: { side: "pro" | "contra"; initiativ
           </div>
         </div>
       )}
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
       {!tone && <button type="submit" disabled={pending} className={`${btn.primary} self-start`}>{t("add")}</button>}
     </form>
   );

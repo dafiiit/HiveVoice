@@ -23,7 +23,7 @@
     "withdrawInvite": "Withdraw",
     "group": "Group",
     "groupNone": "No group",
-    "groupText": "You can attach the initiative to a group where you are an admin. If the group allows it, its admins help manage the initiative.",
+    "groupText": "You can attach the initiative to a group you organise. If the group allows it, its organisers help manage the initiative.",
     "groupSave": "Attach",
     "groupSaved": "Saved"
   },

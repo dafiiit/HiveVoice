@@ -66,8 +66,8 @@ export function GooglePhotosButton({ max, maxSide = 1600, onPicked, className, c
         <div role="status" className="flex max-w-[360px] flex-col gap-2 border border-ink bg-surface p-3 text-sm">
           <span>{t("waiting")}</span>
           <div className="flex flex-wrap gap-2">
-            <a href={uri} target="_blank" rel="noopener noreferrer" className={`${btn.primary} h-10 text-sm`}>{t("open")}</a>
-            <button type="button" onClick={reset} className={`${btn.secondary} h-10 text-sm`}>{t("cancel")}</button>
+            <a href={uri} target="_blank" rel="noopener noreferrer" className={`${btn.primarySm}`}>{t("open")}</a>
+            <button type="button" onClick={reset} className={`${btn.secondarySm}`}>{t("cancel")}</button>
           </div>
         </div>
       )}

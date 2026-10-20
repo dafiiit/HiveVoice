@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { blockInitiative } from "@/lib/actions/initiatives";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 /** Platform admins only: blocking needs a reason the authors can read; a vote that runs is called off. */
 export function BlockInitiative({ id, blocked }: { id: string; blocked: boolean }) {
@@ -23,10 +24,10 @@ export function BlockInitiative({ id, blocked }: { id: string; blocked: boolean 
   return (
     <section aria-label={t("title")} className="flex flex-col gap-2 border border-line p-4">
       <strong className="text-sm">{t("title")}</strong>
-      {!blocked && <label className={field.label}>{t("reason")}<input value={reason} onChange={(e) => setReason(e.target.value)} className={field.inputSm} /></label>}
+      {!blocked && <label className={field.label}>{t("reason")}<input value={reason} onChange={(e) => setReason(e.target.value)} className={field.input} /></label>}
       <button type="button" disabled={pending || (!blocked && reason.trim().length < 10)} onClick={() => go(!blocked)} className={`${blocked ? btn.secondary : btn.red} self-start`}>{blocked ? t("unblock") : t("block")}</button>
       {waiting && <p role="status" className="m-0 text-sm font-bold">{tm("pending")}</p>}
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
+      {error && <Notice tone="error" className="text-sm">{error}</Notice>}
     </section>
   );
 }

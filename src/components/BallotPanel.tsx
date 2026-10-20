@@ -8,6 +8,7 @@ import { dateTime, daysUntil } from "@/lib/format";
 import { Glyph } from "./ui/Glyph";
 import { BallotBox } from "./BallotBox";
 import { btn } from "./ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export type BallotView = {
   id: string;
@@ -103,7 +104,7 @@ export function BallotPanel({ ballot, voted, segment, turnout, signedIn, canVote
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-4">
-              <button type="button" disabled={!choice} onClick={() => (pro.length || contra.length ? setSheet(true) : submit())} className={btn.primaryLg}>{tc("next")}</button>
+              <button type="button" disabled={!choice} onClick={() => (pro.length || contra.length ? setSheet(true) : submit())} className={btn.primary}>{tc("next")}</button>
               <span className="flex items-center gap-2 text-sm"><Glyph shape="keyhole" size={16} /> {t("secret")}</span>
             </div>
           </>
@@ -116,10 +117,10 @@ export function BallotPanel({ ballot, voted, segment, turnout, signedIn, canVote
               <div className="flex flex-col gap-2"><strong>+ {t("strongestPro")}</strong>{pro.map((p) => <span key={p} className="text-sm">{p}</span>)}</div>
               <div className="flex flex-col gap-2"><strong>− {t("strongestContra")}</strong>{contra.map((p) => <span key={p} className="text-sm">{p}</span>)}</div>
             </div>
-            {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+            {error && <Notice tone="error">{error}</Notice>}
             <div className="flex flex-wrap gap-3">
-              <button type="button" onClick={() => setSheet(false)} className={btn.secondaryLg}>{tc("back")}</button>
-              <button type="button" disabled={pending} onClick={submit} className={btn.primaryLg}>{t("castAs", { choice: t(`choice.${choice ?? "yes"}`) })}</button>
+              <button type="button" onClick={() => setSheet(false)} className={btn.secondary}>{tc("back")}</button>
+              <button type="button" disabled={pending} onClick={submit} className={btn.primary}>{t("castAs", { choice: t(`choice.${choice ?? "yes"}`) })}</button>
             </div>
           </div>
         )}
@@ -134,7 +135,7 @@ export function BallotPanel({ ballot, voted, segment, turnout, signedIn, canVote
             </div>
           </div>
         )}
-        {error && !sheet && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+        {error && !sheet && <Notice tone="error">{error}</Notice>}
       </section>
 
       <aside aria-label={t("result")} className="flex flex-col gap-4 border-t-[6px] border-ink pt-4">

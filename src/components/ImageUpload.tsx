@@ -56,10 +56,10 @@ export function ImagePicker({ value, onChange, max = 4 }: { value: string[]; onC
       )}
       {value.length < max && (
         <div className="flex flex-wrap items-start gap-2">
-          <button type="button" disabled={busy} onClick={() => input.current?.click()} className={`${btn.secondary} h-10 text-sm`}>
+          <button type="button" disabled={busy} onClick={() => input.current?.click()} className={`${btn.secondarySm}`}>
             {busy ? t("uploading") : `+ ${t("fromDevice")}`}
           </button>
-          <GooglePhotosButton max={max - value.length} onPicked={(paths) => onChange([...value, ...paths].slice(0, max))} className={`${btn.secondary} h-10 text-sm`}>
+          <GooglePhotosButton max={max - value.length} onPicked={(paths) => onChange([...value, ...paths].slice(0, max))} className={`${btn.secondarySm}`}>
             {t("fromGoogle")}
           </GooglePhotosButton>
           <span className="self-center text-[13px] text-muted">{over ? t("dropHere") : t("dropHint")}</span>
@@ -106,8 +106,8 @@ export function AvatarUpload({ name, seed, path, size = 120 }: { name: string; s
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(false); void pick(e.dataTransfer.files); } }}>
       <div className={`${over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""} w-full max-md:[zoom:0.6]`}><Avatar name={name} seed={seed} path={path} size={size} /></div>
-      <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondary} h-10 w-full px-2 text-sm`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
-      <GooglePhotosButton wide max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondary} h-10 w-full px-2 text-sm`}>{t("fromGoogle")}</GooglePhotosButton>
+      <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondarySm} w-full px-2`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
+      <GooglePhotosButton wide max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondarySm} w-full px-2`}>{t("fromGoogle")}</GooglePhotosButton>
       {path && <button type="button" disabled={working} onClick={remove} className="h-9 w-full border-0 bg-transparent px-0 text-sm text-muted underline">{t("removePhoto")}</button>}
       <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => pick(e.target.files)} />
       {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}

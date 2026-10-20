@@ -8,7 +8,7 @@ import { loadPosts } from "@/lib/posts";
 import { listingCardColumns, listingCardFrom, type ListingCard } from "@/lib/queries";
 import { Cover } from "@/components/ui/Cover";
 import { Avatar } from "@/components/ui/Avatar";
-import { tab, tag } from "@/components/ui/styles";
+import { asideBlock, tag } from "@/components/ui/styles";
 import { JoinPanel } from "@/components/group/JoinPanel";
 import { Goals, type GoalView } from "@/components/group/Goals";
 import { Tasks, type TaskView } from "@/components/group/Tasks";
@@ -28,6 +28,8 @@ import { InviteBanner } from "@/components/group/InviteBanner";
 import { ShareBlock } from "@/components/ShareBlock";
 import { Collection, type CollectionItem } from "@/components/refs/Collection";
 import { loadRefCards, type RefCard } from "@/lib/refs";
+import { BackLink, Notice, Page, Section, Tabs } from "@/components/ui/Page";
+import { dateLong } from "@/lib/format";
 
 const TABS = ["goals", "talk", "links", "collection", "needs", "tasks", "team", "about"] as const;
 
@@ -171,46 +173,81 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     team: t("tabs.team"),
     about: t("tabs.about"),
   };
-  const tabs = TABS.filter((k) => k !== "tasks" || g.mod_tasks);
+  // Five tabs in front, the rarer ones under "Mehr".
+  const front = (["goals", "talk", "collection", "tasks", "team"] as const).filter((k) => k !== "tasks" || g.mod_tasks);
+  const back = (["links", "needs", "about"] as const);
+  const tabHref = (k: (typeof TABS)[number]) => `${path}${k === "goals" ? "" : `?tab=${k}`}`;
+
+  const aside = (
+    <>
+      {data.partOf.length > 0 && (
+        <section className={asideBlock}>
+          <h2 className="m-0 text-lg font-bold">{trf("collection.partOf")}</h2>
+          {data.partOf.map((p) => <Link key={p.id} href={p.href} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={p.title} size={28} group /> <strong>{p.title}</strong></Link>)}
+        </section>
+      )}
+      {data.collection.some((i) => i.card.type === "group") && (
+        <section className={asideBlock}>
+          <h2 className="m-0 text-lg font-bold">{trf("collection.subgroups")}</h2>
+          {data.collection.filter((i) => i.card.type === "group").map((i) => (
+            <Link key={i.card.id} href={i.card.href} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={i.card.title} size={28} group /> <strong>{i.card.title}</strong></Link>
+          ))}
+        </section>
+      )}
+      {data.needs.length > 0 && (
+        <section className={asideBlock}>
+          <h2 className="m-0 text-lg font-bold">{t("needsAside")}</h2>
+          <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+            {data.needs.slice(0, 5).map((n) => <li key={n.id}><Link href={`/anliegen/${n.id}`} className="text-sm text-ink no-underline hover:underline">{n.title}</Link></li>)}
+          </ul>
+        </section>
+      )}
+      {data.similar.length > 0 && (
+        <section className={asideBlock}>
+          <h2 className="m-0 text-lg font-bold">{t("similar")}</h2>
+          {data.similar.map((s) => (
+            <Link key={s.slug} href={`/groups/${s.slug}`} className="flex items-center gap-2 text-sm text-ink no-underline">
+              <Avatar name={s.name} size={28} group /> <span><strong>{s.name}</strong> · {t("memberCount", { n: s.member_count })}</span>
+            </Link>
+          ))}
+        </section>
+      )}
+    </>
+  );
 
   return (
-    <div className="grid gap-5 px-4 pb-6 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_300px]">
-      <div className="flex min-w-0 flex-col gap-6">
-        <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
-          <Link href="/groups" className="text-ink">{t("groups")}</Link><span aria-hidden="true">/</span><span>{g.name}</span>
-        </nav>
+    <Page aside={aside}>
+        <BackLink href="/explore?kind=groups" label={t("groups")} />
         <Cover seed={g.cover_seed} src={g.cover_path} ratio="21 / 9" />
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="inline-flex h-8 items-center bg-ink px-3 font-bold text-on-ink">{t(`kinds.${g.kind}`)}</span>
-          {g.region_name && <span className={tag}>{g.region_name}</span>}
-          <span className={tag}>{t(`policy.${g.join_policy}`)}</span>
-          {g.visibility !== "public" && <span className={tag}>{tr(`vis.${g.visibility}` as "vis.members")}</span>}
-          {g.adults_only && <span className={tag}>{tr("adultsOnly")}</span>}
-          {data.tags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}
-        </div>
-        <h1 className="display m-0">{g.name}</h1>
-        {g.summary && <p className="m-0 max-w-[720px] text-base md:text-xl">{g.summary}</p>}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-          <span className="flex items-center gap-2">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className={tag}>{t(`kinds.${g.kind}`)}</span>
+            {g.region_name && <span className={tag}>{g.region_name}</span>}
+            <span className={tag}>{t(`policy.${g.join_policy}`)}</span>
+            {g.visibility !== "public" && <span className={tag}>{tr(`vis.${g.visibility}` as "vis.members")}</span>}
+            {g.adults_only && <span className={tag}>{tr("adultsOnly")}</span>}
+            {data.tags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}
+          </div>
+          <h1 className="display m-0 break-words">{g.name}</h1>
+          {g.summary && <p className="m-0 max-w-[720px] text-base md:text-xl">{g.summary}</p>}
+          <span className="flex flex-wrap items-center gap-2 text-sm">
             {admins.slice(0, 3).map((a) => <Avatar key={a.id} name={a.name} seed={a.seed} size={28} />)}
             {t("memberCount", { n: g.member_count })}
           </span>
-          {session && <FollowButton type="group" id={g.id} following={data.following} />}
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
+            lastAdmin={role === "admin" && admins.length === 1} />
+          {session && <FollowButton type="group" id={g.id} following={data.following} size="md" />}
           <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} item={session ? { type: "group", id: g.id } : null} />
         </div>
-        {g.archived_at && <p role="status" className="m-0 border-l-4 border-red bg-surface p-3 font-bold">{tr("danger.archived")}</p>}
+        {g.archived_at && <Notice tone="warning">{tr("danger.archived")}</Notice>}
         {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
-        <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
-          lastAdmin={role === "admin" && admins.length === 1} />
 
-        {locked && <p className="m-0 border-l-4 border-ink bg-surface p-4">{data.invite && g.visibility === "secret" ? tr("lockedSecret") : tr("lockedTitle")}</p>}
-        {!locked && <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">
-          {tabs.map((k) => (
-            <Link key={k} role="tab" aria-selected={active === k} href={`${path}${k === "goals" ? "" : `?tab=${k}`}`} scroll={false} className={tab(active === k)}>{labels[k]}</Link>
-          ))}
-        </div>}
+        {locked && <Notice tone="status" className="font-normal">{data.invite && g.visibility === "secret" ? tr("lockedSecret") : tr("lockedTitle")}</Notice>}
+        {!locked && <Tabs label={t("sections")} moreLabel={tc("more")}
+          items={front.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))}
+          more={back.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))} />}
 
         {!locked && active === "goals" && (
           <Goals slug={slug} groupId={g.id} goals={data.goals} members={data.members.map((m) => ({ id: m.id, name: m.name }))}
@@ -231,10 +268,10 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="m-0 max-w-[640px]">{tl("groupIntro")}</p>
               {data.can_post
-                ? <Link href={`/new/link?group=${slug}`} className={btn.primary}>+ {tl("groupShare")}</Link>
+                ? <Link href={`/new/link?group=${slug}`} className={btn.primarySm}>+ {tl("groupShare")}</Link>
                 : <span className="text-sm text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</span>}
             </div>
-            {data.links.length === 0 && <p className="m-0 text-muted">{tl("empty")}</p>}
+            {data.links.length === 0 && <Notice tone="hint" className="text-base">{tl("empty")}</Notice>}
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
               {data.links.map((r) => <LinkCard key={r.id} r={r} me={me ?? null} canVote={!!session?.profile.verified} />)}
             </div>
@@ -246,12 +283,12 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         {!locked && active === "needs" && (
           <section className="flex flex-col gap-4">
             <p className="m-0 max-w-[640px]">{t("needsIntro")}</p>
-            {data.needs.length === 0 && <p className="m-0 text-muted">{t("noNeeds")}</p>}
+            {data.needs.length === 0 && <Notice tone="hint" className="text-base">{t("noNeeds")}</Notice>}
             <div className="flex flex-col border-t border-line">
               {data.needs.map((n) => (
                 <div key={n.id} className="flex flex-wrap items-center gap-4 border-b border-line py-4">
                   <div className="flex min-w-[240px] flex-1 flex-col gap-1">
-                    <Link href={`/needs/${n.id}`} className="font-bold text-ink no-underline">#{t("needsTag")} {n.title}</Link>
+                    <Link href={`/anliegen/${n.id}`} className="font-bold text-ink no-underline hover:underline">{n.title}</Link>
                     {n.description && <span className="text-sm">{n.description}</span>}
                     <span className="text-sm text-muted">{[n.goal_title ? t("forGoal", { goal: n.goal_title }) : null, priceLabel(n, tc, locale)].filter(Boolean).join(" · ")}</span>
                   </div>
@@ -279,8 +316,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             {role === "admin" && (
               <>
                 <GroupRules slug={slug} groupId={g.id} visibility={g.visibility} joinPolicy={g.join_policy} adultsOnly={g.adults_only} slowMode={g.slow_mode_seconds} adminsManageInitiatives={g.admins_manage_initiatives} />
-                <section aria-label={tr("log.title")} className="flex flex-col gap-2">
-                  <h2 className="m-0 text-2xl font-bold">{tr("log.title")}</h2>
+                <Section title={tr("log.title")}>
                   <span className="text-sm text-muted">{tr("log.text")}</span>
                   {(data.team?.audit.length ?? 0) === 0 && <span className="text-muted">{tr("log.empty")}</span>}
                   {data.team?.audit.map((a) => (
@@ -289,7 +325,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
                       <span className="text-muted">{new Date(a.at).toLocaleString(locale)}</span>
                     </span>
                   ))}
-                </section>
+                </Section>
                 <DangerZone slug={slug} groupId={g.id} archived={!!g.archived_at} deleteRequestedAt={g.delete_requested_at} isOwner={me === g.owner_id} isAdmin />
               </>
             )}
@@ -301,43 +337,10 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             <dl className="m-0 grid grid-cols-[140px_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">
               <dt className="font-bold">{t("kind")}</dt><dd className="m-0">{t(`kinds.${g.kind}`)}</dd>
               <dt className="font-bold">{t("team")}</dt><dd className="m-0">{t("memberCount", { n: g.member_count })}</dd>
-              <dt className="font-bold">{t("founded")}</dt><dd className="m-0">{new Date(g.created_at).toLocaleDateString(locale)}</dd>
+              <dt className="font-bold">{t("founded")}</dt><dd className="m-0">{dateLong(g.created_at, locale)}</dd>
             </dl>
           </section>
         )}
-      </div>
-      <aside className="flex flex-col gap-6">
-        {data.partOf.length > 0 && (
-          <section className="flex flex-col gap-2 border-t-[6px] border-ink pt-3">
-            <h2 className="m-0 text-lg font-bold">{trf("collection.partOf")}</h2>
-            {data.partOf.map((p) => <Link key={p.id} href={p.href} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={p.title} size={28} group /> <strong>{p.title}</strong></Link>)}
-          </section>
-        )}
-        {data.collection.some((i) => i.card.type === "group") && (
-          <section className="flex flex-col gap-2 border-t border-line pt-3">
-            <h2 className="m-0 text-lg font-bold">{trf("collection.subgroups")}</h2>
-            {data.collection.filter((i) => i.card.type === "group").map((i) => (
-              <Link key={i.card.id} href={i.card.href} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={i.card.title} size={28} group /> <strong>{i.card.title}</strong></Link>
-            ))}
-          </section>
-        )}
-        {data.needs.length > 0 && (
-          <section className="flex flex-col gap-2 border-t-[6px] border-ink pt-3">
-            <h2 className="m-0 text-lg font-bold">{t("needsAside")}</h2>
-            {data.needs.slice(0, 5).map((n) => <Link key={n.id} href={`${path}?tab=needs`} className="text-sm text-ink">#{n.title}</Link>)}
-          </section>
-        )}
-        {data.similar.length > 0 && (
-          <section className="flex flex-col gap-2 border-t border-line pt-3">
-            <h2 className="m-0 text-lg font-bold">{t("similar")}</h2>
-            {data.similar.map((s) => (
-              <Link key={s.slug} href={`/groups/${s.slug}`} className="flex items-center gap-2 text-sm text-ink no-underline">
-                <Avatar name={s.name} size={28} group /> <span><strong>{s.name}</strong> · {t("memberCount", { n: s.member_count })}</span>
-              </Link>
-            ))}
-          </section>
-        )}
-      </aside>
-    </div>
+    </Page>
   );
 }

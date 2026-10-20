@@ -5,7 +5,7 @@
   "appear": "Du trittst auf",
   "modes": {
     "real": "mit Klarnamen",
-    "alias": "anonym"
+    "alias": "Pseudonym"
   },
   "aliasNote": "Andere sehen nur dein Pseudonym und den Hinweis „verifiziert“.",
   "realNote": "Dein Name steht an Beiträgen und in Gruppen.",
@@ -23,11 +23,10 @@
     "settings": "Einstellungen",
     "docs": "Dokumente"
   },
-  "offers": "Was ich anbiete",
-  "needs": "Was ich suche",
-  "tagsHint": "Damit werden dir passende Gesuche und Angebote vorgeschlagen. Genaueres stellst du hier ein:",
-  "toOffers": "Anbieten",
-  "toNeeds": "Anfragen",
+  "offers": "Ich biete",
+  "needs": "Ich suche",
+  "tagsHint": "Damit werden dir passende Angebote und Gesuche vorgeschlagen. Genauer geht es mit Einträgen unter",
+  "toOffers": "Anliegen",
   "initiatives": "Gestartete Initiativen",
   "noInitiatives": "Noch keine.",
   "start": "Initiative starten",
@@ -79,9 +78,9 @@
     "placeSearch": "Ort ändern …",
     "topics": "Themen",
     "add": "Zuständigkeit hinzufügen",
-    "official": "offiziell · {domain}",
+    "official": "amtlich · {domain}",
     "openRequests": "{n, plural, one {1 offene Anfrage} other {# offene Anfragen}}",
-    "verify": "Offiziell bestätigen",
+    "verify": "Amtlich bestätigen",
     "verifyText": "Gib deine dienstliche E-Mail-Adresse ein. Wir schicken dir einen Bestätigungslink. Das geht nur mit Adressen von Behörden, die bei HiveVoice hinterlegt sind.",
     "officialEmail": "Dienstliche E-Mail",
     "sendLink": "Link senden",

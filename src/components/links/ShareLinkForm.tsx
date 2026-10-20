@@ -7,7 +7,8 @@ import type { Inspection } from "@/lib/links/inspect";
 import { TagPicker } from "../TagPicker";
 import { PreviewImage } from "./PreviewImage";
 import { IconCheck } from "../ui/Icons";
-import { btn, field } from "../ui/styles";
+import { btn, cardFrame, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 type Group = { id: string; slug: string; name: string };
 type Good = Extract<Inspection, { ok: true }>;
@@ -65,18 +66,18 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
           <input id="link-url" type="url" inputMode="url" autoComplete="off" autoFocus value={url} onChange={(e) => { setUrl(e.target.value); setFound(null); setBlocked(null); }}
             onPaste={() => setTimeout(() => document.getElementById("link-check")?.click(), 50)}
             placeholder={t("urlPlaceholder")} className={`${field.input} sm:flex-1`} />
-          <button id="link-check" type="submit" disabled={checking || !url.trim()} className={btn.primaryLg}>{checking ? t("checking") : t("check")}</button>
+          <button id="link-check" type="submit" disabled={checking || !url.trim()} className={btn.primary}>{checking ? t("checking") : t("check")}</button>
         </div>
         {!found && !blocked && !checking && <span className="text-sm text-muted">{t("checkFirst")}</span>}
       </form>
 
       {blocked && (
-        <p role="alert" className="m-0 border-l-4 border-red bg-surface p-4 font-bold">{t(`blocks.${blocked}` as "blocks.unsafe")}</p>
+        <Notice tone="error">{t(`blocks.${blocked}` as "blocks.unsafe")}</Notice>
       )}
 
       {found && (
         <>
-          <section aria-label={t("preview")} className="flex flex-col gap-3 border border-ink border-t-[6px] bg-surface p-4">
+          <section aria-label={t("preview")} className={cardFrame}>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <strong>{t(`kinds.${found.kind}` as "kinds.page")}</strong>
               <span className="text-muted">· {t(`providers.${found.provider}` as "providers.web")}</span>
@@ -106,20 +107,20 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
           <TagPicker label={t("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={t("tagsPlaceholder")} max={10} />
           {groups.length > 0 && (
             <label className={field.label}>{t("groupLabel")}
-              <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className={`${field.select} h-12`}>
+              <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className={`${field.select}`}>
                 <option value="">{t("everyone")}</option>
                 {groups.map((g) => <option key={g.id} value={g.id}>{t("inGroup", { name: g.name })}</option>)}
               </select>
             </label>
           )}
           <p className="m-0 text-sm text-muted">{t("privacy")}</p>
-          {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+          {error && <Notice tone="error">{error}</Notice>}
           <div>
-            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primaryLg}>{pending ? t("publishing") : t("publish")}</button>
+            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primary}>{pending ? t("publishing") : t("publish")}</button>
           </div>
         </>
       )}
-      {!found && error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {!found && error && <Notice tone="error">{error}</Notice>}
     </div>
   );
 }

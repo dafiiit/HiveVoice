@@ -6,7 +6,9 @@ import { listingCardColumns, listingCardFrom, myRegionIds, regionTree, type List
 import { CATEGORIES, CATEGORY_DEFS, isCategory, type FieldDef } from "@/lib/market";
 import { IconCheck } from "../ui/Icons";
 import { Popover } from "../ui/Popover";
-import { btn, chip, field } from "../ui/styles";
+import { btn, chip, field, segment, segments } from "../ui/styles";
+import { Toolbar } from "../ui/Page";
+import { SearchField } from "../ui/SearchField";
 import { ListingCardView } from "./ListingCardView";
 import { MarketMap, type MapPoint } from "./MarketMap";
 
@@ -17,15 +19,14 @@ const SORTS = ["relevant", "new", "price", "date"] as const;
 const param = (f: FieldDef) => (f.type === "number" ? `min_${f.key}` : f.type === "date" ? `from_${f.key}` : `a_${f.key}`);
 
 /**
- * The marketplace in "Entdecken": offers or requests, by category, with the category's own filters
+ * The marketplace in "Anliegen" (tabs Angebote and Gesuche): by category, with the category's own filters
  * (jobs by employment and workplace, flats by rooms and rent, things by condition ...), as a list or a map.
  */
-export async function MarketExplore({ sp, session, homeRegions }: { sp: SP; session: Session | null; homeRegions: string[] }) {
+export async function MarketExplore({ sp, session, homeRegions, side }: { sp: SP; session: Session | null; homeRegions: string[]; side: "offer" | "need" }) {
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string).slice(0, 80) : "");
   const t = await getTranslations("explore");
   const tm = await getTranslations("explore.market");
   const tcat = await getTranslations("categories");
-  const side = str("side") === "need" ? "need" : "offer";
   const cat = isCategory(str("cat")) ? str("cat") as (typeof CATEGORIES)[number] : null;
   const q = str("q").trim();
   const free = str("free") === "1";
@@ -82,11 +83,11 @@ export async function MarketExplore({ sp, session, homeRegions }: { sp: SP; sess
     return { cards, points, total, counts: Object.fromEntries(counts.map((c) => [c.category, c.n])) as Record<string, number>, sentTo, own };
   });
 
-  const base = { kind: "market", side, cat: cat ?? "", q, free: free ? "1" : "", max: max ? String(max) : "", sort, view, mine: mine ? "1" : "", place: place?.id ?? "", ...attr };
+  const base = { tab: side === "offer" ? "offers" : "needs", cat: cat ?? "", q, free: free ? "1" : "", max: max ? String(max) : "", sort, view, mine: mine ? "1" : "", place: place?.id ?? "", ...attr };
   const href = (patch: Record<string, string>) => {
     const p = new URLSearchParams({ ...base, ...patch });
-    for (const [k, v] of [...p.entries()]) if (!v || (k === "sort" && v === "relevant") || (k === "view" && v === "list") || (k === "side" && v === "offer")) p.delete(k);
-    return `/explore?${p}`;
+    for (const [k, v] of [...p.entries()]) if (!v || (k === "sort" && v === "relevant") || (k === "view" && v === "list")) p.delete(k);
+    return `/anliegen?${p}`;
   };
   // Switching the category drops the fields of the old one.
   const catHref = (c: string) => href({ ...Object.fromEntries(Object.keys(attr).map((k) => [k, ""])), cat: c });
@@ -97,32 +98,25 @@ export async function MarketExplore({ sp, session, homeRegions }: { sp: SP; sess
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <div role="radiogroup" aria-label={tm("sideLabel")} className="grid grid-cols-2 border border-ink">
-          {(["offer", "need"] as const).map((s) => (
-            <Link key={s} role="radio" aria-checked={side === s} href={href({ side: s })} className={`inline-flex h-10 items-center justify-center px-4 text-sm font-bold no-underline ${side === s ? "bg-ink text-on-ink" : "bg-surface text-ink"}`}>{tm(`side.${s}`)}</Link>
-          ))}
-        </div>
-        <form action="/explore" className="flex min-w-[220px] flex-1 gap-2">
-          {hidden.map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
-          <input type="search" name="q" defaultValue={q} aria-label={tm("search")} placeholder={tm("searchPlaceholder")} className={`${field.inputSm} h-10 flex-1`} />
-          <button type="submit" className={`${btn.primary} h-10`}>{t("search")}</button>
-        </form>
-      </div>
+      <form action="/anliegen" className="flex gap-2">
+        {hidden.map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
+        <SearchField name="q" defaultValue={q} label={tm("search")} placeholder={tm("searchPlaceholder")} className="flex-1" />
+        <button type="submit" className={btn.primarySm}>{t("search")}</button>
+      </form>
 
       <nav aria-label={tcat("label")} className="-mx-4 flex gap-1.5 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
-        <Link href={catHref("")} aria-current={!cat ? "true" : undefined} className={`${chip(!cat)} h-9 flex-none px-3 no-underline`}>{tcat("all")} · {all}</Link>
+        <Link href={catHref("")} aria-current={!cat ? "true" : undefined} className={`${chip(!cat)} flex-none`}>{tcat("all")} · {all}</Link>
         {CATEGORIES.map((c) => (
-          <Link key={c} href={catHref(c)} aria-current={cat === c ? "true" : undefined} className={`${chip(cat === c)} h-9 flex-none px-3 no-underline`}>
+          <Link key={c} href={catHref(c)} aria-current={cat === c ? "true" : undefined} className={`${chip(cat === c)} flex-none`}>
             {tcat(`names.${c}`)}{data.counts[c] ? ` · ${data.counts[c]}` : ""}
           </Link>
         ))}
       </nav>
 
-      <div className="flex flex-wrap items-center gap-2 text-sm">
+      <Toolbar count={t("count.market", { n: data.total })}>
         <Popover label={t("filter")} badge={active}>
-          <form action="/explore" className="flex flex-col gap-3">
-            {Object.entries(base).filter(([k]) => ["kind", "side", "cat", "q", "sort", "view", "place"].includes(k)).map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
+          <form action="/anliegen" className="flex flex-col gap-3">
+            {Object.entries(base).filter(([k]) => ["tab", "cat", "q", "sort", "view", "place"].includes(k)).map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
             {defs.map((f) => {
               const label = tcat(`${cat}.${f.key}` as "label");
               const name = param(f);
@@ -139,19 +133,19 @@ export async function MarketExplore({ sp, session, homeRegions }: { sp: SP; sess
                 <label key={f.key} className="flex items-center gap-2 text-sm"><input type="checkbox" name={name} value="1" defaultChecked={!!v} className="h-5 w-5 accent-[var(--ink)]" />{label}</label>
               );
               if (f.type === "number") return (
-                <label key={f.key} className={field.label}>{tm("minLabel", { label })}<input type="number" name={name} min={0} defaultValue={v} className={`${field.inputSm} w-32`} /></label>
+                <label key={f.key} className={field.label}>{tm("minLabel", { label })}<input type="number" name={name} min={0} defaultValue={v} className={`${field.input} w-32`} /></label>
               );
               if (f.type === "date") return (
-                <label key={f.key} className={field.label}>{tm("dateFrom", { label })}<input type="date" name={name} defaultValue={v} className={field.inputSm} /></label>
+                <label key={f.key} className={field.label}>{tm("dateFrom", { label })}<input type="date" name={name} defaultValue={v} className={field.input} /></label>
               );
-              return <label key={f.key} className={field.label}>{label}<input name={name} defaultValue={v} className={field.inputSm} /></label>;
+              return <label key={f.key} className={field.label}>{label}<input name={name} defaultValue={v} className={field.input} /></label>;
             })}
             <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="free" value="1" defaultChecked={free} className="h-5 w-5 accent-[var(--ink)]" />{tm("freeOnly")}</label>
-            <label className={field.label}>{tm("maxPrice")}<input type="number" name="max" min={0} defaultValue={max ?? ""} className={`${field.inputSm} w-32`} /></label>
+            <label className={field.label}>{tm("maxPrice")}<input type="number" name="max" min={0} defaultValue={max ?? ""} className={`${field.input} w-32`} /></label>
             {session && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="mine" value="1" defaultChecked={mine} className="h-5 w-5 accent-[var(--ink)]" />{t("nearMe")}</label>}
             <div className="flex items-center gap-3">
-              <button type="submit" className={`${btn.primary} h-10`}>{tm("apply")}</button>
-              {active > 0 && <Link href={href({ ...Object.fromEntries(Object.keys(attr).map((k) => [k, ""])), free: "", max: "", mine: "" })} className="text-sm text-muted">{tm("reset")}</Link>}
+              <button type="submit" className={`${btn.primarySm}`}>{tm("apply")}</button>
+              {active > 0 && <Link href={href({ ...Object.fromEntries(Object.keys(attr).map((k) => [k, ""])), free: "", max: "", mine: "" })} className={`${btn.linkMuted} text-sm`}>{tm("reset")}</Link>}
             </div>
           </form>
         </Popover>
@@ -167,16 +161,14 @@ export async function MarketExplore({ sp, session, homeRegions }: { sp: SP; sess
             </div>
           </Popover>
         )}
-        <div role="radiogroup" aria-label={tm("view")} className="flex">
+        <div role="radiogroup" aria-label={tm("view")} className={segments}>
           {(["list", "map"] as const).map((v) => (
-            <Link key={v} role="radio" aria-checked={view === v} href={href({ view: v })} className={`inline-flex h-9 items-center border border-line-strong px-3 font-bold no-underline ${view === v ? "bg-ink text-on-ink" : "text-ink"}`}>{tm(`views.${v}`)}</Link>
+            <Link key={v} role="radio" aria-checked={view === v} href={href({ view: v })} className={segment(view === v)}>{tm(`views.${v}`)}</Link>
           ))}
         </div>
-        {place && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: place.name })}>{t("inPlace", { name: place.name })} <span aria-hidden="true">✕</span></Link>}
-        {q && <Link href={href({ q: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
-        <Link href={session ? `/anliegen?as=${side}` : "/login?next=/anliegen"} className={btn.primarySm}>+ {tm("post")}</Link>
-        <span className="ml-auto text-muted">{t("count.market", { n: data.total })}</span>
-      </div>
+        {place && <Link href={href({ place: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: place.name })}>{t("inPlace", { name: place.name })} <span aria-hidden="true">✕</span></Link>}
+        {q && <Link href={href({ q: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
+      </Toolbar>
 
       {view === "list" && (data.cards.length === 0
         ? <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>

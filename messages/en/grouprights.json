@@ -3,7 +3,7 @@
     "title": "How does the group work?",
     "project": {
       "name": "Open project",
-      "text": "Everyone who contributes can edit, maintainers approve."
+      "text": "All members can edit, stewards approve."
     },
     "club": {
       "name": "Association",
@@ -27,7 +27,7 @@
     "request": "On request",
     "invite": "By invitation only",
     "openText": "Anyone can join right away.",
-    "requestText": "Admins decide about requests.",
+    "requestText": "Organisers decide about join requests.",
     "inviteText": "Joining only works with an invitation."
   },
   "adultsOnly": "Adults only (18+)",
@@ -67,15 +67,15 @@
     "message": "Message (optional)"
   },
   "roles": {
-    "admin": "Admin",
-    "maintainer": "Maintainer",
-    "contributor": "Contributor",
+    "admin": "Organisers",
+    "maintainer": "Stewards",
+    "contributor": "Members",
     "guest": "Guest"
   },
   "lead": {
     "title": "Leadership",
-    "owner": "Owner: {name}",
-    "ownerHint": "Only the owner appoints admins, hands the group over or deletes it.",
+    "owner": "Lead: {name}",
+    "ownerHint": "Only the lead appoints organisers, hands the group over or deletes it.",
     "orphaned": "The group has nobody leading it right now.",
     "transfer": "Hand the group over",
     "transferTo": "To whom?",
@@ -86,7 +86,7 @@
     "transferAccept": "Take over",
     "transferDecline": "Decline",
     "transferCancel": "Take back",
-    "transferNeed": "Hand-over goes to admins and maintainers of the group."
+    "transferNeed": "Hand-over goes to organisers and stewards of the group."
   },
   "motion": {
     "title": "Members' vote",
@@ -125,9 +125,9 @@
     "slow10": "Every 10 seconds",
     "slow60": "Every minute",
     "slow300": "Every 5 minutes",
-    "slowHint": "Applies to everyone except admins and maintainers.",
+    "slowHint": "Applies to everyone except organisers and stewards.",
     "announce": "If the group becomes more open, all members are told.",
-    "initiatives": "Admins may help manage initiatives attached to this group"
+    "initiatives": "Organisers may help manage initiatives attached to this group"
   },
   "danger": {
     "title": "Archive and delete",
@@ -143,7 +143,7 @@
   },
   "log": {
     "title": "Log",
-    "text": "What admins and maintainers changed, visible to admins only.",
+    "text": "What organisers and stewards changed, visible to organisers only.",
     "empty": "Nothing logged yet.",
     "actions": {
       "group_create": "Group founded",
@@ -187,7 +187,7 @@
     "invite_invalid": "This invitation link is no longer valid.",
     "banned_from_group": "You cannot join this group.",
     "adults_only": "This group is for adults only.",
-    "owner_must_transfer": "The owner has to hand the group over first.",
+    "owner_must_transfer": "The lead has to hand the group over first.",
     "reason_required": "Please give a reason.",
     "name_protected": "This name is reserved for public bodies and parties.",
     "not_allowed": "That is not possible right now."

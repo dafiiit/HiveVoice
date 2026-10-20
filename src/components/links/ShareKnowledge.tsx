@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { ShareLinkForm } from "./ShareLinkForm";
 import { ShareFileForm } from "./ShareFileForm";
 import { NoteEditor } from "./NoteEditor";
-import { chip } from "../ui/styles";
+import { segment, segments } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 type Group = { id: string; slug: string; name: string };
 type Mode = "link" | "file" | "note";
@@ -19,9 +20,9 @@ export function ShareKnowledge({ groups, initialGroup, ideas, initialMode = "lin
   const [notice, setNotice] = useState(false);
   return (
     <div className="flex flex-col gap-5">
-      <div role="radiogroup" aria-label={t("modes")} className="flex flex-wrap gap-2">
+      <div role="radiogroup" aria-label={t("modes")} className={segments}>
         {(["link", "file", "note"] as const).map((m) => (
-          <button key={m} type="button" role="radio" aria-checked={mode === m} onClick={() => { setMode(m); setNotice(false); }} className={chip(mode === m)}>
+          <button key={m} type="button" role="radio" aria-checked={mode === m} onClick={() => { setMode(m); setNotice(false); }} className={segment(mode === m)}>
             {t(m === "link" ? "modeLink" : m === "file" ? "modeFile" : "modeNote")}
           </button>
         ))}
@@ -33,7 +34,7 @@ export function ShareKnowledge({ groups, initialGroup, ideas, initialMode = "lin
       )}
       {mode === "note" && (
         <>
-          {notice && <p role="status" className="m-0 border-l-4 border-ink bg-surface p-3 text-sm">{t("markdownLoaded")}</p>}
+          {notice && <Notice tone="status" className="text-sm font-normal">{t("markdownLoaded")}</Notice>}
           <NoteEditor key={seed.n} initial={{ title: seed.title, description: "", body: seed.body, tags: [] }} groups={groups} initialGroup={initialGroup} ideas={ideas} />
         </>
       )}

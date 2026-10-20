@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink, Notice, Page, Section } from "@/components/ui/Page";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
@@ -7,7 +8,7 @@ import { listingCardColumns, listingCardFrom, type ListingCard } from "@/lib/que
 import { relTime } from "@/lib/format";
 import { Avatar } from "@/components/ui/Avatar";
 import { IconCheck } from "@/components/ui/Icons";
-import { tag } from "@/components/ui/styles";
+import { asideBlock, btn, tag } from "@/components/ui/styles";
 import { FollowButton } from "@/components/FollowButton";
 import { EndorseButton } from "@/components/EndorseButton";
 import { ContactButton } from "@/components/listings/ContactButton";
@@ -60,9 +61,33 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
   const self = me === id;
   // Guests, and everyone for profiles that are only open to shared groups, see name, check mark and headline only.
   const limited = !self && (!session || !d.found);
+  const te = await getTranslations("explore");
+  const offerTags = d.tags.filter((x) => x.relation === "offers");
+  const needTags = d.tags.filter((x) => x.relation !== "offers");
+  const aside = (
+    <>
+      {d.resps.length > 0 && (
+        <section className={asideBlock}>
+          <h2 className="m-0 text-lg font-bold">{t("responsible")}</h2>
+          {d.resps.map((r) => (
+            <Link key={r.id} href={`/responsible?id=${r.id}`} className="flex flex-col text-sm text-ink no-underline">
+              <strong>{r.organization_name ? `${r.organization_name} · ${r.title}` : r.title}{r.is_official && <span className="ml-1 inline-flex align-middle" aria-label={te("official")}><IconCheck size={12} /></span>}</strong>
+              <span>{r.description}</span>
+            </Link>
+          ))}
+        </section>
+      )}
+      {!limited && d.groups.length > 0 && (
+        <section className={asideBlock}>
+          <h2 className="m-0 text-lg font-bold">{t("groups")}</h2>
+          {d.groups.map((g) => <Link key={g.slug} href={`/groups/${g.slug}`} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={g.name} size={24} group />{g.name}</Link>)}
+        </section>
+      )}
+    </>
+  );
   return (
-    <div className="grid gap-5 px-4 pb-6 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <div className="flex min-w-0 flex-col gap-8">
+    <Page aside={aside}>
+        <BackLink href="/explore?kind=people" label={te("kinds.people")} />
         <section className="flex flex-wrap items-start gap-6">
           <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={120} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -71,14 +96,14 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
             {p.headline && <span className="text-lg">{p.headline}</span>}
             {!limited && <span className="text-muted">{[p.region, t("helped", { n: p.helped_count })].filter(Boolean).join(" · ")}</span>}
             {limited && (
-              <span className="text-sm text-muted">{session ? tsf("hidden") : tsf("guestHint", { name: p.display_name })}{!session && <> <Link href={`/login?next=/profile/${id}`} className="font-bold">{tc("signInToWrite")}</Link></>}</span>
+              <span className="text-sm text-muted">{session ? tsf("hidden") : tsf("guestHint", { name: p.display_name })}{!session && <> <Link href={`/login?next=/profile/${id}`} className="font-bold text-ink underline">{tc("signInToWrite")}</Link></>}</span>
             )}
             {!self && p.onboarded_at && (
               <div className="flex flex-wrap gap-2">
                 <MessageButton toId={id} name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} signedIn={!!session} />
                 {session && (
                   <>
-                    <FollowButton type="profile" id={id} following={d.following} />
+                    <FollowButton type="profile" id={id} following={d.following} size="md" />
                     <EndorseButton id={id} on={d.endorsed} />
                     <BlockButton profileId={id} blocked={d.blocked} name={p.display_name} />
                   </>
@@ -86,64 +111,41 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
               </div>
             )}
             {d.trust && d.trust.mode === "vouch" && d.trust.target < 2 && d.trust.mine >= 2 && (
-              <div className="flex flex-col gap-1.5 border-l-4 border-ink bg-surface p-3">
+              <Notice tone="status" className="flex flex-col items-start gap-1.5 font-normal">
                 <span className="text-sm">{tr("vouchHint", { name: p.display_name })}</span>
                 <VouchButton profileId={id} vouched={d.trust.vouched} name={p.display_name} />
-              </div>
+              </Notice>
             )}
-            {self && <Link href="/me" className="text-sm">{t("edit")}</Link>}
+            {self && <Link href="/me" className={`${btn.secondarySm} self-start`}>{t("edit")}</Link>}
           </div>
         </section>
         {p.bio && !limited && <p className="m-0 max-w-[720px] whitespace-pre-line text-lg">{p.bio}</p>}
-        <section className="flex flex-col gap-3">
-          <h2 className="m-0 border-b-2 border-ink pb-2 text-xl font-bold">{t("gives")}</h2>
-          {d.offers.length === 0 && d.tags.filter((x) => x.relation === "offers").length === 0 && <p className="m-0 text-muted">{t("nothing")}</p>}
+        <Section title={t("gives")}>
+          {d.offers.length === 0 && (limited || d.tags.length === 0) && <Notice tone="hint" className="text-base">{t("nothing")}</Notice>}
           {d.offers.map((o) => (
             <div key={o.id} className="flex flex-wrap items-center gap-3 border-b border-line py-3">
-              <Link href={`/${o.kind === "offer" ? "offers" : "needs"}/${o.id}`} className="flex min-w-[220px] flex-1 flex-col text-ink no-underline">
+              <Link href={`/anliegen/${o.id}`} className="flex min-w-[220px] flex-1 flex-col text-ink no-underline">
                 <span className="text-sm text-muted">{o.kind === "offer" ? t("offer") : t("need")}</span>
                 <strong>{o.title}</strong>
                 {o.description && <span className="text-sm">{o.description}</span>}
               </Link>
               <span className="text-sm font-bold">{priceLabel(o, tc, locale)}</span>
               {!self && <ContactButton listingId={o.id} ownerName={p.display_name} ownerSeed={p.avatar_seed} ownerPath={p.avatar_path} title={o.title} price={priceLabel(o, tc, locale)}
-                label={o.kind === "offer" ? t("ask") : t("help")} signedIn={!!session} sent={d.sentTo.includes(o.id)} />}
+                label={o.kind === "offer" ? t("ask") : t("help")} signedIn={!!session} sent={d.sentTo.includes(o.id)} className={btn.primarySm} />}
             </div>
           ))}
-          <div className="flex flex-wrap gap-2">{!limited && d.tags.filter((x) => x.relation === "offers").map((x) => <span key={x.slug} className={tag}>#{t("offersTag")} {x.slug}</span>)}</div>
-        </section>
+          {!limited && offerTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5"><span className="mr-1 text-sm font-bold">{te("offers")}</span>{offerTags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}</div>
+          )}
+          {!limited && needTags.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5"><span className="mr-1 text-sm font-bold">{te("needs")}</span>{needTags.map((x) => <span key={x.slug + x.relation} className={tag}>#{x.slug}</span>)}</div>
+          )}
+        </Section>
         {d.posts.length > 0 && (
-          <section className="flex flex-col gap-3">
-            <h2 className="m-0 border-b-2 border-ink pb-2 text-xl font-bold">{t("posts")}</h2>
+          <Section title={t("posts")}>
             {d.posts.map((x) => <div key={x.id} className="flex flex-col gap-1 border-b border-line py-3"><span className="text-sm text-muted">{relTime(x.created_at, locale)}</span><span>{x.body}</span></div>)}
-          </section>
+          </Section>
         )}
-      </div>
-      <aside className="flex flex-col gap-6">
-        {!limited && d.tags.some((x) => x.relation !== "offers") && (
-          <section className="flex flex-col gap-2 border-t-[6px] border-ink pt-3">
-            <h2 className="m-0 text-lg font-bold">{t("looksFor")}</h2>
-            <div className="flex flex-wrap gap-2">{d.tags.filter((x) => x.relation !== "offers").map((x) => <span key={x.slug + x.relation} className={tag}>#{x.slug}</span>)}</div>
-          </section>
-        )}
-        {d.resps.length > 0 && (
-          <section className="flex flex-col gap-2 border-t border-line pt-3">
-            <h2 className="m-0 text-lg font-bold">{t("responsible")}</h2>
-            {d.resps.map((r) => (
-              <Link key={r.id} href={`/responsible?id=${r.id}`} className="flex flex-col text-sm text-ink no-underline">
-                <strong className="flex items-center gap-1">{r.organization_name ? `${r.organization_name} · ${r.title}` : r.title}{r.is_official && <IconCheck size={12} />}</strong>
-                <span>{r.description}</span>
-              </Link>
-            ))}
-          </section>
-        )}
-        {!limited && d.groups.length > 0 && (
-          <section className="flex flex-col gap-2 border-t border-line pt-3">
-            <h2 className="m-0 text-lg font-bold">{t("groups")}</h2>
-            {d.groups.map((g) => <Link key={g.slug} href={`/groups/${g.slug}`} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={g.name} size={24} group />{g.name}</Link>)}
-          </section>
-        )}
-      </aside>
-    </div>
+    </Page>
   );
 }

@@ -1,17 +1,9 @@
 "use client";
-import { useOptimistic, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { toggleFollow } from "@/lib/actions/social";
+import { ToggleButton } from "./ui/Action";
 
-export function FollowButton({ type, id, following }: { type: "profile" | "group" | "initiative" | "responsibility"; id: string; following: boolean }) {
+export function FollowButton({ type, id, following, size = "sm" }: { type: "profile" | "group" | "initiative" | "responsibility"; id: string; following: boolean; size?: "sm" | "md" }) {
   const t = useTranslations("social");
-  const [state, setState] = useOptimistic(following);
-  const [, start] = useTransition();
-  return (
-    <button type="button" aria-pressed={state}
-      onClick={() => start(async () => { setState(!state); await toggleFollow(type, id, !state); })}
-      className={`h-11 border-0 bg-transparent px-2 ${state ? "font-bold text-ink" : "text-muted"}`}>
-      {state ? t("following") : t("follow")}
-    </button>
-  );
+  return <ToggleButton on={following} size={size} quietOn onToggle={(next) => toggleFollow(type, id, next)} labels={{ on: t("following"), off: t("follow") }} />;
 }

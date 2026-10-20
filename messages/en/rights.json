@@ -10,7 +10,7 @@
     },
     {
       "name": "Account",
-      "text": "You can react, send requests, join groups and attach files. You may write in groups with open entry after the first day."
+      "text": "You can react, send contact requests, join groups and attach files. You may write in groups with open entry after the first day."
     },
     {
       "name": "Verified",
@@ -26,7 +26,7 @@
     }
   ],
   "modes": {
-    "login": "In the test phase a login counts as verified.",
+    "login": "In the test phase signing in counts as verified.",
     "vouch": "You are verified when two verified people vouch for you and your account is a day old.",
     "eid": "You are verified with the online ID."
   },
@@ -50,7 +50,7 @@
   "actions": {
     "message": "Send messages",
     "post": "Write posts and replies",
-    "contact_request": "Send a request to a stranger",
+    "contact_request": "Send a contact request to a stranger",
     "group_join": "Join or ask to join groups",
     "upload": "Upload photos and files",
     "vouch": "Vouch for others",
@@ -59,7 +59,7 @@
     "initiative_create": "Start an initiative",
     "initiative_support": "Support initiatives",
     "vote": "Vote",
-    "listing_create": "Post requests and offers",
+    "listing_create": "Post offers and wanted posts",
     "share": "Share links, files and notes",
     "report": "Report content",
     "jury": "Decide in the citizen jury",
@@ -97,13 +97,13 @@
       "view": "View: depending on visibility everybody, the group, invited people or whoever knows the link.",
       "comment": "Comment and suggest changes: people with the right to comment, with “suggestions” every verified reader.",
       "edit": "Edit: the owner, invited people with the right to edit, with “the group edits” everybody with the group right for files.",
-      "manage": "Manage (rights, ownership, trash): the owner, invited people with “manage”, the group's admins.",
+      "manage": "Manage (rights, ownership, trash): whoever owns it, invited people with “manage” and the group's organisers.",
       "download": "Download: when the switch is on. Whoever may edit can always download.",
       "copy": "Copy into one's own Wissen: with a CC licence, or when downloading is allowed and “all rights reserved” does not apply."
     },
     "initiative": {
       "support": "Support: verified people, as long as the initiative is open and not blocked.",
-      "edit": "Edit: the authors (and the admins of the attached group when the group allows it), with a note.",
+      "edit": "Edit: the authors (and the organisers of the attached group when the group allows it), with a note.",
       "invite_author": "Invite a co-author: the authors, up to five including open invitations.",
       "start_ballot": "Start a vote: the authors, after the debate and with enough supporters for the place.",
       "withdraw": "Withdraw: the lead of the initiative.",
@@ -112,8 +112,8 @@
     "group": {
       "post": "Write: members with the right to write.",
       "invite": "Invite: depending on the role and the invitation rule of the group.",
-      "manage_members": "Manage members: the admins and whoever was given the right.",
-      "archive": "Archive: the admins.",
+      "manage_members": "Manage members: the organisers and whoever was given the right.",
+      "archive": "Archive: the organisers.",
       "transfer": "Hand over ownership: the owner.",
       "delete": "Delete: the owner, with 14 days of waiting."
     },
@@ -124,7 +124,7 @@
       "edit": "Edit and hand over: the main person responsible."
     },
     "poll": {
-      "manage": "End or delete a poll: whoever created it, and the admins and maintainers of the group."
+      "manage": "End or delete a poll: whoever created it, and the group's organisers and stewards."
     },
     "message": {
       "edit": "Change a message: only the sender, for 15 minutes.",
@@ -153,14 +153,14 @@
     "has_activity": "Deleting is no longer possible because somebody has supported, voted or discussed.",
     "too_many_authors": "There are already as many authors and invitations as allowed.",
     "not_member": "Only members can do this. Join the group.",
-    "not_allowed": "You have no right to this here. Ask the admins.",
-    "not_admin": "Only the admins may do this.",
+    "not_allowed": "You have no right to this here. Ask the organisers.",
+    "not_admin": "Only the organisers may do this.",
     "not_affected": "Only people from the place can do this.",
     "own_responsibility": "This is your own responsibility.",
     "official_role": "Official responsibilities cannot be disputed this way.",
     "duplicate": "A dispute about this is running already.",
     "not_holder": "Only whoever runs the responsibility may do this.",
-    "not_creator": "The creator and the group's admins may do this.",
+    "not_creator": "Whoever created it and the group's organisers may do this.",
     "edit_window_over": "The 15 minutes to change it are over.",
     "not_found": "This no longer exists.",
     "unknown_action": "There is no rule for this yet."

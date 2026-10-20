@@ -25,7 +25,7 @@ export function Tasks({ slug, groupId, tasks, canEdit, viewerId, signedIn }: { s
     <div className="flex flex-col gap-5">
       {canEdit && (
         <form className="flex max-w-[520px] gap-2" onSubmit={(e) => { e.preventDefault(); if (title.trim()) start(async () => { await addTask(slug, groupId, title); setTitle(""); }); }}>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("new")} aria-label={t("new")} className={field.inputSm} />
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("new")} aria-label={t("new")} className={field.input} />
           <button type="submit" disabled={pending} className={btn.primary}>+</button>
         </form>
       )}
@@ -46,17 +46,15 @@ export function Tasks({ slug, groupId, tasks, canEdit, viewerId, signedIn }: { s
                     </span>
                     {x.can_write && (
                       <div className="flex flex-wrap gap-3 text-sm">
-                        {c !== "done" && <button type="button" disabled={pending} onClick={() => start(async () => { await moveTask(slug, x.id, c === "open" ? "in_progress" : "done"); })} className="border-0 bg-transparent p-0 font-bold text-ink underline">{c === "open" ? t("start") : t("finish")}</button>}
-                        {c === "done" && <button type="button" disabled={pending} onClick={() => start(async () => { await moveTask(slug, x.id, "open"); })} className="border-0 bg-transparent p-0 text-muted underline">{t("reopen")}</button>}
-                        <button type="button" disabled={pending} onClick={() => start(async () => { await claimTask(slug, x.id, !mine); })} className="border-0 bg-transparent p-0 text-muted underline">{mine ? t("unclaim") : t("claim")}</button>
-                        <button type="button" disabled={pending} onClick={() => start(async () => { await deleteTask(slug, x.id); })} className="border-0 bg-transparent p-0 text-muted underline">{t("delete")}</button>
+                        {c !== "done" && <button type="button" disabled={pending} onClick={() => start(async () => { await moveTask(slug, x.id, c === "open" ? "in_progress" : "done"); })} className={`${btn.link} font-bold`}>{c === "open" ? t("start") : t("finish")}</button>}
+                        {c === "done" && <button type="button" disabled={pending} onClick={() => start(async () => { await moveTask(slug, x.id, "open"); })} className={btn.linkMuted}>{t("reopen")}</button>}
+                        <button type="button" disabled={pending} onClick={() => start(async () => { await claimTask(slug, x.id, !mine); })} className={btn.linkMuted}>{mine ? t("unclaim") : t("claim")}</button>
+                        <button type="button" disabled={pending} onClick={() => start(async () => { await deleteTask(slug, x.id); })} className={btn.linkMuted}>{t("delete")}</button>
                       </div>
                     )}
-                    {signedIn && <ShareMenu type="task" id={x.id} title={x.title} className="self-start border-0 bg-transparent p-0 text-sm font-bold text-ink underline" />}
-                    {x.manage && (
-                      <AccessPanel type="task" id={x.id} read={x.read_scope} write={x.write_scope} hasGroup grants={x.grants} path={`/groups/${slug}`}
-                        linkUrl={x.link_token ? `/r/task/${x.id}?k=${x.link_token}` : null} />
-                    )}
+                    {signedIn && <ShareMenu type="task" id={x.id} title={x.title} className={`${btn.link} self-start text-sm`}
+                      access={x.manage ? <AccessPanel bare type="task" id={x.id} read={x.read_scope} write={x.write_scope} hasGroup grants={x.grants} path={`/groups/${slug}`}
+                        linkUrl={x.link_token ? `/r/task/${x.id}?k=${x.link_token}` : null} /> : undefined} />}
                   </article>
                 );
               })}

@@ -1,26 +1,20 @@
 "use client";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+
 import { useLocale, useTranslations } from "next-intl";
 import { archiveGroup, requestDeleteGroup } from "@/lib/actions/groups";
 import { dateLong } from "@/lib/format";
 import { btn } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
+import { useAction } from "../ui/Action";
 
 /** Archive (admins), schedule deletion with a 14 day wait (owner), download the group's data (admins). */
 export function DangerZone({ slug, groupId, archived, deleteRequestedAt, isOwner, isAdmin }: {
   slug: string; groupId: string; archived: boolean; deleteRequestedAt: string | null; isOwner: boolean; isAdmin: boolean;
 }) {
   const t = useTranslations("grouprights.danger");
-  const tc = useTranslations("common");
   const locale = useLocale();
-  const router = useRouter();
-  const [pending, start] = useTransition();
-  const [error, setError] = useState<string | null>(null);
-  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => start(async () => {
-    const res = await fn();
-    setError(res.ok ? null : tc(`errors.${res.error}` as "errors.unknown"));
-    router.refresh();
-  });
+  const { run: exec, pending, error } = useAction();
+  const run = (fn: () => Promise<{ ok: boolean; error?: string }>) => exec(fn);
   const due = deleteRequestedAt ? new Date(new Date(deleteRequestedAt).getTime() + 14 * 86400000).toISOString() : null;
   return (
     <section aria-label={t("title")} className="flex flex-col gap-3 border-t-[6px] border-ink pt-4">
@@ -39,7 +33,7 @@ export function DangerZone({ slug, groupId, archived, deleteRequestedAt, isOwner
           <button type="button" disabled={pending} className={`${deleteRequestedAt ? btn.secondary : btn.red} self-start`} onClick={() => run(() => requestDeleteGroup(slug, groupId, !deleteRequestedAt))}>{deleteRequestedAt ? t("cancelDelete") : t("delete")}</button>
         </div>
       )}
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
     </section>
   );
 }

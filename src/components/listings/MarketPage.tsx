@@ -3,24 +3,29 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { listingCardColumns, listingCardFrom, myRegionIds, popularTags, type ListingCard } from "@/lib/queries";
-import { tab } from "../ui/styles";
+import { redirect } from "next/navigation";
+import { btn } from "../ui/styles";
+import { Notice, Page, PageHeader, Tabs } from "../ui/Page";
+import { getPlace } from "@/lib/place";
 import { ListingCardView } from "./ListingCardView";
 import { ListingEditor } from "./ListingEditor";
+import { MarketExplore } from "./MarketExplore";
 import { MyListings, type MyListing } from "./MyListings";
-import { Inbox, type ContactRow } from "./Inbox";
 import { priceLabel } from "./price";
-import { Lead } from "../ui/Lead";
 
 type Card = ListingCard & { why: string | null; sent: boolean; allied: boolean; reasons?: string[]; via_id?: string | null };
 type Own = { id: string; title: string; kind: "offer" | "need" };
 
-const TABS = ["you", "offers", "needs", "inbox"] as const;
+const TABS = ["you", "offers", "needs"] as const;
 
 /**
- * "Anliegen": offering and looking in one place. One editor with "Ich biete / Ich suche", the own listings of both
- * kinds, and what fits them, then everyone's offers and requests, and the inbox of contact requests.
+ * "Anliegen", the one home of offers and wanted posts: one editor with "Ich biete / Ich suche", the own listings
+ * of both kinds, what fits them, and everyone's offers and wanted posts with the filters of each category.
+ * Contact requests live in Verbinden only.
  */
 export async function MarketPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  // The old inbox tab: contact requests are answered in Verbinden.
+  if (searchParams.tab === "inbox") redirect("/connect?f=requests");
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
@@ -67,34 +72,14 @@ export async function MarketPage({ searchParams }: { searchParams: Record<string
           and not (l.id = any(${matched.map((m) => m.id)}::uuid[]))
         order by (l.region_id = any(${regions}::uuid[])) desc, l.created_at desc limit 40`;
       cards = [...matched, ...byInterest];
-    } else if (active === "offers" || active === "needs") {
-      cards = await tx<Card[]>`
-        select ${listingCardColumns(tx)}, null as why from ${listingCardFrom(tx)}
-        where l.kind = ${active === "offers" ? "offer" : "need"} and l.status = 'active' ${me ? tx`and l.owner_id <> ${me}` : tx``} ${paidFilter}
-        order by (l.region_id = any(${regions}::uuid[])) desc, l.created_at desc limit 60`;
     }
     cards = cards.map((c) => ({ ...c, sent: sentTo.includes(c.id), allied: allied.includes(c.id) }));
-    const inbox = active === "inbox" && me ? {
-      incoming: await tx<ContactRow[]>`
-        select c.id, c.status::text, c.message, c.created_at, l.title as listing_title, v.title as via_title, p.id as other_id, p.display_name as other_name, p.avatar_seed as other_seed, p.avatar_path as other_path,
-               (select cv.id from public.conversations cv where cv.contact_request_id = c.id) as conversation_id
-        from public.contact_requests c join public.profiles p on p.id = c.from_profile_id left join public.listings l on l.id = c.listing_id
-        left join public.listings v on v.id = c.via_listing_id
-        where c.to_profile_id = ${me} and c.status <> 'withdrawn' order by (c.status = 'pending') desc, c.created_at desc limit 50`,
-      outgoing: await tx<ContactRow[]>`
-        select c.id, c.status::text, c.message, c.created_at, l.title as listing_title, v.title as via_title, p.id as other_id, p.display_name as other_name, p.avatar_seed as other_seed, p.avatar_path as other_path,
-               (select cv.id from public.conversations cv where cv.contact_request_id = c.id) as conversation_id
-        from public.contact_requests c join public.profiles p on p.id = c.to_profile_id left join public.listings l on l.id = c.listing_id
-        left join public.listings v on v.id = c.via_listing_id
-        where c.from_profile_id = ${me} and c.status <> 'withdrawn' order by c.created_at desc limit 50`,
-    } : null;
-    const pendingIn = me ? Number((await tx`select count(*)::int n from public.contact_requests where to_profile_id = ${me} and status = 'pending'`)[0].n) : 0;
     const popular = await popularTags(tx);
     const [region] = me ? await tx<{ id: string; name: string }[]>`select r.id, r.name from public.profiles p join public.regions r on r.id = p.home_region_id where p.id = ${me}` : [];
     const groups = me ? await tx<{ id: string; slug: string; name: string }[]>`
       select g.id, g.slug::text, g.name from public.group_members gm join public.groups g on g.id = gm.group_id
       where gm.profile_id = ${me} and g.archived_at is null and app.has_group_permission(g.id, 'post') order by g.name` : [];
-    return { mine, own, cards, inbox, pendingIn, popular, region, groups };
+    return { mine, own, cards, popular, region, groups };
   });
 
   const ideas = { offer: (t.raw("ideasOffer") as string[]) ?? [], need: (t.raw("ideasNeed") as string[]) ?? [] };
@@ -107,36 +92,27 @@ export async function MarketPage({ searchParams }: { searchParams: Record<string
   // The reference offered when asking: my own listings of the other kind.
   const ownFor = (c: Card) => data.own.filter((o) => o.kind !== c.kind);
 
+  const place = active === "you" ? null : await getPlace();
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-col gap-2">
-        <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
-        <Lead long={t("lead")} short={t("leadShort")} />
-      </div>
+    <Page>
+      <PageHeader title={t("title")} mobileHidden />
       {session ? <ListingEditor kind={startKind} groups={data.groups} startWithLink={searchParams.share === "link"} initialTitle={typeof searchParams.title === "string" ? searchParams.title.slice(0, 120) : ""} ideas={ideas} regionId={data.region?.id ?? null} regionName={data.region?.name ?? null} popular={data.popular} />
-        : <p className="m-0"><Link href="/login?next=/anliegen" className="font-bold">{tc("signInToWrite")}</Link></p>}
+        : <Link href="/login?next=/anliegen" className={`${btn.primary} self-start`}>{tc("signInToWrite")}</Link>}
       <MyListings items={mine} />
-      <div role="tablist" aria-label={t("view")} className="flex overflow-x-auto border-b border-line">
-        {TABS.filter((k) => session || (k !== "you" && k !== "inbox")).map((k) => (
-          <Link key={k} role="tab" aria-selected={active === k} href={href({ tab: k })} scroll={false} className={tab(active === k)}>
-            {k === "inbox" ? (data.pendingIn ? t("tabs.inboxN", { n: data.pendingIn }) : t("tabs.inbox")) : t(`tabs.${k}`)}
+      <Tabs label={t("view")} items={TABS.filter((k) => session || k !== "you").map((k) => ({ href: href({ tab: k, paid: k === "you" && paid ? "1" : "" }), label: t(`tabs.${k}`), on: active === k }))} />
+      {active === "you" && (
+        <>
+          <Link href={href({ paid: paid ? "" : "1" })} className="inline-flex items-center gap-2 self-start text-sm text-ink no-underline" aria-pressed={paid}>
+            <span className={`inline-block h-5 w-5 border border-ink ${paid ? "bg-ink" : ""}`} aria-hidden="true" /> {t("showPaid")}
           </Link>
-        ))}
-      </div>
-      {(active === "offers" || active === "needs") && <Link href={`/explore?kind=market&side=${active === "offers" ? "offer" : "need"}`} className="self-start text-sm font-bold text-ink">{t("browse")} →</Link>}
-      {active !== "inbox" && active !== "needs" && (
-        <Link href={href({ paid: paid ? "" : "1" })} className="inline-flex items-center gap-2 self-start text-sm text-ink no-underline" aria-pressed={paid}>
-          <span className={`inline-block h-5 w-5 border border-ink ${paid ? "bg-ink" : ""}`} aria-hidden="true" /> {t("showPaid")}
-        </Link>
+          {data.cards.length === 0
+            ? <Notice tone="hint">{t("emptyYou")}</Notice>
+            : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {data.cards.map((c) => <ListingCardView key={c.id} c={c} signedIn={!!session} why={c.why} sent={c.sent} allied={c.allied} reasons={c.reasons} mine={ownFor(c)} via={c.via_id} />)}
+              </div>}
+        </>
       )}
-      {active === "inbox" && data.inbox && <Inbox incoming={data.inbox.incoming} outgoing={data.inbox.outgoing} />}
-      {active !== "inbox" && (
-        data.cards.length === 0
-          ? <p className="m-0 text-muted">{active === "you" ? t("emptyYou") : t("emptyNear")}</p>
-          : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {data.cards.map((c) => <ListingCardView key={c.id} c={c} signedIn={!!session} why={c.why} sent={c.sent} allied={c.allied} reasons={c.reasons} mine={ownFor(c)} via={c.via_id} />)}
-            </div>
-      )}
-    </div>
+      {active !== "you" && <MarketExplore sp={searchParams} session={session} side={active === "offers" ? "offer" : "need"} homeRegions={place?.chain.map((r) => r.id) ?? []} />}
+    </Page>
   );
 }

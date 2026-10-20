@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { slugify } from "@/lib/slug";
+import { tagSlug } from "@/lib/slug";
 import { Carousel } from "./ui/Carousel";
 import { chip, field } from "./ui/styles";
 
@@ -20,7 +20,7 @@ export function TagPicker({ label, value, onChange, suggestions, placeholder, ma
   const t = useTranslations("common.tags");
   const [draft, setDraft] = useState("");
   const add = (raw: string) => {
-    const s = slugify(raw);
+    const s = tagSlug(raw);
     if (s.length >= 2 && !value.includes(s) && value.length < max) onChange([...value, s]);
   };
   const remove = (s: string) => onChange(value.filter((x) => x !== s));
@@ -48,7 +48,7 @@ export function TagPicker({ label, value, onChange, suggestions, placeholder, ma
       )}
       <div className="flex max-w-[420px] gap-2">
         <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={placeholder} aria-label={label}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(draft); setDraft(""); } }} className={field.inputSm} />
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(draft); setDraft(""); } }} className={field.input} />
         <button type="button" aria-label={t("add")} onClick={() => { add(draft); setDraft(""); }} className="h-11 flex-none border border-ink bg-transparent px-4 font-bold text-ink">+</button>
       </div>
     </fieldset>

@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { dateTime, relTime } from "@/lib/format";
 import { AddStatement, JurorVote } from "@/components/responsible/DisputeActions";
+import { Notice, Page, PageHeader } from "@/components/ui/Page";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("resprights.dispute_page"))("title") };
@@ -19,6 +19,7 @@ export default async function DisputePage({ params }: PageProps<"/responsible/di
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("resprights.dispute_page");
+  const tex = await getTranslations("explore");
   const locale = await getLocale();
   const data = await asViewer(viewer, async (tx) => {
     const [d] = await tx<D[]>`
@@ -35,15 +36,14 @@ export default async function DisputePage({ params }: PageProps<"/responsible/di
   if (!data) notFound();
   const { d, statements, isParty, seat } = data;
   return (
-    <div className="flex max-w-[760px] flex-col gap-5 px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-10">
-      <nav className="text-sm"><Link href="/responsible" className="text-ink">{t("back")}</Link></nav>
-      <h1 className="display m-0">{t("title")}</h1>
+    <Page width="narrow">
+      <PageHeader title={t("title")} back={{ href: "/responsible", label: tex("kinds.responsible") }} />
       <p className="m-0 text-lg">{t("about", { title: [d.resp_org, d.resp_title].filter(Boolean).join(" · ") })}</p>
-      <p role="status" className="m-0 border-l-4 border-ink pl-3 font-bold">
+      <Notice tone="status">
         {t(`status_${d.status}` as "status_jury")}
         {d.status === "evidence" && <> {t("evidenceUntil", { date: dateTime(d.evidence_until, locale) })}</>}
         {d.status === "jury" && d.jury_until && <> {t("juryUntil", { date: dateTime(d.jury_until, locale) })}</>}
-      </p>
+      </Notice>
       <section className="flex flex-col gap-3">
         <h2 className="m-0 text-xl font-bold">{t("statements")}</h2>
         {statements.length === 0 && <p className="m-0 text-muted">{t("none")}</p>}
@@ -56,6 +56,6 @@ export default async function DisputePage({ params }: PageProps<"/responsible/di
       </section>
       {isParty && d.status === "evidence" && <AddStatement id={d.id} />}
       {seat && !seat.declined && d.status === "jury" && <JurorVote id={d.id} voted={!!seat.choice} />}
-    </div>
+    </Page>
   );
 }

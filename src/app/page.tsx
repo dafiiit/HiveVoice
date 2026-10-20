@@ -63,8 +63,8 @@ export default async function Welcome() {
           <div className="relative flex flex-col gap-6 md:pl-[25%]">
             <Lead long={t("lead")} short={t("leadShort")} className="max-w-[560px] text-xl" />
             <div className="flex flex-wrap gap-3">
-              <Link href="/signup" className={btn.primaryLg}>{t("join")}</Link>
-              <Link href="/explore" className={btn.secondaryLg}>{t("guest")}</Link>
+              <Link href="/signup" className={btn.primary}>{t("join")}</Link>
+              <Link href="/explore" className={btn.secondary}>{t("guest")}</Link>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default async function Welcome() {
       <section className="flex flex-wrap gap-10 border-b border-line bg-surface px-4 py-6 sm:px-6 md:px-10 md:py-[72px]">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
           <h2 className="m-0 text-[clamp(32px,3.4vw,48px)] font-bold leading-none tracking-[-0.03em]">{t("offerTitle")}</h2>
-          <Link href="/anliegen?as=offer" className={`${btn.primaryLg} self-start`}>{t("offerCta")}</Link>
+          <Link href="/anliegen?as=offer" className={`${btn.primary} self-start`}>{t("offerCta")}</Link>
         </div>
         {pairs.length > 0 && (
           <div className="flex min-w-0 flex-[2_1_520px] flex-col border-t-[6px] border-ink">

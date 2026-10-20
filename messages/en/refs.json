@@ -16,16 +16,16 @@
   },
   "missing": "Not visible to you: deleted or shared with specific people only.",
   "share": {
-    "button": "Pass on",
-    "title": "Pass on: {title}",
+    "button": "Share",
+    "title": "Share: {title}",
     "chat": "Into a chat",
     "chatEmpty": "No chats yet. Write to someone first.",
     "group": "Into a group",
     "groupEmpty": "You are not in any group where you may write.",
     "groupCollect": "Add to the collection",
-    "groupPost": "Post in the group's talk",
-    "market": "In your place's marketplace",
-    "marketPost": "Post in the marketplace of {place}",
+    "groupPost": "Send to the group chat",
+    "market": "On your place's noticeboard",
+    "marketPost": "Send to the noticeboard of {place}",
     "marketNone": "Choose your place first.",
     "note": "Message (optional)",
     "notePlaceholder": "Have a look, does this fit you?",
@@ -36,7 +36,11 @@
     "link": "Link",
     "close": "Close",
     "privateHint": "Only people allowed to see it see the card's content. Everyone else sees “Not visible”.",
-    "out": "Outside HiveVoice"
+    "tabs": {
+      "app": "In the app",
+      "out": "Link / QR",
+      "access": "Access"
+    }
   },
   "access": {
     "title": "Who may do what?",
@@ -68,7 +72,7 @@
   },
   "collection": {
     "tab": "Collection",
-    "intro": "Everything that belongs to this group: offers, requests, documents, tasks, initiatives and subgroups. Add things with “Pass on” on any of them.",
+    "intro": "Everything that belongs to this group: offers, wanted posts, documents, tasks, initiatives and subgroups. Add things with “Share” on any of them.",
     "empty": "Nothing in the collection yet.",
     "subgroups": "Subgroups",
     "partOf": "Part of",

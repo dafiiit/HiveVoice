@@ -5,6 +5,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { closePoll, deletePoll, votePoll } from "@/lib/actions/polls";
 import { dateTime } from "@/lib/format";
 import type { PollView } from "@/lib/files";
+import { ConfirmAction } from "./ui/Action";
+import { btn } from "./ui/styles";
 
 /**
  * A poll in a chat or post. Counts are open, who voted for what is not.
@@ -57,11 +59,11 @@ export function PollCard({ poll, canVote, signedIn, loginPath, onChange }: { pol
       {signedIn && !canVote && !shown.closed && <span className="text-xs text-muted">{t("pollVerify")}</span>}
       {shown.can_manage && (
         <span className="flex gap-3 text-xs">
-          {!shown.closed && <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => start(async () => {
+          {!shown.closed && <button type="button" disabled={pending} className={btn.linkMuted} onClick={() => start(async () => {
             const res = await closePoll(shown.id);
             if (res.ok && res.data) { setState({ base: poll, local: res.data }); onChange?.(res.data); } else setError(true);
           })}>{t("pollEnd")}</button>}
-          <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => { if (confirm(t("pollDeleteConfirm"))) start(async () => { const res = await deletePoll(shown.id); if (res.ok) setGone(true); else setError(true); }); }}>{t("pollDelete")}</button>
+          <ConfirmAction disabled={pending} look={btn.linkMuted} question={t("pollDeleteConfirm")} onConfirm={() => start(async () => { const res = await deletePoll(shown.id); if (res.ok) setGone(true); else setError(true); })} label={t("pollDelete")} />
         </span>
       )}
       {error && <span role="alert" className="text-sm font-bold">{t("pollFailed")}</span>}

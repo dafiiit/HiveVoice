@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { asViewer, sql } from "@/lib/db";
 import { adminState } from "@/lib/admin";
 import { Logo } from "@/components/ui/Logo";
-import { AdminPanel, ClaimAdmin } from "@/components/admin/AdminPanel";
+import { AdminPanel } from "@/components/admin/AdminPanel";
 import { AdminQueue, type Queue } from "@/components/admin/AdminQueue";
 import { btn } from "@/components/ui/styles";
 
@@ -29,11 +29,10 @@ export default async function SysAdmin() {
         {!state.allowed && state.reason === "login" && (
           <div className="flex flex-col gap-3"><p className="m-0">{t("loginFirst")}</p><Link href="/login" className={`${btn.primary} self-start`}>{t("login")}</Link></div>
         )}
-        {!state.allowed && state.reason === "bootstrap" && (
-          <div className="flex max-w-[640px] flex-col gap-4"><p className="m-0 text-lg">{t("bootstrap")}</p><ClaimAdmin /></div>
-        )}
+        {!state.allowed && state.reason === "unconfigured" && <p className="m-0 max-w-[640px] text-lg">{t("unconfigured")}</p>}
+        {!state.allowed && state.reason === "mfa" && <p className="m-0 max-w-[640px] text-lg">{t("mfaRequired")}</p>}
         {state.allowed && queue && <AdminQueue q={queue} />}
-        {state.allowed && o && <AdminPanel o={o} me={state.session.profile.id} />}
+        {state.allowed && o && <AdminPanel o={o} />}
       </main>
     </div>
   );

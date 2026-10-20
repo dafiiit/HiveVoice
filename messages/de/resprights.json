@@ -106,7 +106,6 @@
     "reason": "Begründung (freiwillig, anonym für die Parteien)",
     "vote": "Abstimmen",
     "voted": "Du hast abgestimmt. Danke.",
-    "decline": "Ich kann nicht mitentscheiden",
-    "back": "Zu den Zuständigen"
+    "decline": "Ich kann nicht mitentscheiden"
   }
 }

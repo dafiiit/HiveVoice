@@ -8,7 +8,8 @@ import { relTime } from "@/lib/format";
 import { Avatar } from "@/components/ui/Avatar";
 import { AvatarUpload } from "@/components/ImageUpload";
 import { IconCheck } from "@/components/ui/Icons";
-import { tab } from "@/components/ui/styles";
+import { btn } from "@/components/ui/styles";
+import { Notice, Page, Section, Tabs } from "@/components/ui/Page";
 import { PhaseRail } from "@/components/InitiativeCard";
 import { DisplayToggle, TagEditor } from "@/components/me/ProfileEditor";
 import { Responsibilities, type MyResp } from "@/components/me/Responsibilities";
@@ -100,7 +101,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const interests = d.tags.filter((x) => x.relation === "interest").map((x) => x.slug);
 
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
+    <Page>
       <section className="flex flex-wrap items-start gap-6">
         <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={160} />
         <div className="flex min-w-[260px] flex-1 basis-[260px] flex-col gap-2">
@@ -108,69 +109,64 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           <span>{t("stats", { groups: d.p.group_count, helped: d.p.helped_count })}</span>
           <span className="text-muted">{d.places}</span>
           <DisplayToggle mode={d.p.display_mode} realName={session.profile.real_name ?? ""} alias={d.p.alias ?? ""} headline={d.p.headline ?? ""} bio={d.p.bio ?? ""} />
-          <Link href={`/profile/${me}`} className="self-start text-sm">{t("publicProfile")}</Link>
-          <Link href="/rechte" className="self-start text-sm">{tr("title")}</Link>
+          <span className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <Link href={`/profile/${me}`} className="text-ink underline">{t("publicProfile")}</Link>
+            <Link href="/rechte" className="text-ink underline">{tr("title")}</Link>
+          </span>
         </div>
       </section>
-      <div role="tablist" aria-label={t("sections")} className="flex overflow-x-auto border-b border-line">
-        {TABS.map((k) => <Link key={k} role="tab" aria-selected={active === k} href={`/me${k === "profile" ? "" : `?tab=${k}`}`} className={tab(active === k)}>{t(`tabs.${k}`)}</Link>)}
-      </div>
+      <Tabs label={t("sections")} items={TABS.map((k) => ({ href: `/me${k === "profile" ? "" : `?tab=${k}`}`, label: t(`tabs.${k}`), on: active === k }))} />
 
       {active === "profile" && (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <div className="flex flex-col gap-8">
             <TagEditor relation="offers" label={t("offers")} initial={offers} suggestions={d.suggestions} />
             <TagEditor relation="needs" label={t("needs")} initial={needs} suggestions={d.suggestions} />
-            <p className="m-0 text-sm text-muted">{t("tagsHint")} <Link href="/anliegen?as=offer">{t("toOffers")}</Link> · <Link href="/anliegen?as=need">{t("toNeeds")}</Link></p>
-            <Link href="/teilen" className="inline-flex h-12 items-center self-start border border-ink px-5 font-bold text-ink no-underline">{tgr("share.app")}</Link>
+            <p className="m-0 text-sm text-muted">{t("tagsHint")} <Link href="/anliegen" className="text-ink underline">{t("toOffers")}</Link></p>
+            <Link href="/teilen" className={`${btn.secondary} self-start`}>{tgr("share.app")}</Link>
           </div>
           <div className="flex flex-col gap-8">
-            <section className="flex flex-col gap-3">
-              <h2 className="m-0 text-xl font-bold">{t("initiatives")}</h2>
-              {d.inis.length === 0 && <p className="m-0 text-muted">{t("noInitiatives")} <Link href="/new/initiative">{t("start")}</Link></p>}
+            <Section title={t("initiatives")} actions={<Link href="/new/initiative" className={btn.secondarySm}>{t("start")}</Link>}>
+              {d.inis.length === 0 && <Notice tone="hint" className="text-base">{t("noInitiatives")}</Notice>}
               {d.inis.map((i) => (
                 <Link key={i.id} href={`/initiatives/${i.id}`} className="flex flex-col gap-2 border-t border-line pt-3 text-ink no-underline">
                   <span className="text-sm">{i.region_name}</span><strong>{i.title}</strong><PhaseRail phase={i.phase} outcome={i.outcome} compact />
                 </Link>
               ))}
-            </section>
+            </Section>
             {d.args.length > 0 && (
-              <section className="flex flex-col gap-3">
-                <h2 className="m-0 text-xl font-bold">{t("arguments")}</h2>
+              <Section title={t("arguments")}>
                 {d.args.map((a) => (
                   <Link key={a.id} href={`/initiatives/${a.initiative_id}?tab=arguments`} className="flex flex-col gap-1 border-t border-line pt-3 text-ink no-underline">
                     <span className="text-sm font-bold">{a.side === "pro" ? "+ Pro" : "− Contra"} · {a.title}</span><span>{a.body}</span>
                   </Link>
                 ))}
-              </section>
+              </Section>
             )}
-            <section className="flex flex-col gap-2">
-              <h2 className="m-0 text-xl font-bold">{t("groups")}</h2>
-              {d.groups.length === 0 && <p className="m-0 text-muted">{t("noGroups")}</p>}
+            <Section title={t("groups")}>
+              {d.groups.length === 0 && <Notice tone="hint" className="text-base">{t("noGroups")}</Notice>}
               {d.groups.map((g) => (
                 <Link key={g.slug} href={`/groups/${g.slug}`} className="flex items-center gap-3 text-ink no-underline">
                   <Avatar name={g.name} size={32} group /> <strong>{g.name}</strong>
                 </Link>
               ))}
-            </section>
+            </Section>
           </div>
         </div>
       )}
       {active === "reports" && (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-          <section className="flex flex-col">
-            <h2 className="m-0 mb-2 text-xl font-bold">{t("jury")}</h2>
-            {d.seats.length === 0 && <p className="m-0 text-muted">{t("noJury")}</p>}
+          <Section title={t("jury")} className="gap-0">
+            {d.seats.length === 0 && <Notice tone="hint" className="pt-2 text-base">{t("noJury")}</Notice>}
             {d.seats.map((s2) => (
               <Link key={s2.case_id} href={`/jury/${s2.case_id}`} className="flex flex-col gap-1 border-b border-line py-3 text-ink no-underline">
                 <strong>{t("case", { no: s2.case_no })}</strong>
                 <span className="text-sm">{s2.status !== "open" ? t(`caseStatus.${s2.status}`) : s2.choice ? t("youDecided") : s2.declined ? t("declined") : t("pending")}</span>
               </Link>
             ))}
-          </section>
-          <section className="flex flex-col">
-            <h2 className="m-0 mb-2 text-xl font-bold">{t("reports")}</h2>
-            {d.reports.length === 0 && <p className="m-0 text-muted">{t("noReports")}</p>}
+          </Section>
+          <Section title={t("reports")} className="gap-0">
+            {d.reports.length === 0 && <Notice tone="hint" className="pt-2 text-base">{t("noReports")}</Notice>}
             {d.reports.map((r) => (
               <div key={r.id} className="flex flex-col gap-1 border-b border-line py-3">
                 <strong>{t(r.mine ? "reportedBy" : "reportedAbout", { rule: t(`rules.${r.rule}`) })}</strong>
@@ -180,10 +176,9 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
                 {r.can_appeal && <Appeal reportId={r.id} days={d.rules.appeal} />}
               </div>
             ))}
-          </section>
-          <section className="flex flex-col lg:col-span-2">
-            <h2 className="m-0 mb-2 text-xl font-bold">{tm("mine.violations")}</h2>
-            {d.violations.length === 0 && <p className="m-0 text-muted">{tm("mine.none")}</p>}
+          </Section>
+          <Section title={tm("mine.violations")} className="gap-0 lg:col-span-2">
+            {d.violations.length === 0 && <Notice tone="hint" className="pt-2 text-base">{tm("mine.none")}</Notice>}
             {d.violations.map((v) => (
               <div key={v.id} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line py-2 text-sm">
                 <strong>{tm(`mine.outcome_${v.outcome}` as "mine.outcome_notice")}</strong>
@@ -195,7 +190,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
               <span>{tm("ladder.s1")}</span><span>{tm("ladder.s2", { hours: d.rules.hours })}</span><span>{tm("ladder.s3", { days: d.rules.days })}</span><span>{tm("ladder.s4")}</span>
               <span className="text-muted">{tm("ladder.expiry", { months: d.rules.months })} {tm("ladder.appeal")}</span>
             </div>
-          </section>
+          </Section>
         </div>
       )}
       {active === "resp" && <Responsibilities items={d.resps} homeRegion={d.home} incoming={d.incoming} substituting={d.substituting} />}
@@ -205,6 +200,6 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
         <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} places={d.places} interests={interests} suggestions={d.suggestions} />
         </>
       )}
-    </div>
+    </Page>
   );
 }

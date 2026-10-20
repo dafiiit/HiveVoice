@@ -11,9 +11,11 @@ async function exec(statement: string) {
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
 
-test("Entdecken: the marketplace filters by category and its own fields, and the map asks before it loads", async ({ page }) => {
+test("Anliegen: offers filter by category and its own fields, and the map asks before it loads", async ({ page }) => {
+  // The old address in Entdecken leads to the offers in Anliegen.
   await page.goto("/explore?kind=market");
-  await expect(page.getByRole("tab", { name: "Marktplatz" })).toHaveAttribute("aria-selected", "true");
+  await expect(page).toHaveURL(/\/anliegen\?tab=offers/);
+  await expect(page.getByRole("tab", { name: "Angebote" })).toHaveAttribute("aria-selected", "true");
   await page.getByRole("link", { name: /^Wohnen/ }).click();
   await expect(page).toHaveURL(/cat=housing/);
   await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toBeVisible();
@@ -24,8 +26,8 @@ test("Entdecken: the marketplace filters by category and its own fields, and the
   await expect(page).toHaveURL(/a_deal=stay/);
   await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toHaveCount(0);
   await expect(page.getByText("Schlafsofa im Wohnzimmer für Durchreisende")).toBeVisible();
-  await page.getByRole("radio", { name: "Gesuche" }).click();
-  await expect(page).toHaveURL(/side=need/);
+  await page.getByRole("tab", { name: "Gesuche" }).click();
+  await expect(page).toHaveURL(/tab=needs/);
   await page.getByRole("radio", { name: "Karte" }).click();
   await expect(page.getByRole("button", { name: "Karte laden" })).toBeVisible();
   await expect(page.getByText(/tiles\.openfreemap\.org/)).toBeVisible();
@@ -39,7 +41,7 @@ test.describe("offer with something in return", () => {
     const title = `E2E Fahrrad zu verschenken ${Date.now()}`;
     try {
       await login(page);
-      await page.goto("/offers");
+      await page.goto("/anliegen?as=offer");
       await expect(page.getByRole("radio", { name: "Ich biete" })).toBeChecked();
       await page.locator("main input").first().fill(title);
       // The title suggests the category, and its own fields appear.
@@ -48,7 +50,7 @@ test.describe("offer with something in return", () => {
       await page.getByRole("radio", { name: "Gebraucht" }).click();
       await page.getByRole("radio", { name: "Tausch", exact: true }).click();
       await page.getByLabel("Im Tausch gegen").fill("Hilfe im Garten");
-      await expect(page.getByLabel("Auch als Anfrage eintragen")).toBeChecked();
+      await expect(page.getByLabel("Auch als Gesuch eintragen")).toBeChecked();
       await expect(page.getByLabel("Was suchst du im Gegenzug?")).toHaveValue("Hilfe im Garten");
       await page.getByRole("button", { name: "Veröffentlichen" }).click();
       await expect(page.getByText("Veröffentlicht und als Tausch verbunden.")).toBeVisible({ timeout: 20_000 });
@@ -57,7 +59,7 @@ test.describe("offer with something in return", () => {
       await expect(page.getByText("Zu verschenken", { exact: true })).toBeVisible();
       await expect(page.getByText("Gebraucht", { exact: true })).toBeVisible();
       await expect(page.getByRole("link", { name: "Tausch · sucht dafür „Hilfe im Garten“" })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Anfragen, die zu deinem Angebot passen" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Gesuche, die zu deinem Angebot passen" })).toBeVisible();
       await page.getByRole("link", { name: "Tausch · sucht dafür „Hilfe im Garten“" }).click();
       await expect(page.getByRole("heading", { name: "Hilfe im Garten" })).toBeVisible();
       await expect(page.getByRole("link", { name: `Tausch · bietet dafür „${title}“` })).toBeVisible();

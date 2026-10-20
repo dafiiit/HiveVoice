@@ -2,12 +2,13 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { plainExcerpt, type ResourceRow } from "@/lib/links/queries";
 import { formatSize, isImage } from "@/lib/files";
-import { relTime } from "@/lib/format";
+import { addsInfo, relTime } from "@/lib/format";
 import { Avatar } from "../ui/Avatar";
 import { IconCheck } from "../ui/Icons";
 import { ReportButton } from "../ReportDialog";
 import { PreviewImage } from "./PreviewImage";
 import { VoteButtons } from "./VoteButtons";
+import { btn, cardFrame } from "../ui/styles";
 
 /** Small badge: how far we trust the link. */
 export async function TrustBadge({ trust }: { trust: ResourceRow["safety"] }) {
@@ -31,10 +32,10 @@ export async function LinkCard({ r, me, canVote }: { r: ResourceRow; me: string 
   const sub = isLink ? r.host.replace(/^www\./, "") : r.origin === "file" ? (r.file_name ?? "") : excerpt;
   const line = isLink ? r.host.replace(/^www\./, "") : r.origin === "file" ? `${r.file_name ?? ""} · ${formatSize(r.file_size ?? 0)}` : "";
   return (
-    <article className="flex flex-col gap-3 border border-ink border-t-[6px] bg-surface p-4">
+    <article className={cardFrame}>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <strong>{kind(r.kind)}</strong>
-        {provider !== kind(r.kind) && <span className="text-muted">· {provider}</span>}
+        {addsInfo(kind(r.kind), provider) && <span className="text-muted">· {provider}</span>}
         {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
       </div>
       <Link href={`/links/${r.id}`} tabIndex={-1} aria-hidden="true" className="block">
@@ -55,7 +56,7 @@ export async function LinkCard({ r, me, canVote }: { r: ResourceRow; me: string 
         </span>
         <span className="flex items-center gap-1">
           <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={canVote} />
-          {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className="border-0 bg-transparent p-0 text-xs text-muted underline" />}
+          {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-xs`} />}
         </span>
       </div>
     </article>

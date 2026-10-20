@@ -9,6 +9,7 @@ import { TagPicker } from "../TagPicker";
 import { IconFile } from "../ui/Icons";
 import { btn, field } from "../ui/styles";
 import { AccessPicker, type Access } from "./AccessPicker";
+import { Notice } from "@/components/ui/Page";
 
 type Group = { id: string; slug: string; name: string };
 
@@ -60,14 +61,14 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   return (
     <div className="flex max-w-[760px] flex-col gap-5">
       <div className="flex flex-col gap-2">
-        <button type="button" disabled={busy} onClick={() => input.current?.click()} className={`${btn.secondaryLg} self-start`}>
+        <button type="button" disabled={busy} onClick={() => input.current?.click()} className={`${btn.secondary} self-start`}>
           {busy ? t("fileUploading") : file ? t("fileChange") : t("fileChoose")}
         </button>
         <span className="text-sm text-muted">{t("fileHint")}</span>
         <input ref={input} type="file" accept={`${FILE_ACCEPT},.markdown`} className="sr-only" tabIndex={-1} aria-hidden="true"
           onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = ""; }} />
       </div>
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
       {file && (
         <>
           <section aria-label={t("uploadedFile")} className="flex items-center gap-3 border border-ink border-t-[6px] bg-surface p-4">
@@ -86,7 +87,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
           <TagPicker label={tl("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={tl("tagsPlaceholder")} max={10} />
           {groups.length > 0 && (
             <label className={field.label}>{tl("groupLabel")}
-              <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select} h-12`}>
+              <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select}`}>
                 <option value="">{tl("everyone")}</option>
                 {groups.map((g) => <option key={g.id} value={g.id}>{tl("inGroup", { name: g.name })}</option>)}
               </select>
@@ -94,7 +95,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
           )}
           <AccessPicker value={access} onChange={setAccess} inGroup={!!groupId} />
           <div>
-            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primaryLg}>{pending ? tl("publishing") : tl("publish")}</button>
+            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primary}>{pending ? tl("publishing") : tl("publish")}</button>
           </div>
         </>
       )}

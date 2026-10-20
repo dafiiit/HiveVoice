@@ -23,7 +23,7 @@ export function JuryReview({ caseId, caseNo, rule, context, target, decided, sta
         <h1 className="display m-0">{t("invited")}</h1>
         <p className="m-0 text-xl">{t("inviteText", { n: jurySize })}</p>
         <div className="flex flex-wrap gap-3">
-          <button type="button" onClick={() => setStep("review")} className={btn.primaryLg}>{t("start")}</button>
+          <button type="button" onClick={() => setStep("review")} className={btn.primary}>{t("start")}</button>
           <button type="button" disabled={pending} onClick={() => start(async () => { await declineJury(caseId); setStep("done"); setResult("declined"); })} className={btn.ghost}>{t("notNow")}</button>
         </div>
       </section>
@@ -60,7 +60,7 @@ export function JuryReview({ caseId, caseNo, rule, context, target, decided, sta
         <button type="button" disabled={!choice || pending} onClick={() => start(async () => {
           const res = await decideJury(caseId, choice!, reason);
           if (res.ok) { setResult(res.data); setStep("done"); }
-        })} className={`${btn.primaryLg} self-start`}>{t("submit")}</button>
+        })} className={`${btn.primary} self-start`}>{t("submit")}</button>
       </section>
     );
   }
@@ -69,7 +69,7 @@ export function JuryReview({ caseId, caseNo, rule, context, target, decided, sta
       <Glyph shape="flower" size={120} />
       <h1 className="display m-0">{result === "declined" ? t("declinedTitle") : t("thanks")}</h1>
       <p className="m-0 text-xl">{result === "upheld" ? t("upheld") : result === "dismissed" ? t("dismissed") : result === "declined" ? t("declinedText") : t("waiting")}</p>
-      <Link href="/connect" className={`${btn.primaryLg} self-start`}>{t("home")}</Link>
+      <Link href="/connect" className={`${btn.primary} self-start`}>{t("home")}</Link>
     </section>
   );
 }

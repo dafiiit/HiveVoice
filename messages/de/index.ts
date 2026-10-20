@@ -14,6 +14,7 @@ import ns_group from "./group.json";
 import ns_grouprights from "./grouprights.json";
 import ns_growth from "./growth.json";
 import ns_images from "./images.json";
+import ns_info from "./info.json";
 import ns_inirights from "./inirights.json";
 import ns_initiative from "./initiative.json";
 import ns_jury from "./jury.json";
@@ -60,6 +61,7 @@ const messages = {
   "grouprights": ns_grouprights,
   "growth": ns_growth,
   "images": ns_images,
+  "info": ns_info,
   "inirights": ns_inirights,
   "initiative": ns_initiative,
   "jury": ns_jury,

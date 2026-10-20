@@ -2,15 +2,13 @@
   "alias": "Pseudonym · verifiziert",
   "helped": "{n, plural, =0 {noch niemand sagt „hat mir geholfen“} one {1 Mensch sagt „hat mir geholfen“} other {# Menschen sagen „hat mir geholfen“}}",
   "edit": "Profil bearbeiten",
-  "gives": "Gibt und sucht",
+  "gives": "Bietet und sucht",
   "nothing": "Noch nichts eingetragen.",
   "offer": "Angebot",
-  "need": "Anfrage",
-  "ask": "Anfragen",
+  "need": "Gesuch",
+  "ask": "Kontakt aufnehmen",
   "help": "Helfen",
-  "offersTag": "bietet",
   "posts": "Beiträge",
-  "looksFor": "Interessiert sich für",
   "responsible": "Zuständig für",
   "groups": "Gruppen"
 }

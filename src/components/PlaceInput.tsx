@@ -51,7 +51,7 @@ export function PlaceInput({ label, value, onChange, onPlace, hint }: {
     <div className="relative flex flex-col gap-1.5">
       <label className="flex flex-col gap-1.5 text-sm font-bold">{label}
         <input value={value} onChange={(e) => { onChange(e.target.value); setTyping(true); setPicked(null); onPlace(null); }}
-          placeholder={hint} autoComplete="off" role="combobox" aria-expanded={shown.length > 0} aria-controls={list} className={field.inputSm} />
+          placeholder={hint} autoComplete="off" role="combobox" aria-expanded={shown.length > 0} aria-controls={list} className={field.input} />
       </label>
       {shown.length > 0 && (
         <ul id={list} role="listbox" className="absolute left-0 right-0 top-full z-20 m-0 mt-1 flex max-h-[260px] list-none flex-col overflow-y-auto border border-ink bg-surface p-0">

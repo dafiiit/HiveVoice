@@ -131,7 +131,7 @@ export async function toggleAlly(listingId: string, on: boolean) {
     else await tx`delete from public.listing_allies where listing_id = ${listingId} and profile_id = ${s.profile.id}`;
     return null;
   });
-  revalidatePath("/needs");
+  revalidatePath("/anliegen", "layout");
   return res;
 }
 

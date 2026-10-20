@@ -13,12 +13,12 @@
     "title": "Privacy",
     "body": [
       "Controller: [operator name and address].",
-      "What we store: email address for sign-in, your display name (real name or pseudonym), municipality and neighbourhood (never your address), your posts, arguments, requests and offers.",
+      "What we store: email address for sign-in, your display name (real name or pseudonym), municipality and neighbourhood (never your address), your posts, arguments, offers and wanted posts.",
       "What we never store: how you voted. Participation and vote are kept apart; the vote is only linked to a token via a secret server key, not to your account.",
       "Hosting: database and sign-in at Supabase (data centre in Frankfurt am Main), web server at Vercel. [Add data processing agreements.]",
       "On your device: so that you can read HiveVoice without internet, your browser keeps recently opened pages and pictures, and messages still waiting for a connection. These copies stay on your device and are deleted when you sign out.",
       "Other services: e-mails are sent by Resend. If bot protection is on, Cloudflare Turnstile checks during sign-up and sign-in that a human fills in the form. The map view loads map material from OpenFreeMap, but only after you click “Load map”; that service sees your IP address. Listings only appear on the map at the centre of their place. When you share a link, our server fetches the page to show a preview. Google Photos is only used if you connect it yourself. [Check data processing agreements and transfers to third countries.]",
-      "Matching listings: so that offers and requests find each other, we compare the title, description, keywords, category and place of public listings. This happens in our database; private details are never compared.",
+      "Matching listings: so that offers and wanted posts find each other, we compare the title, description, keywords, category and place of public listings. This happens in our database; private details are never compared.",
       "Cookies: only technically necessary cookies for sign-in, language and appearance. No ads, no tracking.",
       "Your rights: access, rectification, erasure (under “For me → Settings → Delete account”), restriction, portability, objection and complaint to a supervisory authority."
     ]

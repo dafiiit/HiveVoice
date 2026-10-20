@@ -14,7 +14,7 @@
       "groups": "Nur Menschen aus meinen Gruppen",
       "none": "Niemand"
     },
-    "contactHint": "Antworten auf deine eigenen Angebote und Anfragen sind davon ausgenommen.",
+    "contactHint": "Antworten auf deine eigenen Angebote und Gesuche sind davon ausgenommen.",
     "minor": "Wegen deines Alters bleibt das geschützt.",
     "saved": "Gespeichert.",
     "blockedTitle": "Blockierte Menschen",
@@ -23,8 +23,8 @@
   },
   "chat": {
     "more": "Mehr",
-    "mute": "Benachrichtigungen aus",
-    "unmute": "Benachrichtigungen an",
+    "mute": "Mitteilungen aus",
+    "unmute": "Mitteilungen an",
     "block": "{name} blockieren",
     "unblock": "Blockade aufheben",
     "blockedNote": "Du hast {name} blockiert. Neue Nachrichten von {name} kommen bei dir nicht an.",
@@ -80,6 +80,6 @@
     "slow10": "Alle 10 Sekunden",
     "slow60": "Jede Minute",
     "slow300": "Alle 5 Minuten",
-    "slowHint": "Betrifft alle außer Admins und Maintainer."
+    "slowHint": "Betrifft alle außer Orga und Betreuung."
   }
 }

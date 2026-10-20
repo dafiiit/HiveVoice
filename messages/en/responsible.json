@@ -8,7 +8,7 @@
   "find": "Search",
   "level": "Level",
   "myPlaces": "My places",
-  "empty": "Nothing found. You can still post your request under “Request”; the community helps to find the right place.",
+  "empty": "Nothing found. You can still post it as wanted; the community helps to find the right place.",
   "official": "officially confirmed",
   "selfDeclared": "self-declared",
   "avg": "Answers on average in",
@@ -27,13 +27,22 @@
   "intake": {
     "received": "received {when}",
     "due": "Answer by {date}",
-    "status": { "answered": "answered", "forwarded": "forwarded", "declined": "not responsible" },
+    "status": {
+      "answered": "answered",
+      "forwarded": "forwarded",
+      "declined": "not responsible"
+    },
     "from": "From {name}",
     "supporters": "{n} supporters",
     "answer": "Answer",
     "forward": "Forward",
     "decision": "Decision",
-    "decisions": { "accepted": "Accepted", "partial": "Partly", "rejected": "Rejected", "info": "Interim" },
+    "decisions": {
+      "accepted": "Accepted",
+      "partial": "Partly",
+      "rejected": "Rejected",
+      "info": "Interim"
+    },
     "reason": "Answer with reasons",
     "public": "The answer is publicly visible.",
     "publish": "Publish answer",

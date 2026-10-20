@@ -8,6 +8,7 @@ import { decideJoin, withdrawJoin } from "@/lib/actions/groups";
 import { dateTime } from "@/lib/format";
 import { Avatar } from "../ui/Avatar";
 import { btn } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export type RequestView = {
   id: string;
@@ -65,7 +66,7 @@ export function RequestPane({ r }: { r: RequestView }) {
               : r.listing_id ? t(r.outgoing ? "req.outContact" : "req.inContact", { title: r.title ?? "" }) : t(r.outgoing ? "req.outDirect" : "req.inDirect")}
           </span>
           {r.via_id && r.via_title && (
-            <Link href={`/${r.via_kind === "need" ? "needs" : "offers"}/${r.via_id}`} className="text-sm font-bold text-ink">{tl("viaLine", { title: r.via_title })}</Link>
+            <Link href={`/anliegen/${r.via_id}`} className="text-sm font-bold text-ink">{tl("viaLine", { title: r.via_title })}</Link>
           )}
         </div>
         <span className={`ml-auto flex-none px-2 py-1 text-sm font-bold ${pendingState ? "border border-ink" : "bg-chip"}`}>
@@ -104,10 +105,10 @@ export function RequestPane({ r }: { r: RequestView }) {
           <button type="button" disabled={pending} className={btn.secondary} onClick={() => act(() => (join ? withdrawJoin(r.id) : withdrawContact(r.id)))}>{t("req.withdraw")}</button>
         )}
         {join && r.group_slug && <Link href={`/groups/${r.group_slug}`} className={btn.secondary}>{t("req.openGroup")}</Link>}
-        {!join && r.listing_id && <Link href={`/${r.listing_kind === "need" ? "needs" : "offers"}/${r.listing_id}`} className={btn.secondary}>{t("openListing")}</Link>}
+        {!join && r.listing_id && <Link href={`/anliegen/${r.listing_id}`} className={btn.secondary}>{t("openListing")}</Link>}
         {(!join || !r.outgoing) && <Link href={`/profile/${r.other_id}`} className={btn.secondary}>{t("openProfile")}</Link>}
       </div>
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
+      {error && <Notice tone="error" className="text-sm">{error}</Notice>}
     </div>
   );
 }

@@ -1,19 +1,19 @@
 {
   "title": "Connect",
   "order": "Order",
-  "listSearch": "Search conversations",
+  "listSearch": "Search chats",
   "listNone": "Nothing found.",
   "mode": {
     "chrono": "Chronological",
     "suggested": "Suggested"
   },
   "guestTitle": "You are reading as a guest.",
-  "guestText": "You can read public groups and the marketplace. Sign in to write.",
+  "guestText": "You can read public groups and the noticeboard. Sign in to write.",
   "guestTextShort": "Reading works without an account, writing does not.",
   "signIn": "Sign in",
-  "conversations": "Conversations",
-  "pane": "Conversation",
-  "market": "Marketplace",
+  "conversations": "Chats",
+  "pane": "Chat",
+  "market": "Noticeboard",
   "marketSub": "{place}",
   "marketSubAll": "News from all places",
   "marketPlaceholder": "What’s new in the neighbourhood?",
@@ -30,7 +30,7 @@
   "popular": "popular",
   "unread": "{n} unread",
   "back": "Back to the list",
-  "pick": "Pick a conversation on the left.",
+  "pick": "Pick a chat on the left.",
   "sort": {
     "top": "For you",
     "new": "Newest"
@@ -44,11 +44,10 @@
     "all": "All",
     "chats": "Chats",
     "groups": "Groups",
-    "requests": "Requests"
+    "requests": "Contact requests"
   },
   "newGroup": "Start a group",
-  "newGroupHint": "Have an idea for a group? Start it here.",
-  "emptyList": "No conversations yet. Message someone through an offer, a request or a profile, or join a group.",
+  "emptyList": "No chats yet. Message someone through an offer, a wanted post or a profile, or join a group.",
   "emptyFilter": "Nothing here right now.",
   "read": "Read",
   "today": "Today",
@@ -69,12 +68,12 @@
     "declined": "Declined",
     "newTag": "New",
     "waitingFor": "Waiting for {name} to answer.",
-    "waitingForGroup": "Waiting for the admins of “{group}”.",
+    "waitingForGroup": "Waiting for the organisers of “{group}”.",
     "yourMessage": "Your message",
     "theirMessage": "Message from {name}",
     "accept": "Accept and open chat",
     "decline": "Decline",
-    "withdraw": "Withdraw request",
+    "withdraw": "Withdraw",
     "acceptJoin": "Let them in",
     "declineJoin": "Decline",
     "declinedBy": "{name} declined.",
@@ -87,8 +86,8 @@
     "button": "Send a message",
     "title": "Message to {name}",
     "placeholder": "Hi, I saw your profile and …",
-    "privacy": "{name} sees your message as a request and decides whether a chat opens.",
-    "sent": "Request sent.",
+    "privacy": "{name} sees your message as a contact request and decides whether a chat opens.",
+    "sent": "Contact request sent.",
     "seeInConnect": "See in Connect"
   },
   "mf": {

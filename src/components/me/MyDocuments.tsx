@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { decideResourceTransfer, purgeResource, restoreResource } from "@/lib/actions/links";
 import { relTime } from "@/lib/format";
 import { btn } from "../ui/styles";
+import { ConfirmAction } from "../ui/Action";
 
 export type DocRow = { id: string; title: string; origin: string; visibility: string; license: string | null; version_no: number; trashed_at: string | null; updated_at: string };
 export type SharedRow = { id: string; title: string; level: string; owner: string };
@@ -64,8 +65,8 @@ export function MyDocuments({ docs, shared, incoming, trashDays, usage }: { docs
           <div key={d.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-line py-3">
             <strong>{d.title}</strong>
             <span className="flex gap-3 text-sm">
-              <button type="button" disabled={pending} className="border-0 bg-transparent p-0 font-bold text-ink underline" onClick={() => start(async () => { await restoreResource(d.id); router.refresh(); })}>{t("docs.restore")}</button>
-              <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => { if (confirm(t("docs.purgeConfirm"))) start(async () => { await purgeResource(d.id); router.refresh(); }); }}>{t("docs.purge")}</button>
+              <button type="button" disabled={pending} className={`${btn.link} font-bold`} onClick={() => start(async () => { await restoreResource(d.id); router.refresh(); })}>{t("docs.restore")}</button>
+              <ConfirmAction disabled={pending} look={btn.linkMuted} question={t("docs.purgeConfirm")} onConfirm={() => start(async () => { await purgeResource(d.id); router.refresh(); })} label={t("docs.purge")} />
             </span>
           </div>
         ))}

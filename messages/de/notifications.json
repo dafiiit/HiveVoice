@@ -7,7 +7,7 @@
     "label": "Anzeigen",
     "all": "Alles",
     "messages": "Nachrichten",
-    "requests": "Anfragen",
+    "requests": "Kontaktanfragen",
     "other": "Weiteres"
   },
   "sections": {
@@ -16,7 +16,7 @@
   },
   "labels": {
     "message": "Chat",
-    "request": "Anfrage",
+    "request": "Kontaktanfrage",
     "group": "Gruppe",
     "initiative": "Initiative",
     "jury": "Jury",
@@ -47,7 +47,7 @@
     },
     "contact_declined": {
       "title": "{name} hat abgelehnt",
-      "body": "Deine Anfrage zu „{title}“ wurde nicht angenommen."
+      "body": "Deine Kontaktanfrage zu „{title}“ wurde nicht angenommen."
     },
     "contact_declined_direct": {
       "title": "{name} hat abgelehnt",
@@ -63,7 +63,7 @@
     },
     "join_declined": {
       "title": "Beitritt abgelehnt",
-      "body": "„{group}“ hat deine Anfrage nicht angenommen."
+      "body": "„{group}“ hat deine Beitrittsanfrage nicht angenommen."
     },
     "goal_vote": {
       "title": "Abstimmung in „{group}“",
@@ -87,7 +87,7 @@
     },
     "initiative_passed": {
       "title": "Initiative angenommen",
-      "body": "„{title}“ geht jetzt an den Adressaten."
+      "body": "„{title}“ geht jetzt an die zuständige Stelle."
     },
     "initiative_failed": {
       "title": "Initiative abgelehnt",
@@ -370,7 +370,7 @@
       "body": "„{title}“"
     },
     "listing_match_need": {
-      "title": "Neue Anfrage passt zu „{for_title}“",
+      "title": "Neues Gesuch passt zu „{for_title}“",
       "body": "„{title}“"
     },
     "object_shared": {

@@ -23,7 +23,7 @@
     "withdrawInvite": "Zurückziehen",
     "group": "Gruppe",
     "groupNone": "Keine Gruppe",
-    "groupText": "Du kannst die Initiative einer Gruppe zuordnen, in der du Admin bist. Wenn die Gruppe es erlaubt, verwalten deren Admins die Initiative mit.",
+    "groupText": "Du kannst die Initiative einer Gruppe zuordnen, in deren Orga du bist. Wenn die Gruppe es erlaubt, verwaltet deren Orga die Initiative mit.",
     "groupSave": "Zuordnen",
     "groupSaved": "Gespeichert"
   },

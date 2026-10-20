@@ -20,7 +20,7 @@ test.describe("Meine Inhalte", () => {
     await page.getByRole("link", { name: /^(Meine )?Inhalte$/ }).first().click();
     await expect(page).toHaveURL(/\/inhalte/);
     await expect(page.getByRole("heading", { name: "Meine Inhalte" })).toBeVisible();
-    await page.getByRole("link", { name: "Notizen" }).click();
+    await page.getByRole("tab", { name: /^Notizen/ }).click();
     await expect(page).toHaveURL(/f=notes/);
   });
 
@@ -47,8 +47,8 @@ test.describe("Meine Inhalte", () => {
     await page.goto("/inhalte?f=lists");
     await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("Privat");
     await page.getByRole("link", { name: new RegExp(name) }).click();
-    page.once("dialog", (d) => d.accept());
     await page.getByRole("button", { name: "Liste löschen" }).click();
+    await page.getByRole("button", { name: "Ja", exact: true }).click();
     await expect(page).toHaveURL(/f=lists/);
     await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveCount(0);
   });

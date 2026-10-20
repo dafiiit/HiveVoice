@@ -6,31 +6,39 @@ import { initiativeCardColumns, initiativeCardFrom, myRegionIds, regionTree, typ
 import { getPlace } from "@/lib/place";
 import { InitiativeCard } from "@/components/InitiativeCard";
 import { Avatar } from "@/components/ui/Avatar";
-import { IconCheck } from "@/components/ui/Icons";
-import { chip, tab, tag } from "@/components/ui/styles";
+import { IconCheck, IconPlus } from "@/components/ui/Icons";
+import { chip, tag } from "@/components/ui/styles";
+import { redirect } from "next/navigation";
+import { Page, PageHeader, Toolbar, Notice } from "@/components/ui/Page";
+import { ExploreTabs, EXPLORE_KINDS } from "@/components/ExploreTabs";
 import { FollowButton } from "@/components/FollowButton";
 import { LinkCard } from "@/components/links/LinkCard";
 import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 import { MobileFinder } from "@/components/shell/MobileFinder";
-import { MarketExplore } from "@/components/listings/MarketExplore";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("explore"))("title") };
 }
 
-const KINDS = ["initiatives", "market", "groups", "people", "responsible", "links"] as const;
+const KINDS = EXPLORE_KINDS;
 const RKINDS = ["document", "sheet", "slides", "form", "folder", "file", "pdf", "image", "video", "code", "design", "map", "dataset", "page", "note"] as const;
 const LEVELS = ["all", "borough", "municipality", "district", "state", "country"] as const;
 const SORTS = ["relevant", "new", "soon", "support"] as const;
 
 type Group = { id: string; slug: string; name: string; summary: string | null; member_count: number; join_policy: string; region_name: string | null; tags: string[]; is_member: boolean };
 type Person = { id: string; display_name: string; avatar_seed: number; avatar_path: string | null; headline: string | null; region_name: string | null; offers: string[]; needs: string[]; following: boolean };
-type Resp = { id: string; title: string; organization_name: string | null; description: string; is_official: boolean; holder_name: string; holder_seed: number; region_name: string | null; avg_response_days: number | null };
 
 export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const sp = await searchParams;
+  // Offers and wanted posts moved to Anliegen, Zuständige have their own page; old links keep working.
+  if (sp.kind === "market") {
+    const p = new URLSearchParams(Object.entries(sp).filter(([k, v]) => typeof v === "string" && !["kind", "side"].includes(k)) as [string, string][]);
+    p.set("tab", sp.side === "need" ? "needs" : "offers");
+    redirect(`/anliegen?${p}`);
+  }
+  if (sp.kind === "responsible") redirect(typeof sp.q === "string" ? `/responsible?q=${encodeURIComponent(sp.q)}` : "/responsible");
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const kind = (KINDS as readonly string[]).includes(str("kind")) ? (str("kind") as (typeof KINDS)[number]) : "initiatives";
   const level = (LEVELS as readonly string[]).includes(str("level")) ? str("level") : "all";
@@ -48,24 +56,6 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const t = await getTranslations("explore");
   const tl = await getTranslations("levels");
   const tk = await getTranslations("links");
-
-  const tabs = (
-    <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
-      {KINDS.map((k) => (
-        <Link key={k} role="tab" aria-selected={kind === k} href={k === "initiatives" ? "/explore" : `/explore?kind=${k}`} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
-      ))}
-    </div>
-  );
-  if (kind === "market") {
-    return (
-      <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-5 md:px-10 md:pb-20 md:pt-10">
-        <MobileFinder />
-        <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
-        {tabs}
-        <MarketExplore sp={sp} session={session} homeRegions={home?.chain.map((r) => r.id) ?? []} />
-      </div>
-    );
-  }
 
   const [filterPlace] = placeId ? await asViewer(null, (tx) => tx<{ id: string; name: string }[]>`select id, name from public.regions where id = ${placeId}`) : [];
   const data = await asViewer(viewer, async (tx) => {
@@ -134,16 +124,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
           order by p.helped_count desc, p.created_at desc limit 60`,
       };
     }
-    return {
-      responsible: await tx<Resp[]>`
-        select s.id, s.title, s.organization_name, s.description, s.is_official, s.avg_response_days,
-               p.display_name as holder_name, p.avatar_seed as holder_seed, r.name as region_name
-        from public.responsibilities s join public.profiles p on p.id = s.holder_id left join public.regions r on r.id = s.region_id
-        where true ${q ? tx`and (lower(s.title) like ${like} or lower(s.description) like ${like} or lower(coalesce(s.organization_name, '')) like ${like})` : tx``}
-          ${mine ? tx`and s.region_id = any(${regions}::uuid[])` : tx``}
-          ${inPlace(tx`s.region_id`)}
-        order by s.is_official desc, (s.region_id = any(${regions}::uuid[])) desc, s.title limit 60`,
-    };
+    return {};
   });
 
   const href = (patch: Record<string, string>) => {
@@ -152,18 +133,17 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
     const s = p.toString();
     return `/explore${s ? `?${s}` : ""}`;
   };
-  const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.responsible?.length ?? data.links?.length ?? 0;
+  const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? data.links?.length ?? 0;
 
+  const create = kind === "initiatives" ? { href: "/new/initiative", label: t("create.initiatives") }
+    : kind === "groups" ? { href: "/new/group", label: t("create.groups") }
+    : kind === "links" ? { href: "/new/link", label: tk("share") } : null;
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-5 md:px-10 md:pb-20 md:pt-10">
+    <Page>
       <MobileFinder />
-      <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
-      <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
-        {KINDS.map((k) => (
-          <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all", sort: "relevant", rk: "" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
-        ))}
-      </div>
-      <div className="-mt-2 flex flex-wrap items-center gap-2 text-sm">
+      <PageHeader title={t("title")} mobileHidden />
+      <ExploreTabs active={kind} href={(k) => href({ kind: k, level: "all", sort: "relevant", rk: "" })} />
+      <Toolbar count={t(`count.${kind}`, { n: count })}>
         {(kind === "initiatives" || kind === "links" || session) && (
           <Popover label={t("filter")} badge={(level !== "all" ? 1 : 0) + (mine ? 1 : 0) + (rk ? 1 : 0)}>
             {kind === "initiatives" && (
@@ -171,7 +151,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
                 <span className="text-[13px] font-bold">{t("level")}</span>
                 <div className="flex flex-wrap gap-1.5">
                   {LEVELS.map((l) => (
-                    <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={`${chip(level === l)} h-8 px-3 no-underline`}>{tl(l)}</Link>
+                    <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={chip(level === l)}>{tl(l)}</Link>
                   ))}
                 </div>
               </div>
@@ -180,8 +160,8 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
               <div className="flex flex-col gap-1.5" role="group" aria-label={tk("kindFilter")}>
                 <span className="text-[13px] font-bold">{tk("kindFilter")}</span>
                 <div className="flex flex-wrap gap-1.5">
-                  <Link href={href({ rk: "" })} aria-pressed={!rk} className={`${chip(!rk)} h-8 px-3 no-underline`}>{tk("allKinds")}</Link>
-                  {RKINDS.map((k) => <Link key={k} href={href({ rk: k })} aria-pressed={rk === k} className={`${chip(rk === k)} h-8 px-3 no-underline`}>{tk(`kinds.${k}`)}</Link>)}
+                  <Link href={href({ rk: "" })} aria-pressed={!rk} className={chip(!rk)}>{tk("allKinds")}</Link>
+                  {RKINDS.map((k) => <Link key={k} href={href({ rk: k })} aria-pressed={rk === k} className={chip(rk === k)}>{tk(`kinds.${k}`)}</Link>)}
                 </div>
               </div>
             )}
@@ -217,22 +197,19 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
             </div>
           </Popover>
         )}
-        {rk && kind === "links" && <Link href={href({ rk: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tk(`kinds.${rk as "page"}`) })}>{tk(`kinds.${rk as "page"}`)} <span aria-hidden="true">✕</span></Link>}
-        {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
-        {q && <Link href={href({ q: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
-        {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
-        {mine && <Link href={href({ mine: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
-        {kind === "links" && (
-          <Link href={session ? "/new/link" : "/login?next=/new/link"} className={btn.primarySm}>+ {tk("share")}</Link>
-        )}
-        <span className="ml-auto text-muted">{t(`count.${kind}`, { n: count })}</span>
-      </div>
+        {rk && kind === "links" && <Link href={href({ rk: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: tk(`kinds.${rk as "page"}`) })}>{tk(`kinds.${rk as "page"}`)} <span aria-hidden="true">✕</span></Link>}
+        {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
+        {q && <Link href={href({ q: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
+        {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
+        {mine && <Link href={href({ mine: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
+        {create && <Link href={session ? create.href : `/login?next=${create.href}`} className={btn.primarySm}><IconPlus size={14} /> {create.label}</Link>}
+      </Toolbar>
 
-      {count === 0 && kind !== "links" && <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>}
+      {count === 0 && kind !== "links" && <Notice tone="hint" className="border-t border-line pt-6 text-base">{t("nothing")}</Notice>}
       {count === 0 && kind === "links" && (
         <div className="flex flex-col items-start gap-3 border-t border-line pt-6">
           <p className="m-0 text-muted">{q || rk ? tk("emptySearch") : tk("empty")}</p>
-          {q && <Link href={`/anliegen?as=need&title=${encodeURIComponent(q)}`} className="font-bold">{tk("ask")}</Link>}
+          {q && <Link href={`/anliegen?as=need&title=${encodeURIComponent(q)}`} className={btn.secondarySm}>{tk("ask")}</Link>}
           {q && <span className="text-sm text-muted">{tk("askText")}</span>}
         </div>
       )}
@@ -281,9 +258,11 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
               </Link>
               <span className="justify-self-end">{session && <FollowButton type="profile" id={p.id} following={p.following} />}</span>
               {(p.offers.length > 0 || p.needs.length > 0) && (
-                <div className="col-span-2 flex flex-wrap gap-1.5 md:col-span-1 md:col-start-1">
-                  {p.offers.slice(0, 3).map((x) => <span key={`o${x}`} className={tag}>#{t("offers")} {x}</span>)}
-                  {p.needs.slice(0, 2).map((x) => <span key={`n${x}`} className={tag}>#{t("needs")} {x}</span>)}
+                <div className="col-span-2 flex flex-wrap items-center gap-1.5 md:col-span-1 md:col-start-1">
+                  {p.offers.length > 0 && <span className="text-[13px] text-muted">{t("offers")}</span>}
+                  {p.offers.slice(0, 3).map((x) => <span key={`o${x}`} className={tag}>#{x}</span>)}
+                  {p.needs.length > 0 && <span className={`text-[13px] text-muted ${p.offers.length ? "ml-2" : ""}`}>{t("needs")}</span>}
+                  {p.needs.slice(0, 2).map((x) => <span key={`n${x}`} className={tag}>#{x}</span>)}
                 </div>
               )}
             </div>
@@ -292,23 +271,6 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
         </div>
       )}
 
-      {data.responsible && (
-        <div className="flex flex-col border-t border-line">
-          {data.responsible.map((r) => (
-            <Link key={r.id} href={`/responsible?id=${r.id}`} className="flex flex-wrap items-center gap-4 border-b border-line py-4 text-ink no-underline">
-              <Avatar name={r.organization_name ?? r.holder_name} size={48} />
-              <span className="flex min-w-[240px] flex-1 flex-col">
-                <strong className="flex items-center gap-1.5 text-lg">
-                  {r.organization_name ? `${r.organization_name} · ${r.title}` : r.title}
-                  {r.is_official && <span title={t("official")} aria-label={t("official")} className="inline-flex"><IconCheck /></span>}
-                </strong>
-                <span className="text-sm">{r.description}</span>
-                <span className="text-sm text-muted">{[r.holder_name, r.region_name, r.avg_response_days != null ? t("responds", { days: r.avg_response_days }) : null].filter(Boolean).join(" · ")}</span>
-              </span>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
+    </Page>
   );
 }

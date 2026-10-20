@@ -8,8 +8,8 @@
   "find": "Suchen",
   "level": "Ebene",
   "myPlaces": "Meine Orte",
-  "empty": "Nichts gefunden. Du kannst deine Anfrage trotzdem unter „Anfragen“ stellen, die Community hilft beim Zuordnen.",
-  "official": "offiziell bestätigt",
+  "empty": "Nichts gefunden. Du kannst dein Anliegen trotzdem als Gesuch eintragen, die Community hilft beim Zuordnen.",
+  "official": "amtlich bestätigt",
   "selfDeclared": "selbst eingetragen",
   "avg": "Antwortet im Schnitt in",
   "days": "{n, plural, one {1 Tag} other {# Tagen}}",
@@ -27,13 +27,22 @@
   "intake": {
     "received": "eingegangen {when}",
     "due": "Antwort bis {date}",
-    "status": { "answered": "beantwortet", "forwarded": "weitergeleitet", "declined": "nicht zuständig" },
+    "status": {
+      "answered": "beantwortet",
+      "forwarded": "weitergeleitet",
+      "declined": "nicht zuständig"
+    },
     "from": "Von {name}",
     "supporters": "{n} Unterstützungen",
     "answer": "Beantworten",
     "forward": "Weiterleiten",
     "decision": "Entscheidung",
-    "decisions": { "accepted": "Angenommen", "partial": "Teilweise", "rejected": "Abgelehnt", "info": "Zwischenstand" },
+    "decisions": {
+      "accepted": "Angenommen",
+      "partial": "Teilweise",
+      "rejected": "Abgelehnt",
+      "info": "Zwischenstand"
+    },
     "reason": "Antwort mit Begründung",
     "public": "Die Antwort ist öffentlich sichtbar.",
     "publish": "Antwort veröffentlichen",

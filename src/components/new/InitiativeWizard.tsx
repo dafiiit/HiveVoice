@@ -10,6 +10,7 @@ import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { RegionPicker } from "./RegionPicker";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 const STEPS = ["idea", "text", "place", "addressee", "review"] as const;
 
@@ -124,7 +125,7 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
             )}
             {!addressee && (
               <>
-                <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("addresseeSearch")} aria-label={t("addresseeSearch")} className={field.inputSm} />
+                <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("addresseeSearch")} aria-label={t("addresseeSearch")} className={field.input} />
                 <div className="flex flex-col">
                   {hits.map((h) => (
                     <button key={h.id} type="button" onClick={() => setAddressee({ id: h.id, label: h.org ? `${h.org} · ${h.title}` : h.title })}
@@ -134,11 +135,11 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
                     </button>
                   ))}
                 </div>
-                <label className={field.label}>{t("addresseeFree")}<input value={addresseeText} onChange={(e) => setAddresseeText(e.target.value)} placeholder={t("addresseeFreePlaceholder")} className={field.inputSm} /></label>
+                <label className={field.label}>{t("addresseeFree")}<input value={addresseeText} onChange={(e) => setAddresseeText(e.target.value)} placeholder={t("addresseeFreePlaceholder")} className={field.input} /></label>
               </>
             )}
             <label className={field.label}>{t("cost")} <span className={field.hint}>{tc("optional")}</span>
-              <input inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="18000" className={`${field.inputSm} max-w-[200px]`} />
+              <input inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="18000" className={`${field.input} max-w-[200px]`} />
             </label>
           </section>
         )}
@@ -154,19 +155,19 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
             </dl>
             {editing && initial!.noteMode !== "none" && (
               <label className={field.label}>{tn("label")}
-                <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={tn("placeholder")} className={field.inputSm} />
+                <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={tn("placeholder")} className={field.input} />
                 <span className={field.hint}>{initial!.noteMode === "frozen" ? tn("hintFrozen") : tn("hintDebate")}</span>
               </label>
             )}
             <span className="text-sm text-muted">{t("reviewHint")}</span>
           </section>
         )}
-        {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+        {error && <Notice tone="error">{error}</Notice>}
         <div className="flex flex-wrap gap-3">
-          {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={btn.secondaryLg}>{tc("back")}</button>}
+          {step > 0 && <button type="button" onClick={() => setStep(step - 1)} className={btn.secondary}>{tc("back")}</button>}
           {step < steps.length - 1
-            ? <button type="button" disabled={!canNext} onClick={() => setStep(step + 1)} className={btn.primaryLg}>{tc("next")}</button>
-            : <button type="button" disabled={pending || (editing && initial!.noteMode !== "none" && note.trim().length < 5)} onClick={submit} className={btn.primaryLg}>{editing ? tc("save") : t("publish")}</button>}
+            ? <button type="button" disabled={!canNext} onClick={() => setStep(step + 1)} className={btn.primary}>{tc("next")}</button>
+            : <button type="button" disabled={pending || (editing && initial!.noteMode !== "none" && note.trim().length < 5)} onClick={submit} className={btn.primary}>{editing ? tc("save") : t("publish")}</button>}
         </div>
       </div>
       <aside className="flex flex-col gap-6">

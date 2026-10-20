@@ -10,7 +10,7 @@ export default async function NotFound() {
       <Glyph shape="keyhole" size={96} />
       <h1 className="display m-0">{t("notFound")}</h1>
       <p className="m-0 max-w-[520px] text-lg">{t("notFoundText")}</p>
-      <Link href="/" className={`${btn.primaryLg} self-start`}>{t("home")}</Link>
+      <Link href="/" className={`${btn.primary} self-start`}>{t("home")}</Link>
     </main>
   );
 }

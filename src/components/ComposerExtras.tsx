@@ -5,7 +5,7 @@ import { uploadAttachment } from "@/lib/upload";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { FILE_ACCEPT, FILE_BUCKET, MAX_FILES, formatSize, pollReady, type PollDraft, type UploadedFile } from "@/lib/files";
 import { IconAttach, IconClose, IconFile, IconPlus, IconPoll } from "./ui/Icons";
-import { field } from "./ui/styles";
+import { btn, field } from "./ui/styles";
 
 const EMPTY_POLL: PollDraft = { question: "", options: ["", ""], multiple: false };
 
@@ -91,11 +91,11 @@ export function ExtrasPreview({ x }: { x: Extras }) {
       {x.error && <p role="alert" className="m-0 text-sm font-bold">{x.error}</p>}
       {x.poll && (
         <fieldset className="m-0 flex min-w-0 flex-col gap-2 border border-ink bg-surface p-3">
-          <input value={x.poll.question} maxLength={200} onChange={(e) => set({ question: e.target.value })} aria-label={t("pollQuestion")} placeholder={t("pollQuestion")} className={`${field.inputSm} font-bold`} />
+          <input value={x.poll.question} maxLength={200} onChange={(e) => set({ question: e.target.value })} aria-label={t("pollQuestion")} placeholder={t("pollQuestion")} className={`${field.input} font-bold`} />
           {x.poll.options.map((o, i) => (
             <div key={i} className="flex items-center gap-1.5">
               <input value={o} maxLength={100} onChange={(e) => set({ options: x.poll!.options.map((v, j) => (j === i ? e.target.value : v)) })}
-                aria-label={t("pollOption", { n: i + 1 })} placeholder={t("pollOption", { n: i + 1 })} className={`${field.inputSm} min-w-0 flex-1`} />
+                aria-label={t("pollOption", { n: i + 1 })} placeholder={t("pollOption", { n: i + 1 })} className={`${field.input} min-w-0 flex-1`} />
               {x.poll!.options.length > 2 && (
                 <button type="button" aria-label={t("pollRemoveOption", { n: i + 1 })} onClick={() => set({ options: x.poll!.options.filter((_, j) => j !== i) })}
                   className="inline-flex h-11 w-11 flex-none items-center justify-center border-0 bg-transparent p-0 text-ink"><IconClose size={16} /></button>
@@ -106,12 +106,12 @@ export function ExtrasPreview({ x }: { x: Extras }) {
             <button type="button" onClick={() => set({ options: [...x.poll!.options, ""] })} className="inline-flex h-10 items-center gap-1.5 self-start border-0 bg-transparent p-0 text-sm font-bold text-ink"><IconPlus size={14} /> {t("pollAdd")}</button>
           )}
           <label className="flex flex-wrap items-center gap-2 text-sm">{t("pollDuration")}
-            <select value={x.poll.hours ?? 0} onChange={(e) => set({ hours: Number(e.target.value) })} className={`${field.select} h-10`}>
+            <select value={x.poll.hours ?? 0} onChange={(e) => set({ hours: Number(e.target.value) })} className={`${field.select}`}>
               <option value={0}>{t("pollNoEnd")}</option><option value={24}>{t("pollDay")}</option><option value={168}>{t("pollWeek")}</option>
             </select>
           </label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={x.poll.multiple} onChange={(e) => set({ multiple: e.target.checked })} className="h-5 w-5 accent-[var(--ink)]" /> {t("pollMultiple")}</label>
-          <button type="button" onClick={() => x.setPoll(null)} className="inline-flex h-9 items-center self-start border-0 bg-transparent p-0 text-sm text-muted underline">{t("pollRemove")}</button>
+          <button type="button" onClick={() => x.setPoll(null)} className={`${btn.linkMuted} self-start text-sm`}>{t("pollRemove")}</button>
         </fieldset>
       )}
     </div>

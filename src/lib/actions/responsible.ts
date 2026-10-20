@@ -151,23 +151,6 @@ export async function markUnanswered(id: string) {
   return res;
 }
 
-export type PersonHit = { id: string; name: string; headline: string | null };
-/** People a role can be handed to or shared with: findable and verified. */
-export async function searchPeopleFor(q: string): Promise<PersonHit[]> {
-  const query = q.trim();
-  if (query.length < 3) return [];
-  const res = await run(async (tx, s) => {
-    const [{ ok }] = await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`;
-    if (!ok) return [] as PersonHit[];
-    return tx<PersonHit[]>`
-      select p.id, p.display_name as name, p.headline from public.profiles p
-      where p.onboarded_at is not null and p.id <> ${s.profile.id} and lower(p.display_name) like ${`%${query.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`}
-        and app.can_find(${s.profile.id}, p.id) and app.profile_is_verified(p.id)
-      order by p.helped_count desc limit 6`;
-  });
-  return res.ok ? res.data : [];
-}
-
 export async function disputeResponsibility(id: string, claim: string) {
   const res = await run(async (tx) => {
     const [{ did }] = await tx<{ did: string }[]>`select app.dispute_responsibility(${id}, ${claim}) as did`;

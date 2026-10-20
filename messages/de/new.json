@@ -1,17 +1,5 @@
 {
   "title": "Neu",
-  "need": {
-    "title": "Anfrage stellen",
-    "text": "Klein oder groß. Andere mit demselben Anliegen findest du dort."
-  },
-  "offer": {
-    "title": "Angebot machen",
-    "text": "Können, Zeit, Dinge und Wissen. Auch als Link zu Dateien und Ordnern."
-  },
-  "group": {
-    "title": "Gruppe gründen",
-    "text": "Ein gemeinsamer Zweck: ein Projekt, ein Verein oder eine Forderung an eine Stelle. Mit Zielen, Verantwortlichen und Abstimmung."
-  },
   "initiative": {
     "title": "Titel",
     "editTitle": "Initiative bearbeiten",
@@ -21,7 +9,7 @@
       "idea": "Idee",
       "text": "Beschreibung",
       "place": "Ort und Ebene",
-      "addressee": "Adressat",
+      "addressee": "Stelle",
       "review": "Prüfen"
     },
     "ideaTitle": "Was soll sich ändern?",
@@ -44,11 +32,11 @@
     "place": "Ort",
     "affected": "Betroffen: alle, die in {place} wohnen.",
     "addresseeTitle": "Wer entscheidet?",
-    "addresseeText": "Nach einer erfolgreichen Abstimmung bekommt der Adressat deine Initiative mit einer Antwortfrist von 6 Wochen.",
+    "addresseeText": "Nach einer erfolgreichen Abstimmung bekommt die zuständige Stelle deine Initiative mit einer Antwortfrist von 6 Wochen.",
     "addresseeSearch": "Zuständige Stelle suchen",
     "addresseeFree": "Nicht dabei? Name der Stelle",
     "addresseeFreePlaceholder": "z. B. Stadtwerke München",
-    "addressee": "Adressat",
+    "addressee": "Zuständige Stelle",
     "cost": "Geschätzte Kosten in €",
     "reviewTitle": "Prüfen",
     "reviewHint": "Nach dem Veröffentlichen kannst du alles weiter bearbeiten. Jede Änderung bleibt im Verlauf sichtbar.",
@@ -73,27 +61,43 @@
         "name": "begründet",
         "hint": "Ein paar Sätze, warum es wichtig ist."
       }
-    }
+    },
+    "pageTitle": "Initiative starten",
+    "pageLead": "Eine Forderung an eine zuständige Stelle: mit Debatte, geheimer Abstimmung und Antwortpflicht."
   },
   "region": {
     "level": "Ebene",
     "other": "Anderer Ort",
     "placeholder": "Postleitzahl oder Ort"
   },
-  "voice": {
-    "title": "Meinung äußern",
-    "text": "Verschaffe dir Gehör und komm mit Menschen in deinem Ort ins Gespräch."
-  },
   "purpose": {
-    "title": "Wofür ist die Gruppe da?",
-    "project": {
-      "title": "Gemeinsam etwas umsetzen",
+    "toInitiative": "Du willst etwas von einer Stelle fordern? Initiative starten",
+    "toGroup": "Ihr wollt gemeinsam etwas umsetzen? Gruppe gründen"
+  },
+  "tiles": {
+    "need": {
+      "title": "Gesuch erstellen",
+      "text": "Klein oder groß: was dir fehlt. Wer etwas Passendes hat, meldet sich."
+    },
+    "offer": {
+      "title": "Angebot erstellen",
+      "text": "Können, Zeit oder Dinge, kostenlos, als Tausch oder bezahlt."
+    },
+    "group": {
+      "title": "Gruppe gründen",
       "text": "Ein Projekt, ein Verein, eine Nachbarschaft. Mit Zielen, Aufgaben und Rollen."
     },
-    "demand": {
-      "title": "Etwas fordern",
-      "text": "Eine Forderung an eine zuständige Stelle, mit Debatte, geheimer Abstimmung und Antwortpflicht. Wird sie angenommen, entsteht eine Gruppe zur Umsetzung."
+    "initiative": {
+      "title": "Initiative starten",
+      "text": "Etwas fordern: von einer zuständigen Stelle, mit Debatte, Abstimmung und Antwortpflicht."
     },
-    "later": "Der Zweck darf sich weiterentwickeln: Ziele lassen sich jederzeit ändern, und aus einer Initiative wird eine Gruppe."
+    "knowledge": {
+      "title": "Wissen hinzufügen",
+      "text": "Einen Link, eine Datei oder eine Notiz für andere."
+    },
+    "voice": {
+      "title": "Auf der Pinnwand schreiben",
+      "text": "Eine Frage oder Neuigkeit für alle in deinem Ort."
+    }
   }
 }

@@ -54,9 +54,9 @@ test.describe("safety", () => {
       await openFelix(page);
       await page.getByText("Mehr", { exact: true }).click();
       const menu = page.getByRole("group", { name: "Mehr" });
-      await menu.getByRole("button", { name: "Benachrichtigungen aus" }).click();
-      await expect(menu.getByRole("button", { name: "Benachrichtigungen an" })).toBeVisible();
-      await menu.getByRole("button", { name: "Benachrichtigungen an" }).click();
+      await menu.getByRole("button", { name: "Mitteilungen aus" }).click();
+      await expect(menu.getByRole("button", { name: "Mitteilungen an" })).toBeVisible();
+      await menu.getByRole("button", { name: "Mitteilungen an" }).click();
       await menu.getByRole("button", { name: "Nach 7 Tagen" }).click();
       await expect(menu.getByText(/Du hast 7 Tage vorgeschlagen/)).toBeVisible();
       await menu.getByRole("button", { name: "Aus", exact: true }).click();

@@ -3,7 +3,7 @@
     "title": "Wie arbeitet die Gruppe?",
     "project": {
       "name": "Offenes Projekt",
-      "text": "Alle Mitwirkenden bearbeiten mit, Maintainer geben frei."
+      "text": "Alle Mitglieder bearbeiten mit, die Betreuung gibt frei."
     },
     "club": {
       "name": "Verein",
@@ -27,7 +27,7 @@
     "request": "Auf Anfrage",
     "invite": "Nur mit Einladung",
     "openText": "Jede:r kann sofort beitreten.",
-    "requestText": "Admins entscheiden über Anfragen.",
+    "requestText": "Die Orga entscheidet über Beitrittsanfragen.",
     "inviteText": "Beitreten geht nur mit Einladung."
   },
   "adultsOnly": "Nur ab 18",
@@ -67,15 +67,15 @@
     "message": "Nachricht (freiwillig)"
   },
   "roles": {
-    "admin": "Admin",
-    "maintainer": "Maintainer",
-    "contributor": "Mitwirkende",
+    "admin": "Orga",
+    "maintainer": "Betreuung",
+    "contributor": "Mitglieder",
     "guest": "Gast"
   },
   "lead": {
     "title": "Leitung",
-    "owner": "Eigentümer:in: {name}",
-    "ownerHint": "Nur die Eigentümerin oder der Eigentümer ernennt Admins, übergibt oder löscht die Gruppe.",
+    "owner": "Leitung: {name}",
+    "ownerHint": "Nur die Leitung nimmt Menschen in die Orga auf, übergibt oder löscht die Gruppe.",
     "orphaned": "Die Gruppe hat gerade niemanden, der sie leitet.",
     "transfer": "Gruppe übergeben",
     "transferTo": "An wen?",
@@ -86,7 +86,7 @@
     "transferAccept": "Übernehmen",
     "transferDecline": "Ablehnen",
     "transferCancel": "Zurücknehmen",
-    "transferNeed": "Übergeben geht an Admins und Maintainer der Gruppe."
+    "transferNeed": "Übergeben geht an die Orga und die Betreuung der Gruppe."
   },
   "motion": {
     "title": "Abstimmung der Mitglieder",
@@ -125,9 +125,9 @@
     "slow10": "Alle 10 Sekunden",
     "slow60": "Jede Minute",
     "slow300": "Alle 5 Minuten",
-    "slowHint": "Gilt für alle außer Admins und Maintainer.",
+    "slowHint": "Gilt für alle außer Orga und Betreuung.",
     "announce": "Wird die Gruppe offener, erfahren das alle Mitglieder.",
-    "initiatives": "Admins dürfen Initiativen mitverwalten, die dieser Gruppe zugeordnet sind"
+    "initiatives": "Die Orga darf Initiativen mitverwalten, die dieser Gruppe zugeordnet sind"
   },
   "danger": {
     "title": "Archivieren und löschen",
@@ -143,7 +143,7 @@
   },
   "log": {
     "title": "Protokoll",
-    "text": "Was Admins und Maintainer geändert haben, nur für Admins sichtbar.",
+    "text": "Was Orga und Betreuung geändert haben, nur für die Orga sichtbar.",
     "empty": "Noch nichts protokolliert.",
     "actions": {
       "group_create": "Gruppe gegründet",
@@ -187,7 +187,7 @@
     "invite_invalid": "Dieser Einladungslink gilt nicht mehr.",
     "banned_from_group": "Du kannst dieser Gruppe nicht beitreten.",
     "adults_only": "Diese Gruppe ist erst ab 18.",
-    "owner_must_transfer": "Die Eigentümerin oder der Eigentümer muss die Gruppe erst übergeben.",
+    "owner_must_transfer": "Die Leitung muss die Gruppe erst übergeben.",
     "reason_required": "Bitte gib einen Grund an.",
     "name_protected": "Dieser Name ist Behörden und Parteien vorbehalten.",
     "not_allowed": "Das ist gerade nicht möglich."

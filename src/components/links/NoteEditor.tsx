@@ -7,6 +7,7 @@ import { Markdown } from "../Markdown";
 import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
 import { AccessPicker, type Access } from "./AccessPicker";
+import { Notice } from "@/components/ui/Page";
 
 type Group = { id: string; slug: string; name: string };
 export type NoteDraft = { id?: string; title: string; description: string; body: string; tags: string[] };
@@ -126,27 +127,27 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} placeholder={tl("descriptionPlaceholder")} className={field.textarea} />
       </label>
       <TagPicker label={tl("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={tl("tagsPlaceholder")} max={10} />
-      {lockedBy && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{td("locked")}</p>}
+      {lockedBy && <Notice tone="error">{td("locked")}</Notice>}
       {editing && (
         <label className={field.label}>{suggesting ? td("suggestNote") : td("changeNote")}
-          <input value={changeNote} onChange={(e) => setChangeNote(e.target.value)} maxLength={300} placeholder={td("changeNotePlaceholder")} className={field.inputSm} />
+          <input value={changeNote} onChange={(e) => setChangeNote(e.target.value)} maxLength={300} placeholder={td("changeNotePlaceholder")} className={field.input} />
         </label>
       )}
       {!editing && groups.length > 0 && (
         <label className={field.label}>{tl("groupLabel")}
-          <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select} h-12`}>
+          <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select}`}>
             <option value="">{tl("everyone")}</option>
             {groups.map((g) => <option key={g.id} value={g.id}>{tl("inGroup", { name: g.name })}</option>)}
           </select>
         </label>
       )}
       {!editing && <AccessPicker value={access} onChange={setAccess} inGroup={!!selectedGroup} />}
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
       <div className="flex flex-wrap gap-3">
-        <button type="button" disabled={pending || title.trim().length < 3 || !body.trim() || (suggesting && changeNote.trim().length < 5) || (!!lockedBy && !suggesting)} onClick={save} className={btn.primaryLg}>
+        <button type="button" disabled={pending || title.trim().length < 3 || !body.trim() || (suggesting && changeNote.trim().length < 5) || (!!lockedBy && !suggesting)} onClick={save} className={btn.primary}>
           {pending ? t("saving") : suggesting ? td("suggestSend") : editing ? t("save") : t("publishNote")}
         </button>
-        {editing && <button type="button" onClick={() => router.push(`/links/${initial.id}`)} className={btn.secondaryLg}>{t("cancel")}</button>}
+        {editing && <button type="button" onClick={() => router.push(`/links/${initial.id}`)} className={btn.secondary}>{t("cancel")}</button>}
       </div>
     </div>
   );

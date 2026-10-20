@@ -1,18 +1,18 @@
 import Link from "next/link";
-import { headers } from "next/headers";
+import { getOrigin } from "@/lib/origin";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { ShareMenu } from "@/components/refs/ShareMenu";
-import { dateLong } from "@/lib/format";
+import { addsInfo, dateLong } from "@/lib/format";
 import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
 import { popularTags } from "@/lib/queries";
 import { formatSize, isImage } from "@/lib/files";
 import { Markdown } from "@/components/Markdown";
 import { NoteEditor } from "@/components/links/NoteEditor";
 import { Avatar } from "@/components/ui/Avatar";
-import { btn } from "@/components/ui/styles";
+import { btn, tag } from "@/components/ui/styles";
 import { ReportButton } from "@/components/ReportDialog";
 import { PreviewImage } from "@/components/links/PreviewImage";
 import { VoteButtons } from "@/components/links/VoteButtons";
@@ -22,6 +22,7 @@ import { ShareAccess, CancelTransfer, type GrantRow } from "@/components/links/S
 import { Comments, CopyButton, Suggestions, Versions, type CommentRow, type SuggestionRow, type VersionRow } from "@/components/links/DocExtras";
 import { RestoreResource } from "@/components/links/RestoreResource";
 import { WhyNot } from "@/components/WhyNot";
+import { BackLink, Notice, Page } from "@/components/ui/Page";
 
 export async function generateMetadata({ params }: PageProps<"/links/[id]">) {
   const { id } = await params;
@@ -44,6 +45,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("links");
+  const tex = await getTranslations("explore");
   const td = await getTranslations("docrights");
   const locale = await getLocale();
   const data = await asViewer(viewer, async (tx) => {
@@ -93,30 +95,42 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
   const canDownload = meta.allow_download || level >= 3;
   const kq = key ? `k=${key}` : "";
   const fileUrl = (extra = "") => `/api/files/${r.file_id}${[extra, kq].filter(Boolean).length ? `?${[extra, kq].filter(Boolean).join("&")}` : ""}`;
-  const h = await headers();
-  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000"}`;
+  const origin = await getOrigin();
   const linkUrl = meta.visibility === "link" && meta.link_token ? `${origin}/links/${id}?k=${meta.link_token}` : null;
   return (
-    <div className="flex max-w-[860px] flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
-      <nav className="text-sm"><Link href="/explore?kind=links" className="text-ink">{t("back")}</Link></nav>
+    <Page width="narrow">
+      <BackLink href="/explore?kind=links" label={tex("kinds.links")} />
       {meta.trashed_at && level >= 4 && <RestoreResource id={id} />}
       {isLink && <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />}
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <strong>{kind}</strong><span className="text-muted">· {provider}{isLink ? ` · ${host}` : ""}</span>
+        <strong>{kind}</strong><span className="text-muted">{[addsInfo(kind, provider) ? provider : null, isLink ? host : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
         {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
       </div>
       <h1 className="display m-0 break-words">{r.title}</h1>
+      <span className="flex flex-wrap items-center gap-2 text-sm">
+        <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={28} />
+        <Link href={`/profile/${r.owner_id}`} className="font-bold text-ink no-underline">{r.owner_name}</Link>
+        {r.group_name && <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink underline">{t("inGroupName", { name: r.group_name })}</Link>}
+        <span className="text-muted">· {dateLong(r.created_at, locale)}</span>
+      </span>
       {r.description && <p className="m-0 whitespace-pre-line text-lg">{r.description}</p>}
-      {session && !meta.trashed_at && <ShareMenu type="resource" id={id} title={r.title} className={`${btn.secondary} self-start`} />}
-      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/explore?kind=links&q=%23${x}`} className="inline-flex h-8 items-center border border-line px-3 text-sm text-ink no-underline">#{x}</Link>)}</div>}
+      {session && !meta.trashed_at && (
+        <ShareMenu type="resource" id={id} title={r.title} className={`${btn.secondary} self-start`}
+          external={meta.visibility === "public" ? { url: `${origin}/links/${id}`, text: r.title } : undefined}
+          access={level >= 4 && !editing && !suggesting ? (
+            <ShareAccess bare id={id} origin={r.origin} visibility={meta.visibility} editMode={meta.edit_mode} allowDownload={meta.allow_download} license={meta.license}
+              linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
+          ) : undefined} />
+      )}
+      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/explore?kind=links&q=%23${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
         {meta.visibility === "me" && <span>{td("page.private")}</span>}
         {meta.visibility === "link" && level < 4 && <span>{td("page.viaLink")}</span>}
         {meta.license && <span>{td("license.shown", { name: td(`license.${meta.license}` as "license.cc_by") })}</span>}
         {isNote && <span>{td("page.version", { n: meta.version_no })}</span>}
-        {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink">{td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
+        {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink underline">{td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
       </div>
-      {sp.suggested === "1" && <p role="status" className="m-0 border-l-4 border-ink pl-3 font-bold">{td("page.suggestSent")}</p>}
+      {sp.suggested === "1" && <Notice tone="status">{td("page.suggestSent")}</Notice>}
 
       {isLink && (
         <section className={`flex flex-col gap-3 border-l-4 p-4 ${careful ? "border-red" : "border-ink"} bg-surface`}>
@@ -127,7 +141,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
           )}
           <span className="text-sm text-muted">{t("leaving")}</span>
           <div className="flex flex-wrap items-center gap-3">
-            <a href={r.url ?? "#"} target="_blank" rel="noopener noreferrer nofollow ugc" className={careful ? btn.secondaryLg : btn.primaryLg}>{careful ? t("openAnyway") : t("open")} ↗</a>
+            <a href={r.url ?? "#"} target="_blank" rel="noopener noreferrer nofollow ugc" className={careful ? btn.secondary : btn.primary}>{careful ? t("openAnyway") : t("open")} ↗</a>
             <span className="truncate text-sm text-muted">{t("openHost", { host })}</span>
           </div>
         </section>
@@ -144,9 +158,9 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
           <span className="text-sm">{tk("fileInfo", { name: r.file_name ?? "", size: formatSize(r.file_size ?? 0) })}</span>
           <div className="flex flex-wrap items-center gap-3">
             {(viewable || canDownload) && (
-              <a href={fileUrl(viewable ? "" : "dl=1")} target={viewable ? "_blank" : undefined} rel="noopener" className={btn.primaryLg}>{viewable ? tk("openFile") : tk("downloadFile")}</a>
+              <a href={fileUrl(viewable ? "" : "dl=1")} target={viewable ? "_blank" : undefined} rel="noopener" className={btn.primary}>{viewable ? tk("openFile") : tk("downloadFile")}</a>
             )}
-            {viewable && canDownload && <a href={fileUrl("dl=1")} className={btn.secondaryLg}>{tk("downloadFile")}</a>}
+            {viewable && canDownload && <a href={fileUrl("dl=1")} className={btn.secondary}>{tk("downloadFile")}</a>}
           </div>
           {!canDownload && <span className="text-sm font-bold">{viewable ? td("page.noDownload") : td("page.noView")}</span>}
           <span className="text-sm text-muted">{tk("ownContent")}</span>
@@ -158,8 +172,8 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
           <Markdown source={data.body} />
           <p className="mb-0 mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-3 text-sm text-muted">
             <span>{tk("updated", { date: dateLong(r.updated_at, locale) })}</span>
-            {level >= 3 && !meta.trashed_at && <Link href={`/links/${r.id}?edit=1`} className="font-bold text-ink">{tk("edit")}</Link>}
-            {level === 2 && !meta.trashed_at && <Link href={`/links/${r.id}?suggest=1`} className="font-bold text-ink">{td("page.suggest")}</Link>}
+            {level >= 3 && !meta.trashed_at && <Link href={`/links/${r.id}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
+            {level === 2 && !meta.trashed_at && <Link href={`/links/${r.id}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
             {meta.lock && !meta.lock.mine && <span className="font-bold text-red">{td("page.locked")}</span>}
             {level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
           </p>
@@ -171,30 +185,18 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
 
       {data.canCopy && !meta.trashed_at && <CopyButton id={id} groups={data.myGroups} linkKey={key} />}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
-        <span className="flex items-center gap-2 text-sm">
-          <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={32} />
-          <span>
-            {t("sharedBy")} <Link href={`/profile/${r.owner_id}`} className="font-bold text-ink">{r.owner_name}</Link>
-            {r.group_name && <> · <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink">{t("inGroupName", { name: r.group_name })}</Link></>}
-            <span className="text-muted"> · {dateLong(r.created_at, locale)}</span>
-          </span>
-        </span>
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-line pt-4">
         <span className="flex items-center gap-3">
           <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={!!me} />
-          {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className="border-0 bg-transparent p-0 text-sm text-muted underline" />}
+          {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
           {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} />}
         </span>
       </div>
 
       {!editing && !suggesting && <Suggestions id={id} items={data.suggestions} />}
-      {level >= 4 && !editing && !suggesting && (
-        <ShareAccess id={id} origin={r.origin} visibility={meta.visibility} editMode={meta.edit_mode} allowDownload={meta.allow_download} license={meta.license}
-          linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
-      )}
       {data.transfer && level >= 4 && <span className="flex items-center gap-2 text-sm">{td("access.transferPending", { name: data.transfer.to_name })} <CancelTransfer transferId={data.transfer.id} /></span>}
       {isNote && level >= 3 && !editing && !suggesting && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
       <Comments id={id} items={data.comments} canComment={level >= 2 && !!me} me={me} canModerate={level >= 4} />
-    </div>
+    </Page>
   );
 }

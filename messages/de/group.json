@@ -28,7 +28,7 @@
     "secret": "Geheim"
   },
   "visText": {
-    "public": "Alle können Gespräch, Ziele und Verlauf lesen.",
+    "public": "Alle können Chat, Ziele und Verlauf lesen.",
     "members": "Nur Mitglieder sehen Inhalte. Die Gruppe erscheint nicht in der Suche."
   },
   "visibility": "Sichtbarkeit",
@@ -36,20 +36,20 @@
   "join": "Beitreten",
   "requestJoin": "Beitritt anfragen",
   "whyJoin": "Warum möchtest du mitmachen? (optional)",
-  "sendRequest": "Anfrage senden",
+  "sendRequest": "Beitritt anfragen",
   "requested": "Angefragt · die Gruppe entscheidet",
   "youAre": "Du bist {role}",
   "leave": "Gruppe verlassen",
   "leaveConfirm": "Gruppe wirklich verlassen?",
   "roles": {
-    "admin": "Admin",
-    "maintainer": "Maintainer",
-    "contributor": "Mitwirkend",
+    "admin": "Orga",
+    "maintainer": "Betreuung",
+    "contributor": "Mitglied",
     "guest": "Gast"
   },
   "holders": {
-    "maintainer": "Maintainer",
-    "contributor": "Mitwirkend",
+    "maintainer": "Betreuung",
+    "contributor": "Mitglied",
     "guest": "Gast",
     "public": "Öffentlich"
   },
@@ -57,22 +57,21 @@
   "tabs": {
     "goals": "Ziele",
     "goalsVoting": "Ziele · {n} Abstimmung",
-    "talk": "Gespräch",
-    "needs": "Bedarf · {n}",
+    "talk": "Chat",
+    "needs": "Gesuche · {n}",
     "tasks": "Aufgaben",
     "team": "Mitglieder und Rechte",
     "about": "Über",
-    "links": "Links"
+    "links": "Wissen"
   },
   "talkPlaceholder": "In „{name}“ schreiben …",
   "joinToPost": "Tritt der Gruppe bei, um mitzuschreiben.",
   "noPosts": "Noch kein Beitrag.",
   "needsIntro": "Was der Gruppe fehlt. Kontakt entsteht nur, wenn beide Seiten zustimmen.",
   "noNeeds": "Gerade kein offener Bedarf.",
-  "needsTag": "braucht",
   "forGoal": "für: {goal}",
-  "canHelp": "Ich kann helfen",
-  "needsAside": "Braucht",
+  "canHelp": "Helfen",
+  "needsAside": "Gesucht",
   "similar": "Ähnliche Gruppen",
   "noDescription": "Noch keine Beschreibung.",
   "kind": "Art",
@@ -81,16 +80,16 @@
   "members": "Mitglieder · {n}",
   "roleOf": "Rolle von {name}",
   "remove": "Entfernen",
-  "onlyAdmin": "Einziger Admin, Rolle gesperrt",
+  "onlyAdmin": "Einzige Person in der Orga, Rolle gesperrt",
   "wantToJoin": "Möchten mitmachen",
-  "accept": "Als Mitwirkend aufnehmen",
+  "accept": "Als Mitglied aufnehmen",
   "decline": "Ablehnen",
   "rights": "Rechte je Rolle",
-  "rightsText": "Admins können die Rechte von Maintainer, Mitwirkend und Gast anpassen. Admins dürfen immer alles.",
+  "rightsText": "Die Orga kann die Rechte von Betreuung, Mitgliedern und Gästen anpassen. Die Orga darf immer alles.",
   "right": "Recht",
   "perms": {
     "read": "Lesen und kommentieren",
-    "post": "In der Gruppe posten",
+    "post": "Im Chat der Gruppe schreiben",
     "propose_goals": "Ziele vorschlagen",
     "vote_goals": "Über Ziele abstimmen (Externe als Resonanz)",
     "edit_tasks": "Aufgaben bearbeiten",
@@ -113,7 +112,7 @@
     "until": "Bis wann",
     "untilPlaceholder": "z. B. Juni 2027",
     "subgoals": "Unterziele, eins pro Zeile",
-    "needs": "Was fehlt dafür? Wird unter Anfragen eingetragen.",
+    "needs": "Was fehlt dafür? Wird als Gesuch eingetragen.",
     "needsPlaceholder": "z. B. Beamer, 300 €, jemand mit Schnitt-Erfahrung",
     "rule": "Die Gruppe stimmt 7 Tage ab. Angenommen ist das Ziel mit der Mehrheit der abstimmenden Mitglieder, wenn mindestens die Hälfte mitstimmt.",
     "submit": "Zur Abstimmung stellen"
@@ -144,8 +143,9 @@
     "tags": "Themen",
     "focus": "Deine Rolle in der Gruppe",
     "focusPlaceholder": "z. B. Organisation, Finanzen",
-    "modTasks": "Aufgaben-Board",
-    "submit": "Gruppe gründen"
+    "modTasks": "Aufgaben",
+    "submit": "Gruppe gründen",
+    "settings": "Einstellungen anpassen"
   },
   "presets": {
     "title": "Für wen ist die Gruppe?",

@@ -37,8 +37,8 @@ export function Notes({ notes }: { notes: { id: string; body: string; updated_at
             <>
               <p className="m-0 whitespace-pre-line">{n.body}</p>
               <div className="flex gap-3 text-sm">
-                <button type="button" onClick={() => { setEditing(n.id); setText(n.body); }} className="border-0 bg-transparent p-0 text-muted underline">{tc("edit")}</button>
-                <button type="button" disabled={pending} onClick={() => start(async () => { await deleteNote(n.id); })} className="border-0 bg-transparent p-0 text-muted underline">{tc("delete")}</button>
+                <button type="button" onClick={() => { setEditing(n.id); setText(n.body); }} className={btn.linkMuted}>{tc("edit")}</button>
+                <button type="button" disabled={pending} onClick={() => start(async () => { await deleteNote(n.id); })} className={btn.linkMuted}>{tc("delete")}</button>
               </div>
             </>
           )}

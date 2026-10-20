@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { JuryReview } from "@/components/jury/JuryReview";
+import { Page } from "@/components/ui/Page";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("jury"))("title") };
@@ -22,8 +23,8 @@ export default async function JuryPage({ params }: PageProps<"/jury/[id]">) {
   });
   if (!c) notFound();
   return (
-    <div className="px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-16">
+    <Page width="narrow">
       <JuryReview caseId={c.id} caseNo={c.case_no} rule={c.rule} context={c.context_text} target={c.target_text} decided={c.decided} status={c.status} jurySize={c.jury_size} />
-    </div>
+    </Page>
   );
 }

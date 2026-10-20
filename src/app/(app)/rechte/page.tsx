@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { Page, PageHeader } from "@/components/ui/Page";
+import { InfoTabs } from "@/components/InfoTabs";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { dateTime } from "@/lib/format";
-import { Lead } from "@/components/ui/Lead";
+import { Notice } from "@/components/ui/Page";
 
 type Explained = { action: string; allowed: boolean; reason: string | null; min_level: number; limit: number | null; used: number };
 type Rights = {
@@ -30,11 +32,9 @@ export default async function RightsPage() {
   const status = (a: Explained) =>
     a.allowed ? t("status.ok") : a.reason === "level_required" ? t("status.level_required", { level: a.min_level }) : t(`status.${a.reason as "banned"}`);
   return (
-    <div className="flex max-w-[960px] flex-col gap-6 px-4 pb-8 pt-4 md:gap-10 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-col gap-2">
-        <h1 className="display m-0">{t("title")}</h1>
-        <Lead long={t("lead")} short={t("leadShort")} />
-      </div>
+    <Page>
+      <PageHeader title={t("title")} lead={t("leadShort")} />
+      <InfoTabs active="rights" />
 
       <section aria-label={t("yourLevel", { name: levels[r.level].name })} className="flex flex-col gap-3 border border-ink border-t-[6px] bg-surface p-4 md:p-6">
         <strong className="text-2xl leading-tight">{t("yourLevel", { name: levels[r.level].name })}</strong>
@@ -49,12 +49,12 @@ export default async function RightsPage() {
         )}
         {session && r.level >= 2 && r.mode === "vouch" && <span className="text-sm text-muted">{t("vouchGiven", { n: r.vouches_given })}</span>}
         {r.sanction && (
-          <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">
+          <Notice tone="error">
             {r.sanction.ends_at
               ? t("sanction", { kind: t(`kinds.${r.sanction.kind}`), date: dateTime(r.sanction.ends_at, locale) })
               : t("sanctionOpen", { kind: t(`kinds.${r.sanction.kind}`) })}
             {r.sanction.reason ? ` ${r.sanction.reason}` : ""}
-          </p>
+          </Notice>
         )}
         {!session && <Link href="/login?next=/rechte" className="font-bold">{t("status.not_authenticated")}</Link>}
       </section>
@@ -112,6 +112,6 @@ export default async function RightsPage() {
         </ol>
         <Link href="/principles" className="self-start text-sm font-bold">{t("more")}</Link>
       </section>
-    </div>
+    </Page>
   );
 }

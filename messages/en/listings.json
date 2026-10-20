@@ -1,7 +1,7 @@
 {
   "requested": "Requested · waiting",
   "defaultMessage": "Hi! I am interested. When would suit you?",
-  "contactTitle": "Request",
+  "contactTitle": "Contact request",
   "to": "To {name}",
   "message": "Message",
   "privacy": "Contact details are only shared once {name} agrees.",

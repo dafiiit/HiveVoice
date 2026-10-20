@@ -7,6 +7,7 @@ import { Cover } from "../ui/Cover";
 import { ContactButton } from "./ContactButton";
 import { AllyButton } from "./MyListings";
 import { priceLabel } from "./price";
+import { btn, cardFrame } from "../ui/styles";
 
 type Own = { id: string; title: string };
 
@@ -31,14 +32,14 @@ export async function ListingCardView({ c, signedIn, why, sent, allied, reasons,
   const who = c.group_name ?? c.owner_name;
   const price = priceLabel(c, tc, locale);
   const facts = attrFacts(c.category, c.attrs, (k, v) => tcat(k as "label", v), locale).map((f) => f.value);
-  const href = `/${c.kind === "offer" ? "offers" : "needs"}/${c.id}`;
+  const href = `/anliegen/${c.id}`;
   const why2 = reasons?.length ? await reasonLabels(reasons) : [];
   return (
-    <article className="flex flex-col gap-3 border border-ink border-t-[6px] bg-surface p-4">
+    <article className={cardFrame}>
       <span className="flex items-center gap-2 text-sm">
         <Avatar name={who} seed={c.group_name ? undefined : c.owner_seed} path={c.group_name ? null : c.owner_path} size={28} group={!!c.group_name} />
         <span className="min-w-0 flex-1"><strong>{who}</strong> {t(c.kind === "need" ? (c.goal_title ? "needsForGoal" : "needs") : "gives")}</span>
-        {c.category !== "help" && <span className="flex-none bg-chip px-1.5 py-0.5 text-[12px] font-bold">{tcat(`names.${c.category}` as "names.help")}</span>}
+        <span className="flex-none bg-chip px-1.5 py-0.5 text-[12px] font-bold">{tcat(`names.${c.category}` as "names.help")}</span>
       </span>
       {c.images.length > 0 && (
         <Link href={href} tabIndex={-1} aria-hidden="true" className="relative block">
@@ -50,7 +51,7 @@ export async function ListingCardView({ c, signedIn, why, sent, allied, reasons,
       {facts.length > 0 && <span className="text-sm font-bold">{facts.slice(0, 4).join(" · ")}</span>}
       <span className="text-sm text-muted">{[c.goal_title ? t("goal", { goal: c.goal_title }) : null, c.location_text ?? c.region_name, c.schedule_text, c.seats ? t("seats", { n: c.seats }) : null].filter(Boolean).join(" · ")}</span>
       {c.pair_id && c.pair_title && (
-        <Link href={`/${c.kind === "offer" ? "needs" : "offers"}/${c.pair_id}`} className="text-sm text-ink">{t(c.kind === "offer" ? "pairOffer" : "pairNeed", { title: c.pair_title })}</Link>
+        <Link href={`/anliegen/${c.pair_id}`} className="text-sm text-ink underline">{t(c.kind === "offer" ? "pairOffer" : "pairNeed", { title: c.pair_title })}</Link>
       )}
       {why && !why2.length && <span className="text-sm font-bold text-red">{t("why", { tag: why })}</span>}
       {why2.length > 0 && <span className="text-sm"><strong className="text-red">{t("matchesWhy")}</strong> {why2.join(" · ")}</span>}
@@ -59,7 +60,7 @@ export async function ListingCardView({ c, signedIn, why, sent, allied, reasons,
         <div className="flex items-center gap-3">
           {c.kind === "need" && c.seeking_allies && signedIn && <AllyButton id={c.id} on={!!allied} count={c.ally_count} />}
           <ContactButton listingId={c.id} ownerName={who} ownerSeed={c.owner_seed} ownerPath={c.group_name ? null : c.owner_path} title={c.title} price={price}
-            label={t(c.kind === "need" ? "help" : "ask")} signedIn={signedIn} sent={sent} mine={mine} via={via} />
+            label={t(c.kind === "need" ? "help" : "ask")} signedIn={signedIn} sent={sent} mine={mine} via={via} className={btn.primarySm} />
         </div>
       </div>
     </article>

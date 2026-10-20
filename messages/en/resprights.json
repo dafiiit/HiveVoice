@@ -106,7 +106,6 @@
     "reason": "Reason (optional, anonymous to the parties)",
     "vote": "Vote",
     "voted": "You voted. Thank you.",
-    "decline": "I cannot take part",
-    "back": "Back to the responsible people"
+    "decline": "I cannot take part"
   }
 }

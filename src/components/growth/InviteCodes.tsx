@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { createInviteCode, redeemInviteCode, revokeInviteCode } from "@/lib/actions/growth";
 import { dateLong } from "@/lib/format";
 import { btn, field } from "../ui/styles";
+import { CopyButton } from "../ui/Copy";
 
 export type CodeRow = { code: string; used: boolean; expires_at: string; revoked: boolean };
 
@@ -16,7 +17,6 @@ export function InviteCodes({ codes, left, origin }: { codes: CodeRow[]; left: n
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
   return (
     <div className="flex flex-col gap-3">
       <span className="text-sm">{left > 0 ? t("left", { n: left }) : t("leftNone")}</span>
@@ -32,8 +32,8 @@ export function InviteCodes({ codes, left, origin }: { codes: CodeRow[]; left: n
             <span className="text-muted">{c.used ? t("used") : t("expires", { date: dateLong(c.expires_at, locale) })}</span></span>
           {!c.used && (
             <span className="flex gap-3">
-              <button type="button" className="border-0 bg-transparent p-0 font-bold text-ink underline" onClick={async () => { await navigator.clipboard.writeText(`${origin}/einladung/${c.code}`); setCopied(c.code); }}>{copied === c.code ? t("copied") : t("copyLink")}</button>
-              <button type="button" disabled={pending} className="border-0 bg-transparent p-0 text-muted underline" onClick={() => start(async () => { await revokeInviteCode(c.code); router.refresh(); })}>{t("revoke")}</button>
+              <CopyButton text={`${origin}/einladung/${c.code}`} label={t("copyLink")} size="sm" />
+              <button type="button" disabled={pending} className={btn.linkMuted} onClick={() => start(async () => { await revokeInviteCode(c.code); router.refresh(); })}>{t("revoke")}</button>
             </span>
           )}
         </div>
@@ -63,7 +63,7 @@ export function RedeemCode({ initial = "" }: { initial?: string }) {
       });
     }}>
       <label className={field.label}>{t("redeemTitle")}
-        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={10} placeholder={t("redeemPlaceholder")} className={`${field.inputSm} w-56 tracking-wider`} />
+        <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} maxLength={10} placeholder={t("redeemPlaceholder")} className={`${field.input} w-56 tracking-wider`} />
       </label>
       <button type="submit" disabled={pending || code.trim().length < 10} className={btn.primary}>{t("redeem")}</button>
       {error && <p role="alert" className="m-0 w-full font-bold">{error}</p>}

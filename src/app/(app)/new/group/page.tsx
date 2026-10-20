@@ -1,31 +1,27 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Lead } from "@/components/ui/Lead";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { popularTags } from "@/lib/queries";
-import { NewGroupFlow } from "@/components/new/NewGroupFlow";
+import { GroupForm } from "@/components/new/GroupForm";
+import { Page, PageHeader } from "@/components/ui/Page";
+import { newChain } from "@/components/new/chain";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("group"))("form.title") };
 }
 
-export default async function NewGroup({ searchParams }: PageProps<"/new/group">) {
-  const sp = await searchParams;
+export default async function NewGroup() {
   const session = await requireSession("/new/group");
   const t = await getTranslations("group.form");
-  const { chain, ideas } = await asViewer({ authId: session.authId, profileId: session.profile.id }, async (tx) => ({
-    chain: await tx<{ id: string; name: string; level: string }[]>`
-      select r.id, r.name, r.level::text from public.user_regions ur join public.regions r on r.id = ur.region_id where ur.profile_id = ${session.profile.id}
-      order by array_position(array['borough','municipality','district','state','country'], r.level::text)`,
-    ideas: await popularTags(tx),
-  }));
+  const tn = await getTranslations("new.purpose");
+  const { chain, ideas } = await asViewer({ authId: session.authId, profileId: session.profile.id }, async (tx) => ({ chain: await newChain(tx, session.profile.id), ideas: await popularTags(tx) }));
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-col gap-2">
-        <h1 className="display m-0">{t("title")}</h1>
-        <Lead long={t("lead")} short={t("leadShort")} />
-      </div>
-      <NewGroupFlow chain={chain} ideas={ideas} initial={sp.purpose === "demand" ? "demand" : "project"} />
-    </div>
+    <Page width="narrow">
+      <PageHeader title={t("title")} lead={t("lead")}>
+        <Link href="/new/initiative" className="self-start text-sm text-ink underline">{tn("toInitiative")}</Link>
+      </PageHeader>
+      <GroupForm chain={chain} ideas={ideas} />
+    </Page>
   );
 }

@@ -24,7 +24,7 @@ export function RegionPicker({ chain, value, onChange }: { chain: { id: string; 
         ))}
       </div>
       <label className={field.label}>{t("other")}
-        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("placeholder")} className={field.inputSm} />
+        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("placeholder")} className={field.input} />
       </label>
       {hits.map((h) => (
         <button key={h.id} type="button" onClick={() => { onChange({ id: h.id, name: h.name, level: h.level }); setQ(""); setHits([]); }}

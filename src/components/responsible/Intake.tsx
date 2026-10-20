@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { forwardRequest, respondRequest } from "@/lib/actions/responsible";
 import { dateLong, relTime } from "@/lib/format";
 import { btn, chip, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export type IntakeItem = { id: string; body: string; created_at: string; due_at: string; status: string; decision: string | null; response_body: string | null;
   author: string; resp_title: string; initiative_id: string | null; initiative_title: string | null; group_slug: string | null; group_name: string | null; supporters: number | null };
@@ -31,7 +32,7 @@ function Item({ r, others }: { r: IntakeItem; others: { id: string; label: strin
       )}
       <p className="m-0">{r.body}</p>
       <span className="text-sm text-muted">{t("from", { name: r.author })}{r.supporters ? ` · ${t("supporters", { n: r.supporters })}` : ""}</span>
-      {r.response_body && <p className="m-0 border-l-4 border-ink pl-3">{r.response_body}</p>}
+      {r.response_body && <Notice tone="status" className="font-normal">{r.response_body}</Notice>}
       {r.status === "open" && !mode && (
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setMode("answer")} className={btn.primary}>{t("answer")}</button>
@@ -61,7 +62,7 @@ function Item({ r, others }: { r: IntakeItem; others: { id: string; label: strin
           <label className={field.label}>{t("forwardTo")}
             <select value={to} onChange={(e) => setTo(e.target.value)} className={field.select}>{others.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}</select>
           </label>
-          <label className={field.label}>{t("note")}<input value={body} onChange={(e) => setBody(e.target.value)} className={field.inputSm} /></label>
+          <label className={field.label}>{t("note")}<input value={body} onChange={(e) => setBody(e.target.value)} className={field.input} /></label>
           <div className="flex gap-2">
             <button type="button" disabled={pending} onClick={() => start(async () => { await forwardRequest(r.id, to, body); setMode(null); })} className={btn.primary}>{t("forward")}</button>
             <button type="button" onClick={() => setMode(null)} className={btn.secondary}>{tc("cancel")}</button>

@@ -13,6 +13,7 @@ import { Attachments } from "../Attachments";
 import { PollCard } from "../PollCard";
 import { RefCardView } from "../refs/RefCardView";
 import { ExtrasButtons, ExtrasPreview, useExtras } from "../ComposerExtras";
+import { Notice } from "@/components/ui/Page";
 
 // `key` stays the same when a sent message gets its real id, so its bubble is not rebuilt; `fresh` bubbles slide in.
 type Local = Omit<Message, "created_at"> & { created_at: string | Date; sending?: boolean; waiting?: boolean; key: string; fresh?: boolean };
@@ -253,21 +254,21 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                     {m.waiting ? t("waiting") : m.sending ? t("sending") : fmt.time.format(new Date(m.created_at))}
                     {m.edited_at && !m.deleted_at && <span>· {ts("edited")}</span>}
                     {mine && lastMine?.id === m.id && readAt && ms(readAt) >= ms(m.created_at) - 1000 && <span>· {t("read")}</span>}
-                    {!m.sending && !m.deleted_at && <button type="button" onClick={() => startReply(m)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{te("reply")}</button>}
+                    {!m.sending && !m.deleted_at && <button type="button" onClick={() => startReply(m)} className={`${btn.linkMuted} text-xs`}>{te("reply")}</button>}
                     {mine && !m.sending && !m.deleted_at && now - ms(m.created_at) < 15 * 60000 && editing?.id !== m.id && (
-                      <button type="button" onClick={() => setEditing({ id: m.id, text: m.body })} className="border-0 bg-transparent p-0 text-xs text-muted underline">{ts("edit")}</button>
+                      <button type="button" onClick={() => setEditing({ id: m.id, text: m.body })} className={`${btn.linkMuted} text-xs`}>{ts("edit")}</button>
                     )}
                     {!m.sending && !m.deleted_at && deleting !== m.id && (
-                      <button type="button" onClick={() => setDeleting(m.id)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{ts("delete")}</button>
+                      <button type="button" onClick={() => setDeleting(m.id)} className={`${btn.linkMuted} text-xs`}>{ts("delete")}</button>
                     )}
                     {deleting === m.id && (
                       <span className="flex items-center gap-2">
-                        <button type="button" onClick={() => void remove(m.id, false)} className="border-0 bg-transparent p-0 text-xs font-bold text-ink underline">{ts("deleteForMe")}</button>
-                        {mine && <button type="button" onClick={() => void remove(m.id, true)} className="border-0 bg-transparent p-0 text-xs font-bold text-ink underline">{ts("deleteForAll")}</button>}
-                        <button type="button" onClick={() => setDeleting(null)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{ts("cancel")}</button>
+                        <button type="button" onClick={() => void remove(m.id, false)} className={`${btn.link} text-xs font-bold`}>{ts("deleteForMe")}</button>
+                        {mine && <button type="button" onClick={() => void remove(m.id, true)} className={`${btn.link} text-xs font-bold`}>{ts("deleteForAll")}</button>}
+                        <button type="button" onClick={() => setDeleting(null)} className={`${btn.linkMuted} text-xs`}>{ts("cancel")}</button>
                       </span>
                     )}
-                    {!mine && !m.sending && !m.deleted_at && <ReportButton type="message" id={m.id} className="border-0 bg-transparent p-0 text-xs text-muted underline" />}
+                    {!mine && !m.sending && !m.deleted_at && <ReportButton type="message" id={m.id} className={`${btn.linkMuted} text-xs`} />}
                   </span>
                 </div>
               </div>
@@ -276,7 +277,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
         })}
         </div>
       </div>
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 text-sm font-bold">{error}</p>}
+      {error && <Notice tone="error" className="text-sm">{error}</Notice>}
       <form onSubmit={(e) => { e.preventDefault(); void send(); }} className="flex flex-none flex-col gap-2 border-t border-line pt-2 md:pt-3">
         {replyTo && (
           <div className="flex items-start gap-2 border-l-[3px] border-ink bg-chip py-1.5 pl-3 pr-1">

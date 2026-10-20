@@ -9,6 +9,7 @@ import { forgetLastLogin } from "@/lib/actions/lastLogin";
 import type { LastLogin } from "@/lib/lastLogin";
 import { Captcha, captchaOn } from "./Captcha";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 const providers = (process.env.NEXT_PUBLIC_AUTH_PROVIDERS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 const passkeys = process.env.NEXT_PUBLIC_PASSKEYS === "1";
@@ -84,7 +85,7 @@ export function AuthForm({ mode, next, remembered: initialRemembered = null }: {
       {mode === "login" && remembered && (remembered.provider === "google" || remembered.provider === "apple") && (
         <div className="flex max-w-[520px] flex-col gap-3 border border-ink bg-surface p-4">
           <strong>{t("remembered.title")}</strong>
-          <button type="button" onClick={() => oauth(remembered.provider as "google" | "apple", remembered.email)} className={btn.primaryLg}>
+          <button type="button" onClick={() => oauth(remembered.provider as "google" | "apple", remembered.email)} className={btn.primary}>
             {t("remembered.continue", { email: remembered.email })}
           </button>
           <button type="button" onClick={async () => { await forgetLastLogin(); setRemembered(null); }} className={`${btn.ghost} self-start`}>{t("remembered.other")}</button>
@@ -93,15 +94,15 @@ export function AuthForm({ mode, next, remembered: initialRemembered = null }: {
       {mode === "login" && remembered?.provider === "email" && (
         <p className="m-0 flex flex-wrap items-center gap-x-3 text-sm">
           <span>{t("remembered.asEmail", { email: remembered.email })}</span>
-          <button type="button" onClick={async () => { await forgetLastLogin(); setRemembered(null); setEmail(""); }} className="border-0 bg-transparent p-0 text-sm text-muted underline">{t("remembered.other")}</button>
+          <button type="button" onClick={async () => { await forgetLastLogin(); setRemembered(null); setEmail(""); }} className={`${btn.linkMuted} text-sm`}>{t("remembered.other")}</button>
         </p>
       )}
       <p className="m-0 max-w-[520px]">{t("intro")}</p>
       {(providers.length > 0 || passkeys) && (
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          {providers.includes("google") && <button type="button" onClick={() => oauth("google")} className={btn.secondaryLg}>{t("withGoogle")}</button>}
-          {providers.includes("apple") && <button type="button" onClick={() => oauth("apple")} className={btn.secondaryLg}>{t("withApple")}</button>}
-          {passkeys && mode === "login" && <button type="button" onClick={passkey} className={btn.secondaryLg}>{t("withPasskey")}</button>}
+          {providers.includes("google") && <button type="button" onClick={() => oauth("google")} className={btn.secondary}>{t("withGoogle")}</button>}
+          {providers.includes("apple") && <button type="button" onClick={() => oauth("apple")} className={btn.secondary}>{t("withApple")}</button>}
+          {passkeys && mode === "login" && <button type="button" onClick={passkey} className={btn.secondary}>{t("withPasskey")}</button>}
         </div>
       )}
       <form onSubmit={submit} className="flex flex-col gap-5">
@@ -115,9 +116,9 @@ export function AuthForm({ mode, next, remembered: initialRemembered = null }: {
         </label>
         <input type="text" name="website" value={trap} onChange={(e) => setTrap(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
         <Captcha onToken={setCaptcha} />
-        {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+        {error && <Notice tone="error">{error}</Notice>}
         <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={busy || (captchaOn && !captcha)} className={btn.primaryLg}>{mode === "login" ? t("login") : t("signup")}</button>
+          <button type="submit" disabled={busy || (captchaOn && !captcha)} className={btn.primary}>{mode === "login" ? t("login") : t("signup")}</button>
           {mode === "login"
             ? <Link href={`/signup${next ? `?next=${encodeURIComponent(next)}` : ""}`} className={btn.ghost}>{t("noAccount")}</Link>
             : <Link href="/login" className={btn.ghost}>{t("haveAccount")}</Link>}

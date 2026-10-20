@@ -7,7 +7,7 @@
     "label": "Show",
     "all": "All",
     "messages": "Messages",
-    "requests": "Requests",
+    "requests": "Contact requests",
     "other": "More"
   },
   "sections": {
@@ -16,7 +16,7 @@
   },
   "labels": {
     "message": "Chat",
-    "request": "Request",
+    "request": "Contact request",
     "group": "Group",
     "initiative": "Initiative",
     "jury": "Jury",
@@ -47,7 +47,7 @@
     },
     "contact_declined": {
       "title": "{name} declined",
-      "body": "Your request about “{title}” was not accepted."
+      "body": "Your contact request about “{title}” was not accepted."
     },
     "contact_declined_direct": {
       "title": "{name} declined",
@@ -63,7 +63,7 @@
     },
     "join_declined": {
       "title": "Request declined",
-      "body": "“{group}” did not accept your request."
+      "body": "“{group}” did not accept your join request."
     },
     "goal_vote": {
       "title": "Vote in “{group}”",
@@ -87,7 +87,7 @@
     },
     "initiative_passed": {
       "title": "Initiative passed",
-      "body": "“{title}” now goes to the addressee."
+      "body": "“{title}” now goes to the responsible office."
     },
     "initiative_failed": {
       "title": "Initiative rejected",
@@ -370,7 +370,7 @@
       "body": "“{title}”"
     },
     "listing_match_need": {
-      "title": "A new request fits “{for_title}”",
+      "title": "A new wanted post fits “{for_title}”",
       "body": "“{title}”"
     },
     "object_shared": {

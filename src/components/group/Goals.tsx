@@ -7,6 +7,7 @@ import { dateLong } from "@/lib/format";
 import { Avatar } from "../ui/Avatar";
 import { BallotPanel, type BallotView } from "../BallotPanel";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 export type GoalView = {
   id: string; title: string; description: string | null; status: "voting" | "adopted" | "rejected" | "done"; timeline: string | null;
@@ -83,7 +84,7 @@ export function Goals({ slug, groupId, goals, members, canPropose, canEdit, canV
             {g.needs.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="font-bold">{t("missing")}</span>
-                {g.needs.map((n) => <Link key={n.id} href={`/needs/${n.id}`} className="border border-line px-2 py-1 text-ink no-underline">{n.title}</Link>)}
+                {g.needs.map((n) => <Link key={n.id} href={`/anliegen/${n.id}`} className="border border-line px-2 py-1 text-ink no-underline">{n.title}</Link>)}
               </div>
             )}
             {g.ballot && g.status === "voting" && (
@@ -95,23 +96,23 @@ export function Goals({ slug, groupId, goals, members, canPropose, canEdit, canV
           </article>
         );
       })}
-      {canPropose && !open && <button type="button" onClick={() => setOpen(true)} className={`${btn.secondaryLg} self-start border-ink`}>+ {t("propose")}</button>}
+      {canPropose && !open && <button type="button" onClick={() => setOpen(true)} className={`${btn.secondary} self-start border-ink`}>+ {t("propose")}</button>}
       {open && (
         <section aria-label={t("propose")} className="flex flex-col gap-4 border-2 border-ink bg-surface p-5">
           <strong className="text-xl">{t("propose")}</strong>
-          <label className={field.label}>{t("goal")}<input value={title} onChange={(e) => setTitle(e.target.value)} className={field.inputSm} /></label>
+          <label className={field.label}>{t("goal")}<input value={title} onChange={(e) => setTitle(e.target.value)} className={field.input} /></label>
           <div className="flex flex-wrap gap-4">
             <label className={field.label}>{t("owner")}
               <select value={owner} onChange={(e) => setOwner(e.target.value)} className={field.select}>
                 {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
               </select>
             </label>
-            <label className={field.label}>{t("until")}<input value={timeline} onChange={(e) => setTimeline(e.target.value)} placeholder={t("untilPlaceholder")} className={field.inputSm} /></label>
+            <label className={field.label}>{t("until")}<input value={timeline} onChange={(e) => setTimeline(e.target.value)} placeholder={t("untilPlaceholder")} className={field.input} /></label>
           </div>
           <label className={field.label}>{t("subgoals")}<textarea rows={3} value={subs} onChange={(e) => setSubs(e.target.value)} className={field.textarea} /></label>
-          <label className={field.label}>{t("needs")}<input value={needs} onChange={(e) => setNeeds(e.target.value)} placeholder={t("needsPlaceholder")} className={field.inputSm} /></label>
+          <label className={field.label}>{t("needs")}<input value={needs} onChange={(e) => setNeeds(e.target.value)} placeholder={t("needsPlaceholder")} className={field.input} /></label>
           <span className={field.hint}>{t("rule")}</span>
-          {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+          {error && <Notice tone="error">{error}</Notice>}
           <div className="flex gap-3">
             <button type="button" disabled={pending || title.trim().length < 3} onClick={submit} className={btn.primary}>{t("submit")}</button>
             <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>

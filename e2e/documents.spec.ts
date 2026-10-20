@@ -29,12 +29,15 @@ test.describe("documents: who sees what", () => {
       expect(href).toMatch(/^\/links\/[0-9a-f-]{36}$/);
       await page.goto(href!);
       await expect(page.getByText("Nur du siehst dieses Dokument.")).toBeVisible();
-      await expect(page.getByRole("heading", { name: "Rechte und Teilen", level: 2 })).toBeVisible();
+      // Who may read and edit lives in the share window, tab "Zugriff".
+      await page.getByRole("button", { name: "Teilen", exact: true }).click();
+      await page.getByRole("tab", { name: "Zugriff" }).click();
+      await expect(page.getByRole("region", { name: "Rechte und Teilen" })).toBeVisible();
 
       // Only with the link.
       await page.getByLabel("Wer darf das sehen?").selectOption("link");
       await page.getByRole("button", { name: "Einstellungen speichern" }).click();
-      const link = await page.getByLabel("Link zum Weitergeben").inputValue({ timeout: 60_000 });
+      const link = await page.getByLabel("Link zum Teilen").inputValue({ timeout: 60_000 });
       expect(link).toMatch(/\/links\/[0-9a-f-]{36}\?k=[0-9a-f]{32}$/);
       const guest = await browser.newContext();
       const gp = await guest.newPage();
@@ -45,8 +48,9 @@ test.describe("documents: who sees what", () => {
       expect(bare.status()).toBe(404);
 
       // Into the trash: closed for everybody else, restorable.
-      page.once("dialog", (d) => void d.accept());
+      await page.keyboard.press("Escape");
       await page.getByRole("button", { name: "In den Papierkorb" }).click();
+      await page.getByRole("button", { name: "Ja", exact: true }).click();
       await expect(page).toHaveURL(/kind=links/, { timeout: 60_000 });
       await page.goto("/me?tab=docs");
       await expect(page.getByText(marker)).toBeVisible();

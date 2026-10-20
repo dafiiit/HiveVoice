@@ -16,16 +16,16 @@
   },
   "missing": "Nicht sichtbar für dich: gelöscht oder nur für bestimmte Personen freigegeben.",
   "share": {
-    "button": "Weitergeben",
-    "title": "Weitergeben: {title}",
+    "button": "Teilen",
+    "title": "Teilen: {title}",
     "chat": "In einen Chat",
     "chatEmpty": "Noch keine Chats. Schreib zuerst jemandem.",
     "group": "In eine Gruppe",
     "groupEmpty": "Du bist in keiner Gruppe, in der du schreiben darfst.",
     "groupCollect": "In die Sammlung legen",
-    "groupPost": "Im Gespräch der Gruppe posten",
-    "market": "Im Marktplatz deines Ortes",
-    "marketPost": "Im Marktplatz {place} posten",
+    "groupPost": "Im Chat der Gruppe senden",
+    "market": "Auf der Pinnwand deines Ortes",
+    "marketPost": "Auf der Pinnwand {place} senden",
     "marketNone": "Wähle zuerst deinen Ort.",
     "note": "Nachricht (optional)",
     "notePlaceholder": "Schau mal, passt das zu dir?",
@@ -36,7 +36,11 @@
     "link": "Link",
     "close": "Schließen",
     "privateHint": "Nur wer es sehen darf, sieht den Inhalt der Karte. Für alle anderen steht dort „Nicht sichtbar“.",
-    "out": "Nach außen"
+    "tabs": {
+      "app": "In der App",
+      "out": "Link / QR",
+      "access": "Zugriff"
+    }
   },
   "access": {
     "title": "Wer darf was?",
@@ -68,7 +72,7 @@
   },
   "collection": {
     "tab": "Sammlung",
-    "intro": "Alles, was zu dieser Gruppe gehört: Angebote, Gesuche, Dokumente, Aufgaben, Initiativen und Untergruppen. Hinzufügen geht über „Weitergeben“ an jedem Eintrag.",
+    "intro": "Alles, was zu dieser Gruppe gehört: Angebote, Gesuche, Dokumente, Aufgaben, Initiativen und Untergruppen. Hinzufügen geht über „Teilen“ an jedem Eintrag.",
     "empty": "Noch nichts in der Sammlung.",
     "subgroups": "Untergruppen",
     "partOf": "Gehört zu",

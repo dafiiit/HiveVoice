@@ -3,6 +3,7 @@ import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { popularTags } from "@/lib/queries";
 import { ShareKnowledge } from "@/components/links/ShareKnowledge";
+import { Page, PageHeader } from "@/components/ui/Page";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("links"))("shareTitle") };
@@ -20,12 +21,9 @@ export default async function NewLink({ searchParams }: PageProps<"/new/link">) 
     ideas: await popularTags(tx),
   }));
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-col gap-2">
-        <h1 className="display m-0">{sp.mode === "note" ? tm("newDocTitle") : t("shareTitle")}</h1>
-        <p className="m-0 max-w-[680px] text-muted">{t("shareLeadShort")}</p>
-      </div>
+    <Page width="narrow">
+      <PageHeader title={sp.mode === "note" ? tm("newDocTitle") : t("shareTitle")} lead={t("shareLeadShort")} />
       <ShareKnowledge groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} initialMode={sp.mode === "note" || sp.mode === "file" ? sp.mode : "link"} />
-    </div>
+    </Page>
   );
 }

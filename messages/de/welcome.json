@@ -8,11 +8,20 @@
   "leadShort": "Frag an, was dir fehlt. Biete, was du kannst.",
   "moving": "Gerade in Bewegung",
   "allInitiatives": "Alle Initiativen",
-  "stagesTitle": "Anfragen · Anbieten · Verbinden",
+  "stagesTitle": "Suchen · Bieten · Verbinden",
   "stage": {
-    "need": { "name": "Anfragen", "text": "Was dir fehlt. Von Kuchen und Tee bis zum Radweg." },
-    "offer": { "name": "Anbieten", "text": "Was du kannst oder übrig hast. Kostenlos oder bezahlt." },
-    "connect": { "name": "Verbinden", "text": "Wer dasselbe will, schließt sich zur Gruppe zusammen und beschließt Ziele." }
+    "need": {
+      "name": "Suchen",
+      "text": "Was dir fehlt. Von Kuchen und Tee bis zum Radweg."
+    },
+    "offer": {
+      "name": "Bieten",
+      "text": "Was du kannst oder übrig hast. Kostenlos oder bezahlt."
+    },
+    "connect": {
+      "name": "Verbinden",
+      "text": "Wer dasselbe will, schließt sich zur Gruppe zusammen und beschließt Ziele."
+    }
   },
   "offerTitle": "Biete, was du kannst. Finde, was dir fehlt.",
   "heroAlt": "Nachbarn planen gemeinsam an einem Tisch im Hinterhof",
@@ -20,9 +29,18 @@
   "needs": "braucht",
   "offers": "bietet",
   "trust": {
-    "bots": { "title": "Ein Raum ohne Bots", "text": "Schreiben und abstimmen kann nur, wer bestätigt ist. Ob du anonym oder mit Klarnamen auftrittst, entscheidest du." },
-    "secret": { "title": "Geheime Wahl", "text": "Gezählt werden nur Summen. Wer was gewählt hat, sieht niemand." },
-    "life": { "title": "Für jeden Lebensbereich", "text": "Mitbewohnerin finden, eine Band gründen, Startkapital auftreiben oder den Spielplatz retten. Alles am selben Ort." }
+    "bots": {
+      "title": "Ein Raum ohne Bots",
+      "text": "Schreiben und abstimmen kann nur, wer bestätigt ist. Ob du mit Pseudonym oder Klarnamen auftrittst, entscheidest du."
+    },
+    "secret": {
+      "title": "Geheime Wahl",
+      "text": "Gezählt werden nur Summen. Wer was gewählt hat, sieht niemand."
+    },
+    "life": {
+      "title": "Für jeden Lebensbereich",
+      "text": "Mitbewohnerin finden, eine Band gründen, Startkapital auftreiben oder den Spielplatz retten. Alles am selben Ort."
+    }
   },
   "nonpartisan": "Parteiunabhängig",
   "imprint": "Impressum",

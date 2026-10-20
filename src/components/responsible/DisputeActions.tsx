@@ -45,7 +45,7 @@ export function JurorVote({ id, voted }: { id: string; voted: boolean }) {
       <div role="radiogroup" className="flex flex-wrap gap-2">
         {(["ok", "not_ok"] as const).map((c) => <button key={c} type="button" role="radio" aria-checked={choice === c} onClick={() => setChoice(c)} className={chip(choice === c)}>{t(c)}</button>)}
       </div>
-      <label className={field.label}>{t("reason")}<input value={reason} onChange={(e) => setReason(e.target.value)} className={field.inputSm} /></label>
+      <label className={field.label}>{t("reason")}<input value={reason} onChange={(e) => setReason(e.target.value)} className={field.input} /></label>
       {error && <p role="alert" className="m-0 font-bold">{error}</p>}
       <span className="flex flex-wrap gap-2">
         <button type="button" disabled={pending} className={btn.primary} onClick={() => start(async () => {

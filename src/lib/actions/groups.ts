@@ -196,24 +196,6 @@ export async function revokeInviteLink(slug: string, inviteId: string) {
   return res;
 }
 
-export type Invitee = { id: string; name: string; headline: string | null };
-/** People who can be invited: by name, only those who may be found and are not in the group yet. */
-export async function searchInvitees(groupId: string, q: string): Promise<Invitee[]> {
-  const query = q.trim();
-  if (query.length < 3) return [];
-  const res = await run(async (tx, s) => {
-    const [{ ok }] = await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`;
-    if (!ok) return [] as Invitee[];
-    return tx<Invitee[]>`
-      select p.id, p.display_name as name, p.headline from public.profiles p
-      where p.onboarded_at is not null and p.id <> ${s.profile.id} and lower(p.display_name) like ${`%${query.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`}
-        and app.can_find(${s.profile.id}, p.id)
-        and not exists (select 1 from public.group_members m where m.group_id = ${groupId} and m.profile_id = p.id)
-      order by p.helped_count desc limit 6`;
-  });
-  return res.ok ? res.data : [];
-}
-
 export async function inviteMember(slug: string, groupId: string, profileId: string, role: string, message: string) {
   const res = await run(async (tx) => { await tx`select app.invite_member(${groupId}, ${profileId}, ${role}::public.group_role, ${message || null})`; return null; });
   revalidatePath(path(slug));

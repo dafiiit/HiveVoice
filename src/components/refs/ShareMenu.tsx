@@ -1,23 +1,30 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { shareTargets, shareToChat, shareToGroup, shareToMarket, type ShareTargets } from "@/lib/actions/share";
 import type { RefType } from "@/lib/refs";
 import { IconCheck } from "../ui/Icons";
 import { ShareButtons } from "../ShareButtons";
-import { btn, chip, field } from "../ui/styles";
+import { Dialog } from "../ui/Dialog";
+import { btn, chip, field, segment, segments } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
-type Where = "chat" | "group" | "market" | "out";
+type Where = "chat" | "group" | "market";
+type Tab = "app" | "out" | "access";
 
 /**
- * "Weitergeben": send something as a card into a chat, a group (its collection, optionally its talk) or the
- * marketplace of one's place. Works the same for offers, requests, documents, groups, tasks and initiatives.
- * Public things can also leave HiveVoice: share sheet, link and QR code (`external`).
+ * The one "Teilen" button for everything (offers, wanted posts, documents, groups, tasks, initiatives).
+ * Its window has up to three tabs: "In der App" (a card into a chat, a group or the noticeboard),
+ * "Link / QR" for public things (share sheet, link, QR code) and "Zugriff" (who may read and edit) for
+ * the people who manage it.
  */
-export function ShareMenu({ type, id, title, className, external }: { type: RefType; id: string; title: string; className?: string; external?: { url: string; text: string } }) {
+export function ShareMenu({ type, id, title, className, external, access }: {
+  type: RefType; id: string; title: string; className?: string; external?: { url: string; text: string }; access?: ReactNode;
+}) {
   const t = useTranslations("refs.share");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
+  const [tab, setTab] = useState<Tab>("app");
   const [targets, setTargets] = useState<ShareTargets | null>(null);
   const [where, setWhere] = useState<Where>("chat");
   const [target, setTarget] = useState("");
@@ -28,7 +35,7 @@ export function ShareMenu({ type, id, title, className, external }: { type: RefT
   const [pending, start] = useTransition();
 
   const show = () => {
-    setOpen(true); setDone(null); setError(null);
+    setOpen(true); setTab("app"); setDone(null); setError(null);
     if (!targets) start(async () => {
       const res = await shareTargets();
       if (res.ok) { setTargets(res.data); setTarget(res.data.chats[0]?.id ?? ""); }
@@ -60,16 +67,22 @@ export function ShareMenu({ type, id, title, className, external }: { type: RefT
     <>
       <button type="button" onClick={show} className={className ?? btn.secondary}>{t("button")}</button>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 md:items-center" onClick={() => setOpen(false)}>
-          <div role="dialog" aria-modal="true" aria-label={t("title", { title })} onClick={(e) => e.stopPropagation()} className="flex max-h-[90dvh] w-full max-w-[520px] flex-col gap-4 overflow-y-auto bg-surface p-6">
-            <strong className="text-lg leading-tight">{t("title", { title })}</strong>
-            <div role="radiogroup" aria-label={t("button")} className="flex flex-wrap gap-2">
-              {(external ? ["chat", "group", "market", "out"] as const : ["chat", "group", "market"] as const).map((w) => (
+        <Dialog title={t("title", { title })} onClose={() => setOpen(false)} wide>
+            {(external || access) && (
+              <div role="tablist" aria-label={t("button")} className={segments}>
+                {(["app", ...(external ? ["out"] : []), ...(access ? ["access"] : [])] as Tab[]).map((k) => (
+                  <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={segment(tab === k)}>{t(`tabs.${k}`)}</button>
+                ))}
+              </div>
+            )}
+            {tab === "out" && external && <ShareButtons url={external.url} title={title} text={external.text} />}
+            {tab === "access" && access}
+            {tab === "app" && <>
+            <div role="radiogroup" aria-label={t("tabs.app")} className="flex flex-wrap gap-2">
+              {(["chat", "group", "market"] as const).map((w) => (
                 <button key={w} type="button" role="radio" aria-checked={where === w} onClick={() => pick(w)} className={chip(where === w)}>{t(w)}</button>
               ))}
             </div>
-            {where === "out" && external && <ShareButtons url={external.url} title={title} text={external.text} />}
-            {where !== "out" && <>
             {targets && where !== "market" && (options.length === 0
               ? <p className="m-0 text-sm text-muted">{empty}</p>
               : <label className={field.label}>{t(where)}
@@ -85,16 +98,11 @@ export function ShareMenu({ type, id, title, className, external }: { type: RefT
               <textarea rows={2} value={note} maxLength={2000} onChange={(e) => setNote(e.target.value)} placeholder={t("notePlaceholder")} className={field.textarea} />
             </label>
             <span className="text-[13px] text-muted">{t("privateHint")}</span>
-            {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+            {error && <Notice tone="error">{error}</Notice>}
             {done && <p role="status" className="m-0 flex items-center gap-2 font-bold"><IconCheck /> {done}</p>}
-            <div className="flex gap-3">
-              <button type="button" disabled={pending || !ready} onClick={send} className={btn.primaryLg}>{where === "group" && !asPost ? t("groupCollect") : t("send")}</button>
-              <button type="button" onClick={() => setOpen(false)} className={btn.secondaryLg}>{t("close")}</button>
-            </div>
+            <button type="button" disabled={pending || !ready} onClick={send} className={`${btn.primary} self-start`}>{where === "group" && !asPost ? t("groupCollect") : t("send")}</button>
             </>}
-            {where === "out" && <button type="button" onClick={() => setOpen(false)} className={`${btn.secondaryLg} self-start`}>{t("close")}</button>}
-          </div>
-        </div>
+        </Dialog>
       )}
     </>
   );

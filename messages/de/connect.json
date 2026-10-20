@@ -1,19 +1,19 @@
 {
   "title": "Verbinden",
   "order": "Reihenfolge",
-  "listSearch": "Unterhaltungen durchsuchen",
+  "listSearch": "Chats durchsuchen",
   "listNone": "Nichts gefunden.",
   "mode": {
     "chrono": "Chronologisch",
     "suggested": "Vorgeschlagen"
   },
   "guestTitle": "Du liest als Gast.",
-  "guestText": "Öffentliche Gruppen und den Marktplatz kannst du lesen. Schreiben kannst du nach der Anmeldung.",
+  "guestText": "Öffentliche Gruppen und die Pinnwand kannst du lesen. Schreiben kannst du nach der Anmeldung.",
   "guestTextShort": "Lesen geht ohne Anmeldung, Schreiben nicht.",
   "signIn": "Anmelden",
-  "conversations": "Unterhaltungen",
-  "pane": "Unterhaltung",
-  "market": "Marktplatz",
+  "conversations": "Chats",
+  "pane": "Chat",
+  "market": "Pinnwand",
   "marketSub": "{place}",
   "marketSubAll": "Neues aus allen Orten",
   "marketPlaceholder": "Was gibt’s Neues im Viertel?",
@@ -30,7 +30,7 @@
   "popular": "beliebt",
   "unread": "{n} ungelesen",
   "back": "Zurück zur Liste",
-  "pick": "Wähle links eine Unterhaltung.",
+  "pick": "Wähle links einen Chat.",
   "sort": {
     "top": "Für dich",
     "new": "Neueste"
@@ -44,11 +44,10 @@
     "all": "Alles",
     "chats": "Chats",
     "groups": "Gruppen",
-    "requests": "Anfragen"
+    "requests": "Kontaktanfragen"
   },
   "newGroup": "Gruppe gründen",
-  "newGroupHint": "Du hast eine Idee für eine Gruppe? Gründe sie hier.",
-  "emptyList": "Noch keine Gespräche. Schreib jemandem über ein Angebot, eine Anfrage oder ein Profil, oder tritt einer Gruppe bei.",
+  "emptyList": "Noch keine Chats. Schreib jemandem über ein Angebot, ein Gesuch oder ein Profil, oder tritt einer Gruppe bei.",
   "emptyFilter": "Hier ist gerade nichts.",
   "read": "Gelesen",
   "today": "Heute",
@@ -69,12 +68,12 @@
     "declined": "Abgelehnt",
     "newTag": "Neu",
     "waitingFor": "Wartet auf die Antwort von {name}.",
-    "waitingForGroup": "Wartet auf die Verwalter:innen von „{group}“.",
+    "waitingForGroup": "Wartet auf die Orga von „{group}“.",
     "yourMessage": "Deine Nachricht",
     "theirMessage": "Nachricht von {name}",
     "accept": "Annehmen und Chat öffnen",
     "decline": "Ablehnen",
-    "withdraw": "Anfrage zurückziehen",
+    "withdraw": "Zurückziehen",
     "acceptJoin": "Aufnehmen",
     "declineJoin": "Ablehnen",
     "declinedBy": "{name} hat abgelehnt.",
@@ -87,8 +86,8 @@
     "button": "Nachricht schreiben",
     "title": "Nachricht an {name}",
     "placeholder": "Hallo, ich habe dein Profil gesehen und …",
-    "privacy": "{name} sieht deine Nachricht als Anfrage und entscheidet, ob ein Chat entsteht.",
-    "sent": "Anfrage gesendet.",
+    "privacy": "{name} sieht deine Nachricht als Kontaktanfrage und entscheidet, ob ein Chat entsteht.",
+    "sent": "Kontaktanfrage gesendet.",
     "seeInConnect": "In Verbinden ansehen"
   },
   "mf": {

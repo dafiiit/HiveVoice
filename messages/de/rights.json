@@ -10,7 +10,7 @@
     },
     {
       "name": "Konto",
-      "text": "Du kannst reagieren, Anfragen schicken, Gruppen beitreten und Dateien anhängen. Schreiben darfst du in Gruppen mit offenem Beitritt nach dem ersten Tag."
+      "text": "Du kannst reagieren, Kontaktanfragen schicken, Gruppen beitreten und Dateien anhängen. Schreiben darfst du in Gruppen mit offenem Beitritt nach dem ersten Tag."
     },
     {
       "name": "Bestätigt",
@@ -26,7 +26,7 @@
     }
   ],
   "modes": {
-    "login": "Im Testbetrieb zählt ein Login als bestätigt.",
+    "login": "Im Testbetrieb zählt eine Anmeldung als bestätigt.",
     "vouch": "Bestätigt bist du, wenn zwei bestätigte Personen für dich bürgen und dein Konto einen Tag alt ist.",
     "eid": "Bestätigt bist du mit dem Online-Ausweis."
   },
@@ -50,7 +50,7 @@
   "actions": {
     "message": "Nachrichten schicken",
     "post": "Beiträge und Antworten schreiben",
-    "contact_request": "Fremden eine Anfrage schicken",
+    "contact_request": "Fremden eine Kontaktanfrage schicken",
     "group_join": "Gruppen beitreten oder anfragen",
     "upload": "Fotos und Dateien hochladen",
     "vouch": "Für andere bürgen",
@@ -59,7 +59,7 @@
     "initiative_create": "Initiative starten",
     "initiative_support": "Initiativen unterstützen",
     "vote": "Abstimmen",
-    "listing_create": "Anfragen und Angebote einstellen",
+    "listing_create": "Angebote und Gesuche einstellen",
     "share": "Links, Dateien und Notizen teilen",
     "report": "Inhalte melden",
     "jury": "In der Bürgerjury mitentscheiden",
@@ -97,13 +97,13 @@
       "view": "Ansehen: je nach Sichtbarkeit alle, die Gruppe, Eingeladene oder wer den Link kennt.",
       "comment": "Kommentieren und Änderungen vorschlagen: Menschen mit dem Recht „Kommentieren“, bei „Vorschläge“ alle bestätigten Lesenden.",
       "edit": "Bearbeiten: die Eigentümer:in, Eingeladene mit dem Recht „Bearbeiten“, bei „Gruppe bearbeitet“ alle mit dem Gruppenrecht für Dateien.",
-      "manage": "Verwalten (Rechte, Eigentum, Papierkorb): die Eigentümer:in, Eingeladene mit „Verwalten“, die Admins der Gruppe.",
+      "manage": "Verwalten (Rechte, Eigentum, Papierkorb): wer es besitzt, Eingeladene mit „Verwalten“ und die Orga der Gruppe.",
       "download": "Herunterladen: wenn der Schalter an ist. Wer bearbeiten darf, kann immer herunterladen.",
       "copy": "Kopie in das eigene Wissen: bei einer CC-Lizenz, oder wenn Herunterladen erlaubt und nicht „Alle Rechte vorbehalten“ gilt."
     },
     "initiative": {
       "support": "Unterstützen: bestätigte Menschen, solange die Initiative offen und nicht gesperrt ist.",
-      "edit": "Bearbeiten: die Autor:innen (und die Admins der zugeordneten Gruppe, wenn die Gruppe es erlaubt), mit Vermerk.",
+      "edit": "Bearbeiten: die Autor:innen (und die Orga der zugeordneten Gruppe, wenn die Gruppe es erlaubt), mit Vermerk.",
       "invite_author": "Mit-Autor:in einladen: die Autor:innen, bis zu fünf zusammen mit offenen Einladungen.",
       "start_ballot": "Abstimmung starten: die Autor:innen, nach der Debatte und mit genug Unterstützenden für den Ort.",
       "withdraw": "Zurückziehen: die Leitung der Initiative.",
@@ -112,8 +112,8 @@
     "group": {
       "post": "Schreiben: Mitglieder mit dem Recht „Schreiben“.",
       "invite": "Einladen: je nach Rolle und Einladungsregel der Gruppe.",
-      "manage_members": "Mitglieder verwalten: die Admins und wer das Recht bekommen hat.",
-      "archive": "Archivieren: die Admins.",
+      "manage_members": "Mitglieder verwalten: die Orga und wer das Recht bekommen hat.",
+      "archive": "Archivieren: die Orga.",
       "transfer": "Eigentum übergeben: die Eigentümer:in.",
       "delete": "Löschen: die Eigentümer:in, mit 14 Tagen Wartezeit."
     },
@@ -124,7 +124,7 @@
       "edit": "Bearbeiten und übergeben: die Hauptverantwortliche."
     },
     "poll": {
-      "manage": "Umfrage beenden oder löschen: wer sie erstellt hat, und die Admins und Maintainer der Gruppe."
+      "manage": "Umfrage beenden oder löschen: wer sie erstellt hat, und Orga und Betreuung der Gruppe."
     },
     "message": {
       "edit": "Nachricht ändern: nur die Absender:in, 15 Minuten lang.",
@@ -153,14 +153,14 @@
     "has_activity": "Löschen geht nicht mehr, weil schon jemand unterstützt, abgestimmt oder mitdiskutiert hat.",
     "too_many_authors": "Es sind schon so viele Autor:innen und Einladungen wie erlaubt.",
     "not_member": "Das geht nur für Mitglieder. Tritt der Gruppe bei.",
-    "not_allowed": "Dafür hast du hier kein Recht. Frag die Admins.",
-    "not_admin": "Das dürfen nur die Admins.",
+    "not_allowed": "Dafür hast du hier kein Recht. Frag die Orga.",
+    "not_admin": "Das darf nur die Orga.",
     "not_affected": "Das können nur Menschen aus dem Ort.",
     "own_responsibility": "Das ist deine eigene Zuständigkeit.",
     "official_role": "Amtliche Zuständigkeiten lassen sich so nicht anzweifeln.",
     "duplicate": "Dazu läuft schon ein Streitfall.",
     "not_holder": "Das darf nur, wer die Zuständigkeit betreut.",
-    "not_creator": "Das dürfen die Ersteller:in und die Gruppen-Admins.",
+    "not_creator": "Das darf, wer es erstellt hat, und die Orga der Gruppe.",
     "edit_window_over": "Die 15 Minuten zum Ändern sind vorbei.",
     "not_found": "Das gibt es nicht mehr.",
     "unknown_action": "Dazu gibt es noch keine Regel."

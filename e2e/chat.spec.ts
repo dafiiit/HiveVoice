@@ -89,7 +89,7 @@ test.describe("chats with replies, files and polls", () => {
       await page.getByLabel("Frage der Umfrage").fill("Welcher Tag?");
       await page.getByLabel("Antwort 1").fill("Montag");
       await page.getByLabel("Antwort 2").fill("Dienstag");
-      await page.getByRole("button", { name: "Posten" }).click();
+      await page.getByRole("button", { name: "Senden", exact: true }).click();
       const post = page.locator("article", { hasText: marker });
       await expect(post).toBeVisible();
       await post.getByRole("radio", { name: /Dienstag/ }).click();

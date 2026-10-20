@@ -3,6 +3,7 @@ import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { updateListing } from "@/lib/actions/listings";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 /** Changing title and description: the owner, and whoever was given editing rights. */
 export function EditListing({ id, title, description, path }: { id: string; title: string; description: string | null; path: string }) {
@@ -16,9 +17,9 @@ export function EditListing({ id, title, description, path }: { id: string; titl
   if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondary}>{t("button")}</button>;
   return (
     <div className="flex w-full max-w-[720px] flex-col gap-3 border border-ink bg-surface p-4">
-      <label className={field.label}>{t("title")}<input value={ti} maxLength={200} onChange={(e) => setTi(e.target.value)} className={field.inputSm} /></label>
+      <label className={field.label}>{t("title")}<input value={ti} maxLength={200} onChange={(e) => setTi(e.target.value)} className={field.input} /></label>
       <label className={field.label}>{t("description")}<textarea rows={5} value={de} onChange={(e) => setDe(e.target.value)} className={field.textarea} /></label>
-      {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+      {error && <Notice tone="error">{error}</Notice>}
       <div className="flex gap-3">
         <button type="button" disabled={pending || ti.trim().length < 3} className={btn.primary} onClick={() => start(async () => {
           const res = await updateListing(id, ti, de, path);

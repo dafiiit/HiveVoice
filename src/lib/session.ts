@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { sql, type Viewer } from "./db";
 import { createSupabaseServer } from "./supabase/server";
 import { verifiedClaims } from "./supabase/claims";
+import { adminEmails } from "./admin-emails";
 
 export type SessionProfile = {
   id: string;
@@ -22,7 +23,8 @@ export type SessionProfile = {
   unread: number;
 };
 
-export type Session = { authId: string; email: string | null; profile: SessionProfile };
+/** aal: "aal2" once the person passed a second factor in this session (see ADMIN_REQUIRE_MFA). */
+export type Session = { authId: string; email: string | null; aal: string | null; profile: SessionProfile };
 
 /** The signed-in person, or null for guests. Cached per request. */
 export const getSession = cache(async (): Promise<Session | null> => {
@@ -35,7 +37,12 @@ export const getSession = cache(async (): Promise<Session | null> => {
     await sql`select app.ensure_profile(${claims.sub}, ${name})`;
     [row] = await sql<{ p: SessionProfile | null }[]>`select app.session_profile(${claims.sub}) as p`;
   }
-  return row.p ? { authId: claims.sub, email: claims.email ?? null, profile: row.p } : null;
+  // Someone added to or taken off ADMIN_EMAILS: bring the admin list up to date right away.
+  if (row.p && row.p.is_admin !== adminEmails().includes((claims.email ?? "").toLowerCase())) {
+    await sql`select app.sync_server_admins(${adminEmails()}::text[])`.catch(() => null);
+    [row] = await sql<{ p: SessionProfile | null }[]>`select app.session_profile(${claims.sub}) as p`;
+  }
+  return row.p ? { authId: claims.sub, email: claims.email ?? null, aal: claims.aal ?? null, profile: row.p } : null;
 });
 
 export async function getViewer(): Promise<Viewer> {

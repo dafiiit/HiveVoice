@@ -10,9 +10,12 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-prod/**",
+    ".next-e2e/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Worktrees of parallel sessions are checked in their own folder.
+    ".claude/**",
     // Edge Functions run on Deno with their own imports.
     "supabase/functions/**",
   ]),

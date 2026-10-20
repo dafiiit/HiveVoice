@@ -8,6 +8,7 @@ import { Glyph } from "../ui/Glyph";
 import { Avatar } from "../ui/Avatar";
 import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
+import { Notice } from "@/components/ui/Page";
 
 const STEPS = ["intro", "place", "appearance", "interests"] as const;
 
@@ -196,10 +197,10 @@ export function Onboarding({ alias: initialAlias, realName: initialReal, suggest
             </section>
           )}
 
-          {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+          {error && <Notice tone="error">{error}</Notice>}
           <div className="flex flex-wrap items-center gap-3">
-            {(step > 0 || card > 0) && <button type="button" onClick={back} className={btn.secondaryLg}>{tc("back")}</button>}
-            <button type="button" onClick={next} disabled={!canNext || pending} className={btn.primaryLg}>
+            {(step > 0 || card > 0) && <button type="button" onClick={back} className={btn.secondary}>{tc("back")}</button>}
+            <button type="button" onClick={next} disabled={!canNext || pending} className={btn.primary}>
               {step === STEPS.length - 1 ? t("finish") : tc("next")}
             </button>
             {STEPS[step] === "intro" && (

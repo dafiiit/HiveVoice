@@ -1,6 +1,9 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { relTime } from "@/lib/format";
+import { Page, PageHeader } from "@/components/ui/Page";
+import { InfoTabs } from "@/components/InfoTabs";
+import { segment, segments } from "@/components/ui/styles";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("modrights.transparency"))("title") };
@@ -34,12 +37,12 @@ export default async function Transparency({ searchParams }: PageProps<"/transpa
     return entries.length ? entries.map(([k, n]) => <li key={k}>{label(k)}: <strong>{n}</strong></li>) : <li className="text-muted">{t("none")}</li>;
   };
   return (
-    <div className="flex max-w-[860px] flex-col gap-6 px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-10">
-      <h1 className="display m-0">{t("title")} {stats.year}</h1>
-      <p className="m-0 max-w-[720px] text-lg">{t("lead")}</p>
+    <Page>
+      <PageHeader title={`${t("title")} ${stats.year}`} lead={t("lead")} />
+      <InfoTabs active="transparency" />
       <p className="m-0 max-w-[720px]">{t("how", { months })}</p>
-      <nav className="flex gap-3 text-sm" aria-label={t("year")}>
-        {[thisYear, thisYear - 1, thisYear - 2].map((y) => <a key={y} href={`/transparenz?y=${y}`} aria-current={y === year ? "page" : undefined} className={y === year ? "font-bold text-ink" : "text-ink"}>{y}</a>)}
+      <nav className={segments} aria-label={t("year")}>
+        {[thisYear, thisYear - 1, thisYear - 2].map((y) => <a key={y} href={`/transparenz?y=${y}`} aria-current={y === year ? "page" : undefined} className={segment(y === year)}>{y}</a>)}
       </nav>
       <section className="grid grid-cols-2 gap-px border border-line bg-line md:grid-cols-4">
         {cell(t("reports"), stats.reports)}{cell(t("upheld"), stats.upheld)}{cell(t("dismissed"), stats.dismissed)}{cell(t("emergency"), stats.emergency)}
@@ -56,6 +59,6 @@ export default async function Transparency({ searchParams }: PageProps<"/transpa
         {log.map((l, i) => <span key={i} className="border-b border-line py-1 text-sm">{ta.has(`kind_${l.kind}`) ? ta(`kind_${l.kind}` as "kind_ban") : l.kind} · {relTime(l.created_at, locale)}</span>)}
       </section>
       <p className="m-0 text-sm text-muted">{t("operator")}</p>
-    </div>
+    </Page>
   );
 }

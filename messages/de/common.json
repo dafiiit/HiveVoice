@@ -7,13 +7,13 @@
   "delete": "Löschen",
   "edit": "Bearbeiten",
   "send": "Senden",
-  "post": "Posten",
+  "post": "Senden",
   "reply": "Antworten",
   "replies": "{n, plural, =0 {Antworten} one {1 Antwort} other {# Antworten}}",
   "more": "Mehr",
   "loadMore": "Mehr laden",
   "verified": "verifiziert",
-  "anonymous": "anonym",
+  "anonymous": "Pseudonym",
   "you": "Du",
   "optional": "optional",
   "report": "Melden",
@@ -39,7 +39,7 @@
     "ballot_closed": "Die Abstimmung ist beendet.",
     "ballot_running": "Es läuft bereits eine Abstimmung.",
     "wrong_phase": "Das geht in dieser Phase nicht.",
-    "last_admin": "Die Gruppe braucht mindestens einen Admin.",
+    "last_admin": "Die Gruppe braucht mindestens eine Person in der Orga.",
     "already_reported": "Du hast das schon gemeldet.",
     "own_content": "Eigene Beiträge kannst du nicht melden.",
     "own_listing": "Das ist dein eigener Eintrag.",
@@ -54,7 +54,7 @@
     "banned": "Dein Konto ist gerade pausiert. Details stehen unter „Rechte und Stufen“.",
     "too_many_empty_groups": "Du hast schon drei Gruppen ohne weitere Mitglieder. Lade zuerst Leute ein.",
     "blocked": "Du kannst dieser Person nicht schreiben.",
-    "contact_closed": "Diese Person nimmt gerade keine Anfragen von dir an.",
+    "contact_closed": "Diese Person nimmt gerade keine Kontaktanfragen von dir an.",
     "minor_protected": "Diese Person erreichst du nur über gemeinsame Gruppen.",
     "mode_change_limit": "Zwischen Alias und Klarnamen kannst du nur einmal im Monat wechseln.",
     "real_name_required": "Dafür brauchst du deinen Klarnamen. Stelle dein Profil unter „Für mich“ um.",
@@ -66,7 +66,7 @@
     "invite_invalid": "Dieser Einladungslink gilt nicht mehr.",
     "banned_from_group": "Du kannst dieser Gruppe nicht beitreten.",
     "adults_only": "Diese Gruppe ist erst ab 18.",
-    "owner_must_transfer": "Die Eigentümerin oder der Eigentümer muss die Gruppe erst übergeben.",
+    "owner_must_transfer": "Die Leitung muss die Gruppe erst übergeben.",
     "reason_required": "Bitte gib einen Grund an.",
     "name_protected": "Dieser Name ist Behörden und Parteien vorbehalten.",
     "not_allowed": "Das ist gerade nicht möglich.",
@@ -76,7 +76,7 @@
     "debate_too_short": "Die Debatte muss erst ein paar Tage laufen, bevor abgestimmt werden darf.",
     "note_required": "Bitte schreib kurz, was sich geändert hat (mindestens 5 Zeichen).",
     "too_big_change": "Während der Abstimmung sind nur kleine Korrekturen erlaubt. Für größere Änderungen brich die Abstimmung ab.",
-    "frozen": "Adressat und Kosten sind eingefroren.",
+    "frozen": "Zuständige Stelle und Kosten sind eingefroren.",
     "has_activity": "Löschen geht nicht mehr, weil schon jemand unterstützt, abgestimmt oder mitdiskutiert hat.",
     "lead_must_hand_over": "Die Leitung muss zuerst an eine andere Autor:in übergeben werden.",
     "too_many_responsibilities": "Du hast schon so viele Selbsterklärungen, wie erlaubt sind. Lass dich von der Gemeinschaft bestätigen oder gib eine ab.",
@@ -94,19 +94,20 @@
     "no_invites_left": "Du hast keine Einladungen mehr übrig.",
     "already_member": "Du bist schon dabei.",
     "email_not_allowed": "Mit dieser E-Mail-Adresse kann man sich nicht anmelden (Wegwerf-Adresse).",
-    "spam_detected": "Das sieht nach Spam aus: derselbe Text oder viele Links in kurzer Zeit. Warte bitte etwas."
+    "spam_detected": "Das sieht nach Spam aus: derselbe Text oder viele Links in kurzer Zeit. Warte bitte etwas.",
+    "admins_from_config": "Admins werden in der Einstellung ADMIN_EMAILS festgelegt."
   },
   "phase": {
     "idea": "Idee",
     "debate": "Debatte",
-    "addressee": "Beim Adressaten",
+    "addressee": "Bei der Stelle",
     "implementation": "In Umsetzung",
     "done": "Umgesetzt",
     "now": "Phase {n} von 5 · {label}"
   },
   "outcome": {
     "rejected_vote": "In der Abstimmung abgelehnt",
-    "rejected_addressee": "Vom Adressaten abgelehnt",
+    "rejected_addressee": "Von der Stelle abgelehnt",
     "withdrawn": "Zurückgezogen"
   },
   "tags": {
@@ -124,5 +125,10 @@
     "en": "English"
   },
   "perMonth": "{amount}/Monat",
-  "offline": "Offline – du siehst den zuletzt geladenen Stand. Nachrichten gehen raus, sobald du wieder online bist."
+  "offline": "Offline – du siehst den zuletzt geladenen Stand. Nachrichten gehen raus, sobald du wieder online bist.",
+  "yes": "Ja",
+  "searchPerson": "Name suchen (mindestens 3 Buchstaben)",
+  "nobodyFound": "Niemand gefunden.",
+  "copied": "Kopiert",
+  "copyLink": "Link kopieren"
 }

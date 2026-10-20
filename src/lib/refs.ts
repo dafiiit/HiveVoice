@@ -24,7 +24,7 @@ export async function loadRefCards(tx: Tx, refs: { type: string | null; id: stri
   const ids = (t: RefType) => [...new Set(by.get(t) ?? [])];
   if (by.has("listing")) add(await tx<RefCard[]>`
     select 'listing' as type, l.id, l.title, l.kind::text as kind, l.category as sub,
-           '/' || case l.kind when 'offer' then 'offers' else 'needs' end || '/' || l.id as href
+           '/anliegen/' || l.id as href
     from public.listings l where l.id = any(${ids("listing")}::uuid[])`);
   if (by.has("resource")) add(await tx<RefCard[]>`
     select 'resource' as type, r.id, r.title, r.kind::text as kind, r.host as sub, '/links/' || r.id as href

@@ -6,7 +6,7 @@ export function LevelBadge({ level, domain }: { level: "official" | "community" 
   const t = useTranslations("resprights.level");
   const text = level === "official" ? t("officialText", { domain: domain ?? "" }) : t(`${level}Text` as "selfText");
   return (
-    <span title={text} className={`inline-flex items-center gap-1 text-sm ${level === "official" ? "font-bold text-red" : level === "community" ? "font-bold text-ink" : "text-muted"}`}>
+    <span title={text} className={`inline-flex items-center gap-1 text-sm ${level === "self" ? "text-muted" : "font-bold text-ink"}`}>
       {level !== "self" && <IconCheck size={12} />} {t(level)}
     </span>
   );

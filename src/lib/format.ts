@@ -29,3 +29,10 @@ export function euro(cents: number, locale: string) {
 export function daysUntil(date: Date | string, now = new Date()) {
   return Math.max(0, Math.ceil((new Date(date).getTime() - now.getTime()) / 86400000));
 }
+
+/** Whether a second label says something new next to the first ("Karte · Karten" and "Notiz · Notiz in HiveVoice" do not). */
+export function addsInfo(first: string, second: string) {
+  const a = first.toLowerCase(), b = second.toLowerCase();
+  const stem = (x: string) => x.slice(0, Math.max(4, Math.min(x.length, 5)));
+  return !(a === b || b.startsWith(stem(a)) || a.startsWith(stem(b)));
+}

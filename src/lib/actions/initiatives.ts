@@ -110,24 +110,6 @@ export async function blockInitiative(id: string, reason: string, on: boolean) {
   return res;
 }
 
-export type CoAuthorHit = { id: string; name: string; headline: string | null };
-/** People who can be asked to write along: findable, verified, not yet an author. */
-export async function searchCoAuthors(id: string, q: string): Promise<CoAuthorHit[]> {
-  const query = q.trim();
-  if (query.length < 3) return [];
-  const res = await run(async (tx, s) => {
-    const [{ ok }] = await tx<{ ok: boolean }[]>`select app.people_search_allowed() as ok`;
-    if (!ok) return [] as CoAuthorHit[];
-    return tx<CoAuthorHit[]>`
-      select p.id, p.display_name as name, p.headline from public.profiles p
-      where p.onboarded_at is not null and p.id <> ${s.profile.id} and lower(p.display_name) like ${`%${query.toLowerCase().replace(/[\\%_]/g, (c) => `\\${c}`)}%`}
-        and app.can_find(${s.profile.id}, p.id) and app.profile_is_verified(p.id)
-        and not exists (select 1 from public.initiative_authors a where a.initiative_id = ${id} and a.profile_id = p.id)
-      order by p.helped_count desc limit 6`;
-  });
-  return res.ok ? res.data : [];
-}
-
 export async function inviteAuthor(id: string, profileId: string) {
   const res = await run(async (tx) => { await tx`select app.invite_author(${id}, ${profileId})`; return null; });
   revalidatePath(path(id));

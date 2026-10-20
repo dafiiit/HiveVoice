@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { saveListing, type ListingInput } from "@/lib/actions/listings";
 import { findResponsible, type RespHit } from "@/lib/actions/responsible";
-import { slugify } from "@/lib/slug";
+import { tagSlug } from "@/lib/slug";
 import { Avatar } from "../ui/Avatar";
 import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
@@ -13,18 +13,19 @@ import { PlaceInput } from "../PlaceInput";
 import { Carousel } from "../ui/Carousel";
 import { ShareKnowledge } from "../links/ShareKnowledge";
 import { imageUrl } from "@/lib/images";
-import { btn, chip, field } from "../ui/styles";
+import { btn, chip, field, segment, segments } from "../ui/styles";
 import { CATEGORY_DEFS, attrFacts, guessCategory, type Category } from "@/lib/market";
 import { AttrFields, CategoryPicker } from "./CategoryFields";
+import { Notice } from "@/components/ui/Page";
 
 // Simple keyword hints so new listings get findable tags right away.
 const DICT: [RegExp, string][] = [
-  [/sofa|übernacht|schlaf|couch|sleep/i, "uebernachtung"], [/essen|salat|brot|kuchen|kochen|lebensmittel|food|cake/i, "essen"],
+  [/sofa|übernacht|schlaf|couch|sleep/i, "übernachtung"], [/essen|salat|brot|kuchen|kochen|lebensmittel|food|cake/i, "essen"],
   [/yoga|sport|lauf|training|volleyball|fitness/i, "bewegung"], [/cad|konstru|3d|blender/i, "3d-modellierung"],
   [/nachhilfe|erklär|lern|kurs|tutor/i, "nachhilfe"], [/umzug|tragen|moving/i, "umzug"], [/leih|bohr|werkzeug|borrow|tool/i, "ausleihen"],
   [/garten|pflanz|beet|garden/i, "garten"], [/tee|treffen|gesellschaft|kennenlernen|spazier/i, "gesellschaft"],
   [/fahrrad|rad repar|bike/i, "fahrrad-reparatur"], [/band|musik|proberaum|bass|chor|music/i, "musik"],
-  [/antrag|genehmigung|behörde|permit/i, "genehmigung"], [/startkapital|invest|förder|geld|funding/i, "foerderung"],
+  [/antrag|genehmigung|behörde|permit/i, "genehmigung"], [/startkapital|invest|förder|geld|funding/i, "förderung"],
 ];
 const suggestTags = (text: string) => DICT.filter(([re]) => re.test(text)).map(([, tag]) => tag);
 
@@ -86,7 +87,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
     setCategory("help"); setCatTouched(false); setAttrs({}); setPairOn(true); setPairTitle(""); setPairDesc(""); setPairCat("help");
   };
   const submit = (status: "active" | "draft") => start(async () => {
-    const allTags = Array.from(new Set([...tags, ...auto, ...(tags.length || auto.length ? [] : [slugify(title.split(/\s+/)[0] ?? "")])])).filter(Boolean);
+    const allTags = Array.from(new Set([...tags, ...auto, ...(tags.length || auto.length ? [] : [tagSlug(title.split(/\s+/)[0] ?? "")])])).filter(Boolean);
     const withPair = payMode === "swap" && pairOn && (pairTitle || swap).trim().length >= 3;
     const res = await saveListing({
       kind, title, description, detailsPrivate: details, payMode, rateEuro: rate, fixedEuro: fixed, swapText: swap,
@@ -105,19 +106,18 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
 
   return (
     <section aria-label={t(give ? "newOffer" : "newNeed")} className="flex flex-col gap-4 border border-line bg-surface p-5">
-      <div role="radiogroup" aria-label={t("kindLabel")} className="grid grid-cols-2 border border-ink md:max-w-[420px]">
-        {(["offer", "need"] as const).map((k) => (
-          <button key={k} type="button" role="radio" aria-checked={kind === k} onClick={() => { setKind(k); setDone(null); }}
-            className={`h-11 border-0 text-sm font-bold ${kind === k ? "bg-ink text-on-ink" : "bg-surface text-ink"}`}>{t(k === "offer" ? "iOffer" : "iNeed")}</button>
-        ))}
+      {/* One switch: offering, looking, or sharing knowledge (a link, a file, a note). */}
+      <div role="radiogroup" aria-label={t("kindLabel")} className={`${segments} flex-wrap`}>
+        {(["offer", "need", "knowledge"] as const).map((k) => {
+          const on = k === "knowledge" ? give && mode === "knowledge" : kind === k && !(k === "offer" && mode === "knowledge");
+          return (
+            <button key={k} type="button" role="radio" aria-checked={on} className={segment(on)}
+              onClick={() => { setDone(null); if (k === "knowledge") { setKind("offer"); setMode("knowledge"); } else { setKind(k); setMode("listing"); } }}>
+              {t(k === "offer" ? "iOffer" : k === "need" ? "iNeed" : "iShare")}
+            </button>
+          );
+        })}
       </div>
-      {give && (
-        <div role="radiogroup" aria-label={t("modeLabel")} className="flex flex-wrap gap-2">
-          {(["listing", "knowledge"] as const).map((k) => (
-            <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)} className={chip(mode === k)}>{t(k === "listing" ? "modeOffer" : "modeKnowledge")}</button>
-          ))}
-        </div>
-      )}
       {give && mode === "knowledge" && (
         <>
           <p className="m-0 max-w-[680px] text-sm">{t("knowledgeLead")}</p>
@@ -128,13 +128,13 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
       {done && (
         <p role="status" className="m-0 flex flex-wrap items-center gap-2 font-bold">
           <IconCheck /> {t(done.pair ? "publishedPair" : "published")}
-          <Link href={`/${done.kind === "offer" ? "offers" : "needs"}/${done.id}#passt`} className="text-ink">{t("show")}</Link>
+          <Link href={`/anliegen/${done.id}#passt`} className="text-ink underline">{t("show")}</Link>
         </p>
       )}
       <div className="flex flex-col gap-3 md:flex-row">
         <input value={title} onChange={(e) => { setTitle(e.target.value); setDone(null); }} aria-label={t(give ? "titleOffer" : "titleNeed")}
           placeholder={t(give ? "placeholderOffer" : "placeholderNeed")} className={`${field.input} md:flex-1`} />
-        {!edOpen && <button type="button" onClick={() => setOpen(true)} className={btn.primaryLg}>{t(give ? "startOffer" : "startNeed")}</button>}
+        {!edOpen && <button type="button" onClick={() => setOpen(true)} className={btn.primary}>{t(give ? "startOffer" : "startNeed")}</button>}
       </div>
       {!edOpen && ideas[kind].length > 0 && (
         <div className="flex flex-col gap-1.5">
@@ -156,18 +156,18 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
             </label>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <PlaceInput label={t("location")} value={location} onChange={setLocation} onPlace={(p) => setPlaceId(p?.id ?? null)} hint={t("locationHint")} />
-              <label className={field.label}>{t("schedule")}<input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder={t("schedulePlaceholder")} className={field.inputSm} /></label>
+              <label className={field.label}>{t("schedule")}<input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder={t("schedulePlaceholder")} className={field.input} /></label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={() => setRecurring(!recurring)} className="h-5 w-5 accent-[var(--ink)]" />{t("recurring")}</label>
-              <label className={field.label}>{t(give ? "seats" : "people")}<input type="number" min={1} value={seats} onChange={(e) => setSeats(e.target.value)} className={field.inputSm} /></label>
+              <label className={field.label}>{t(give ? "seats" : "people")}<input type="number" min={1} value={seats} onChange={(e) => setSeats(e.target.value)} className={field.input} /></label>
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-sm font-bold">{t(give ? "payOffer" : "payNeed")}</span>
               <div role="radiogroup" aria-label={t(give ? "payOffer" : "payNeed")} className="flex flex-wrap gap-2">
                 {payOpts.map((k) => <button key={k} type="button" role="radio" aria-checked={payMode === k} onClick={() => setPay(k)} className={chip(payMode === k)}>{payLabel(k)}</button>)}
               </div>
-              {payMode === "hourly" && <label className={field.label}>{t("perHour")}<input type="number" min={0} value={rate} onChange={(e) => setRate(e.target.value)} className={`${field.inputSm} w-32`} /></label>}
-              {payMode === "fixed" && <label className={field.label}>{t("amount")} {tcat.has(`fixedHint.${cat}`) && <span className={field.hint}>{tcat(`fixedHint.${cat}` as "fixedHint.job")}</span>}<input type="number" min={0} value={fixed} onChange={(e) => setFixed(e.target.value)} className={`${field.inputSm} w-32`} /></label>}
-              {payMode === "swap" && <label className={field.label}>{t("swapFor")}<input value={swap} onChange={(e) => setSwap(e.target.value)} placeholder={t("swapPlaceholder")} className={field.inputSm} /></label>}
+              {payMode === "hourly" && <label className={field.label}>{t("perHour")}<input type="number" min={0} value={rate} onChange={(e) => setRate(e.target.value)} className={`${field.input} w-32`} /></label>}
+              {payMode === "fixed" && <label className={field.label}>{t("amount")} {tcat.has(`fixedHint.${cat}`) && <span className={field.hint}>{tcat(`fixedHint.${cat}` as "fixedHint.job")}</span>}<input type="number" min={0} value={fixed} onChange={(e) => setFixed(e.target.value)} className={`${field.input} w-32`} /></label>}
+              {payMode === "swap" && <label className={field.label}>{t("swapFor")}<input value={swap} onChange={(e) => setSwap(e.target.value)} placeholder={t("swapPlaceholder")} className={field.input} /></label>}
               {payMode === "swap" && (
                 <div className="flex flex-col gap-3 border-l-4 border-ink bg-paper p-3">
                   <label className="flex items-start gap-2 text-sm">
@@ -177,7 +177,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
                   {pairOn && (
                     <>
                       <label className={field.label}>{t(give ? "pairTitleOffer" : "pairTitleNeed")}
-                        <input value={pairTitle || swap} onChange={(e) => setPairTitle(e.target.value)} placeholder={t("pairPlaceholder")} className={field.inputSm} />
+                        <input value={pairTitle || swap} onChange={(e) => setPairTitle(e.target.value)} placeholder={t("pairPlaceholder")} className={field.input} />
                       </label>
                       <label className={field.label}>{t("description")}
                         <textarea rows={2} value={pairDesc} onChange={(e) => setPairDesc(e.target.value)} className={field.textarea} />
@@ -210,7 +210,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
                 <button type="button" aria-expanded={finder} onClick={() => setFinder(!finder)} className={`${btn.secondary} self-start`}>{t("whoIsResponsible")}</button>
                 {finder && (
                   <div className="flex flex-col gap-2 border border-line p-3">
-                    <input type="search" value={fq} onChange={(e) => setFq(e.target.value)} placeholder={t("finderPlaceholder")} aria-label={t("whoIsResponsible")} className={field.inputSm} />
+                    <input type="search" value={fq} onChange={(e) => setFq(e.target.value)} placeholder={t("finderPlaceholder")} aria-label={t("whoIsResponsible")} className={field.input} />
                     {hits.map((h) => {
                       const on = resp.some((r) => r.id === h.id);
                       return (
@@ -232,10 +232,10 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
                   <span><strong>{t("allies")}</strong><br />{t("alliesHint")}</span></label>
               </div>
             )}
-            {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
+            {error && <Notice tone="error">{error}</Notice>}
             <span className="text-sm text-muted">{t("matchHint")}</span>
             <div className="flex flex-wrap gap-3">
-              <button type="button" disabled={pending || title.trim().length < 3} onClick={() => submit("active")} className={btn.primaryLg}>{t("publish")}</button>
+              <button type="button" disabled={pending || title.trim().length < 3} onClick={() => submit("active")} className={btn.primary}>{t("publish")}</button>
               <button type="button" onClick={reset} className={btn.ghost}>{t("discard")}</button>
             </div>
           </div>

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Lead } from "@/components/ui/Lead";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { myRegionIds } from "@/lib/queries";
 import { Avatar } from "@/components/ui/Avatar";
 import { dateLong } from "@/lib/format";
-import { chip, tab } from "@/components/ui/styles";
+import { btn, chip, segment, segments } from "@/components/ui/styles";
+import { Notice, Page, PageHeader } from "@/components/ui/Page";
+import { ExploreTabs } from "@/components/ExploreTabs";
+import { SearchField } from "@/components/ui/SearchField";
+import { MobileFinder } from "@/components/shell/MobileFinder";
 import { RequestForm } from "@/components/responsible/RequestForm";
 import { LevelBadge } from "@/components/responsible/LevelBadge";
 import { ConfirmButton } from "@/components/responsible/ConfirmButton";
@@ -93,32 +96,33 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
     return `/responsible${p.size ? `?${p}` : ""}`;
   };
 
+  const te = await getTranslations("explore");
   return (
-    <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
-      <div className="flex flex-col gap-2">
-        <h1 className="display m-0">{t("title")}</h1>
-        <Lead long={t("lead")} short={t("leadShort")} className="max-w-[720px]" />
-      </div>
+    <Page>
+      <MobileFinder />
+      <PageHeader title={te("title")} mobileHidden />
+      <ExploreTabs active="responsible" />
       {session && (
-        <div role="tablist" className="flex border-b border-line">
-          <Link role="tab" aria-selected={view === "search"} href={href({ view: "search" })} className={tab(view === "search")}>{t("search")}</Link>
-          <Link role="tab" aria-selected={view === "sent"} href={href({ view: "sent" })} className={tab(view === "sent")}>{tr("sent.tab")}</Link>
-          {d.mine.length > 0 && <Link role="tab" aria-selected={view === "intake"} href={href({ view: "intake" })} className={tab(view === "intake")}>{t("intakeTab")}</Link>}
+        <div role="tablist" aria-label={t("title")} className={segments}>
+          <Link role="tab" aria-selected={view === "search"} href={href({ view: "search" })} className={segment(view === "search")}>{t("search")}</Link>
+          <Link role="tab" aria-selected={view === "sent"} href={href({ view: "sent" })} className={segment(view === "sent")}>{tr("sent.tab")}</Link>
+          {d.mine.length > 0 && <Link role="tab" aria-selected={view === "intake"} href={href({ view: "intake" })} className={segment(view === "intake")}>{t("intakeTab")}</Link>}
         </div>
       )}
       {view === "search" && (
         <>
           <form action="/responsible" className="flex max-w-[720px] gap-2" role="search">
-            <input type="search" name="q" defaultValue={q} placeholder={t("placeholder")} aria-label={t("search")} className="h-[52px] min-w-0 flex-1 border border-ink bg-surface px-3 text-ink" />
-            <button type="submit" className="h-[52px] bg-ink px-5 font-bold text-on-ink">{t("find")}</button>
+            {level !== "all" && <input type="hidden" name="level" value={level} />}
+            <SearchField box="md" name="q" defaultValue={q} placeholder={t("placeholder")} label={t("search")} className="flex-1" />
+            <button type="submit" className={btn.primary}>{t("find")}</button>
           </form>
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("level")}>
             {["all", ...(session ? ["mine"] : []), "borough", "municipality", "state", "country"].map((l) => (
-              <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={`${chip(level === l)} no-underline`}>{l === "mine" ? t("myPlaces") : tl(l as "all")}</Link>
+              <Link key={l} href={href({ level: l })} aria-pressed={level === l} className={chip(level === l)}>{l === "mine" ? t("myPlaces") : tl(l as "all")}</Link>
             ))}
           </div>
           <div className="flex flex-col border-t border-line">
-            {d.rows.length === 0 && <p className="text-muted">{t("empty")}</p>}
+            {d.rows.length === 0 && <Notice tone="hint" className="pt-4 text-base">{t("empty")}</Notice>}
             {d.rows.map((r) => (
               <div key={r.id} className="flex flex-wrap items-start gap-4 border-b border-line py-5">
                 <div className="flex min-w-[260px] flex-1 flex-col gap-1">
@@ -147,11 +151,11 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
                   <strong className="text-2xl">{r.avg_response_days != null ? t("days", { n: r.avg_response_days }) : "–"}</strong>
                 </div>
                 {session && r.holder_id !== me && <RequestForm responsibilityId={r.id} name={r.organization_name ?? r.title} projects={d.projects} />}
-                {!session && <Link href="/login?next=/responsible" className="text-sm font-bold">{t("signIn")}</Link>}
+                {!session && <Link href="/login?next=/responsible" className={btn.secondarySm}>{t("signIn")}</Link>}
               </div>
             ))}
           </div>
-          <p className="m-0 max-w-[720px] text-sm text-muted">{t("footer")} <Link href="/me?tab=resp">{t("addOwn")}</Link></p>
+          <p className="m-0 max-w-[720px] text-sm text-muted">{t("footer")} <Link href="/me?tab=resp" className="text-ink underline">{t("addOwn")}</Link></p>
         </>
       )}
       {view === "sent" && (
@@ -166,6 +170,6 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
           <Intake items={d.intake} others={d.others} />
         </>
       )}
-    </div>
+    </Page>
   );
 }

@@ -10,7 +10,7 @@ export default function ErrorPage({ reset }: { error: Error; reset: () => void }
       <Glyph shape="hourglass" size={80} />
       <h1 className="display m-0">{t("error")}</h1>
       <p className="m-0 max-w-[520px] text-lg">{t("errorText")}</p>
-      <button type="button" onClick={reset} className={`${btn.primaryLg} self-start`}>{t("retry")}</button>
+      <button type="button" onClick={reset} className={`${btn.primary} self-start`}>{t("retry")}</button>
     </main>
   );
 }

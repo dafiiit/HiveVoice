@@ -25,7 +25,7 @@ export function ListSearch({ listId, value, keep, label }: { listId: string; val
   };
   useEffect(() => { if (input.current?.value) filter(input.current.value); });
   return (
-    <form method="get" action="/connect" role="search" className="flex min-w-0 flex-1" onSubmit={(e) => { e.preventDefault(); input.current?.blur(); }}>
+    <form method="get" action="/friends" role="search" className="flex min-w-0 flex-1" onSubmit={(e) => { e.preventDefault(); input.current?.blur(); }}>
       {Object.entries(keep).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       <label className={`${searchBox("sm")} flex-1`}>
         <IconSearch size={16} />

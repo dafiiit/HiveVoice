@@ -23,7 +23,7 @@ export function NewList({ label }: { label: string }) {
       if (!title.trim()) return;
       start(async () => {
         const res = await createTodoList(title);
-        if (res.ok) router.push(`/inhalte/listen/${res.data}`);
+        if (res.ok) router.push(`/me/lists/${res.data}`);
         else setError(tc(`errors.${res.error}` as "errors.unknown"));
       });
     }}>
@@ -117,7 +117,7 @@ export function TodoList({ id, title, visibility, items, editable }: { id: strin
             {visibility === "me" ? t("makePublic") : t("makePrivate")}
           </button>
           <ConfirmAction disabled={pending} size="sm" question={t("deleteConfirm")} label={t("delete")}
-            onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/inhalte?f=lists"); })} />
+            onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/me?f=lists"); })} />
         </div>
       )}
     </div>

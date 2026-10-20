@@ -6,10 +6,10 @@ const signedIn = !!process.env.TEST_USER_EMAIL;
 test("whoever is signed in goes straight to the content from the login page", async ({ page }) => {
   test.skip(!signedIn || !process.env.SUPABASE_SERVICE_ROLE_KEY, "needs the test account");
   await login(page);
-  await page.goto("/login?next=/anliegen");
-  await expect(page).toHaveURL(/\/anliegen/);
+  await page.goto("/login?next=/me/listings");
+  await expect(page).toHaveURL(/\/me\/listings/);
   await page.goto("/signup");
-  await expect(page).toHaveURL(/\/connect/);
+  await expect(page).toHaveURL(/\/friends/);
 });
 
 test("the login page remembers the last account on this device and can forget it", async ({ page, context, baseURL }) => {

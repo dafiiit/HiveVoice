@@ -259,7 +259,7 @@
     },
     "responsibility_transfer": {
       "title": "{by} wants to hand a responsibility over to you",
-      "body": "“{title}”. Open “For me” to accept."
+      "body": "“{title}”. Open account menu → Settings to accept."
     },
     "responsibility_transfer_answer": {
       "title": "Answer to the hand-over",
@@ -307,7 +307,7 @@
     },
     "resource_transfer": {
       "title": "{by} wants to hand a document over to you",
-      "body": "“{title}”. Open “For me” → Documents."
+      "body": "“{title}”. Open Me → Documents."
     },
     "resource_transfer_answer": {
       "title": "Answer to the hand-over",

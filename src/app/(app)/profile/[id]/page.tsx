@@ -87,7 +87,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
   );
   return (
     <Page aside={aside}>
-        <BackLink href="/explore?kind=people" label={te("kinds.people")} />
+        <BackLink href="/community/people" label={te("kinds.people")} />
         <section className="flex flex-wrap items-start gap-6">
           <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={120} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -116,7 +116,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
                 <VouchButton profileId={id} vouched={d.trust.vouched} name={p.display_name} />
               </Notice>
             )}
-            {self && <Link href="/me" className={`${btn.secondarySm} self-start`}>{t("edit")}</Link>}
+            {self && <Link href="/settings" className={`${btn.secondarySm} self-start`}>{t("edit")}</Link>}
           </div>
         </section>
         {p.bio && !limited && <p className="m-0 max-w-[720px] whitespace-pre-line text-lg">{p.bio}</p>}
@@ -124,7 +124,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
           {d.offers.length === 0 && (limited || d.tags.length === 0) && <Notice tone="hint" className="text-base">{t("nothing")}</Notice>}
           {d.offers.map((o) => (
             <div key={o.id} className="flex flex-wrap items-center gap-3 border-b border-line py-3">
-              <Link href={`/anliegen/${o.id}`} className="flex min-w-[220px] flex-1 flex-col text-ink no-underline">
+              <Link href={`/listings/${o.id}`} className="flex min-w-[220px] flex-1 flex-col text-ink no-underline">
                 <span className="text-sm text-muted">{o.kind === "offer" ? t("offer") : t("need")}</span>
                 <strong>{o.title}</strong>
                 {o.description && <span className="text-sm">{o.description}</span>}

@@ -145,7 +145,8 @@
     "focusPlaceholder": "e.g. organisation, finances",
     "modTasks": "Tasks",
     "submit": "Start group",
-    "settings": "Adjust settings"
+    "settings": "Adjust settings",
+    "inviteNote": "{name} will be invited as soon as the group exists."
   },
   "presets": {
     "title": "Who is the group for?",
@@ -191,6 +192,43 @@
       "housing": {
         "name": "Housing project or cooperative",
         "text": "For members, adults only, by invitation. Decisions as goals, cleaning and garden duties as tasks."
+      },
+      "chat": {
+        "name": "Chat group",
+        "text": "A few people, just chat. Add tools when needed."
+      },
+      "couple": {
+        "name": "Just the two of us",
+        "text": "Couple, family, friends: plan with tasks and documents."
+      }
+    }
+  },
+  "tools": {
+    "title": "Tools",
+    "text": "The group has only what it needs. Switching a tool off hides it, nothing is deleted.",
+    "formText": "Without tools the group is simply a chat. You can change this any time.",
+    "always": "Always there: chat, members with roles and rights, about the group.",
+    "add": "Add tools",
+    "items": {
+      "goals": {
+        "name": "Goals and votes",
+        "text": "Proposals everyone votes on"
+      },
+      "tasks": {
+        "name": "Tasks",
+        "text": "Who does what"
+      },
+      "links": {
+        "name": "Documents and knowledge",
+        "text": "Shared documents, links and files"
+      },
+      "collection": {
+        "name": "Collection",
+        "text": "Collect initiatives, listings and subgroups"
+      },
+      "needs": {
+        "name": "Listings",
+        "text": "What the group is looking for"
       }
     }
   }

@@ -58,6 +58,6 @@ export async function requestDirect(toId: string, message: string) {
     const [{ r }] = await tx<{ r: { conversation_id?: string; request_id?: string } }[]>`select app.request_direct(${toId}, ${message}) as r`;
     return r;
   });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }

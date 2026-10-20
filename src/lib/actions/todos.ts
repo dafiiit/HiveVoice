@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { run } from "../action";
 
 // Personal to-do lists. Row level security keeps them to the owner; "public" only opens them for reading.
-const done = (id?: string) => { revalidatePath("/inhalte"); if (id) revalidatePath(`/inhalte/listen/${id}`); };
+const done = (id?: string) => { revalidatePath("/me"); if (id) revalidatePath(`/me/lists/${id}`); };
 
 export async function createTodoList(title: string) {
   const res = await run(async (tx) => {

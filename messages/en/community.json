@@ -1,0 +1,35 @@
+{
+  "title": "Community",
+  "sections": "Parts of the community",
+  "nav": {
+    "board": "Pinboard",
+    "listings": "Listings",
+    "groups": "Groups",
+    "people": "People"
+  },
+  "board": {
+    "lead": "What people around you are talking about. Choose the place and topic yourself.",
+    "noPlace": "Choose a place to see its pinboard.",
+    "where": "Place",
+    "levels": {
+      "borough": "Neighbourhood",
+      "municipality": "Town",
+      "state": "State",
+      "country": "Country"
+    },
+    "tag": "Topic",
+    "allTags": "All",
+    "search": "Search the pinboard",
+    "placeholder": "Write something on the pinboard in {place} …",
+    "readOnly": "Anyone can read, writing needs an account.",
+    "signIn": "Sign in",
+    "none": "Nothing found. Choose a larger place or another topic.",
+    "empty": "Nothing on the pinboard yet. Write the first post."
+  },
+  "groups": {
+    "lead": "Groups and initiatives you can join. An initiative is a group with a goal."
+  },
+  "people": {
+    "lead": "People on HiveVoice. Search by name or tag, for example “responsible traffic”."
+  }
+}

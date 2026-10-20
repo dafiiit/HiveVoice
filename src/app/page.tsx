@@ -15,7 +15,7 @@ type Pair = { need: string; offer: string };
 
 export default async function Welcome() {
   const session = await getSession();
-  if (session) redirect(session.profile.onboarded ? "/connect" : "/onboarding");
+  if (session) redirect(session.profile.onboarded ? "/friends" : "/onboarding");
   const t = await getTranslations("welcome");
   const tp = await getTranslations("principles");
   const tr = await getTranslations("rights");
@@ -52,7 +52,7 @@ export default async function Welcome() {
         <div className="flex items-center gap-2">
           <Link href="/principles" className="hidden h-11 items-center px-2 font-bold text-ink no-underline sm:inline-flex md:px-4">{tp("nav")}</Link>
           <LanguageMenu />
-          <Link href="/explore" className="hidden h-11 items-center px-4 font-bold text-ink no-underline md:inline-flex">{t("guest")}</Link>
+          <Link href="/community" className="hidden h-11 items-center px-4 font-bold text-ink no-underline md:inline-flex">{t("guest")}</Link>
           <Link href="/login" className={btn.primary}>{t("login")}</Link>
         </div>
       </SmartHeader>
@@ -64,7 +64,7 @@ export default async function Welcome() {
             <Lead long={t("lead")} short={t("leadShort")} className="max-w-[560px] text-xl" />
             <div className="flex flex-wrap gap-3">
               <Link href="/signup" className={btn.primary}>{t("join")}</Link>
-              <Link href="/explore" className={btn.secondary}>{t("guest")}</Link>
+              <Link href="/community" className={btn.secondary}>{t("guest")}</Link>
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@ export default async function Welcome() {
         <section className="flex flex-col gap-6 border-b border-line px-4 py-6 sm:px-6 md:px-10 md:py-[72px]">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <h2 className="m-0 text-2xl font-bold">{t("moving")}</h2>
-            <Link href="/explore" className="font-bold text-ink">{t("allInitiatives")}</Link>
+            <Link href="/community" className="font-bold text-ink">{t("allInitiatives")}</Link>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             {live.map((it) => <InitiativeCard key={it.id} it={it} />)}
@@ -103,7 +103,7 @@ export default async function Welcome() {
       <section className="flex flex-wrap gap-10 border-b border-line bg-surface px-4 py-6 sm:px-6 md:px-10 md:py-[72px]">
         <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-4">
           <h2 className="m-0 text-[clamp(32px,3.4vw,48px)] font-bold leading-none tracking-[-0.03em]">{t("offerTitle")}</h2>
-          <Link href="/anliegen?as=offer" className={`${btn.primary} self-start`}>{t("offerCta")}</Link>
+          <Link href="/me/listings?as=offer" className={`${btn.primary} self-start`}>{t("offerCta")}</Link>
         </div>
         {pairs.length > 0 && (
           <div className="flex min-w-0 flex-[2_1_520px] flex-col border-t-[6px] border-ink">
@@ -131,9 +131,9 @@ export default async function Welcome() {
         <strong>HiveVoice</strong>
         <span>{t("nonpartisan")}</span>
         <Link href="/principles">{tp("nav")}</Link>
-        <Link href="/rechte">{tr("title")}</Link>
-        <Link href="/teilen">{ttg("title")}</Link>
-        <Link href="/transparenz">{ttr("title")}</Link>
+        <Link href="/rights">{tr("title")}</Link>
+        <Link href="/sharing">{ttg("title")}</Link>
+        <Link href="/transparency">{ttr("title")}</Link>
         <Link href="/legal/imprint">{t("imprint")}</Link>
         <Link href="/legal/privacy">{t("privacy")}</Link>
         <a href="https://github.com/dafiiit/HiveVoice">{t("source")}</a>

@@ -145,7 +145,8 @@
     "focusPlaceholder": "z. B. Organisation, Finanzen",
     "modTasks": "Aufgaben",
     "submit": "Gruppe gründen",
-    "settings": "Einstellungen anpassen"
+    "settings": "Einstellungen anpassen",
+    "inviteNote": "{name} wird eingeladen, sobald die Gruppe steht."
   },
   "presets": {
     "title": "Für wen ist die Gruppe?",
@@ -178,7 +179,7 @@
       },
       "foodsharing": {
         "name": "Foodsharing oder Tafel",
-        "text": "Offen für alle. Abholungen als Aufgaben, Lebensmittel als Angebote im Marktplatz."
+        "text": "Offen für alle. Abholungen als Aufgaben, Lebensmittel als Angebote in Gemeinschaft → Anliegen."
       },
       "repair": {
         "name": "Repair-Café oder offene Werkstatt",
@@ -191,6 +192,43 @@
       "housing": {
         "name": "Wohnprojekt oder Genossenschaft",
         "text": "Für Mitglieder, nur Erwachsene mit Einladung. Beschlüsse als Ziele, Putz- und Gartendienste als Aufgaben."
+      },
+      "chat": {
+        "name": "Chatgruppe",
+        "text": "Ein paar Leute, nur Chat. Werkzeuge kommen bei Bedarf dazu."
+      },
+      "couple": {
+        "name": "Zu zweit",
+        "text": "Paar, Familie, Freunde: planen mit Aufgaben und Dokumenten."
+      }
+    }
+  },
+  "tools": {
+    "title": "Werkzeuge",
+    "text": "Die Gruppe hat nur, was ihr braucht. Ausschalten blendet den Bereich aus, gelöscht wird nichts.",
+    "formText": "Ohne Werkzeuge ist die Gruppe einfach ein Chat. Später jederzeit änderbar.",
+    "always": "Immer dabei: Chat, Mitglieder mit Rollen und Rechten, Über die Gruppe.",
+    "add": "Werkzeuge hinzufügen",
+    "items": {
+      "goals": {
+        "name": "Ziele und Abstimmungen",
+        "text": "Vorschläge, über die alle abstimmen"
+      },
+      "tasks": {
+        "name": "Aufgaben",
+        "text": "Wer macht was, mit Zuständigen"
+      },
+      "links": {
+        "name": "Dokumente und Wissen",
+        "text": "Geteilte Dokumente, Links und Dateien"
+      },
+      "collection": {
+        "name": "Sammlung",
+        "text": "Initiativen, Anliegen und Untergruppen sammeln"
+      },
+      "needs": {
+        "name": "Anliegen",
+        "text": "Was die Gruppe sucht"
       }
     }
   }

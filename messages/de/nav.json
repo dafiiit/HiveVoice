@@ -1,15 +1,15 @@
 {
-  "main": "Hauptnavigation",
+  "main": "Bereiche",
   "explore": "Entdecken",
   "needs": "Anfragen",
   "offers": "Anbieten",
   "connect": "Verbinden",
-  "me": "Für mich",
+  "me": "Ich",
   "new": "Neu",
   "yourGroups": "Deine Gruppen",
   "responsible": "Wer ist zuständig?",
   "search": "Suche",
-  "searchPlaceholder": "Suchen: Initiativen, Gruppen, Menschen, Orte",
+  "searchPlaceholder": "Suchen: Menschen, Gruppen, Initiativen, Orte",
   "inbox": "Mitteilungen, {n} ungelesen",
   "profileOf": "Für mich – {name}",
   "login": "Anmelden",
@@ -29,8 +29,8 @@
     "yours": "Dein Ort",
     "chosen": "Gewählter Ort",
     "choose": "Ort wählen",
-    "explain": "Dein Ort bestimmt, welchen Marktplatz du siehst und was zu dir passt.",
-    "explainGuest": "Ohne Konto merken wir uns den Ort nur in diesem Browser. Er bestimmt, welchen Marktplatz du siehst.",
+    "explain": "Dein Ort bestimmt, welche Pinnwand du siehst und was zu dir passt.",
+    "explainGuest": "Ohne Konto merken wir uns den Ort nur in diesem Browser. Er bestimmt, welche Pinnwand du siehst.",
     "discover": "In {name} entdecken",
     "change": "Ort ändern",
     "searchPlaceholder": "Postleitzahl oder Ort",
@@ -41,5 +41,17 @@
     "partOf": "Gehört zu"
   },
   "searchPlaceholderShort": "Suchen …",
-  "anliegen": "Anliegen"
+  "anliegen": "Anliegen",
+  "community": "Gemeinschaft",
+  "friends": "Freunde",
+  "account": {
+    "open": "Konto von {name}",
+    "account": "Dein Konto",
+    "profile": "Mein Profil",
+    "settings": "Einstellungen",
+    "resp": "Zuständigkeiten",
+    "reports": "Meldungen",
+    "principles": "Grundsätze",
+    "signOut": "Abmelden"
+  }
 }

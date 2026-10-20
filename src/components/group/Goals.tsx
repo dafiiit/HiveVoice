@@ -84,7 +84,7 @@ export function Goals({ slug, groupId, goals, members, canPropose, canEdit, canV
             {g.needs.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="font-bold">{t("missing")}</span>
-                {g.needs.map((n) => <Link key={n.id} href={`/anliegen/${n.id}`} className="border border-line px-2 py-1 text-ink no-underline">{n.title}</Link>)}
+                {g.needs.map((n) => <Link key={n.id} href={`/listings/${n.id}`} className="border border-line px-2 py-1 text-ink no-underline">{n.title}</Link>)}
               </div>
             )}
             {g.ballot && g.status === "voting" && (

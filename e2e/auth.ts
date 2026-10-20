@@ -48,15 +48,15 @@ export async function login(page: Page, opts: { fresh?: boolean } = {}) {
   if (service) {
     const base = new URL(page.url().startsWith("http") ? page.url() : (process.env.E2E_BASE_URL ?? "http://localhost:3000"));
     await page.context().addCookies((await session(opts.fresh)).cookies.map((c) => ({ ...c, url: base.origin, sameSite: "Lax" as const, expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 400 })));
-    await page.goto("/connect");
-    await page.waitForURL(/\/(connect|onboarding)/);
+    await page.goto("/friends");
+    await page.waitForURL(/\/(friends|onboarding)/);
     return;
   }
   await page.goto("/login");
   await page.getByLabel("E-Mail").fill(email());
   await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
   await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
+  await page.waitForURL(/\/(friends|onboarding)/);
 }
 
 /** A Supabase client signed in as the test account, for cleaning up stored files. */

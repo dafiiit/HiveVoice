@@ -24,6 +24,8 @@ import { Invites } from "@/components/group/Invites";
 import { Leadership, type MotionView, type TransferView } from "@/components/group/Leadership";
 import { GroupRules } from "@/components/group/GroupRules";
 import { DangerZone } from "@/components/group/DangerZone";
+import { GroupTools } from "@/components/group/GroupTools";
+import { GROUP_TOOLS, type GroupTool } from "@/lib/group-tools";
 import { InviteBanner } from "@/components/group/InviteBanner";
 import { ShareBlock } from "@/components/ShareBlock";
 import { Collection, type CollectionItem } from "@/components/refs/Collection";
@@ -37,7 +39,7 @@ type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
   join_policy: "open" | "request" | "invite"; member_count: number; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
   owner_id: string | null; owner_name: string | null; orphaned_at: string | null; delete_requested_at: string | null; archived_at: string | null;
-  slow_mode_seconds: number; adults_only: boolean; admins_manage_initiatives: boolean; can_takeover: boolean;
+  slow_mode_seconds: number; adults_only: boolean; admins_manage_initiatives: boolean; can_takeover: boolean; tools: GroupTool[];
 };
 
 export async function generateMetadata({ params }: PageProps<"/groups/[slug]">) {
@@ -64,7 +66,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     const [g] = await tx<Group[]>`
       select g.id, g.slug::text, g.name, g.summary, g.description, g.kind::text, g.visibility::text, g.join_policy::text, g.member_count,
              g.cover_seed, g.cover_path, g.mod_tasks, g.created_at, r.name as region_name,
-             g.owner_id, op.display_name as owner_name, g.orphaned_at, g.delete_requested_at, g.archived_at, g.slow_mode_seconds, g.adults_only, g.admins_manage_initiatives,
+             g.owner_id, op.display_name as owner_name, g.orphaned_at, g.delete_requested_at, g.archived_at, g.slow_mode_seconds, g.adults_only, g.admins_manage_initiatives, g.tools,
              (g.orphaned_at is not null or g.owner_id is null or app.last_activity(g.owner_id) < now() - interval '30 days') as can_takeover
       from public.groups g left join public.regions r on r.id = g.region_id left join public.profiles op on op.id = g.owner_id where g.slug = ${slug}`;
     if (!g) return null;
@@ -100,7 +102,10 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       }
       goals.push({ ...go, ballot });
     }
-    const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "goals";
+    // Only the tools the admins switched on have a tab; chat, members and the about page are always there.
+    const on = (k: (typeof TABS)[number]) => !(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool);
+    const first = g.tools.includes("goals") ? "goals" : "talk";
+    const active = (TABS as readonly string[]).includes(String(sp.tab)) && on(sp.tab as (typeof TABS)[number]) ? (sp.tab as (typeof TABS)[number]) : first;
     const links = active === "links" ? await tx<ResourceRow[]>`select ${resourceColumns(tx, me ?? null)} from ${resourceFrom(tx)} where r.group_id = ${g.id} and r.hidden_at is null and r.trashed_at is null and r.visibility in ('public', 'group') order by r.score desc, r.created_at desc limit 100` : [];
     const posts = active === "talk" ? await loadPosts(tx, { groupId: g.id }, me ?? null, { sort: "chat", limit: 60 }) : [];
     const needs = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.group_id = ${g.id} and l.kind = 'need' and l.status = 'active' order by l.created_at desc`;
@@ -174,9 +179,11 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     about: t("tabs.about"),
   };
   // Five tabs in front, the rarer ones under "Mehr".
-  const front = (["goals", "talk", "collection", "tasks", "team"] as const).filter((k) => k !== "tasks" || g.mod_tasks);
-  const back = (["links", "needs", "about"] as const);
-  const tabHref = (k: (typeof TABS)[number]) => `${path}${k === "goals" ? "" : `?tab=${k}`}`;
+  const has = (k: (typeof TABS)[number]) => !(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool);
+  const front = (["goals", "talk", "collection", "tasks", "team"] as const).filter((k) => (k !== "tasks" || g.mod_tasks) && has(k));
+  const back = (["links", "needs", "about"] as const).filter(has);
+  const first = g.tools.includes("goals") ? "goals" : "talk";
+  const tabHref = (k: (typeof TABS)[number]) => `${path}${k === first ? "" : `?tab=${k}`}`;
 
   const aside = (
     <>
@@ -198,7 +205,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         <section className={asideBlock}>
           <h2 className="m-0 text-lg font-bold">{t("needsAside")}</h2>
           <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-            {data.needs.slice(0, 5).map((n) => <li key={n.id}><Link href={`/anliegen/${n.id}`} className="text-sm text-ink no-underline hover:underline">{n.title}</Link></li>)}
+            {data.needs.slice(0, 5).map((n) => <li key={n.id}><Link href={`/listings/${n.id}`} className="text-sm text-ink no-underline hover:underline">{n.title}</Link></li>)}
           </ul>
         </section>
       )}
@@ -217,8 +224,8 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
 
   return (
     <Page aside={aside}>
-        <BackLink href="/explore?kind=groups" label={t("groups")} />
-        <Cover seed={g.cover_seed} src={g.cover_path} ratio="21 / 9" />
+        <BackLink href="/friends?f=groups" label={t("groups")} />
+        {g.cover_path && <Cover seed={g.cover_seed} src={g.cover_path} ratio="21 / 9" />}
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className={tag}>{t(`kinds.${g.kind}`)}</span>
@@ -248,6 +255,9 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         {!locked && <Tabs label={t("sections")} moreLabel={tc("more")}
           items={front.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))}
           more={back.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))} />}
+        {!locked && role === "admin" && g.tools.length < GROUP_TOOLS.length && active !== "about" && (
+          <Link href={`${path}?tab=about#tools`} className="self-start text-sm text-ink underline">{t("tools.add")}</Link>
+        )}
 
         {!locked && active === "goals" && (
           <Goals slug={slug} groupId={g.id} goals={data.goals} members={data.members.map((m) => ({ id: m.id, name: m.name }))}
@@ -288,7 +298,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
               {data.needs.map((n) => (
                 <div key={n.id} className="flex flex-wrap items-center gap-4 border-b border-line py-4">
                   <div className="flex min-w-[240px] flex-1 flex-col gap-1">
-                    <Link href={`/anliegen/${n.id}`} className="font-bold text-ink no-underline hover:underline">{n.title}</Link>
+                    <Link href={`/listings/${n.id}`} className="font-bold text-ink no-underline hover:underline">{n.title}</Link>
                     {n.description && <span className="text-sm">{n.description}</span>}
                     <span className="text-sm text-muted">{[n.goal_title ? t("forGoal", { goal: n.goal_title }) : null, priceLabel(n, tc, locale)].filter(Boolean).join(" · ")}</span>
                   </div>
@@ -331,6 +341,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             )}
           </div>
         )}
+        {!locked && active === "about" && role === "admin" && <GroupTools slug={slug} groupId={g.id} tools={g.tools} />}
         {!locked && active === "about" && (
           <section className="flex max-w-[720px] flex-col gap-4">
             <p className="m-0 whitespace-pre-line text-lg leading-relaxed">{g.description ?? g.summary ?? t("noDescription")}</p>

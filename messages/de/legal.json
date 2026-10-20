@@ -20,7 +20,7 @@
       "Weitere Dienste: E-Mails verschickt Resend. Ist der Bot-Schutz eingeschaltet, prüft Cloudflare Turnstile beim Registrieren und Anmelden, ob ein Mensch das Formular ausfüllt. Die Kartenansicht lädt Kartenmaterial von OpenFreeMap, aber erst, wenn du auf „Karte laden“ klickst; dabei sieht der Dienst deine IP-Adresse. Einträge erscheinen auf der Karte nur am Mittelpunkt ihres Ortes. Wenn du einen Link teilst, ruft unser Server die Seite ab, um eine Vorschau zu zeigen. Google Fotos wird nur genutzt, wenn du es selbst verbindest. [Auftragsverarbeitung und Drittlandübermittlung prüfen.]",
       "Passende Einträge: Damit Angebote und Gesuche zueinander finden, vergleichen wir Titel, Beschreibung, Stichwörter, Kategorie und Ort öffentlicher Einträge. Das passiert in unserer Datenbank; private Details werden nie verglichen.",
       "Cookies: nur technisch notwendige Cookies für Anmeldung, Sprache und Darstellung. Keine Werbung, kein Tracking.",
-      "Deine Rechte: Auskunft, Berichtigung, Löschung (unter „Für mich → Einstellungen → Konto verlassen“), Einschränkung, Datenübertragbarkeit, Widerspruch und Beschwerde bei einer Aufsichtsbehörde."
+      "Deine Rechte: Auskunft, Berichtigung, Löschung (unter „Konto-Menü → Einstellungen → Konto verlassen“), Einschränkung, Datenübertragbarkeit, Widerspruch und Beschwerde bei einer Aufsichtsbehörde."
     ]
   }
 }

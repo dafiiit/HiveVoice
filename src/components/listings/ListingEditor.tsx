@@ -106,13 +106,13 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
 
   return (
     <section aria-label={t(give ? "newOffer" : "newNeed")} className="flex flex-col gap-4 border border-line bg-surface p-5">
-      {/* One switch: offering, looking, or sharing knowledge (a link, a file, a note). */}
+      {/* One switch: offering or looking. Documents and links are part of the toolbox (Ich → Dokumente). */}
       <div role="radiogroup" aria-label={t("kindLabel")} className={`${segments} flex-wrap`}>
-        {(["offer", "need", "knowledge"] as const).map((k) => {
-          const on = k === "knowledge" ? give && mode === "knowledge" : kind === k && !(k === "offer" && mode === "knowledge");
+        {(["offer", "need"] as const).map((k) => {
+          const on = kind === k && mode === "listing";
           return (
             <button key={k} type="button" role="radio" aria-checked={on} className={segment(on)}
-              onClick={() => { setDone(null); if (k === "knowledge") { setKind("offer"); setMode("knowledge"); } else { setKind(k); setMode("listing"); } }}>
+              onClick={() => { setDone(null); setKind(k); setMode("listing"); }}>
               {t(k === "offer" ? "iOffer" : k === "need" ? "iNeed" : "iShare")}
             </button>
           );
@@ -128,7 +128,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
       {done && (
         <p role="status" className="m-0 flex flex-wrap items-center gap-2 font-bold">
           <IconCheck /> {t(done.pair ? "publishedPair" : "published")}
-          <Link href={`/anliegen/${done.id}#passt`} className="text-ink underline">{t("show")}</Link>
+          <Link href={`/listings/${done.id}#passt`} className="text-ink underline">{t("show")}</Link>
         </p>
       )}
       <div className="flex flex-col gap-3 md:flex-row">

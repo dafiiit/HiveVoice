@@ -45,6 +45,7 @@ Grundlage für die Wellen 1–4: docs/personas.md (30 Personas, Feature-Codes F0
 ## GUI mobile
 
 ## GUI desktop and mobile
+- [ ] **Struktur Gemeinschaft · Freunde · Ich ausbauen** - Umbau steht (docs/struktur.md); offen: „Heute“-Übersicht unter Ich, Kalender als Werkzeug (F01), Rechtegruppen frei benennen, Gruppen-Seite als Spalte 3 neben der Liste in Freunde statt eigener Seite, Leichte-Sprache-Texte für die neuen Bereiche
 - [ ] **GUI cleanup, weitere Runden** - erste Runde erledigt (siehe Done). Offen: Formulare mit vielen Feldern (Anliegen anlegen, Gruppe gründen, Initiative) und die Einstellungen visuell durchgehen; Erklärtexte bündeln (z. B. eine Seite „So funktionieren Vorschläge“ statt Hinweisen an vielen Stellen)
 
 ## Waiting On
@@ -55,7 +56,6 @@ Grundlage für die Wellen 1–4: docs/personas.md (30 Personas, Feature-Codes F0
 - [ ] **2FA für Admins (beim Wechsel vom MVP zum Betrieb)** - Seite zum Einrichten von TOTP/Passkey und Code-Abfrage beim Anmelden (Supabase MFA), dann `ADMIN_REQUIRE_MFA=1` setzen; danach Sudo-Modus (frische Anmeldung für gefährliche Aktionen) und Mail bei Admin-Anmeldung von neuem Gerät (docs/betrieb.md, Abschnitt Admins)
 - [ ] **Später aus docs/personas.md, erst mit einem konkreten Partner** - F06 Anträge und Änderungsanträge (Partei, Verband), F18 Bürgerhaushalt (Gemeinde), F21 Stimmen delegieren, F25 anonyme Hinweise (rechtlich heikel), F26 Lage-Modus für Krisen (Hilfsorganisation), F14 Sammlungen und Tauschlisten, F27 Vertrauen bei Tieren/Kindern/Schlüsseln, F28 Pressebereich, F29 Schnittstellen und Export
 - [ ] **Ein Zugriffsmodell in der Datenbank** - Oberfläche ist vereinheitlicht (Teilen → Zugriff), aber Dokumente (visibility, edit_mode, resource_grants mit Stufen und Ablauf) und Einträge/Aufgaben (read_scope, write_scope, object_grants) speichern es noch verschieden; zusammenführen braucht neue Policies auf der Live-Datenbank
-- [ ] **Adressen in einer Sprache** - /explore, /connect, /groups … neben /anliegen, /teilen, /rechte; ~370 Verweise, Weiterleitungen für alte Links nötig
 - [ ] **Mehrsprachiges Embedding-Modell** - gte-small ist für Deutsch schwach; multilingual-e5-small in der Edge Function, Schwelle neu eichen (docs/markt.md)
 - [ ] **Unabhängigkeit Stufe 1** - Speicher-Schicht mit S3, SMTP statt Resend, `EMBEDDING_URL`, Codeberg-Spiegel (docs/unabhaengigkeit.md)
 - [ ] **eID-Anbindung** - Modus `eid` ist vorbereitet, aber noch kein eID-Dienst angebunden
@@ -67,6 +67,7 @@ Grundlage für die Wellen 1–4: docs/personas.md (30 Personas, Feature-Codes F0
 - [ ] **Föderation über Stufe 1 hinaus** - Remote-Profile sind höchstens Stufe 1, mehr ist noch nicht gebaut
 
 ## Done
+- [x] **~~Umbau Gemeinschaft · Freunde · Ich~~ (2026-10-21)** - Teams-Layout mit Leiste links (Logo-Icons), Suche oben in der Mitte, Konto-Menü rechts; Pinnwand mit Ort und Thema; Anliegen in allen drei Bereichen; Zuständige als Tag unter Personen; Gruppenwerkzeuge an/aus (ab zwei Personen, „Gruppe daraus“ im Chat); Adressen auf Englisch mit Weiterleitungen; „Wissen teilen“ ohne eigene Knöpfe
 - [x] **~~Admins aus der Konfiguration~~ (2026-10-20)** - `ADMIN_EMAILS` beim Hosting-Anbieter bestimmt die Admins (nur bestätigte Adressen), kein „Mich als Admin eintragen“ mehr, Admins ernennen sich nicht gegenseitig; 2FA vorbereitet (`ADMIN_REQUIRE_MFA`)
 - [x] **~~Einheitlich statt gewachsen~~ (2026-10-20)** - Begriffe (Gesuch, Kontaktanfrage, Chat, Teilen, Pinnwand, Orga/Betreuung/Leitung, zuständige Stelle), ein Zuhause je Inhalt (Angebote und Gesuche nur in Anliegen unter /anliegen/[id], Kontaktanfragen nur in Verbinden, Zuständige unter Entdecken, eine Einladungsadresse), /new mit sechs gleichen Kacheln, Initiative mit eigener Seite, Gruppe gründen mit Vorlage und eingeklappten Einstellungen; Bausteine Page/PageHeader/Section/Tabs/Toolbar/Notice/Dialog/Popover/PersonPicker/CopyField, zwei Bedienhöhen, Bestätigen in der Seite, Teilen-Fenster mit „Zugriff“, Hashtags mit Umlauten, Erklärseiten unter einer Navigation
 - [x] **~~Meine Inhalte~~ (2026-10-20)** - vierter Bereich nach Verbinden (/inhalte): Dokumente, Todo-Listen, Notizen, Initiativen, Anliegen; neue Dokumente, Dateien und Listen sind privat, bis man sie teilt; Notizen und Dokumente aus „Für mich“ hierher umgezogen

@@ -87,7 +87,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       if (!c || (c.unread === 0 && !unread)) continue;
       if (c.unread === 0) continue;
       items.push({
-        id: n.id, unread: true, at: c.at, href: `/connect?c=d:${p.conversation_id}`, category: "messages", glyph: "bubble",
+        id: n.id, unread: true, at: c.at, href: `/friends?c=d:${p.conversation_id}`, category: "messages", glyph: "bubble",
         title: t("items.message.title", { name: c.other_name }), body: c.preview ?? "", label: t("labels.message"),
         extra: [t("unreadN", { n: c.unread }), c.title].filter(Boolean).join(" · "), person: { name: c.other_name, seed: c.other_seed, path: c.other_path },
       });
@@ -95,7 +95,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
     }
     let kind = n.kind;
     let values: Record<string, string> = Object.fromEntries(Object.entries(p).map(([k, v]) => [k, v ?? ""]));
-    let href = "/connect";
+    let href = "/friends";
     let person: Person | undefined;
     let category: Category = "other";
     let label = t("labels.other");
@@ -105,13 +105,13 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       if (direct) kind = `${kind}_direct`;
       values = { ...values, name: r?.other_name ?? "?", title: p.title ?? r?.title ?? "", message: r?.message ?? "" };
       person = r ? { name: r.other_name, seed: r.other_seed, path: r.other_path } : undefined;
-      href = n.kind === "contact_accepted" && (p.conversation_id ?? r?.conversation_id) ? `/connect?c=d:${p.conversation_id ?? r?.conversation_id}` : p.request_id ? `/connect?c=c:${p.request_id}` : "/connect?f=requests";
+      href = n.kind === "contact_accepted" && (p.conversation_id ?? r?.conversation_id) ? `/friends?c=d:${p.conversation_id ?? r?.conversation_id}` : p.request_id ? `/friends?c=c:${p.request_id}` : "/friends?f=requests";
       category = "requests"; label = t("labels.request");
     } else if (kind === "join_request") {
       const j = ctx.joins.get(p.group_id ?? "");
       values = { ...values, name: j?.name ?? "?", message: j?.message ?? "" };
       person = j ? { name: j.name, seed: j.seed, path: j.path } : undefined;
-      href = j ? `/connect?c=j:${j.id}` : `/groups/${p.slug}?tab=team`;
+      href = j ? `/friends?c=j:${j.id}` : `/groups/${p.slug}?tab=team`;
       category = "requests"; label = t("labels.group");
     } else if (kind === "join_accepted" || kind === "join_declined") {
       href = `/groups/${p.slug}`; category = "requests"; label = t("labels.group");
@@ -127,9 +127,9 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
     } else if (kind === "responsibility_dispute" || kind === "dispute_jury_invite" || kind === "responsibility_dispute_decided") {
       href = `/responsible/dispute/${p.dispute_id}`; label = t("labels.jury"); category = kind === "dispute_jury_invite" ? "requests" : "other";
     } else if (kind.startsWith("responsibility_")) {
-      href = "/me?tab=resp"; label = t("labels.request"); if (kind === "responsibility_transfer") category = "requests";
+      href = "/settings?tab=resp"; label = t("labels.request"); if (kind === "responsibility_transfer") category = "requests";
     } else if (kind === "post_reply") {
-      href = p.group_id ? "/connect" : p.initiative_id ? `/initiatives/${p.initiative_id}?tab=threads` : "/connect";
+      href = p.group_id ? "/friends" : p.initiative_id ? `/initiatives/${p.initiative_id}?tab=threads` : "/friends";
     } else if (kind === "jury_invite") {
       href = `/jury/${p.case_id}`; label = t("labels.jury");
     } else if (kind === "group_invite" || kind === "invite_accepted" || kind === "invite_declined" || kind === "group_invite_used") {
@@ -141,30 +141,30 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
     } else if (kind === "group_motion_result") {
       kind = `group_motion_result_${String(p.passed) === "true" ? "yes" : "no"}`; href = `/groups/${p.slug}?tab=team`; label = t("labels.group");
     } else if (kind === "group_removed" || kind === "group_delete_requested" || kind === "group_archived" || kind === "group_rule_changed") {
-      href = kind === "group_removed" ? "/connect" : `/groups/${p.slug}`; label = t("labels.group");
+      href = kind === "group_removed" ? "/friends" : `/groups/${p.slug}`; label = t("labels.group");
     } else if (kind === "resource_transfer" || kind === "resource_transfer_answer") {
-      href = "/inhalte?f=docs"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
+      href = "/me?f=notes"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
     } else if (kind.startsWith("resource_")) {
       href = `/links/${p.resource_id}`; label = t("labels.other");
     } else if (kind === "invite_used" || kind === "invitee_violation") {
-      href = "/teilen"; label = t("labels.other");
+      href = "/sharing"; label = t("labels.other");
     } else if (kind === "vouched") {
-      href = "/rechte";
+      href = "/rights";
     } else if (kind === "post_removed") {
-      href = p.slug ? `/groups/${p.slug}?tab=talk` : "/connect"; label = t("labels.group");
+      href = p.slug ? `/groups/${p.slug}?tab=talk` : "/friends"; label = t("labels.group");
     } else if (kind === "ttl_proposed") {
-      href = `/connect?c=d:${p.conversation_id}`; category = "messages"; label = t("labels.message");
+      href = `/friends?c=d:${p.conversation_id}`; category = "messages"; label = t("labels.message");
     } else if (kind.startsWith("violation_") || kind === "appeal_decided" || kind === "emergency_hidden" || kind === "emergency_cleared" || kind === "platform_ban") {
-      href = "/me?tab=reports"; label = t("labels.jury");
+      href = "/settings?tab=reports"; label = t("labels.jury");
     } else if (kind === "emergency_review" || kind === "admin_proposal" || kind === "emergency_access") {
       href = "/notifications"; label = t("labels.other");
     } else if (kind === "object_shared") {
       href = `/r/${p.type}/${p.id}`; category = "requests"; label = t("labels.other");
     } else if (kind === "listing_match") {
       kind = `listing_match_${p.kind === "need" ? "need" : "offer"}`;
-      href = `/anliegen/${p.listing_id}`; label = t("labels.request");
+      href = `/listings/${p.listing_id}`; label = t("labels.request");
     } else if (kind === "report_decided" || kind === "content_hidden") {
-      href = "/me?tab=reports"; label = t("labels.jury");
+      href = "/settings?tab=reports"; label = t("labels.jury");
     }
     const known = t.has(`items.${kind}.title`);
     const key = known ? kind : "fallback";

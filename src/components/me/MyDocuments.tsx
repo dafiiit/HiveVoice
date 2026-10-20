@@ -13,7 +13,10 @@ export type SharedRow = { id: string; title: string; level: string; owner: strin
 export type IncomingTransfer = { id: string; title: string; by: string };
 
 /** Everything one wrote or shared, what others shared with one, hand-overs, and the trash. */
-export function MyDocuments({ docs, shared, incoming, trashDays, usage }: { docs: DocRow[]; shared: SharedRow[]; incoming: IncomingTransfer[]; trashDays: number; usage: { used: string; limit: string } }) {
+export function MyDocuments({ docs, shared, incoming, trashDays, usage, title, empty }: {
+  docs: DocRow[]; shared: SharedRow[]; incoming: IncomingTransfer[]; trashDays: number;
+  /** Storage used, shown with the uploads. */ usage: { used: string; limit: string } | null; title?: string; empty?: string;
+}) {
   const t = useTranslations("docrights");
   const tc = useTranslations("common");
   const locale = useLocale();
@@ -24,7 +27,7 @@ export function MyDocuments({ docs, shared, incoming, trashDays, usage }: { docs
   const trash = docs.filter((d) => d.trashed_at);
   return (
     <div className="flex max-w-[760px] flex-col gap-6">
-      <p className="m-0 text-sm text-muted">{t("docs.usage", { used: usage.used, limit: usage.limit })}</p>
+      {usage && <p className="m-0 text-sm text-muted">{t("docs.usage", { used: usage.used, limit: usage.limit })}</p>}
       {incoming.map((x) => (
         <div key={x.id} role="status" className="flex flex-col gap-2 border-2 border-ink bg-surface p-4">
           <strong>{t("docs.transferText", { by: x.by, title: x.title })}</strong>
@@ -38,8 +41,8 @@ export function MyDocuments({ docs, shared, incoming, trashDays, usage }: { docs
         </div>
       ))}
       <section className="flex flex-col">
-        <h2 className="m-0 border-b-2 border-ink pb-2 text-lg font-bold">{t("docs.mine")}</h2>
-        {live.length === 0 && <p className="mt-3 text-muted">{t("docs.empty")}</p>}
+        <h2 className="m-0 border-b-2 border-ink pb-2 text-lg font-bold">{title ?? t("docs.mine")}</h2>
+        {live.length === 0 && <p className="mt-3 text-muted">{empty ?? t("docs.empty")}</p>}
         {live.map((d) => (
           <Link key={d.id} href={`/links/${d.id}`} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line py-3 text-ink no-underline">
             <strong>{d.title}</strong>

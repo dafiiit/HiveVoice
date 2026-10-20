@@ -12,6 +12,6 @@ export default async function Signup({ searchParams }: PageProps<"/signup">) {
   const target = typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
   // Already signed in on this device: straight to the content.
   const session = await getSession();
-  if (session) redirect(session.profile.onboarded ? (target ?? "/connect") : "/onboarding");
+  if (session) redirect(session.profile.onboarded ? (target ?? "/friends") : "/onboarding");
   return <AuthForm mode="signup" next={target} remembered={null} />;
 }

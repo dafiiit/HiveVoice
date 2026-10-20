@@ -12,15 +12,15 @@ async function exec(statement: string) {
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
 
-test.describe("Meine Inhalte", () => {
+test.describe("Ich: my own things", () => {
   test.skip(!signedIn, "needs a test account");
 
   test("is in the navigation and lists what one created", async ({ page }) => {
     await login(page);
-    await page.getByRole("link", { name: /^(Meine )?Inhalte$/ }).first().click();
-    await expect(page).toHaveURL(/\/inhalte/);
+    await page.getByRole("link", { name: /^Ich/ }).filter({ visible: true }).first().click();
+    await expect(page).toHaveURL(/\/me$/);
     await expect(page.getByRole("heading", { name: "Meine Inhalte" })).toBeVisible();
-    await page.getByRole("tab", { name: /^Notizen/ }).click();
+    await page.getByRole("navigation", { name: "Meine Bereiche" }).getByRole("link", { name: "Notizen" }).click();
     await expect(page).toHaveURL(/f=notes/);
   });
 
@@ -28,7 +28,7 @@ test.describe("Meine Inhalte", () => {
     test.skip(info.project.name !== "desktop", "writes data");
     const name = `Liste ${Date.now()}`;
     await login(page);
-    await page.goto("/inhalte");
+    await page.goto("/me");
     await page.getByRole("button", { name: "Liste" }).click();
     await page.getByLabel("Name der Liste").fill(name);
     await page.getByRole("button", { name: "Anlegen" }).click();
@@ -44,7 +44,7 @@ test.describe("Meine Inhalte", () => {
     await page.reload();
     await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeChecked();
 
-    await page.goto("/inhalte?f=lists");
+    await page.goto("/me?f=lists");
     await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("Privat");
     await page.getByRole("link", { name: new RegExp(name) }).click();
     await page.getByRole("button", { name: "Liste löschen" }).click();
@@ -56,14 +56,14 @@ test.describe("Meine Inhalte", () => {
   test("new documents are private unless written for a group", async ({ page }) => {
     await login(page);
     await page.goto("/new/link?mode=note");
-    await expect(page.getByRole("heading", { name: "Neues Dokument" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Neue Notiz" })).toBeVisible();
     await expect(page.getByLabel("Wer darf das sehen?")).toHaveValue("me");
   });
 
-  test("old links to notes and documents in Für mich lead here", async ({ page }) => {
+  test("old links to notes and documents in the settings lead here", async ({ page }) => {
     await login(page);
-    await page.goto("/me?tab=docs");
-    await expect(page).toHaveURL(/\/inhalte\?f=docs/);
+    await page.goto("/settings?tab=docs");
+    await expect(page).toHaveURL(/\/me\?f=docs/);
   });
 });
 
@@ -75,7 +75,7 @@ test.describe("offline", () => {
     const marker = `Offlinetest ${Date.now()}`;
     try {
       await login(page);
-      await page.goto("/connect?f=chats");
+      await page.goto("/friends?f=chats");
       await page.getByRole("link", { name: /Felix Wolf/ }).first().click();
       await expect(page.getByRole("log")).toBeVisible();
       const url = page.url();
@@ -100,7 +100,7 @@ test.describe("offline", () => {
       await expect(page.getByRole("log").getByText(marker)).toBeVisible();
 
       // Another section opened earlier stays readable too.
-      await page.getByRole("link", { name: /^(Meine )?Inhalte$/ }).first().click();
+      await page.getByRole("link", { name: /^Ich/ }).filter({ visible: true }).first().click();
       await expect(page.getByRole("heading", { name: "Meine Inhalte" })).toBeVisible();
       await page.goto(url);
 

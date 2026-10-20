@@ -76,7 +76,7 @@ export async function ListingDetail({ id, linkToken = null }: { id: string; link
   );
   return (
     <Page width="narrow">
-      <BackLink href={kind === "offer" ? "/anliegen?tab=offers" : "/anliegen?tab=needs"} label={tm("filters.listings")} />
+      <BackLink href={kind === "offer" ? "/community/listings?tab=offers" : "/community/listings?tab=needs"} label={tm("filters.listings")} />
       {l.images.length > 0
         ? (
           <div className="flex flex-col gap-2">
@@ -102,10 +102,10 @@ export async function ListingDetail({ id, linkToken = null }: { id: string; link
             label={t(kind === "offer" ? "ask" : "help")} signedIn={!!session} sent={data.sent} mine={data.mine} via={fit ? fit.id : null} />
         )}
         {kind === "need" && l.seeking_allies && session && !own && <AllyButton id={l.id} on={data.allied} count={l.ally_count} />}
-        <ShareBlock path={`/anliegen/${id}`} title={l.title} isPublic={l.read_scope === "public"} item={session ? { type: "listing", id: l.id } : null}
+        <ShareBlock path={`/listings/${id}`} title={l.title} isPublic={l.read_scope === "public"} item={session ? { type: "listing", id: l.id } : null}
           access={data.access ? <AccessPanel bare type="listing" id={l.id} read={data.access.read_scope} write={data.access.write_scope} hasGroup={!!l.group_slug}
-          linkUrl={data.access.link_token ? `${origin}/r/listing/${l.id}?k=${data.access.link_token}` : null} grants={data.grants} path={`/anliegen/${id}`} /> : undefined} />
-        {(own || data.canEdit) && <EditListing id={l.id} title={l.title} description={l.description} path={`/anliegen/${id}`} />}
+          linkUrl={data.access.link_token ? `${origin}/r/listing/${l.id}?k=${data.access.link_token}` : null} grants={data.grants} path={`/listings/${id}`} /> : undefined} />
+        {(own || data.canEdit) && <EditListing id={l.id} title={l.title} description={l.description} path={`/listings/${id}`} />}
         {!own && session && <span className="ml-auto"><ReportButton type="listing" id={l.id} /></span>}
       </div>
       <dl className="m-0 grid grid-cols-[minmax(110px,140px)_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">
@@ -118,7 +118,7 @@ export async function ListingDetail({ id, linkToken = null }: { id: string; link
         <dt className="font-bold">{t("price")}</dt><dd className="m-0">{priceLabel(l, tc, locale)}</dd>
       </dl>
       {l.pair_id && l.pair_title && (
-        <Link href={`/anliegen/${l.pair_id}`} className="self-start font-bold text-ink underline">
+        <Link href={`/listings/${l.pair_id}`} className="self-start font-bold text-ink underline">
           {t(kind === "offer" ? "pairOffer" : "pairNeed", { title: l.pair_title })}
         </Link>
       )}

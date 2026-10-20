@@ -1,3 +1,4 @@
+import type { GroupTool } from "./group-tools";
 // Starting points for the kinds of communities that use HiveVoice: each one sets the group's kind, rights template,
 // visibility, joining, age limit, task board and themes. Everything stays changeable afterwards. The reasoning behind
 // each preset is in docs/verknuepfungen.md.
@@ -10,9 +11,14 @@ export type CommunityPreset = {
   adultsOnly: boolean;
   modTasks: boolean;
   tags: string[];
+  /** The tools the group starts with (GROUP_TOOLS); all when left out. */
+  tools?: GroupTool[];
 };
 
 export const COMMUNITIES: CommunityPreset[] = [
+  // Small and private: a chat among a few people (or two), tools switched on when needed.
+  { key: "chat", kind: "other", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: [], tools: [] },
+  { key: "couple", kind: "other", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: [], tools: ["tasks", "links"] },
   { key: "sports", kind: "club", template: "club", visibility: "public", joinPolicy: "request", adultsOnly: false, modTasks: true, tags: ["sport", "verein", "training"] },
   { key: "school", kind: "community", template: "club", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: ["schule", "eltern"] },
   { key: "daycare", kind: "community", template: "club", visibility: "secret", joinPolicy: "invite", adultsOnly: true, modTasks: true, tags: ["kita", "eltern"] },

@@ -5,7 +5,7 @@ const signedIn = !!process.env.TEST_USER_EMAIL;
 
 
 test("guests can pass the app on and see how invitations work", async ({ page }) => {
-  await page.goto("/teilen");
+  await page.goto("/sharing");
   await expect(page.getByRole("heading", { name: "Einladen", level: 1 })).toBeVisible();
   await page.getByRole("button", { name: "QR-Code zeigen" }).click();
   const qr = page.getByRole("img", { name: /QR-Code zu HiveVoice/ });
@@ -20,7 +20,7 @@ test("guests can pass the app on and see how invitations work", async ({ page })
 });
 
 test("an invitation link explains itself and asks guests to sign in", async ({ page }) => {
-  await page.goto("/einladung/ABCDEFGHJK");
+  await page.goto("/invite/ABCDEFGHJK");
   await expect(page.getByRole("heading", { name: "Du wurdest eingeladen", level: 1 })).toBeVisible();
   await expect(page.getByRole("link", { name: "Anmelden oder Konto anlegen" })).toBeVisible();
 });
@@ -31,7 +31,7 @@ test.describe("signed in", () => {
   test("the share page shows invitations and where somebody is missing", async ({ page }) => {
     test.setTimeout(180_000);
     await login(page);
-    await page.goto("/teilen");
+    await page.goto("/sharing");
     await expect(page.getByRole("heading", { name: "Einladungen", level: 2 })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Wo bei dir noch jemand fehlt", level: 2 })).toBeVisible();
   });

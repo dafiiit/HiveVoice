@@ -200,7 +200,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={list} aria-live="polite" role="log"
         onScroll={(e) => { const el = e.currentTarget; stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80; }}
-        className="flex max-h-[55dvh] min-h-[280px] flex-1 flex-col gap-1 overflow-y-auto py-3 max-md:max-h-none max-md:min-h-0 lg:max-h-none lg:min-h-0 md:py-4">
+        className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto py-3 md:py-4">
         <div ref={inner} className="flex flex-col gap-1">
         {messages.map((m, i) => {
           const mine = m.sender_id === viewerId;
@@ -247,7 +247,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                   {!m.deleted_at && m.ref && <div className={`w-full max-w-[360px] ${mine ? "self-end" : "self-start"}`}><RefCardView card={m.ref} /></div>}
                   <Attachments items={m.attachments} align={mine ? "end" : "start"} />
                   {m.poll && (
-                    <PollCard poll={m.poll} canVote={verified} signedIn loginPath="/connect"
+                    <PollCard poll={m.poll} canVote={verified} signedIn loginPath="/friends"
                       onChange={(p) => setMessages((all) => all.map((y) => (y.id === m.id ? { ...y, poll: p } : y)))} />
                   )}
                   <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">

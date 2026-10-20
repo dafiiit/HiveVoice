@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "HiveVoice",
     short_name: "HiveVoice",
     description: "Anfragen, anbieten, verbinden. Von der Idee zur Veränderung.",
-    start_url: "/connect",
+    start_url: "/friends",
     display: "standalone",
     background_color: "#f4f4f4",
     theme_color: "#111111",

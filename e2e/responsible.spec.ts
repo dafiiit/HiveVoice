@@ -21,7 +21,7 @@ test.describe("signed in", () => {
     await page.getByRole("tab", { name: "Meine Anfragen" }).click();
     await expect(page).toHaveURL(/view=sent/);
     await expect(page.getByText(/Antwort-Soll: 14 Tage/)).toBeVisible();
-    await page.goto("/me?tab=resp");
+    await page.goto("/settings?tab=resp");
     await expect(page.getByRole("button", { name: /Zuständigkeit|hinzufügen/i }).first()).toBeVisible();
   });
 });

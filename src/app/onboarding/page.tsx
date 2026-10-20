@@ -12,7 +12,7 @@ export async function generateMetadata() {
 export default async function OnboardingPage() {
   const session = await getSession();
   if (!session) redirect("/login");
-  if (session.profile.onboarded) redirect("/connect");
+  if (session.profile.onboarded) redirect("/friends");
   const tags = await asViewer(null, (tx) => popularTags(tx));
   return (
     <Onboarding

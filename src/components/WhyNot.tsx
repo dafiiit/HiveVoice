@@ -19,7 +19,7 @@ export function WhyNot({ action, objectId, className }: { action: string; object
         })}>{t("whyNot")}</button>
       ) : (
         <span role="status" className="font-bold">{reason === "ok" ? t("status.ok") : t.has(`why.${reason}`) ? t(`why.${reason}` as "why.not_found") : t("why.not_allowed")}
-          {" "}<Link href="/rechte" className="font-normal">{t("more")}</Link></span>
+          {" "}<Link href="/rights" className="font-normal">{t("more")}</Link></span>
       )}
     </span>
   );

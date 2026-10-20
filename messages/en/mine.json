@@ -5,17 +5,17 @@
   "newDoc": "Document",
   "newList": "List",
   "filters": {
-    "all": "All",
-    "docs": "Documents",
+    "all": "Overview",
     "lists": "Lists",
     "notes": "Notes",
     "projects": "Initiatives",
-    "listings": "Offers and requests"
+    "listings": "Offers and requests",
+    "uploads": "Uploads"
   },
   "filterLabel": "Filter content",
   "kind": {
     "doc": "Document",
-    "file": "File",
+    "file": "Upload",
     "link": "Link",
     "list": "List",
     "note": "Note",
@@ -57,5 +57,16 @@
     "back": "My content",
     "readOnly": "List by {name}"
   },
-  "newDocTitle": "New document"
+  "newDocTitle": "New note",
+  "area": "Me",
+  "sections": "My sections",
+  "newNote": "Note",
+  "newUpload": "Upload",
+  "myNotes": "My notes",
+  "myUploads": "My uploads",
+  "emptyNotes": "No note yet. Notes are written in Markdown, with versions, and shared when you want.",
+  "emptyUploads": "Nothing uploaded yet. Files, photos, PDFs and links end up here.",
+  "newNoteLead": "In Markdown, with versions. Only for you until you share it.",
+  "uploadTitle": "Upload",
+  "uploadLead": "A file (photo, PDF …) or a link. Only for you at first."
 }

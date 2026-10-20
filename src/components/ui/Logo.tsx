@@ -28,3 +28,25 @@ export function Logo({ size = 40, wordmark = true, compact = false }: { size?: n
     </span>
   );
 }
+
+// One hexagon of the mark (pointy top, like in the logo), centred on cx/cy with radius r.
+const hex = (cx: number, cy: number, r: number) =>
+  [0, 1, 2, 3, 4, 5].map((i) => { const a = (Math.PI / 3) * i - Math.PI / 2; return `${(cx + r * Math.cos(a)).toFixed(2)},${(cy + r * Math.sin(a)).toFixed(2)}`; }).join(" ");
+
+/**
+ * The icons of the three areas, all from the logo: Gemeinschaft is the whole hive,
+ * Freunde two cells side by side (red and black), Ich the red cell alone.
+ */
+export function AreaIcon({ area, size = 28 }: { area: "community" | "friends" | "me"; size?: number }) {
+  if (area === "community") return <LogoMark size={size} />;
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true" style={{ display: "block", flex: "0 0 auto" }}>
+      {area === "friends" ? (
+        <>
+          <polygon points={hex(29, 50, 22)} fill="var(--red)" />
+          <polygon points={hex(71, 50, 22)} fill="currentColor" />
+        </>
+      ) : <polygon points={hex(50, 50, 30)} fill="var(--red)" />}
+    </svg>
+  );
+}

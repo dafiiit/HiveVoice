@@ -69,7 +69,7 @@ export function JuryReview({ caseId, caseNo, rule, context, target, decided, sta
       <Glyph shape="flower" size={120} />
       <h1 className="display m-0">{result === "declined" ? t("declinedTitle") : t("thanks")}</h1>
       <p className="m-0 text-xl">{result === "upheld" ? t("upheld") : result === "dismissed" ? t("dismissed") : result === "declined" ? t("declinedText") : t("waiting")}</p>
-      <Link href="/connect" className={`${btn.primary} self-start`}>{t("home")}</Link>
+      <Link href="/friends" className={`${btn.primary} self-start`}>{t("home")}</Link>
     </section>
   );
 }

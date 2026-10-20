@@ -5,13 +5,13 @@ import { asViewer } from "../db";
 
 export async function createInviteCode() {
   const res = await run(async (tx) => (await tx<{ c: string }[]>`select app.create_invite_code() as c`)[0].c);
-  revalidatePath("/teilen");
+  revalidatePath("/sharing");
   return res;
 }
 
 export async function revokeInviteCode(code: string) {
   const res = await run(async (tx) => { await tx`select app.revoke_invite_code(${code})`; return null; });
-  revalidatePath("/teilen");
+  revalidatePath("/sharing");
   return res;
 }
 

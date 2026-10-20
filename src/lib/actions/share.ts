@@ -40,7 +40,7 @@ export async function shareToChat(conversationId: string, ref: Ref, note: string
              values (${conversationId}, ${s.profile.id}, ${note.trim().slice(0, 2000)}, ${r.type}, ${r.id})`;
     return null;
   });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 
@@ -64,7 +64,7 @@ export async function shareToMarket(regionId: string, ref: Ref, note: string) {
     await tx`insert into public.posts (author_id, body, region_id, ref_type, ref_id) values (${s.profile.id}, ${note.trim().slice(0, 5000)}, ${regionId}, ${r.type}, ${r.id})`;
     return null;
   });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 

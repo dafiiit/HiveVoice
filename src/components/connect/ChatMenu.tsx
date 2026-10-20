@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { blockProfile, hideChat, muteChat, proposeTtl } from "@/lib/actions/safety";
@@ -9,7 +10,7 @@ import { btn, segment, segments } from "../ui/styles";
 
 export type TtlState = { days: number | null; proposedDays: number | null; proposedByMe: boolean };
 
-/** The "more" menu of a private chat: notifications, disappearing messages, blocking, clearing the chat for me. */
+/** The "more" menu of a private chat: a group with this person (for the group tools), notifications, disappearing messages, blocking, clearing the chat for me. */
 export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, ttl }: {
   conversationId: string; otherId: string; otherName: string; muted: boolean; blocked: boolean; ttl: TtlState;
 }) {
@@ -22,6 +23,7 @@ export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, t
   return (
     <Popover label={<span>{t("more")}</span>} align="right">
       <div className="flex flex-col" role="group" aria-label={t("more")}>
+        <Link href={`/new/group?with=${otherId}`} className={`${item} no-underline`}>{t("groupWith", { name: otherName })}</Link>
         <button type="button" disabled={pending} className={item} onClick={() => run(() => muteChat(conversationId, !muted))}>
           {muted ? t("unmute") : t("mute")}
         </button>
@@ -58,7 +60,7 @@ export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, t
           <div className="flex flex-col gap-2 py-2">
             <span className="text-sm">{t("clearConfirm")}</span>
             <span className="flex gap-2">
-              <button type="button" disabled={pending} className={btn.redSm} onClick={() => run(async () => { const r = await hideChat(conversationId); if (r.ok) router.push("/connect"); return r; })}>{t("yes")}</button>
+              <button type="button" disabled={pending} className={btn.redSm} onClick={() => run(async () => { const r = await hideChat(conversationId); if (r.ok) router.push("/friends"); return r; })}>{t("yes")}</button>
               <button type="button" className={btn.secondarySm} onClick={() => setConfirm(false)}>{t("no")}</button>
             </span>
           </div>

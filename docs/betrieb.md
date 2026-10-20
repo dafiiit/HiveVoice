@@ -10,7 +10,7 @@ Es gibt keinen Knopf „Mich als Admin eintragen“, und Admins können sich nic
 1. Vercel → Projekt → Settings → Environment Variables: `ADMIN_EMAILS` = eigene E-Mail-Adresse
    (mehrere durch Komma getrennt), für Production und Preview. Dann neu deployen.
 2. Mit dieser Adresse anmelden. Sie muss bestätigt sein (Bestätigungsmail oder Google-Login).
-3. In der App unter Für mich → Einstellungen → Ansicht auf „Verwaltung“ wechseln (oder `/verwaltung` öffnen). Für alle anderen gibt es diese Seite nicht (404).
+3. In der App unter Konto-Menü oben rechts → Einstellungen → Ansicht auf „Verwaltung“ wechseln (oder `/admin` öffnen). Für alle anderen gibt es diese Seite nicht (404).
 
 Der Abgleich (`app.sync_server_admins`) läuft bei jedem Aufruf der Verwaltung und sobald sich jemand
 anmeldet, dessen Adresse neu auf der Liste steht oder von ihr gestrichen wurde. Wichtig: Ist `ADMIN_EMAILS`

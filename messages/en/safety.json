@@ -41,7 +41,8 @@
     "ttlTheirs": "{name} proposes: messages disappear after {days} days.",
     "ttlAgree": "Agree",
     "ttlDecline": "No, keep off",
-    "muted": "Muted"
+    "muted": "Muted",
+    "groupWith": "Start a group with {name}"
   },
   "message": {
     "edit": "Edit",

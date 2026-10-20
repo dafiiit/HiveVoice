@@ -41,7 +41,8 @@
     "ttlTheirs": "{name} schlägt vor: Nachrichten verschwinden nach {days} Tagen.",
     "ttlAgree": "Zustimmen",
     "ttlDecline": "Nein, aus lassen",
-    "muted": "Stumm"
+    "muted": "Stumm",
+    "groupWith": "Gruppe mit {name} anlegen"
   },
   "message": {
     "edit": "Bearbeiten",

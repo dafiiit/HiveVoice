@@ -1,63 +1,68 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ComponentType } from "react";
-import { IconChat, IconCompass, IconFolder, IconPlus, IconShare } from "../ui/Icons";
+import { AreaIcon } from "../ui/Logo";
+import { IconPlus } from "../ui/Icons";
 
-/** `short` is the label under the icon in the bottom bar on phones. */
-export type NavItem = { href: string; label: string; short?: string; badge?: number };
+export type Area = "community" | "friends" | "me";
+export type NavItem = { area: Area; href: string; label: string; badge?: number };
 
-const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/anliegen": IconShare, "/connect": IconChat, "/inhalte": IconFolder };
+// Pages that belong to an area without living under its address.
+const ALSO: Record<Area, string[]> = {
+  community: ["/community", "/listings", "/profile", "/initiatives", "/responsible", "/jury"],
+  friends: ["/friends", "/groups", "/invite"],
+  me: ["/me", "/links"],
+};
+const isActive = (path: string, area: Area) => ALSO[area].some((h) => path === h || path.startsWith(h + "/"));
 
-// Sections that also cover pages under other paths (none at the moment).
-const ALSO: Record<string, string[]> = {};
-const isActive = (path: string, href: string) => [href, ...(ALSO[href] ?? [])].some((h) => path === h || path.startsWith(h + "/"));
-
-export function SideLinks({ items }: { items: NavItem[] }) {
+/** The rail on the left (desktop), like in Teams: three areas, each with its icon from the logo, and "Neu" at the bottom. */
+export function Rail({ items, newLabel, label }: { items: NavItem[]; newLabel: string; label: string }) {
   const path = usePathname();
   return (
-    <div className="flex flex-col border-t border-line">
+    <nav aria-label={label} className="sticky top-16 hidden h-[calc(100dvh-4rem)] w-[96px] flex-none flex-col items-stretch border-r border-line bg-paper md:flex">
       {items.map((it) => {
-        const on = isActive(path, it.href);
+        const on = isActive(path, it.area);
         return (
-          <Link key={it.href} href={it.href} aria-current={on ? "page" : undefined}
-            className={`flex h-[52px] items-center gap-3 border-b border-line text-ink no-underline ${on ? "font-bold" : ""}`}>
-            <span className={`h-2.5 w-2.5 flex-none ${on ? "bg-ink" : "border border-ink"}`} aria-hidden="true" />
-            <span className="flex-1">{it.label}</span>
-            {!!it.badge && (
-              <span className="inline-flex h-[22px] min-w-[22px] items-center justify-center bg-ink px-1.5 text-xs font-bold text-on-ink">{it.badge}</span>
-            )}
+          <Link key={it.area} href={it.href} aria-current={on ? "page" : undefined}
+            className={`relative flex h-[76px] flex-col items-center justify-center gap-1.5 border-l-4 text-[11.5px] leading-none text-ink no-underline ${on ? "border-ink bg-surface font-bold" : "border-transparent hover:bg-surface"}`}>
+            <span className="relative inline-flex">
+              <AreaIcon area={it.area} size={30} />
+              {!!it.badge && <span className="absolute -right-3 -top-2 inline-flex h-[18px] min-w-[18px] items-center justify-center bg-red px-1 text-[11px] font-bold text-on-red">{it.badge}</span>}
+            </span>
+            {it.label}
           </Link>
         );
       })}
-    </div>
+      <Link href="/new" aria-label={newLabel} title={newLabel}
+        className="mx-auto mb-5 mt-auto inline-flex h-12 w-12 items-center justify-center bg-ink text-on-ink no-underline">
+        <IconPlus size={22} />
+      </Link>
+    </nav>
   );
 }
 
-export function BottomNav({ items, newLabel }: { items: NavItem[]; newLabel: string }) {
+/** Phones: the same three areas at the bottom, "Neu" in the middle. 4rem above the system gesture area. */
+export function BottomNav({ items, newLabel, label }: { items: NavItem[]; newLabel: string; label: string }) {
   const path = usePathname();
-  // Mobile: the sections with an icon and a short label, the "new" button after the first two.
-  // The bar is 4rem tall above the system gesture area (Android edge-to-edge, iPhone home bar), not inside it.
-  const [a, b, ...rest] = items;
   const cell = (it: NavItem) => {
-    const on = isActive(path, it.href);
-    const Icon = ICONS[it.href] ?? IconCompass;
+    const on = isActive(path, it.area);
     return (
-      <Link key={it.href} href={it.href} aria-current={on ? "page" : undefined}
-        className={`flex flex-col items-center justify-center gap-0.5 border-t-4 text-[11px] leading-none text-ink no-underline ${on ? "border-ink font-bold" : "border-transparent"}`}>
+      <Link key={it.area} href={it.href} aria-current={on ? "page" : undefined}
+        className={`flex flex-col items-center justify-center gap-1 border-t-4 text-[11px] leading-none text-ink no-underline ${on ? "border-ink font-bold" : "border-transparent"}`}>
         <span className="relative inline-flex">
-          <Icon size={22} />
+          <AreaIcon area={it.area} size={24} />
           {!!it.badge && <span className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center bg-red px-1 text-[10px] font-bold text-on-red">{it.badge}</span>}
         </span>
-        {it.short ?? it.label}
+        {it.label}
       </Link>
     );
   };
+  const [a, b, ...rest] = items;
   return (
-    <nav aria-label="Hauptnavigation" className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(4rem+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav aria-label={label} className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(4rem+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
       {cell(a)}
       {cell(b)}
-      <Link href="/new" aria-label={newLabel} className="flex flex-col items-center justify-center gap-0.5 bg-ink text-[11px] font-bold leading-none text-on-ink no-underline">
+      <Link href="/new" aria-label={newLabel} className="flex flex-col items-center justify-center gap-1 bg-ink text-[11px] font-bold leading-none text-on-ink no-underline">
         <IconPlus size={22} />
         {newLabel}
       </Link>

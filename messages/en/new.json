@@ -91,13 +91,13 @@
       "title": "Start an initiative",
       "text": "Demand something from a responsible office, with debate, a vote and a duty to answer."
     },
-    "knowledge": {
-      "title": "Add knowledge",
-      "text": "A link, a file or a note for others."
-    },
     "voice": {
       "title": "Write on the noticeboard",
       "text": "A question or news for everyone in your place."
+    },
+    "doc": {
+      "title": "Write a note",
+      "text": "In Markdown, with versions. Only for you until you share it."
     }
   }
 }

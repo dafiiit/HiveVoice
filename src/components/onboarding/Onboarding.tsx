@@ -68,7 +68,7 @@ export function Onboarding({ alias: initialAlias, realName: initialReal, suggest
     start(async () => {
       const res = await finishOnboarding({ regionId: borough || place!.id, displayMode: mode, realName, alias, needs, offers, ageOk, isMinor });
       if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
-      router.replace("/connect");
+      router.replace("/friends");
       router.refresh();
     });
   }

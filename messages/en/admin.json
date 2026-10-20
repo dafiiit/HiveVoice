@@ -36,7 +36,7 @@
   "demoChats": "Demo chats for new accounts",
   "on": "On",
   "off": "Off",
-  "demoChatsText": "On: whoever opens Connect for the first time gets a few sample chats and contact requests from demo profiles. Turn off and delete the demo data before the real launch.",
+  "demoChatsText": "On: whoever opens Friends for the first time gets a few sample chats and contact requests from demo profiles. Turn off and delete the demo data before the real launch.",
   "view": "View",
   "viewUser": "User",
   "viewAdmin": "Admin",

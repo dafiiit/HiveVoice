@@ -9,12 +9,12 @@ export async function generateMetadata() {
 }
 
 const OPTIONS = [
-  { href: "/anliegen?as=need", shape: "lupe", key: "need" },
-  { href: "/anliegen?as=offer", shape: "gift", key: "offer" },
+  { href: "/me/listings?as=need", shape: "lupe", key: "need" },
+  { href: "/me/listings?as=offer", shape: "gift", key: "offer" },
   { href: "/new/group", shape: "flower", key: "group" },
   { href: "/new/initiative", shape: "burst", key: "initiative" },
-  { href: "/new/link", shape: "arch", key: "knowledge" },
-  { href: "/connect?c=market", shape: "bubble", key: "voice" },
+  { href: "/new/link?mode=note", shape: "arch", key: "doc" },
+  { href: "/community", shape: "bubble", key: "voice" },
 ] as const;
 
 /** Everything you can start, as equal tiles: the same words as on the buttons elsewhere. */

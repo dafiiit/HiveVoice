@@ -10,7 +10,7 @@ async function exec(statement: string) {
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
 async function openFelix(page: Page) {
-  await page.goto("/connect?f=chats");
+  await page.goto("/friends?f=chats");
   await page.getByRole("link", { name: /Felix Wolf/ }).first().click();
   await expect(page.getByRole("log")).toBeVisible();
 }
@@ -66,7 +66,7 @@ test.describe("safety", () => {
       await expect(page.getByText(/Du hast Felix blockiert/)).toBeVisible();
     } finally {
       // Put everything back, whatever happened.
-      await page.goto("/me?tab=settings");
+      await page.goto("/settings?tab=settings");
       const unblock = page.getByRole("button", { name: "Blockade aufheben" });
       if (await unblock.count()) await unblock.first().click();
       await expect(page.getByText("Du hast niemanden blockiert.")).toBeVisible({ timeout: 15_000 });
@@ -76,7 +76,7 @@ test.describe("safety", () => {
   test("privacy choices are saved and can be undone", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "writes data");
     await login(page);
-    await page.goto("/me?tab=settings");
+    await page.goto("/settings?tab=settings");
     const contact = page.getByRole("radiogroup", { name: "Wer darf mir schreiben?" });
     try {
       await contact.getByRole("radio", { name: "Nur Menschen aus meinen Gruppen" }).click();
@@ -91,7 +91,7 @@ test.describe("safety", () => {
 });
 
 test("a guest sees a profile in short: no bio, no region, a hint to sign in", async ({ page }) => {
-  await page.goto("/explore?kind=people");
+  await page.goto("/community/people");
   const first = page.locator("main a[href^='/profile/']").first();
   if (!(await first.count())) test.skip(true, "no profile is findable by a guest in this database");
   await first.click();

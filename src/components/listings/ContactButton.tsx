@@ -29,7 +29,7 @@ export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, titl
     return (
       <span role="status" className="flex flex-wrap items-center gap-x-3 text-sm">
         <strong>{t("requested")}</strong>
-        <Link href={requestId ? `/connect?c=c:${requestId}` : "/connect?f=requests"} className="text-ink underline">{tcn("dm.seeInConnect")}</Link>
+        <Link href={requestId ? `/friends?c=c:${requestId}` : "/friends?f=requests"} className="text-ink underline">{tcn("dm.seeInConnect")}</Link>
       </span>
     );
   }

@@ -15,7 +15,7 @@ export function InviteBanner({ requestId, by }: { requestId: string; by: string;
   const decide = (accept: boolean) => start(async () => {
     const res = await decideInvite(requestId, accept);
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
-    if (accept) router.refresh(); else router.push("/connect");
+    if (accept) router.refresh(); else router.push("/friends");
   });
   return (
     <div role="status" className="flex flex-col gap-2 border-2 border-ink bg-surface p-4">

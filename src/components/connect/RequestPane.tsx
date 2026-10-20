@@ -46,7 +46,7 @@ export function RequestPane({ r }: { r: RequestView }) {
     const res = await fn();
     if (!res.ok) return setError(t("sendFailed"));
     if (after) after(res.data);
-    else router.replace("/connect?f=requests");
+    else router.replace("/friends?f=requests");
     router.refresh();
   });
 
@@ -66,7 +66,7 @@ export function RequestPane({ r }: { r: RequestView }) {
               : r.listing_id ? t(r.outgoing ? "req.outContact" : "req.inContact", { title: r.title ?? "" }) : t(r.outgoing ? "req.outDirect" : "req.inDirect")}
           </span>
           {r.via_id && r.via_title && (
-            <Link href={`/anliegen/${r.via_id}`} className="text-sm font-bold text-ink">{tl("viaLine", { title: r.via_title })}</Link>
+            <Link href={`/listings/${r.via_id}`} className="text-sm font-bold text-ink">{tl("viaLine", { title: r.via_title })}</Link>
           )}
         </div>
         <span className={`ml-auto flex-none px-2 py-1 text-sm font-bold ${pendingState ? "border border-ink" : "bg-chip"}`}>
@@ -91,7 +91,7 @@ export function RequestPane({ r }: { r: RequestView }) {
         {pendingState && !r.outgoing && !join && (
           <>
             <button type="button" disabled={pending} className={btn.primary}
-              onClick={() => act(() => decideContact(r.id, true), (c) => router.replace(c ? `/connect?c=d:${c}` : "/connect?f=requests"))}>{t("req.accept")}</button>
+              onClick={() => act(() => decideContact(r.id, true), (c) => router.replace(c ? `/friends?c=d:${c}` : "/friends?f=requests"))}>{t("req.accept")}</button>
             <button type="button" disabled={pending} className={btn.secondary} onClick={() => act(() => decideContact(r.id, false))}>{t("req.decline")}</button>
           </>
         )}
@@ -105,7 +105,7 @@ export function RequestPane({ r }: { r: RequestView }) {
           <button type="button" disabled={pending} className={btn.secondary} onClick={() => act(() => (join ? withdrawJoin(r.id) : withdrawContact(r.id)))}>{t("req.withdraw")}</button>
         )}
         {join && r.group_slug && <Link href={`/groups/${r.group_slug}`} className={btn.secondary}>{t("req.openGroup")}</Link>}
-        {!join && r.listing_id && <Link href={`/anliegen/${r.listing_id}`} className={btn.secondary}>{t("openListing")}</Link>}
+        {!join && r.listing_id && <Link href={`/listings/${r.listing_id}`} className={btn.secondary}>{t("openListing")}</Link>}
         {(!join || !r.outgoing) && <Link href={`/profile/${r.other_id}`} className={btn.secondary}>{t("openProfile")}</Link>}
       </div>
       {error && <Notice tone="error" className="text-sm">{error}</Notice>}

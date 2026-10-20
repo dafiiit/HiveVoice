@@ -71,7 +71,7 @@ export function ReportButton({ type, id, className }: { type: "post" | "argument
                 <ol className="m-0 flex flex-col gap-2 pl-5">
                   <li>{t("how1")}</li><li>{t("how2")}</li><li>{t("how3")}</li>
                 </ol>
-                <Link href="/me?tab=reports" className={`${btn.primary} self-start`}>{t("track")}</Link>
+                <Link href="/settings?tab=reports" className={`${btn.primary} self-start`}>{t("track")}</Link>
               </div>
             )}
         </Dialog>

@@ -91,13 +91,13 @@
       "title": "Initiative starten",
       "text": "Etwas fordern: von einer zuständigen Stelle, mit Debatte, Abstimmung und Antwortpflicht."
     },
-    "knowledge": {
-      "title": "Wissen hinzufügen",
-      "text": "Einen Link, eine Datei oder eine Notiz für andere."
-    },
     "voice": {
       "title": "Auf der Pinnwand schreiben",
       "text": "Eine Frage oder Neuigkeit für alle in deinem Ort."
+    },
+    "doc": {
+      "title": "Notiz schreiben",
+      "text": "In Markdown, mit Versionen. Erst nur für dich, teilen kannst du später."
     }
   }
 }

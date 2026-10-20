@@ -1,15 +1,15 @@
 {
-  "main": "Main navigation",
+  "main": "Areas",
   "explore": "Explore",
   "needs": "Requests",
   "offers": "Offers",
   "connect": "Connect",
-  "me": "For me",
+  "me": "Me",
   "new": "New",
   "yourGroups": "Your groups",
   "responsible": "Who is responsible?",
   "search": "Search",
-  "searchPlaceholder": "Initiatives, groups, people, places",
+  "searchPlaceholder": "Search: people, groups, initiatives, places",
   "inbox": "Notifications, {n} unread",
   "profileOf": "For me – {name}",
   "login": "Sign in",
@@ -29,8 +29,8 @@
     "yours": "Your place",
     "chosen": "Chosen place",
     "choose": "Choose place",
-    "explain": "Your place decides which marketplace you see and what fits you.",
-    "explainGuest": "Without an account we only remember the place in this browser. It decides which marketplace you see.",
+    "explain": "Your place decides which pinboard you see and what fits you.",
+    "explainGuest": "Without an account we only remember the place in this browser. It decides which pinboard you see.",
     "discover": "Explore {name}",
     "change": "Change place",
     "searchPlaceholder": "Postal code or place",
@@ -41,5 +41,17 @@
     "partOf": "Part of"
   },
   "searchPlaceholderShort": "Search …",
-  "anliegen": "Matters"
+  "anliegen": "Matters",
+  "community": "Community",
+  "friends": "Friends",
+  "account": {
+    "open": "Account of {name}",
+    "account": "Your account",
+    "profile": "My profile",
+    "settings": "Settings",
+    "resp": "Responsibilities",
+    "reports": "Reports",
+    "principles": "Principles",
+    "signOut": "Sign out"
+  }
 }

@@ -1,5 +1,5 @@
 {
-  "title": "Verbinden",
+  "title": "Freunde",
   "order": "Reihenfolge",
   "listSearch": "Chats durchsuchen",
   "listNone": "Nichts gefunden.",
@@ -30,7 +30,7 @@
   "popular": "beliebt",
   "unread": "{n} ungelesen",
   "back": "Zurück zur Liste",
-  "pick": "Wähle links einen Chat.",
+  "pick": "Wähle links einen Chat oder eine Gruppe.",
   "sort": {
     "top": "Für dich",
     "new": "Neueste"
@@ -44,7 +44,8 @@
     "all": "Alles",
     "chats": "Chats",
     "groups": "Gruppen",
-    "requests": "Kontaktanfragen"
+    "requests": "Kontaktanfragen",
+    "listings": "Anliegen"
   },
   "newGroup": "Gruppe gründen",
   "emptyList": "Noch keine Chats. Schreib jemandem über ein Angebot, ein Gesuch oder ein Profil, oder tritt einer Gruppe bei.",
@@ -88,7 +89,7 @@
     "placeholder": "Hallo, ich habe dein Profil gesehen und …",
     "privacy": "{name} sieht deine Nachricht als Kontaktanfrage und entscheidet, ob ein Chat entsteht.",
     "sent": "Kontaktanfrage gesendet.",
-    "seeInConnect": "In Verbinden ansehen"
+    "seeInConnect": "In Freunde ansehen"
   },
   "mf": {
     "label": "Filter",
@@ -103,5 +104,10 @@
     "none": "Keine Beiträge dazu. Ändere den Umkreis oder die Suche."
   },
   "waiting": "Wartet auf Verbindung",
-  "offlineExtras": "Ohne Verbindung geht nur Text. Fotos, Dateien und Umfragen bitte später senden."
+  "offlineExtras": "Ohne Verbindung geht nur Text. Fotos, Dateien und Umfragen bitte später senden.",
+  "newGroupShort": "Gruppe",
+  "listingOffer": "{name} bietet",
+  "listingNeed": "{name} sucht",
+  "toolsWith": "Gruppe daraus",
+  "toolsWithText": "Eine Gruppe mit {name}: Aufgaben, Dokumente und mehr zu zweit"
 }

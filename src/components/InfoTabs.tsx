@@ -3,8 +3,8 @@ import { Tabs } from "./ui/Page";
 
 const PAGES = [
   { key: "principles", href: "/principles" },
-  { key: "rights", href: "/rechte" },
-  { key: "transparency", href: "/transparenz" },
+  { key: "rights", href: "/rights" },
+  { key: "transparency", href: "/transparency" },
   { key: "privacy", href: "/legal/privacy" },
   { key: "imprint", href: "/legal/imprint" },
 ] as const;

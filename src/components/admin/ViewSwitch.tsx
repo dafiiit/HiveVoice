@@ -8,7 +8,7 @@ export async function ViewSwitch({ admin }: { admin: boolean }) {
   return (
     <nav aria-label={t("view")} className="flex gap-px">
       <Link href="/" aria-current={!admin ? "page" : undefined} className={chip(!admin)}>{t("viewUser")}</Link>
-      <Link href="/verwaltung" aria-current={admin ? "page" : undefined} className={chip(admin)}>{t("viewAdmin")}</Link>
+      <Link href="/admin" aria-current={admin ? "page" : undefined} className={chip(admin)}>{t("viewAdmin")}</Link>
     </nav>
   );
 }

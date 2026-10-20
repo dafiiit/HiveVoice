@@ -13,6 +13,6 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
   const target = typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : undefined;
   // Already signed in on this device: straight to the content.
   const session = await getSession();
-  if (session) redirect(session.profile.onboarded ? (target ?? "/connect") : "/onboarding");
+  if (session) redirect(session.profile.onboarded ? (target ?? "/friends") : "/onboarding");
   return <AuthForm mode="login" next={target} remembered={await lastLogin()} />;
 }

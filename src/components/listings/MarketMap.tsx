@@ -43,7 +43,7 @@ export function MarketMap({ points, placeHref }: { points: MapPoint[]; placeHref
         el.className = "flex h-8 min-w-8 items-center justify-center border-2 border-[var(--paper)] bg-[var(--ink)] px-1.5 text-sm font-bold text-[var(--on-ink)]";
         el.textContent = String(p.n);
         el.setAttribute("aria-label", t("mapAt", { n: p.n, place: p.name }));
-        const list = p.items.map((i) => `<li><a href="/anliegen/${i.id}">${esc(i.title)}</a></li>`).join("");
+        const list = p.items.map((i) => `<li><a href="/listings/${i.id}">${esc(i.title)}</a></li>`).join("");
         const popup = new maplibregl.Popup({ offset: 18, maxWidth: "280px" }).setHTML(
           `<strong>${esc(t("mapAt", { n: p.n, place: p.name }))}</strong><ul style="margin:6px 0;padding-left:18px">${list}</ul>` +
           `<a href="${placeHref.replace("__PLACE__", p.id)}" style="font-weight:700">${esc(t("mapAll", { place: p.name }))}</a>`);

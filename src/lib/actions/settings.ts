@@ -59,31 +59,11 @@ export async function setProfileTags(relation: "interest" | "offers" | "needs", 
     await tx`select app.set_profile_tags(${relation}, ${tags.slice(0, 30)}::text[])`;
     return null;
   });
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
   return res;
 }
 
-export async function saveNote(id: string | null, body: string) {
-  const res = await run(async (tx, s) => {
-    if (id) await tx`update public.notes set body = ${body}, updated_at = now() where id = ${id}`;
-    else await tx`insert into public.notes (profile_id, body) values (${s.profile.id}, ${body})`;
-    return null;
-  });
-  revalidatePath("/me");
-  revalidatePath("/inhalte");
-  return res;
-}
-
-export async function deleteNote(id: string) {
-  const res = await run(async (tx) => {
-    await tx`delete from public.notes where id = ${id}`;
-    return null;
-  });
-  revalidatePath("/me");
-  revalidatePath("/inhalte");
-  return res;
-}
 
 /** Removes the profile with all its content and the login. Votes were never linked to the person. */
 export async function deleteAccount(keepGroupItems = true) {

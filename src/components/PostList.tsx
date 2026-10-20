@@ -114,7 +114,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
         {p.poll && <PollCard poll={p.poll} canVote={canWrite} signedIn={!!viewerId} loginPath={path} />}
         <RefCardView card={p.ref} />
         {p.listing_id && (
-          <Link href={`/anliegen/${p.listing_id}`} className="flex flex-col gap-0.5 border border-ink bg-surface p-3 text-ink no-underline">
+          <Link href={`/listings/${p.listing_id}`} className="flex flex-col gap-0.5 border border-ink bg-surface p-3 text-ink no-underline">
             <span className="text-xs font-bold">{p.listing_kind === "offer" ? t("offer") : t("need")}</span>
             <strong>{p.listing_title}</strong>
           </Link>

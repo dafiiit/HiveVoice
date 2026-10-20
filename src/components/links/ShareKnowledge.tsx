@@ -10,7 +10,10 @@ import { Notice } from "@/components/ui/Page";
 type Group = { id: string; slug: string; name: string };
 type Mode = "link" | "file" | "note";
 
-/** Sharing knowledge in three ways: a link to something elsewhere, a file (photo, PDF), or a Markdown note written here. */
+/**
+ * Two things to make: a Markdown note written here (Notiz), or an upload from outside (a file such as a photo or PDF, or a link).
+ * A Markdown file picked as an upload becomes a note.
+ */
 export function ShareKnowledge({ groups, initialGroup, ideas, initialMode = "link" }: { groups: Group[]; initialGroup: string | null; ideas: string[]; initialMode?: Mode }) {
   const t = useTranslations("knowledge");
   const tl = useTranslations("links");
@@ -20,13 +23,13 @@ export function ShareKnowledge({ groups, initialGroup, ideas, initialMode = "lin
   const [notice, setNotice] = useState(false);
   return (
     <div className="flex flex-col gap-5">
-      <div role="radiogroup" aria-label={t("modes")} className={segments}>
-        {(["link", "file", "note"] as const).map((m) => (
+      {initialMode !== "note" && <div role="radiogroup" aria-label={t("modes")} className={segments}>
+        {(["file", "link"] as const).map((m) => (
           <button key={m} type="button" role="radio" aria-checked={mode === m} onClick={() => { setMode(m); setNotice(false); }} className={segment(mode === m)}>
-            {t(m === "link" ? "modeLink" : m === "file" ? "modeFile" : "modeNote")}
+            {t(m === "link" ? "modeLink" : "modeFile")}
           </button>
         ))}
-      </div>
+      </div>}
       {mode === "link" && <ShareLinkForm groups={groups} initialGroup={initialGroup} ideas={ideas} />}
       {mode === "file" && (
         <ShareFileForm groups={groups} initialGroup={initialGroup} ideas={ideas}

@@ -61,6 +61,6 @@ export async function quickSearch(q: string): Promise<Hit[]> {
   const places = await searchPlaces(query);
   return [
     ...hits,
-    ...places.slice(0, 3).map((p): Hit => ({ kind: "place", id: p.id, title: p.locality && p.locality !== p.name ? `${p.name} · ${p.locality}` : p.name, sub: p.context, href: `/explore?place=${p.id}` })),
+    ...places.slice(0, 3).map((p): Hit => ({ kind: "place", id: p.id, title: p.locality && p.locality !== p.name ? `${p.name} · ${p.locality}` : p.name, sub: p.context, href: `/community/groups?place=${p.id}` })),
   ];
 }

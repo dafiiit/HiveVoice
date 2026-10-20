@@ -79,6 +79,10 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
    * Alles privat, bis geteilt
 
 ## Entschieden
+* Gruppenwerkzeuge gibt es schon ab zwei Personen (Paar, Familie): aus jedem 1-zu-1-Chat „Gruppe daraus“; Vorlagen „Chatgruppe“ (ohne Werkzeuge) und „Zu zweit“ (Aufgaben, Dokumente)
+* Pinnwand im manuellen Modus: Ort (Nachbarschaft, Stadt, Bundesland, Land) und Thema (Tag) selbst einstellen
+* Alle Adressen auf Englisch, alte Adressen leiten weiter (Adressplan unten)
+* Umbau in einem Schritt (2026-10-21)
 * Startbereich nach dem Anmelden: Freunde, wenn man in Gruppen ist; sonst Gemeinschaft (neue Konten)
 * Befragungen sind Abstimmungen (Werkzeug der Toolbox), kein eigenes Menü
 * Mängel melden ist ein Anliegen (mit Foto und Ort), kein eigenes Menü
@@ -87,3 +91,23 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
 
 ## Offen
 * Brauchen Gruppen Kanäle (wie Teams) oder reichen Untergruppen?
+
+## Adressen (umgesetzt 2026-10-21)
+| Bereich | Adresse | vorher |
+|---|---|---|
+| Gemeinschaft → Pinnwand | /community | /connect?c=market |
+| Gemeinschaft → Anliegen | /community/listings | /anliegen?tab=offers |
+| Gemeinschaft → Gruppen (Ansicht Initiativen) | /community/groups(?kind=initiatives) | /explore |
+| Gemeinschaft → Personen (auch Zuständige) | /community/people | /explore?kind=people, /responsible |
+| Freunde | /friends | /connect |
+| Ich → Überblick, Listen, Notizen, Dokumente, Initiativen | /me(?f=…) | /inhalte |
+| Ich → Meine Anliegen | /me/listings | /anliegen |
+| Liste | /me/lists/[id] | /inhalte/listen/[id] |
+| Anliegen | /listings/[id] | /anliegen/[id] |
+| Einstellungen (Konto-Menü) | /settings | /me |
+| Einladung, Teilen, Rechte, Transparenz, Verwaltung | /invite, /sharing, /rights, /transparency, /admin | deutsch |
+
+## Noch nicht gebaut (aus dem Baum oben)
+* Kalender, Dienstpläne, Abstimmungen als Werkzeug für Ich (Welle 1), Kasse, Timeline/Wirkung, Rechtegruppen frei benennen
+* Bilder und Texte als eigene Inhaltsart unter Ich, „Heute“-Übersicht
+* Wissen ist nicht mehr öffentlich durchsuchbar (Tab „Wissen“ entfällt); öffentliche Dokumente sind nur über Link, Gruppe oder Pinnwand zu finden

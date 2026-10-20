@@ -5,7 +5,7 @@ const signedIn = !!process.env.TEST_USER_EMAIL;
 
 
 test("a guest sees level 0 and what signing in unlocks", async ({ page }) => {
-  await page.goto("/rechte");
+  await page.goto("/rights");
   await expect(page.getByRole("heading", { name: "Rechte und Stufen", level: 1 })).toBeVisible();
   await expect(page.getByText("Deine Stufe: Gast")).toBeVisible();
   await expect(page.getByRole("link", { name: "Anmelden nötig" }).first()).toBeVisible();
@@ -18,7 +18,7 @@ test.describe("signed in", () => {
 
   test("the rights page shows my level, the limits and the levels", async ({ page }) => {
     await login(page);
-    await page.goto("/rechte");
+    await page.goto("/rights");
     await expect(page.getByText(/^Deine Stufe: (Bestätigt|Amtlich|Moderation)$/)).toBeVisible();
     const table = page.getByRole("table");
     await expect(table.getByRole("row", { name: /Nachrichten schicken/ })).toContainText("Ja");

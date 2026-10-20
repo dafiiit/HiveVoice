@@ -33,7 +33,7 @@ export function JoinPanel({ slug, id, policy, role, requested, signedIn, lastAdm
     return (
       <span role="status" className="flex flex-wrap items-center gap-x-3 text-sm">
         <strong>{t("requested")}</strong>
-        <Link href="/connect?f=requests" className="text-ink underline">{tcn("dm.seeInConnect")}</Link>
+        <Link href="/friends?f=requests" className="text-ink underline">{tcn("dm.seeInConnect")}</Link>
       </span>
     );
   }

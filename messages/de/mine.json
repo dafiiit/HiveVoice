@@ -5,17 +5,17 @@
   "newDoc": "Dokument",
   "newList": "Liste",
   "filters": {
-    "all": "Alle",
-    "docs": "Dokumente",
+    "all": "Überblick",
     "lists": "Listen",
     "notes": "Notizen",
     "projects": "Initiativen",
-    "listings": "Anliegen"
+    "listings": "Anliegen",
+    "uploads": "Uploads"
   },
   "filterLabel": "Inhalte filtern",
   "kind": {
     "doc": "Dokument",
-    "file": "Datei",
+    "file": "Upload",
     "link": "Link",
     "list": "Liste",
     "note": "Notiz",
@@ -57,5 +57,16 @@
     "back": "Meine Inhalte",
     "readOnly": "Liste von {name}"
   },
-  "newDocTitle": "Neues Dokument"
+  "newDocTitle": "Neue Notiz",
+  "area": "Ich",
+  "sections": "Meine Bereiche",
+  "newNote": "Notiz",
+  "newUpload": "Hochladen",
+  "myNotes": "Meine Notizen",
+  "myUploads": "Meine Uploads",
+  "emptyNotes": "Noch keine Notiz. Notizen schreibst du in Markdown, mit Versionen, und teilst sie, wenn du willst.",
+  "emptyUploads": "Noch nichts hochgeladen. Dateien, Fotos, PDFs und Links landen hier.",
+  "newNoteLead": "In Markdown, mit Versionen. Erst nur für dich, teilen kannst du später.",
+  "uploadTitle": "Hochladen",
+  "uploadLead": "Eine Datei (Foto, PDF …) oder einen Link. Erst nur für dich."
 }

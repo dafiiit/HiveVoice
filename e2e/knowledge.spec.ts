@@ -26,15 +26,14 @@ test.describe("knowledge: notes, files and images", () => {
     const marker = `Notiztest ${Date.now()}`;
     try {
       await login(page);
-      await page.goto("/new/link");
-      await page.getByRole("radio", { name: "Notiz" }).click();
+      await page.goto("/new/link?mode=note");
       await page.getByLabel("Titel", { exact: true }).fill(marker);
       await page.getByLabel("Inhalt in Markdown").fill("# Hauptteil\n\nText mit **fett** und einer Liste:\n\n- eins\n- zwei\n\n```mermaid\nflowchart LR\n  A[Idee] --> B[Gruppe]\n```\n");
       const preview = page.getByRole("region", { name: "Vorschau" });
       await expect(preview.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
       await expect(preview.getByText("fett")).toBeVisible();
       await expect(preview.getByRole("img", { name: "Diagramm" }).locator("svg")).toBeVisible({ timeout: 20_000 });
-      // Documents start private; this one is shared with everybody so Wissen can find it.
+      // Documents start private; this one is shared with everybody.
       await page.getByLabel("Wer darf das sehen?").selectOption("public");
       await page.getByRole("button", { name: "Notiz veröffentlichen" }).click();
       await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
@@ -49,9 +48,9 @@ test.describe("knowledge: notes, files and images", () => {
       await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
       await expect(page.locator("article.border").getByRole("heading", { name: "Neu gefasst" })).toBeVisible();
 
-      // Wissen finds a note by its text.
-      await page.goto("/explore?kind=links&q=Neu+gefasst");
-      await expect(page.getByRole("link", { name: marker })).toBeVisible();
+      // It is listed under Ich → Notizen.
+      await page.goto("/me?f=notes");
+      await expect(page.getByText(marker).first()).toBeVisible();
     } finally {
       await exec(`delete from public.resources where title = '${marker}'`);
     }

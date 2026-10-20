@@ -51,35 +51,36 @@ test("the login page header uses the same behaviour", async ({ page }) => {
 });
 
 test("initiatives and groups show their photographs", async ({ page }) => {
-  await page.goto("/explore");
+  await page.goto("/community/groups?kind=initiatives");
   await expect.poll(async () => (await loaded(page, "article img[src*='/images/demo/']")).filter(Boolean).length).toBeGreaterThan(2);
   await page.goto("/groups/westpark-volleyball");
   await expect.poll(async () => (await loaded(page, "img[src$='/demo/volleyball.jpg']")).some(Boolean)).toBe(true);
 });
 
-test.describe("Verbinden on a desktop screen", () => {
+test.describe("the layout like Teams", () => {
   test.skip(!signedIn, "TEST_USER_EMAIL not set");
 
-  test("the page itself does not scroll, and the marketplace header stays while its posts scroll", async ({ page }, info) => {
-    test.skip(info.project.name === "mobile", "the fixed board is for wide screens");
+  test("a rail with Gemeinschaft, Freunde and Ich, search in the middle, the account on the right", async ({ page }, info) => {
+    test.skip(info.project.name === "mobile", "the rail is for wide screens");
     await login(page);
-    await page.goto("/connect");
-    await expect(page.getByText("Pinnwand").first()).toBeVisible();
-    const overflow = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
-    expect(overflow).toBeLessThanOrEqual(1);
+    await page.goto("/friends");
+    const rail = page.getByRole("navigation", { name: "Bereiche" }).first();
+    for (const label of ["Gemeinschaft", "Freunde", "Ich"]) await expect(rail.getByRole("link", { name: new RegExp(`^${label}`) })).toBeVisible();
+    await expect(rail.getByRole("link", { name: /^Freunde/ })).toHaveAttribute("aria-current", "page");
+    const header = page.locator("header").first();
+    const search = (await header.getByRole("search").boundingBox())!;
+    const width = await page.evaluate(() => document.documentElement.clientWidth);
+    expect(Math.abs(search.x + search.width / 2 - width / 2), "search sits in the middle").toBeLessThan(80);
+    await header.locator("summary[aria-label^='Konto von']").click();
+    for (const name of ["Mein Profil", "Einstellungen", "Abmelden"]) await expect(page.getByRole(name === "Abmelden" ? "button" : "link", { name })).toBeVisible();
+  });
 
-    const header = page.locator("section[aria-label='Gespräch'] header, section header").filter({ hasText: "Pinnwand" }).first();
-    const before = (await header.boundingBox())!.y;
-    const scrolled = await page.evaluate(() => {
-      const pane = [...document.querySelectorAll("section")].find((s) => s.querySelector("header")?.textContent?.includes("Pinnwand"));
-      const box = [...(pane?.querySelectorAll("div") ?? [])].find((d) => getComputedStyle(d).overflowY === "auto" && d.scrollHeight > d.clientHeight);
-      if (!box) return null;
-      box.scrollTop = box.scrollHeight;
-      return box.scrollTop;
-    });
-    expect(scrolled, "the post list should scroll on its own").toBeGreaterThan(0);
-    expect((await header.boundingBox())!.y).toBe(before);
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  test("Freunde fills the screen: the list scrolls, the page does not", async ({ page }, info) => {
+    test.skip(info.project.name === "mobile", "wide screens");
+    await login(page);
+    await page.goto("/friends");
+    await expect(page.getByRole("region", { name: "Chats" }).getByRole("link").first()).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
   });
 });
 
@@ -96,71 +97,65 @@ test("nothing on the welcome header is cut off, whatever the screen width", asyn
 test.describe("on a phone", () => {
   test.skip(!signedIn, "TEST_USER_EMAIL not set");
 
-  test("the top bar holds no search or place, Entdecken shows them under it", async ({ page }, info) => {
+  test("the top bar keeps the search, the place moves to the pinboard", async ({ page }, info) => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
-    await page.goto("/connect");
-    // the top bar has no search (the list of conversations has its own)
-    await expect(page.locator("header").first().getByRole("search")).toHaveCount(0);
-    await expect(page.getByRole("button", { name: /^Dein Ort/ })).toHaveCount(0);
-    expect((await page.locator("header").first().boundingBox())!.height).toBeLessThanOrEqual(58);
-
-    await page.goto("/explore");
-    const search = page.getByRole("search");
-    await expect(search).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Dein Ort/ })).toBeVisible();
-    const bar = (await page.locator("header").first().boundingBox())!;
-    expect((await search.boundingBox())!.y).toBeGreaterThanOrEqual(bar.y + bar.height);
+    await page.goto("/friends");
+    await expect(page.locator("header").first().getByRole("search")).toBeVisible();
+    expect((await page.locator("header").first().boundingBox())!.height).toBeLessThanOrEqual(66);
+    await page.goto("/community");
+    await expect(page.getByRole("group", { name: "Ort" })).toBeVisible();
   });
 
-  test("the bottom bar has an icon and a label for every section", async ({ page }, info) => {
+  test("the bottom bar has the three areas and Neu", async ({ page }, info) => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
-    await page.goto("/connect");
-    const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
-    for (const label of ["Entdecken", "Anliegen", "Neu", "Verbinden"]) {
-      const item = nav.getByRole("link", { name: label });
+    await page.goto("/friends");
+    const nav = page.getByRole("navigation", { name: "Bereiche" }).last();
+    for (const label of ["Gemeinschaft", "Freunde", "Neu", "Ich"]) {
+      const item = nav.getByRole("link", { name: new RegExp(`^${label}`) });
       await expect(item).toBeVisible();
       await expect(item.locator("svg")).toHaveCount(1);
-      await expect(item).toContainText(label);
     }
-    await expect(nav.getByRole("link", { name: "Verbinden" })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: /^Freunde/ })).toHaveAttribute("aria-current", "page");
   });
 
-  test("Anliegen joins offering and looking: one entry in the navigation, old links lead there", async ({ page }) => {
+  test("Anliegen in all three areas, old links lead there", async ({ page }) => {
     await login(page);
     await page.goto("/needs?tab=near");
-    await expect(page).toHaveURL(/\/anliegen\?as=need&tab=offers/);
+    await expect(page).toHaveURL(/\/me\/listings\?.*as=need/);
     await expect(page.getByRole("radio", { name: "Ich suche" })).toBeChecked();
-    for (const name of ["Passt zu dir", "Angebote", "Gesuche"]) await expect(page.getByRole("tab", { name: new RegExp(`^${name}`) })).toBeVisible();
-    await expect(page.getByRole("tab", { name: /^Eingang/ })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Anfragen", exact: true })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Anliegen", exact: true }).first()).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("radio", { name: "Ich teile Wissen" })).toHaveCount(0);
+    await page.goto("/anliegen?tab=offers");
+    await expect(page).toHaveURL(/\/community\/listings/);
+    for (const name of ["Angebote", "Gesuche"]) await expect(page.getByRole("tab", { name: new RegExp(`^${name}`) })).toBeVisible();
+    await page.goto("/friends?f=listings");
+    await expect(page.getByRole("link", { name: "Anliegen", exact: true }).first()).toHaveAttribute("aria-pressed", "true");
   });
 
-  test("Verbinden puts the chats first and fills the screen without page scroll", async ({ page }, info) => {
+  test("Freunde puts the chats first and fills the screen without page scroll", async ({ page }, info) => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
-    await page.goto("/connect");
+    await page.goto("/friends");
     const list = page.getByRole("region", { name: "Chats" });
     await expect(list.getByRole("link").first()).toBeVisible();
     const first = (await list.getByRole("link").nth(5).boundingBox())!;
     expect(first.y, "several conversations are visible without scrolling").toBeLessThan(500);
     expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
 
-    await page.goto("/connect?f=chats");
+    await page.goto("/friends?f=chats");
     await page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first().click();
     const field = page.getByLabel("Nachricht schreiben");
     await expect(field).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
-    const bottom = (await page.getByRole("navigation", { name: "Hauptnavigation" }).boundingBox())!;
+    const bottom = (await page.getByRole("navigation", { name: "Bereiche" }).last().boundingBox())!;
     expect((await field.boundingBox())!.y + (await field.boundingBox())!.height).toBeLessThanOrEqual(bottom.y);
   });
 
-  test("search and order sit above the list, rows are as tall as the marketplace", async ({ page }, info) => {
+  test("search and order sit above the list, rows are all as tall", async ({ page }, info) => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
-    await page.goto("/connect");
+    await page.goto("/friends");
     const list = page.getByRole("region", { name: "Chats" });
     const search = list.getByRole("searchbox", { name: "Chats durchsuchen" });
     const order = list.locator("summary", { hasText: "Chronologisch" });
@@ -170,7 +165,7 @@ test.describe("on a phone", () => {
 
     const rows = list.locator("a[data-search]");
     const heights = await rows.evaluateAll((els) => els.slice(0, 4).map((e) => Math.round(e.getBoundingClientRect().height)));
-    for (const h of heights.slice(1)) expect(h, "chat rows as tall as the marketplace row").toBe(heights[0]);
+    for (const h of heights.slice(1)) expect(h, "chat rows all as tall").toBe(heights[0]);
 
     await search.fill("zzzz-nichts");
     await expect(rows.first()).toBeHidden();
@@ -185,33 +180,26 @@ test.describe("on a phone", () => {
     await expect(list.locator("summary", { hasText: "Vorgeschlagen" })).toBeVisible();
     await expect(list.getByRole("link", { name: "Chronologisch" }), "dropdown closes after choosing").toBeHidden();
 
-    await page.goto("/connect?c=market");
-    await page.locator("summary", { hasText: "Filter" }).first().click();
-    const panel = page.getByRole("button", { name: "Anwenden" }).locator("xpath=ancestor::form");
-    const box = (await panel.boundingBox())!;
-    const width = await page.evaluate(() => document.documentElement.clientWidth);
-    expect(box.x).toBeGreaterThanOrEqual(0);
-    expect(box.x + box.width).toBeLessThanOrEqual(width);
   });
 
   test("the main areas start with their content, not with an explanation", async ({ page }) => {
     await login(page);
-    await page.goto("/anliegen");
+    await page.goto("/me/listings");
     await expect(page.getByRole("radio", { name: "Ich biete" })).toBeVisible();
     await expect(page.getByText(/Wir bringen beides zusammen/)).toHaveCount(0);
     await expect(page.getByText("Bieten und suchen an einem Ort.", { exact: true })).toHaveCount(0);
   });
 });
 
-test("the installed app opens on Verbinden", async ({ request }) => {
+test("the installed app opens on Freunde", async ({ request }) => {
   const res = await request.get("/manifest.webmanifest");
-  expect((await res.json()).start_url).toBe("/connect");
+  expect((await res.json()).start_url).toBe("/friends");
 });
 
 for (const width of [360, 390]) {
   test(`the guest header fits on ${width} px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 800 });
-    await page.goto("/explore");
+    await page.goto("/community");
     const button = page.locator("header").getByRole("link", { name: "Anmelden" });
     await expect(button).toBeVisible();
     const box = (await button.boundingBox())!;

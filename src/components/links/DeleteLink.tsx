@@ -7,11 +7,11 @@ import { ConfirmAction } from "../ui/Action";
 import { btn } from "../ui/styles";
 
 /** Not deleted at once: the document waits 30 days in the trash. */
-export function DeleteLink({ id, groupSlug }: { id: string; groupSlug: string | null }) {
+export function DeleteLink({ id, groupSlug, note }: { id: string; groupSlug: string | null; note: boolean }) {
   const t = useTranslations("docrights.page");
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <ConfirmAction disabled={pending} look={`${btn.linkMuted} text-sm`} question={t("trashConfirm", { days: 30 })} onConfirm={() => start(async () => { await deleteResource(id); router.push(groupSlug ? `/groups/${groupSlug}?tab=links` : "/explore?kind=links"); })} label={t("trash")} />
+    <ConfirmAction disabled={pending} look={`${btn.linkMuted} text-sm`} question={t("trashConfirm", { days: 30 })} onConfirm={() => start(async () => { await deleteResource(id); router.push(groupSlug ? `/groups/${groupSlug}?tab=links` : (note ? "/me?f=notes" : "/me?f=uploads")); })} label={t("trash")} />
   );
 }

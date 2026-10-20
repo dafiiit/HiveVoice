@@ -85,7 +85,7 @@ export function AdminQueue({ q }: { q: Queue }) {
           <input value={scope} onChange={(e) => setScope(e.target.value)} placeholder={t("scope")} aria-label={t("scope")} className={field.input} />
           <button type="submit" disabled={pending} className={`${btn.secondary} self-start`}>{t("log")}</button>
         </form>
-        <Link href="/transparenz" className="font-bold">{t("transparency")}</Link>
+        <Link href="/transparency" className="font-bold">{t("transparency")}</Link>
       </section>
     </div>
   );

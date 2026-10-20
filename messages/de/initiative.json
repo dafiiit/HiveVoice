@@ -4,7 +4,7 @@
   "voteRunning": "Abstimmung läuft, {days, plural, =0 {endet heute} one {noch 1 Tag} other {noch # Tage}}",
   "to": "An: {who}",
   "breadcrumb": "Pfad",
-  "explore": "Entdecken",
+  "explore": "Initiativen",
   "by": "Von",
   "verified": "verifiziert",
   "dates": "Erstellt am {created} · zuletzt geändert am {updated}",

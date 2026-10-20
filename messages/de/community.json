@@ -1,0 +1,35 @@
+{
+  "title": "Gemeinschaft",
+  "sections": "Bereiche der Gemeinschaft",
+  "nav": {
+    "board": "Pinnwand",
+    "listings": "Anliegen",
+    "groups": "Gruppen",
+    "people": "Personen"
+  },
+  "board": {
+    "lead": "Was Menschen in deiner Gegend gerade bewegt. Stell Ort und Thema selbst ein.",
+    "noPlace": "Wähle einen Ort, dann siehst du die Pinnwand dort.",
+    "where": "Ort",
+    "levels": {
+      "borough": "Nachbarschaft",
+      "municipality": "Stadt",
+      "state": "Bundesland",
+      "country": "Land"
+    },
+    "tag": "Thema",
+    "allTags": "Alle",
+    "search": "Auf der Pinnwand suchen",
+    "placeholder": "Etwas an die Pinnwand in {place} schreiben …",
+    "readOnly": "Lesen geht ohne Konto, schreiben mit.",
+    "signIn": "Anmelden",
+    "none": "Nichts gefunden. Wähle einen größeren Ort oder ein anderes Thema.",
+    "empty": "Noch nichts an der Pinnwand. Schreib den ersten Beitrag."
+  },
+  "groups": {
+    "lead": "Gruppen und Initiativen, denen du beitreten kannst. Eine Initiative ist eine Gruppe mit einem Ziel."
+  },
+  "people": {
+    "lead": "Menschen auf HiveVoice. Suche nach Namen oder Tags, zum Beispiel „zuständig verkehr“."
+  }
+}

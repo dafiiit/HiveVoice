@@ -25,7 +25,7 @@ export function AuthForm({ mode, next, remembered: initialRemembered = null }: {
   const [sent, setSent] = useState(false);
   const [captcha, setCaptcha] = useState<string | null>(null);
   const [trap, setTrap] = useState("");
-  const target = next && next.startsWith("/") ? next : "/connect";
+  const target = next && next.startsWith("/") ? next : "/friends";
   const callback = () => `${window.location.origin}/auth/callback?next=${encodeURIComponent(mode === "signup" ? "/onboarding" : target)}`;
 
   async function submit(e: React.FormEvent) {

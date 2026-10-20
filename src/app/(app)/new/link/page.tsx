@@ -6,13 +6,12 @@ import { ShareKnowledge } from "@/components/links/ShareKnowledge";
 import { Page, PageHeader } from "@/components/ui/Page";
 
 export async function generateMetadata() {
-  return { title: (await getTranslations("links"))("shareTitle") };
+  return { title: (await getTranslations("mine"))("uploadTitle") };
 }
 
 export default async function NewLink({ searchParams }: PageProps<"/new/link">) {
   const sp = await searchParams;
   const session = await requireSession("/new/link");
-  const t = await getTranslations("links");
   const tm = await getTranslations("mine");
   const { groups, ideas } = await asViewer({ authId: session.authId, profileId: session.profile.id }, async (tx) => ({
     groups: await tx<{ id: string; slug: string; name: string }[]>`
@@ -22,8 +21,8 @@ export default async function NewLink({ searchParams }: PageProps<"/new/link">) 
   }));
   return (
     <Page width="narrow">
-      <PageHeader title={sp.mode === "note" ? tm("newDocTitle") : t("shareTitle")} lead={t("shareLeadShort")} />
-      <ShareKnowledge groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} initialMode={sp.mode === "note" || sp.mode === "file" ? sp.mode : "link"} />
+      <PageHeader title={sp.mode === "note" ? tm("newDocTitle") : tm("uploadTitle")} lead={sp.mode === "note" ? tm("newNoteLead") : tm("uploadLead")} />
+      <ShareKnowledge groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} initialMode={sp.mode === "note" || sp.mode === "link" ? sp.mode : "file"} />
     </Page>
   );
 }

@@ -2,12 +2,17 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { run } from "../action";
+import { GROUP_TOOLS, type GroupTool } from "../group-tools";
 
 const path = (slug: string) => `/groups/${slug}`;
 
 export type GroupInput = {
   name: string; summary: string; description: string; kind: string; visibility: string; joinPolicy: string;
   regionId: string; modTasks: boolean; modOfficial: boolean; tags: string[]; focus: string; template?: string; adultsOnly?: boolean;
+  /** The tools the group starts with (all when left out). */
+  tools?: GroupTool[];
+  /** Started from a private chat: the other person gets an invitation right away. */
+  invite?: string;
 };
 
 export async function createGroup(input: GroupInput) {
@@ -17,6 +22,8 @@ export async function createGroup(input: GroupInput) {
       join_policy: input.joinPolicy, region_id: input.regionId, mod_tasks: input.modTasks, mod_official: input.modOfficial,
       tags: input.tags, focus: input.focus, template: input.template ?? "project", adults_only: input.adultsOnly ?? false,
     })}) as id`;
+    if (input.tools) await tx`update public.groups set tools = ${input.tools.filter((k) => (GROUP_TOOLS as readonly string[]).includes(k))}::text[] where id = ${id}`;
+    if (input.invite) await tx`select app.invite_member(${id}, ${input.invite}, 'contributor'::public.group_role, null)`;
     const [{ slug }] = await tx<{ slug: string }[]>`select slug::text from public.groups where id = ${id}`;
     return slug;
   });
@@ -42,6 +49,15 @@ export async function updateGroup(slug: string, id: string, input: Partial<{ nam
   return res;
 }
 
+export async function setGroupTools(slug: string, id: string, tools: GroupTool[]) {
+  const res = await run(async (tx) => {
+    await tx`update public.groups set tools = ${tools.filter((k) => (GROUP_TOOLS as readonly string[]).includes(k))}::text[] where id = ${id}`;
+    return null;
+  });
+  revalidatePath(path(slug));
+  return res;
+}
+
 export async function joinGroup(slug: string, id: string, message: string) {
   const res = await run(async (tx) => {
     const [{ r }] = await tx<{ r: string }[]>`select app.join_group(${id}, ${message || null}) as r`;
@@ -57,7 +73,7 @@ export async function withdrawJoin(requestId: string) {
     await tx`select app.withdraw_join_request(${requestId})`;
     return null;
   });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 
@@ -77,7 +93,7 @@ export async function decideJoin(slug: string, requestId: string, accept: boolea
     return null;
   });
   revalidatePath(path(slug));
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 

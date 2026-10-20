@@ -32,7 +32,7 @@ export async function ListingCardView({ c, signedIn, why, sent, allied, reasons,
   const who = c.group_name ?? c.owner_name;
   const price = priceLabel(c, tc, locale);
   const facts = attrFacts(c.category, c.attrs, (k, v) => tcat(k as "label", v), locale).map((f) => f.value);
-  const href = `/anliegen/${c.id}`;
+  const href = `/listings/${c.id}`;
   const why2 = reasons?.length ? await reasonLabels(reasons) : [];
   return (
     <article className={cardFrame}>
@@ -51,7 +51,7 @@ export async function ListingCardView({ c, signedIn, why, sent, allied, reasons,
       {facts.length > 0 && <span className="text-sm font-bold">{facts.slice(0, 4).join(" · ")}</span>}
       <span className="text-sm text-muted">{[c.goal_title ? t("goal", { goal: c.goal_title }) : null, c.location_text ?? c.region_name, c.schedule_text, c.seats ? t("seats", { n: c.seats }) : null].filter(Boolean).join(" · ")}</span>
       {c.pair_id && c.pair_title && (
-        <Link href={`/anliegen/${c.pair_id}`} className="text-sm text-ink underline">{t(c.kind === "offer" ? "pairOffer" : "pairNeed", { title: c.pair_title })}</Link>
+        <Link href={`/listings/${c.pair_id}`} className="text-sm text-ink underline">{t(c.kind === "offer" ? "pairOffer" : "pairNeed", { title: c.pair_title })}</Link>
       )}
       {why && !why2.length && <span className="text-sm font-bold text-red">{t("why", { tag: why })}</span>}
       {why2.length > 0 && <span className="text-sm"><strong className="text-red">{t("matchesWhy")}</strong> {why2.join(" · ")}</span>}

@@ -1,5 +1,5 @@
 {
-  "title": "Connect",
+  "title": "Friends",
   "order": "Order",
   "listSearch": "Search chats",
   "listNone": "Nothing found.",
@@ -30,7 +30,7 @@
   "popular": "popular",
   "unread": "{n} unread",
   "back": "Back to the list",
-  "pick": "Pick a chat on the left.",
+  "pick": "Pick a chat or a group on the left.",
   "sort": {
     "top": "For you",
     "new": "Newest"
@@ -44,7 +44,8 @@
     "all": "All",
     "chats": "Chats",
     "groups": "Groups",
-    "requests": "Contact requests"
+    "requests": "Contact requests",
+    "listings": "Listings"
   },
   "newGroup": "Start a group",
   "emptyList": "No chats yet. Message someone through an offer, a wanted post or a profile, or join a group.",
@@ -88,7 +89,7 @@
     "placeholder": "Hi, I saw your profile and …",
     "privacy": "{name} sees your message as a contact request and decides whether a chat opens.",
     "sent": "Contact request sent.",
-    "seeInConnect": "See in Connect"
+    "seeInConnect": "See in Friends"
   },
   "mf": {
     "label": "Filter",
@@ -103,5 +104,10 @@
     "none": "No posts match. Change the area or the search."
   },
   "waiting": "Waiting for connection",
-  "offlineExtras": "Without a connection only text can be sent. Please send photos, files and polls later."
+  "offlineExtras": "Without a connection only text can be sent. Please send photos, files and polls later.",
+  "newGroupShort": "Group",
+  "listingOffer": "{name} offers",
+  "listingNeed": "{name} is looking",
+  "toolsWith": "Make a group",
+  "toolsWithText": "A group with {name}: tasks, documents and more for two"
 }

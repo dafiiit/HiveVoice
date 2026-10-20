@@ -259,7 +259,7 @@
     },
     "responsibility_transfer": {
       "title": "{by} möchte dir eine Zuständigkeit übergeben",
-      "body": "„{title}“. Öffne „Für mich“, um anzunehmen."
+      "body": "„{title}“. Öffne Konto-Menü → Einstellungen, um anzunehmen."
     },
     "responsibility_transfer_answer": {
       "title": "Antwort zur Übergabe",
@@ -307,7 +307,7 @@
     },
     "resource_transfer": {
       "title": "{by} möchte dir ein Dokument übergeben",
-      "body": "„{title}“. Öffne „Für mich“ → Dokumente."
+      "body": "„{title}“. Öffne Ich → Dokumente."
     },
     "resource_transfer_answer": {
       "title": "Antwort zur Übergabe",

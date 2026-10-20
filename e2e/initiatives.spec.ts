@@ -27,8 +27,7 @@ test.describe("initiatives: authors and rights", () => {
           returning id)
         insert into public.initiative_authors (initiative_id, profile_id) select ins.id, me.id from ins, me`);
       await login(page);
-      await page.goto("/explore");
-      await page.goto("/me");
+      await page.goto("/me?f=projects");
       const href = await page.getByRole("link", { name: marker }).first().getAttribute("href");
       expect(href).toMatch(/^\/initiatives\/[0-9a-f-]{36}$/);
       await page.goto(href!);
@@ -45,7 +44,7 @@ test.describe("initiatives: authors and rights", () => {
 
       await page.getByRole("button", { name: "Löschen", exact: true }).click();
       await page.getByRole("button", { name: "Ja", exact: true }).click();
-      await expect(page).toHaveURL(/\/me/, { timeout: 60_000 });
+      await expect(page).toHaveURL(/\/me\?f=projects/, { timeout: 60_000 });
       const gone = await page.request.get(href!);
       expect(gone.status()).toBe(404);
     } finally {

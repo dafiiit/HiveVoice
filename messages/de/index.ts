@@ -5,6 +5,7 @@ import ns_auth from "./auth.json";
 import ns_ballot from "./ballot.json";
 import ns_categories from "./categories.json";
 import ns_common from "./common.json";
+import ns_community from "./community.json";
 import ns_connect from "./connect.json";
 import ns_docrights from "./docrights.json";
 import ns_errorPage from "./errorPage.json";
@@ -52,6 +53,7 @@ const messages = {
   "ballot": ns_ballot,
   "categories": ns_categories,
   "common": ns_common,
+  "community": ns_community,
   "connect": ns_connect,
   "docrights": ns_docrights,
   "errorPage": ns_errorPage,

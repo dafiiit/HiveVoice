@@ -4,7 +4,7 @@
   "voteRunning": "Vote running, {days, plural, =0 {ends today} one {1 day left} other {# days left}}",
   "to": "To: {who}",
   "breadcrumb": "Breadcrumb",
-  "explore": "Explore",
+  "explore": "Initiatives",
   "by": "By",
   "verified": "verified",
   "dates": "Created on {created} · last changed on {updated}",

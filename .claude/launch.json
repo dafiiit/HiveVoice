@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "hivevoice", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }
+    { "name": "hivevoice", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 },
+    { "name": "hivevoice-alt", "runtimeExecutable": "sh", "runtimeArgs": ["-c", "NEXT_DIST_DIR=.next-alt npx next dev -p 3200"], "port": 3200 }
   ]
 }

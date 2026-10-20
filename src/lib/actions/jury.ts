@@ -16,6 +16,6 @@ export async function declineJury(caseId: string) {
     await tx`select app.decline_jury(${caseId})`;
     return null;
   });
-  revalidatePath("/me");
+  revalidatePath("/settings");
   return res;
 }

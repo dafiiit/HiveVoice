@@ -8,7 +8,14 @@ import { IconSearch } from "../ui/Icons";
 import { searchBox, searchInput } from "../ui/styles";
 
 const ORDER = ["initiative", "group", "person", "link", "responsible", "place"] as const;
-const TAB: Record<string, string> = { initiative: "initiatives", group: "groups", person: "people", responsible: "responsible", link: "links" };
+// Where "all results" open: Gemeinschaft → Gruppen (with Initiativen) or → Personen (responsible people are people with a tag).
+const FULL: Record<string, (q: string) => string> = {
+  initiative: (q) => `/community/groups?kind=initiatives&q=${q}`,
+  group: (q) => `/community/groups?q=${q}`,
+  person: (q) => `/community/people?q=${q}`,
+  responsible: (q) => `/community/people?q=${encodeURIComponent("zuständig ")}${q}`,
+  link: (q) => `/community/groups?q=${q}`,
+};
 
 /**
  * Search at the top. While typing it offers a few direct hits per kind (initiatives, groups,
@@ -26,7 +33,7 @@ export function QuickSearch({ className = "" }: { className?: string }) {
 /** On the results page the box shows what was searched; elsewhere it starts empty. */
 function SearchWithUrl({ className }: { className: string }) {
   const params = useSearchParams();
-  const onResults = usePathname().startsWith("/explore");
+  const onResults = usePathname().startsWith("/community/");
   const urlQuery = onResults ? params.get("q") ?? "" : "";
   return <SearchBox key={urlQuery} initial={urlQuery} className={className} />;
 }
@@ -68,8 +75,7 @@ function SearchBox({ initial, className }: { initial: string; className: string 
   const full = () => {
     const best = (["initiative", "group", "person", "responsible", "link"] as const)
       .map((k) => [k, hits.filter((h) => h.kind === k).length] as const).sort((a, b) => b[1] - a[1])[0];
-    const kind = ready && best && best[1] > 0 ? TAB[best[0]] : "initiatives";
-    go(`/explore?q=${encodeURIComponent(query)}${kind !== "initiatives" ? `&kind=${kind}` : ""}`);
+    go(FULL[ready && best && best[1] > 0 ? best[0] : "group"](encodeURIComponent(query)));
   };
   const choose = (i: number) => (i < rows.length ? go(rows[i].href) : full());
 
@@ -82,7 +88,7 @@ function SearchBox({ initial, className }: { initial: string; className: string 
 
   const shown = open && query.length >= 2;
   return (
-    <form ref={root} action="/explore" role="search" onSubmit={(e) => { e.preventDefault(); if (query) full(); }} className={`relative min-w-0 flex-1 md:max-w-[560px] ${className}`}>
+    <form ref={root} action="/community/groups" role="search" onSubmit={(e) => { e.preventDefault(); if (query) full(); }} className={`relative min-w-0 flex-1 md:max-w-[560px] ${className}`}>
       <div className={searchBox("md")}>
         <IconSearch />
         <label className="sr-only" htmlFor={`${list}-q`}>{t("search")}</label>

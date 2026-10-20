@@ -29,7 +29,7 @@ test.describe("chats with replies, files and polls", () => {
     let stored: string | null = null;
     try {
       await login(page);
-      await page.goto("/connect?f=chats");
+      await page.goto("/friends?f=chats");
       await page.getByRole("link", { name: /Felix Wolf/ }).first().click();
       const log = page.getByRole("log");
       await expect(log).toBeVisible();
@@ -83,8 +83,8 @@ test.describe("chats with replies, files and polls", () => {
     const marker = `Umfragetest ${Date.now()}`;
     try {
       await login(page);
-      await page.goto("/connect?c=market");
-      await page.getByPlaceholder(/Neues im Viertel/).fill(marker);
+      await page.goto("/community");
+      await page.getByPlaceholder(/an die Pinnwand/).fill(marker);
       await page.getByRole("button", { name: "Umfrage erstellen" }).first().click();
       await page.getByLabel("Frage der Umfrage").fill("Welcher Tag?");
       await page.getByLabel("Antwort 1").fill("Montag");

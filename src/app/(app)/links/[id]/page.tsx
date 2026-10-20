@@ -45,7 +45,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("links");
-  const tex = await getTranslations("explore");
+  const tm = await getTranslations("mine");
   const td = await getTranslations("docrights");
   const locale = await getLocale();
   const data = await asViewer(viewer, async (tx) => {
@@ -99,7 +99,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
   const linkUrl = meta.visibility === "link" && meta.link_token ? `${origin}/links/${id}?k=${meta.link_token}` : null;
   return (
     <Page width="narrow">
-      <BackLink href="/explore?kind=links" label={tex("kinds.links")} />
+      <BackLink href={isNote ? "/me?f=notes" : "/me?f=uploads"} label={tm(isNote ? "filters.notes" : "filters.uploads")} />
       {meta.trashed_at && level >= 4 && <RestoreResource id={id} />}
       {isLink && <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />}
       <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -122,7 +122,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
               linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
           ) : undefined} />
       )}
-      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/explore?kind=links&q=%23${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
+      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
         {meta.visibility === "me" && <span>{td("page.private")}</span>}
         {meta.visibility === "link" && level < 4 && <span>{td("page.viaLink")}</span>}
@@ -189,7 +189,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
         <span className="flex items-center gap-3">
           <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={!!me} />
           {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
-          {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} />}
+          {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} note={isNote} />}
         </span>
       </div>
 

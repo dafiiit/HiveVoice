@@ -7,9 +7,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { dateLong } from "@/lib/format";
 import { btn, chip, segment, segments } from "@/components/ui/styles";
 import { Notice, Page, PageHeader } from "@/components/ui/Page";
-import { ExploreTabs } from "@/components/ExploreTabs";
 import { SearchField } from "@/components/ui/SearchField";
-import { MobileFinder } from "@/components/shell/MobileFinder";
 import { RequestForm } from "@/components/responsible/RequestForm";
 import { LevelBadge } from "@/components/responsible/LevelBadge";
 import { ConfirmButton } from "@/components/responsible/ConfirmButton";
@@ -99,9 +97,7 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
   const te = await getTranslations("explore");
   return (
     <Page>
-      <MobileFinder />
-      <PageHeader title={te("title")} mobileHidden />
-      <ExploreTabs active="responsible" />
+      <PageHeader title={t("title")} back={{ href: "/community/people?q=zust%C3%A4ndig", label: te("kinds.people") }} />
       {session && (
         <div role="tablist" aria-label={t("title")} className={segments}>
           <Link role="tab" aria-selected={view === "search"} href={href({ view: "search" })} className={segment(view === "search")}>{t("search")}</Link>
@@ -155,7 +151,7 @@ export default async function Responsible({ searchParams }: PageProps<"/responsi
               </div>
             ))}
           </div>
-          <p className="m-0 max-w-[720px] text-sm text-muted">{t("footer")} <Link href="/me?tab=resp" className="text-ink underline">{t("addOwn")}</Link></p>
+          <p className="m-0 max-w-[720px] text-sm text-muted">{t("footer")} <Link href="/settings?tab=resp" className="text-ink underline">{t("addOwn")}</Link></p>
         </>
       )}
       {view === "sent" && (

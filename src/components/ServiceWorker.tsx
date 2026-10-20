@@ -27,7 +27,7 @@ export function ServiceWorker() {
     if (enabled()) {
       navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then(() => {
         // The places one returns to most are kept from the start.
-        for (const url of ["/connect", "/inhalte"]) navigator.serviceWorker.controller?.postMessage({ type: "keep", url });
+        for (const url of ["/friends", "/me"]) navigator.serviceWorker.controller?.postMessage({ type: "keep", url });
       }).catch(() => {});
     }
     const update = () => {

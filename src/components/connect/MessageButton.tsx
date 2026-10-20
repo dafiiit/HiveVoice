@@ -32,7 +32,7 @@ export function MessageButton({ toId, name, seed, path, signedIn }: { toId: stri
               <button type="button" disabled={pending || !msg.trim()} className={btn.primary} onClick={() => start(async () => {
                 const res = await requestDirect(toId, msg);
                 if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
-                router.push(res.data.conversation_id ? `/connect?c=d:${res.data.conversation_id}` : `/connect?c=c:${res.data.request_id}`);
+                router.push(res.data.conversation_id ? `/friends?c=d:${res.data.conversation_id}` : `/friends?c=c:${res.data.request_id}`);
               })}>{tc("send")}</button>
               <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>
             </div>

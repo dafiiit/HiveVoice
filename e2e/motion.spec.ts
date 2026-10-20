@@ -13,7 +13,7 @@ test.describe("motion", () => {
   test("a vote springs, throws specks and rolls the number; taking it back answers too", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "writes data, and both projects would race on the same post");
     await login(page);
-    await page.goto("/connect?c=market");
+    await page.goto("/community");
     const post = page.locator("article", { hasText: "Hanna Vogt" }).first();
     const up = post.getByRole("button", { name: "Daumen hoch" });
     const count = post.locator(".roll > span").first();
@@ -48,7 +48,7 @@ test.describe("motion", () => {
     const sql = postgres(cleanup!, { max: 1, ssl: cleanup!.includes("localhost") ? false : "require" });
     try {
       await login(page);
-      await page.goto("/connect?f=chats");
+      await page.goto("/friends?f=chats");
       await page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first().click();
       const log = page.getByRole("log");
       await expect(log).toBeVisible();

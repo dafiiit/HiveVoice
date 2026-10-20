@@ -17,6 +17,7 @@
 /.next/
 /.next-prod/
 /.next-e2e/
+/.next-alt/
 /out/
 
 # production

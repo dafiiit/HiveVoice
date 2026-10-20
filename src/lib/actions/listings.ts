@@ -80,8 +80,8 @@ export async function saveListing(input: ListingInput) {
       return null;
     });
   }
-  revalidatePath("/anliegen");
-  revalidatePath("/explore");
+  revalidatePath("/me/listings"); revalidatePath("/community/listings");
+  revalidatePath("/community", "layout");
   return res;
 }
 
@@ -91,7 +91,7 @@ export async function setListingStatus(id: string, status: "active" | "paused" |
     return null;
   });
   void kind;
-  revalidatePath("/anliegen");
+  revalidatePath("/me/listings"); revalidatePath("/community/listings");
   return res;
 }
 
@@ -100,8 +100,8 @@ export async function requestContact(listingId: string, message: string, viaList
     const [{ id }] = await tx<{ id: string }[]>`select app.request_contact(${listingId}, ${message}, ${viaListingId || null}::uuid) as id`;
     return id;
   });
-  revalidatePath("/anliegen");
-  revalidatePath("/connect");
+  revalidatePath("/me/listings"); revalidatePath("/community/listings");
+  revalidatePath("/friends");
   return res;
 }
 
@@ -110,8 +110,8 @@ export async function decideContact(requestId: string, accept: boolean) {
     const [{ c }] = await tx<{ c: string | null }[]>`select app.decide_contact(${requestId}, ${accept}) as c`;
     return c;
   });
-  revalidatePath("/anliegen");
-  revalidatePath("/connect");
+  revalidatePath("/me/listings"); revalidatePath("/community/listings");
+  revalidatePath("/friends");
   return res;
 }
 
@@ -120,8 +120,8 @@ export async function withdrawContact(requestId: string) {
     await tx`update public.contact_requests set status = 'withdrawn' where id = ${requestId}`;
     return null;
   });
-  revalidatePath("/anliegen");
-  revalidatePath("/connect");
+  revalidatePath("/me/listings"); revalidatePath("/community/listings");
+  revalidatePath("/friends");
   return res;
 }
 
@@ -131,7 +131,7 @@ export async function toggleAlly(listingId: string, on: boolean) {
     else await tx`delete from public.listing_allies where listing_id = ${listingId} and profile_id = ${s.profile.id}`;
     return null;
   });
-  revalidatePath("/anliegen", "layout");
+  revalidatePath("/me/listings"); revalidatePath("/community/listings");
   return res;
 }
 

@@ -53,7 +53,7 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
     <Popover size="md" open={open} onOpenChange={setOpen} className={className}
       ariaLabel={place ? `${t(signedIn ? "yours" : "chosen")}: ${place.name}` : t("choose")}
       label={<><IconPin size={16} /><span className="min-w-0 max-w-[160px] truncate md:max-w-[200px]">{place?.name ?? t("choose")}</span></>}
-      panelClassName="absolute right-0 top-full z-40 mt-1 flex w-[min(340px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-4 md:left-0 md:right-auto">
+      panelClassName="absolute left-0 top-full z-40 mt-1 flex w-[min(340px,calc(100vw-2rem))] flex-col gap-3 border border-ink bg-surface p-4">
       {open && (
         <>
           {place && !editing && (
@@ -75,7 +75,7 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
               )}
               <p className="m-0 text-sm">{t(signedIn ? "explain" : "explainGuest")}</p>
               <div className="flex flex-wrap gap-2">
-                <Link href={`/explore?place=${place.id}`} onClick={() => setOpen(false)} className={`${btn.primarySm}`}>{t("discover", { name: place.name })}</Link>
+                <Link href={`/community/groups?place=${place.id}`} onClick={() => setOpen(false)} className={`${btn.primarySm}`}>{t("discover", { name: place.name })}</Link>
                 <button type="button" onClick={() => setChanging(true)} className={`${btn.secondarySm}`}>{t("change")}</button>
                 {!signedIn && <button type="button" disabled={pending} onClick={() => apply(null)} className={`${btn.linkMuted} text-sm`}>{t("forget")}</button>}
               </div>

@@ -202,5 +202,10 @@
     "title": "Titel",
     "description": "Beschreibung",
     "save": "Speichern"
-  }
+  },
+  "communityTitle": "Anliegen",
+  "communityLead": "Was andere anbieten und suchen.",
+  "create": "Eigenes Anliegen",
+  "mineTitle": "Meine Anliegen",
+  "fitsYou": "Passt zu deinen Anliegen"
 }

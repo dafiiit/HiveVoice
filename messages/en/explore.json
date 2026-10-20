@@ -81,5 +81,8 @@
   "create": {
     "initiatives": "Start an initiative",
     "groups": "Found a group"
-  }
+  },
+  "searchPeople": "Name or tag, e.g. responsible",
+  "searchGroups": "Search groups or initiatives",
+  "responsibleTag": "Responsible: {title}"
 }

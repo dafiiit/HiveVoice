@@ -5,34 +5,34 @@ import { loadMessages } from "../messages";
 
 export async function blockProfile(profileId: string, on: boolean) {
   const res = await run(async (tx) => { await tx`select app.block_profile(${profileId}, ${on})`; return null; });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   revalidatePath(`/profile/${profileId}`);
-  revalidatePath("/me");
+  revalidatePath("/settings");
   return res;
 }
 
 export async function muteChat(conversationId: string, on: boolean) {
   const res = await run(async (tx) => { await tx`select app.mute_conversation(${conversationId}, ${on})`; return null; });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 
 export async function hideChat(conversationId: string) {
   const res = await run(async (tx) => { await tx`select app.hide_conversation(${conversationId})`; return null; });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 
 /** 7 or 30 days is a proposal until the other person agrees; null turns disappearing messages off. */
 export async function proposeTtl(conversationId: string, days: 7 | 30 | null) {
   const res = await run(async (tx) => { await tx`select app.propose_ttl(${conversationId}, ${days})`; return null; });
-  revalidatePath("/connect");
+  revalidatePath("/friends");
   return res;
 }
 
 export async function setPrivacy(input: { findable: "all" | "members" | "groups"; contactFrom: "all" | "verified" | "groups" | "none" }) {
   const res = await run(async (tx) => { await tx`select app.set_privacy(${input.findable}, ${input.contactFrom})`; return null; });
-  revalidatePath("/me");
+  revalidatePath("/settings");
   return res;
 }
 

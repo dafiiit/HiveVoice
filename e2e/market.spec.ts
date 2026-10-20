@@ -12,9 +12,9 @@ async function exec(statement: string) {
 }
 
 test("Anliegen: offers filter by category and its own fields, and the map asks before it loads", async ({ page }) => {
-  // The old address in Entdecken leads to the offers in Anliegen.
+  // The old address leads to the offers in Gemeinschaft → Anliegen.
   await page.goto("/explore?kind=market");
-  await expect(page).toHaveURL(/\/anliegen\?tab=offers/);
+  await expect(page).toHaveURL(/\/community\/listings/);
   await expect(page.getByRole("tab", { name: "Angebote" })).toHaveAttribute("aria-selected", "true");
   await page.getByRole("link", { name: /^Wohnen/ }).click();
   await expect(page).toHaveURL(/cat=housing/);
@@ -41,7 +41,7 @@ test.describe("offer with something in return", () => {
     const title = `E2E Fahrrad zu verschenken ${Date.now()}`;
     try {
       await login(page);
-      await page.goto("/anliegen?as=offer");
+      await page.goto("/me/listings?as=offer");
       await expect(page.getByRole("radio", { name: "Ich biete" })).toBeChecked();
       await page.locator("main input").first().fill(title);
       // The title suggests the category, and its own fields appear.

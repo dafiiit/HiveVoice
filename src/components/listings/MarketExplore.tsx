@@ -22,7 +22,7 @@ const param = (f: FieldDef) => (f.type === "number" ? `min_${f.key}` : f.type ==
  * The marketplace in "Anliegen" (tabs Angebote and Gesuche): by category, with the category's own filters
  * (jobs by employment and workplace, flats by rooms and rent, things by condition ...), as a list or a map.
  */
-export async function MarketExplore({ sp, session, homeRegions, side }: { sp: SP; session: Session | null; homeRegions: string[]; side: "offer" | "need" }) {
+export async function MarketExplore({ sp, session, homeRegions, side, base: path }: { sp: SP; session: Session | null; homeRegions: string[]; side: "offer" | "need"; base: string }) {
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string).slice(0, 80) : "");
   const t = await getTranslations("explore");
   const tm = await getTranslations("explore.market");
@@ -87,7 +87,7 @@ export async function MarketExplore({ sp, session, homeRegions, side }: { sp: SP
   const href = (patch: Record<string, string>) => {
     const p = new URLSearchParams({ ...base, ...patch });
     for (const [k, v] of [...p.entries()]) if (!v || (k === "sort" && v === "relevant") || (k === "view" && v === "list")) p.delete(k);
-    return `/anliegen?${p}`;
+    return `${path}?${p}`;
   };
   // Switching the category drops the fields of the old one.
   const catHref = (c: string) => href({ ...Object.fromEntries(Object.keys(attr).map((k) => [k, ""])), cat: c });
@@ -98,7 +98,7 @@ export async function MarketExplore({ sp, session, homeRegions, side }: { sp: SP
 
   return (
     <div className="flex flex-col gap-4">
-      <form action="/anliegen" className="flex gap-2">
+      <form action={path} className="flex gap-2">
         {hidden.map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
         <SearchField name="q" defaultValue={q} label={tm("search")} placeholder={tm("searchPlaceholder")} className="flex-1" />
         <button type="submit" className={btn.primarySm}>{t("search")}</button>
@@ -115,7 +115,7 @@ export async function MarketExplore({ sp, session, homeRegions, side }: { sp: SP
 
       <Toolbar count={t("count.market", { n: data.total })}>
         <Popover label={t("filter")} badge={active}>
-          <form action="/anliegen" className="flex flex-col gap-3">
+          <form action={path} className="flex flex-col gap-3">
             {Object.entries(base).filter(([k]) => ["tab", "cat", "q", "sort", "view", "place"].includes(k)).map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
             {defs.map((f) => {
               const label = tcat(`${cat}.${f.key}` as "label");

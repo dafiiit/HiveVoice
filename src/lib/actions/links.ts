@@ -35,7 +35,7 @@ export async function shareLink(input: ShareInput) {
     })}) as id`;
     return id;
   });
-  revalidatePath("/explore");
+  revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
   return res;
 }
@@ -54,18 +54,18 @@ export async function voteResource(id: string, value: -1 | 0 | 1, path: string) 
 /** Into the trash: gone for everybody else at once, restorable for 30 days. */
 export async function deleteResource(id: string) {
   const res = await run(async (tx) => { await tx`select app.trash_resource(${id})`; return null; });
-  revalidatePath("/explore");
+  revalidatePath("/community", "layout");
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
   revalidatePath("/groups", "layout");
   return res;
 }
 
 export async function restoreResource(id: string) {
   const res = await run(async (tx) => { await tx`select app.restore_resource(${id})`; return null; });
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
-  revalidatePath("/explore");
+  revalidatePath("/community", "layout");
   return res;
 }
 
@@ -79,8 +79,8 @@ export async function purgeResource(id: string) {
     return null;
   });
   if (res.ok) await purgeFiles(paths);
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
   return res;
 }
 
@@ -97,7 +97,7 @@ export async function shareFile(input: FileShareInput) {
     }
     return id;
   });
-  revalidatePath("/explore");
+  revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
   return res;
 }
@@ -113,14 +113,14 @@ export async function saveNote(input: NoteInput) {
     })}) as id`;
     return id;
   });
-  revalidatePath("/explore");
+  revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
   if (res.ok) revalidatePath(`/links/${res.data}`);
   return res;
 }
 
-const touch = (id: string) => { revalidatePath(`/links/${id}`); revalidatePath("/me");
- revalidatePath("/inhalte"); revalidatePath("/explore"); };
+const touch = (id: string) => { revalidatePath(`/links/${id}`); revalidatePath("/settings");
+ revalidatePath("/me"); revalidatePath("/community", "layout"); };
 
 export async function setResourceAccess(id: string, visibility: string, editMode: string, allowDownload: boolean, license: string | null) {
   const res = await run(async (tx) => { await tx`select app.set_resource_access(${id}, ${visibility}, ${editMode}, ${allowDownload}, ${license})`; return null; });
@@ -198,15 +198,15 @@ export async function proposeResourceTransfer(id: string, to: string) {
 
 export async function decideResourceTransfer(transferId: string, accept: boolean) {
   const res = await run(async (tx) => { await tx`select app.decide_resource_transfer(${transferId}, ${accept})`; return null; });
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
   return res;
 }
 
 export async function cancelResourceTransfer(transferId: string) {
   const res = await run(async (tx) => { await tx`select app.cancel_resource_transfer(${transferId})`; return null; });
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
   return res;
 }
 
@@ -241,7 +241,7 @@ export async function copyResource(id: string, groupId: string | null, keyToken?
     if (file) await purgeFiles([file.path]);
     return { ok: false as const, error: errorCode(e) };
   });
+  revalidatePath("/settings");
   revalidatePath("/me");
-  revalidatePath("/inhalte");
   return res;
 }

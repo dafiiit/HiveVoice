@@ -27,7 +27,7 @@ export async function GroupInvite({ code }: { code: string }) {
       {!preview.valid ? (
         <>
           <Notice tone="error" className="text-lg">{t((preview.reason ?? "invalid") as "invalid")}</Notice>
-          <Link href="/connect" className={`${btn.secondary} self-start`}>{t("go")}</Link>
+          <Link href="/friends" className={`${btn.secondary} self-start`}>{t("go")}</Link>
         </>
       ) : (
         <>
@@ -38,7 +38,7 @@ export async function GroupInvite({ code }: { code: string }) {
               <span className="text-sm text-muted">{[preview.members != null ? t("members", { n: preview.members }) : null, preview.adults_only ? t("adults") : null, t("role", { role: tr(`roles.${preview.role ?? "contributor"}` as "roles.admin") })].filter(Boolean).join(" · ")}</span>
             </div>
           )}
-          {session ? <AcceptInvite code={code} /> : <Link href={`/login?next=${encodeURIComponent(`/einladung/${code}`)}`} className={`${btn.primary} self-start`}>{t("signIn")}</Link>}
+          {session ? <AcceptInvite code={code} /> : <Link href={`/login?next=${encodeURIComponent(`/invite/${code}`)}`} className={`${btn.primary} self-start`}>{t("signIn")}</Link>}
         </>
       )}
     </Page>
@@ -57,7 +57,7 @@ export async function AppInvite({ code }: { code: string }) {
     <Page width="narrow">
       <PageHeader title={t("title")} />
       <p className="m-0 text-lg">{t("text")}</p>
-      {!session && <Link href={`/login?next=${encodeURIComponent(`/einladung/${clean}`)}`} className={`${btn.primary} self-start`}>{t("signIn")}</Link>}
+      {!session && <Link href={`/login?next=${encodeURIComponent(`/invite/${clean}`)}`} className={`${btn.primary} self-start`}>{t("signIn")}</Link>}
       {session && redeemed && <Notice tone="status">{t("done")}</Notice>}
       {session && !redeemed && <RedeemCode initial={clean} />}
     </Page>

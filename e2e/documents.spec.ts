@@ -24,7 +24,7 @@ test.describe("documents: who sees what", () => {
         select p.id, null, 'hivevoice', 'note', 'note', 'note', '${marker}', E'# Test\\nNur für den Link.', '{}'::jsonb, 'trusted', 'me', 'cc_by_sa'
         from public.profiles p join auth.users u on u.id = p.auth_user_id where u.email = '${email}'`);
       await login(page);
-      await page.goto("/me?tab=docs");
+      await page.goto("/settings?tab=docs");
       const href = await page.getByRole("link", { name: new RegExp(marker) }).first().getAttribute("href");
       expect(href).toMatch(/^\/links\/[0-9a-f-]{36}$/);
       await page.goto(href!);
@@ -51,8 +51,8 @@ test.describe("documents: who sees what", () => {
       await page.keyboard.press("Escape");
       await page.getByRole("button", { name: "In den Papierkorb" }).click();
       await page.getByRole("button", { name: "Ja", exact: true }).click();
-      await expect(page).toHaveURL(/kind=links/, { timeout: 60_000 });
-      await page.goto("/me?tab=docs");
+      await expect(page).toHaveURL(/\/me\?f=notes/, { timeout: 60_000 });
+      await page.goto("/me?f=notes");
       await expect(page.getByText(marker)).toBeVisible();
       await gp.reload();
       await expect(gp.getByRole("heading", { name: marker, level: 1 })).toHaveCount(0);

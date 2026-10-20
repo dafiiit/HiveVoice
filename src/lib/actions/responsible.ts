@@ -56,7 +56,7 @@ export async function saveResponsibility(input: ResponsibilityInput) {
     })}) as id`;
     return id;
   });
-  revalidatePath("/me");
+  revalidatePath("/settings");
   return res;
 }
 
@@ -65,7 +65,7 @@ export async function deleteResponsibility(id: string) {
     await tx`delete from public.responsibilities where id = ${id}`;
     return null;
   });
-  revalidatePath("/me");
+  revalidatePath("/settings");
   return res;
 }
 
@@ -89,7 +89,7 @@ export async function startOfficialVerification(responsibilityId: string, email:
   }
 }
 
-const touch = () => { revalidatePath("/responsible"); revalidatePath("/me"); };
+const touch = () => { revalidatePath("/responsible"); revalidatePath("/settings"); };
 
 export async function confirmResponsibility(id: string, on: boolean) {
   const res = await run(async (tx) => { await tx`select app.confirm_responsibility(${id}, ${on})`; return null; });

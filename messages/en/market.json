@@ -202,5 +202,10 @@
     "title": "Title",
     "description": "Description",
     "save": "Save"
-  }
+  },
+  "communityTitle": "Listings",
+  "communityLead": "What others offer and look for.",
+  "create": "My own listing",
+  "mineTitle": "My listings",
+  "fitsYou": "Fits your listings"
 }

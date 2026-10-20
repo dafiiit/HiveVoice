@@ -10,8 +10,8 @@ import { LAST_LOGIN_COOKIE } from "@/lib/supabase/options";
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
   const code = url.searchParams.get("code");
-  const nextParam = url.searchParams.get("next") ?? "/connect";
-  const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/connect";
+  const nextParam = url.searchParams.get("next") ?? "/friends";
+  const next = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/friends";
 
   if (code) {
     const supabase = await createSupabaseServer();
@@ -36,6 +36,6 @@ export async function GET(request: NextRequest) {
     store.set(EASY_COOKIE, s.easy_language ? "1" : "0", { maxAge: year, path: "/" });
     store.set(THEME_COOKIE, s.theme, { maxAge: year, path: "/" });
   }
-  const dest = session.profile.onboarded ? (next === "/onboarding" ? "/connect" : next) : "/onboarding";
+  const dest = session.profile.onboarded ? (next === "/onboarding" ? "/friends" : next) : "/onboarding";
   return NextResponse.redirect(new URL(dest, url.origin));
 }

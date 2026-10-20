@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { blockProfile, hideChat, muteChat, proposeTtl } from "@/lib/actions/safety";
 import { Popover } from "../ui/Popover";
 import { useAction } from "../ui/Action";
+import { btn, segment, segments } from "../ui/styles";
 
 export type TtlState = { days: number | null; proposedDays: number | null; proposedByMe: boolean };
 
@@ -33,15 +34,15 @@ export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, t
             <>
               <span className="text-sm">{t("ttlTheirs", { days: ttl.proposedDays, name: otherName })}</span>
               <span className="flex gap-2">
-                <button type="button" disabled={pending} className="inline-flex h-9 items-center border-0 bg-ink px-3 text-sm font-bold text-on-ink" onClick={() => run(() => proposeTtl(conversationId, ttl.proposedDays as 7 | 30))}>{t("ttlAgree")}</button>
-                <button type="button" disabled={pending} className="inline-flex h-9 items-center border border-line-strong bg-transparent px-3 text-sm text-ink" onClick={() => run(() => proposeTtl(conversationId, null))}>{t("ttlDecline")}</button>
+                <button type="button" disabled={pending} className={btn.primarySm} onClick={() => run(() => proposeTtl(conversationId, ttl.proposedDays as 7 | 30))}>{t("ttlAgree")}</button>
+                <button type="button" disabled={pending} className={btn.secondarySm} onClick={() => run(() => proposeTtl(conversationId, null))}>{t("ttlDecline")}</button>
               </span>
             </>
           )}
-          <span className="flex flex-wrap gap-1.5" role="group" aria-label={t("ttl")}>
+          <span className={segments} role="group" aria-label={t("ttl")}>
             {([null, 7, 30] as const).map((d) => (
               <button key={String(d)} type="button" disabled={pending} aria-pressed={(ttl.days ?? null) === d && !ttl.proposedDays}
-                className={`inline-flex h-8 items-center border px-2.5 text-sm ${(ttl.days ?? null) === d && !ttl.proposedDays ? "border-ink bg-ink font-bold text-on-ink" : "border-line bg-surface text-ink"}`}
+                className={segment((ttl.days ?? null) === d && !ttl.proposedDays)}
                 onClick={() => run(() => proposeTtl(conversationId, d))}>{d === null ? t("ttlOff") : t(d === 7 ? "ttl7" : "ttl30")}</button>
             ))}
           </span>
@@ -57,8 +58,8 @@ export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, t
           <div className="flex flex-col gap-2 py-2">
             <span className="text-sm">{t("clearConfirm")}</span>
             <span className="flex gap-2">
-              <button type="button" disabled={pending} className="inline-flex h-9 items-center border-0 bg-red px-3 text-sm font-bold text-on-red" onClick={() => run(async () => { const r = await hideChat(conversationId); if (r.ok) router.push("/connect"); return r; })}>{t("yes")}</button>
-              <button type="button" className="inline-flex h-9 items-center border border-line-strong bg-transparent px-3 text-sm text-ink" onClick={() => setConfirm(false)}>{t("no")}</button>
+              <button type="button" disabled={pending} className={btn.redSm} onClick={() => run(async () => { const r = await hideChat(conversationId); if (r.ok) router.push("/connect"); return r; })}>{t("yes")}</button>
+              <button type="button" className={btn.secondarySm} onClick={() => setConfirm(false)}>{t("no")}</button>
             </span>
           </div>
         )}

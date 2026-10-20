@@ -98,8 +98,8 @@ test.describe("knowledge: notes, files and images", () => {
       const pdf = await page.request.get((await open.getAttribute("href"))!, { maxRedirects: 0 });
       expect(pdf.status()).toBe(302);
       stored.push(decodeURIComponent(pdf.headers()["location"].split("/object/sign/files/")[1].split("?")[0]));
-      // Without an account the same address gives nothing for a file that is public: it is readable, so it redirects too.
-      expect((await request.get((await open.getAttribute("href"))!, { maxRedirects: 0 })).status()).toBe(302);
+      // New files are private until shared: without an account the same address gives nothing.
+      expect((await request.get((await open.getAttribute("href"))!, { maxRedirects: 0 })).status()).toBe(404);
     } finally {
       await exec(`delete from public.resources where title in ('${photoTitle}', '${pdfTitle}')`);
       for (const path of stored) await removeStored(path);

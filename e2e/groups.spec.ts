@@ -21,6 +21,8 @@ test.describe("groups: ownership, invitations, rules", () => {
       await login(page);
       await page.goto("/new/group");
       await page.getByLabel("Name", { exact: false }).first().fill(marker);
+      // The way of working comes from the template and sits under "Einstellungen anpassen".
+      await page.getByText("Einstellungen anpassen").click();
       await page.getByRole("radiogroup", { name: "Wie arbeitet die Gruppe?" }).getByRole("radio", { name: /Verein/ }).click();
       await page.getByRole("button", { name: "Gruppe gründen", exact: true }).click();
       // Public groups ask for the real name; an account that went anonymous cannot found one (the mode changes once a month only).
@@ -31,12 +33,12 @@ test.describe("groups: ownership, invitations, rules", () => {
       const groupUrl = page.url();
 
       await page.goto(`${groupUrl}?tab=team`);
-      await expect(page.getByText(/^Eigentümer:in: /)).toBeVisible();
+      await expect(page.getByText(/^Leitung: /)).toBeVisible();
 
       // An invitation link, seen by a guest.
       await page.getByRole("button", { name: "Link erstellen" }).click();
       const link = await page.getByLabel("Einladungslink").inputValue();
-      expect(link).toMatch(/\/join\/[0-9a-f]{32}$/);
+      expect(link).toMatch(/\/einladung\/[0-9a-f]{32}$/);
       // Let the list refresh finish before a second browser asks for the same server (the dev server stalls on three parallel renders).
       await expect(page.getByRole("button", { name: "Widerrufen" }).first()).toBeVisible({ timeout: 60_000 });
       const guest = await browser.newContext();

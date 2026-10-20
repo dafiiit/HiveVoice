@@ -54,6 +54,8 @@ test.describe("safety", () => {
       await openFelix(page);
       await page.getByText("Mehr", { exact: true }).click();
       const menu = page.getByRole("group", { name: "Mehr" });
+      // A run that stopped half way may have left the chat muted.
+      if (await menu.getByRole("button", { name: "Mitteilungen an" }).isVisible()) await menu.getByRole("button", { name: "Mitteilungen an" }).click();
       await menu.getByRole("button", { name: "Mitteilungen aus" }).click();
       await expect(menu.getByRole("button", { name: "Mitteilungen an" })).toBeVisible();
       await menu.getByRole("button", { name: "Mitteilungen an" }).click();

@@ -54,7 +54,7 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
   return (
     <div className="flex max-w-[860px] flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
       <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
-        <Link href={kind === "offer" ? "/needs?tab=near" : "/offers?tab=near"} className="text-ink">{t(kind === "offer" ? "allOffers" : "allNeeds")}</Link>
+        <Link href={kind === "offer" ? "/anliegen?tab=offers" : "/anliegen?tab=needs"} className="text-ink">{t(kind === "offer" ? "allOffers" : "allNeeds")}</Link>
       </nav>
       {l.images.length > 0
         ? (

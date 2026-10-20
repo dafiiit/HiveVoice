@@ -37,8 +37,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
   // "Für mich" lives in the avatar at the top right, so the side navigation stays short.
   const items: NavItem[] = [
     { href: "/explore", label: t("explore") },
-    { href: "/needs", label: t("needs") },
-    { href: "/offers", label: t("offers") },
+    { href: "/anliegen", label: t("anliegen") },
     { href: "/connect", label: t("connect"), badge: waiting },
   ];
   const place = await getPlace();

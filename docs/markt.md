@@ -42,8 +42,9 @@ den Rechten der Person, die fragt, sieht also nur, was sie lesen darf.
 | gleiche Strecke (Mitfahrt) | 4 |
 | Preis im Budget | 1 |
 | Tausch in beide Richtungen | 5 |
+| ähnliche Bedeutung (Embedding, siehe unten) | 3 |
 
-Ein Treffer braucht inhaltliche Nähe (Stichwort, Wort oder Strecke) und mindestens 3 Punkte.
+Ein Treffer braucht inhaltliche Nähe (Stichwort, Wort, Bedeutung oder Strecke) und mindestens 3 Punkte.
 
 **Sichtbar für beide Seiten:**
 
@@ -53,20 +54,22 @@ Ein Treffer braucht inhaltliche Nähe (Stichwort, Wort oder Strecke) und mindest
 - Die Anfrage trägt den Bezug (`contact_requests.via_listing_id`); im Eingang und in „Verbinden“ steht „passt zu ‚…‘“.
 - Neuer Eintrag: die Besitzer der besten Treffer (ab 6 Punkten, höchstens fünf, je Paar einmal) bekommen die Mitteilung „Neues Angebot passt zu ‚…‘“ (`app.notify_listing_matches`).
 
-### Ausbaustufe: KI-gestützt
+### Bedeutung (KI, in Supabase)
 
-Die Regeln oben sind nachvollziehbar und kosten nichts. Für die nächste Stufe, wenn es mehr Einträge gibt:
+Jeder aktive Eintrag bekommt ein Embedding (`listings.embedding`, 384 Dimensionen) aus öffentlichem Text:
+Titel, Beschreibung, Stichwörter, nie die privaten Details. Gerechnet wird mit dem Modell gte-small, das in
+Supabase Edge Functions eingebaut ist (`supabase/functions/embed-listings`); kein Text verlässt die Plattform,
+kein Schlüssel, keine Kosten außer den Funktionsaufrufen.
 
-1. **Bedeutungsnähe statt Wortgleichheit.** Beim Speichern eine Vektor-Darstellung von Titel, Beschreibung und
-   Kategorie berechnen (`pgvector` ist auf Supabase verfügbar), in `app.listing_matches` als weiteren Grund
-   „ähnlich gemeint“ mit eigenem Gewicht einrechnen. „Bohrmaschine“ findet dann auch „Akkuschrauber“.
-   Datenschutz: nur öffentliche Felder, nie `details_private`; Modell selbst betreiben oder Anbieter mit
-   Auftragsverarbeitung in der EU; in der Datenschutzerklärung nennen.
-2. **Vorschläge beim Schreiben.** Aus dem Titel Stichwörter und Kategorie vorschlagen (heute: feste Wortlisten).
-3. **Erklärung in einem Satz.** Für die besten Treffer kurz erklären, warum sie passen. Nur als Zusatz: die
-   festen Gründe bleiben sichtbar, damit niemand einer Blackbox vertrauen muss.
+- Die App ruft die Funktion nach jedem Speichern auf, danach erst gehen die Treffer-Mitteilungen raus.
+- Die Funktion arbeitet nur ab, was `app.pending_embeddings` liefert (fehlend oder veraltet, erkannt am md5 des Textes), höchstens 8 je Aufruf. Ohne offene Arbeit tut sie nichts, deshalb braucht sie keinen Schlüssel.
+- In `app.listing_matches` zählt die Ähnlichkeit relativ: gte-small ist auf Englisch trainiert und hält fast alle deutschen Texte für ähnlich (0,85 bis 0,89). Als Grund „ähnliche Bedeutung“ (+3) zählt deshalb nur, was mindestens 0,06 über dem Durchschnitt dieses Eintrags liegt (an den Demo-Daten geeicht: „Auer Mühlbach in Blender modellieren“ ↔ „3D-Modellierung in Blender“).
+- Neu deployen: `supabase functions deploy embed-listings --no-verify-jwt`.
 
-Gewichte und Schwelle sollten nach den ersten Wochen anhand angenommener Anfragen nachjustiert werden.
+**Nächste Schritte:** ein mehrsprachiges Modell (z. B. multilingual-e5-small über Transformers.js in derselben
+Edge Function) hebt die Qualität für Deutsch deutlich; dann die Schwelle neu eichen. Danach Vorschläge für
+Stichwörter und Kategorie beim Schreiben, und für die besten Treffer ein Satz, warum sie passen – immer
+zusätzlich zu den festen Gründen, nie statt ihrer. Gewichte nach den ersten Wochen anhand angenommener Anfragen nachjustieren.
 
 ## Entdecken → Marktplatz
 

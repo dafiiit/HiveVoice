@@ -1,14 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { login } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 
 test("guests can pass the app on and see how invitations work", async ({ page }) => {
   await page.goto("/teilen");

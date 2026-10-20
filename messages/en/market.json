@@ -7,14 +7,9 @@
   "needLeadShort": "Ask for what you are missing.",
   "view": "View",
   "tabs": {
-    "offer": {
-      "you": "Where you are needed",
-      "near": "All requests"
-    },
-    "need": {
-      "you": "Matches for you",
-      "near": "All offers"
-    },
+    "you": "Fits you",
+    "offers": "Offers",
+    "needs": "Requests",
     "inbox": "Inbox",
     "inboxN": "Inbox · {n}"
   },
@@ -172,7 +167,10 @@
     "pause": "Pause",
     "resume": "Resume",
     "close": "Close",
-    "matchesLink": "show"
+    "matchesLink": "show",
+    "title": "Your listings",
+    "gives": "offers",
+    "seeks": "seeks"
   },
   "inbox": {
     "incoming": "Received",
@@ -212,8 +210,13 @@
     "employment": "same employment",
     "route": "same route",
     "budget": "within budget",
-    "swap": "swap both ways"
+    "swap": "swap both ways",
+    "meaning": "similar meaning"
   },
   "browse": "Search with filters",
-  "category": "Category"
+  "category": "Category",
+  "title": "Matters",
+  "lead": "Offer what you can or have, and ask for what you are missing. We bring both together and show why they fit.",
+  "leadShort": "Offer and look in one place.",
+  "emptyYou": "Nothing matching yet. Post above what you offer or look for, or add in your profile what you can do and need."
 }

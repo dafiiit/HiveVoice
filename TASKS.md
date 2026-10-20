@@ -2,12 +2,24 @@
 
 ## Active
 - [ ] **Bot-Schutz einschalten** - Code fertig; Schritte in docs/betrieb.md: Turnstile-Widget bei Cloudflare anlegen, Secret im Supabase-Dashboard (Authentication → Bot and Abuse Protection), `NEXT_PUBLIC_TURNSTILE_SITE_KEY` in Vercel und `.env.local` – Supabase und Site Key gleichzeitig, sonst scheitert jede Anmeldung
+  - [ ] I did this, check if it worked...
 - [ ] **Rechtstexte festlegen** - Checkliste in docs/betrieb.md; Datenschutztext nennt jetzt alle Dienste (Resend, Turnstile, OpenFreeMap, Link-Vorschau, Matching). Offen: Impressum-Angaben, Rechtsgrundlagen, AV-Verträge, DSA-Kontaktstelle, Umgang mit Behördenanfragen – vom Betreiber zu klären und prüfen zu lassen
 - [ ] **Matching mit KI (Stufe 2)** - Konzept in docs/markt.md: pgvector-Ähnlichkeit als weiterer Grund in `app.listing_matches`; Anbieter/Datenschutz vorher entscheiden
+  - [ ] ja nutze hier erstmal supabase
+- [ ] **Werbematerial erstellen** - zeige 10 verschiedene Usecases, für verschiedene Personas welche zeigen was diese App besonders geeignet macht für diese Personen in dieser Situation.
+  - [ ] Create a powerpoint presenting the App. The philosophical concept, the real life application for personas, the advantage over other social medias.
+- [ ] **Plan zur unabhängigkeit** - Analysiere von welchen providern/closed source/kostenpflichtig die app aktuell abhängig ist und wie wir nach dem MVP später zu einer unabhänigen, dezentralen Lösung kommen.
+  - [ ] Für jede Abhängigkeit finde eine Lösung
+  - [ ] Für jede zentrale komponente überlege dir eine dezentrale alternative
 
 ## GUI mobile
 
-## GUI desktop
+## GUI desktop and mobile
+- [ ] **Packe "Anfragen" und "Anbieten" in eine Kategorie in der Seitenleiste, sodass es nur noch drei gibt. Die gemeinsame Kategorie soll "Anliegen" heißen. Sie soll elegant beides verbinden.**
+- [ ] **Verknüpfungen in der App stärken** - Es gibt einige Kreuzverbindungen in der App und ich will diese Stärken. Suche weitere die ich vergessen habe und stelle sicher das alles möglich ist. Es gibt Aufgaben, Gruppen, Dokumente, Angebote und Anfragen.  alle soll man in den Chats oder Marktplatz Verschicken können.  alle soll man Einer Gruppe hinzufügen können.  Für alle soll man verschiedene Optionen haben, was das lese und schreibrecht angeht und man kann diese beiden getrennt verwalten (nur ich, spezielle Personen hinzufügen, jeder mit dem ich den Link geteilt habe, jeder im Internet)
+  - [ ] überlege wie man das alles organisieren kann, dass man maximalen spielraum beim gestalten hat
+  - [ ] Implementiere die möglichkeiten zur vollen verschachtelung. Stelle dabei sicher das es übersichtlich bleibt.
+  - [ ] Ich will das jeder Verein, jede Schule, jede schon existierende Gruppe sich diese App so gestalten kann, das sie ihren Ansprüchen gerecht wird. Denke die zB. 10 verschiedene Communities in der Gesellschaft aus und überlege was für ansprüche sie hätten und wie man diesen gerecht werden könnte.
 
 ## Waiting On
 

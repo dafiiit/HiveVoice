@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import postgres from "postgres";
+import { login, testClient } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 const migrator = process.env.MIGRATION_DATABASE_URL;
@@ -8,20 +8,12 @@ const migrator = process.env.MIGRATION_DATABASE_URL;
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 const PDF = Buffer.from("%PDF-1.1\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 200 200]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n");
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 async function exec(statement: string) {
   const sql = postgres(migrator!, { max: 1, ssl: migrator!.includes("localhost") ? false : "require" });
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
 async function removeStored(path: string) {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
-  await supabase.auth.signInWithPassword({ email: process.env.TEST_USER_EMAIL!, password: process.env.TEST_USER_PASSWORD! });
+  const supabase = await testClient();
   await supabase.storage.from("files").remove([path]);
 }
 

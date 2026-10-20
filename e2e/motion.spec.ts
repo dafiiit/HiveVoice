@@ -1,16 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import postgres from "postgres";
+import { login } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 const RADSPUR = "7ee2cdaf-6661-4c62-b5ba-7c26bf600653";
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 
 test.describe("motion", () => {
   test.skip(!signedIn, "TEST_USER_EMAIL not set");

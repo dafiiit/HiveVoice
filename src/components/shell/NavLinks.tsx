@@ -2,13 +2,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
-import { IconChat, IconCompass, IconPlus, IconSearch, IconShare } from "../ui/Icons";
+import { IconChat, IconCompass, IconPlus, IconShare } from "../ui/Icons";
 
 export type NavItem = { href: string; label: string; badge?: number };
 
-const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/needs": IconSearch, "/offers": IconShare, "/connect": IconChat };
+const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/anliegen": IconShare, "/connect": IconChat };
 
-const isActive = (path: string, href: string) => path === href || path.startsWith(href + "/");
+// "Anliegen" also covers the pages of single offers and requests.
+const ALSO: Record<string, string[]> = { "/anliegen": ["/offers", "/needs"] };
+const isActive = (path: string, href: string) => [href, ...(ALSO[href] ?? [])].some((h) => path === h || path.startsWith(h + "/"));
 
 export function SideLinks({ items }: { items: NavItem[] }) {
   const path = usePathname();
@@ -33,8 +35,8 @@ export function SideLinks({ items }: { items: NavItem[] }) {
 
 export function BottomNav({ items, newLabel }: { items: NavItem[]; newLabel: string }) {
   const path = usePathname();
-  // Mobile: four sections around the central "new" button, each with an icon and a short label.
-  const [a, b, c, d] = items;
+  // Mobile: the sections with an icon and a short label, the "new" button after the first two.
+  const [a, b, ...rest] = items;
   const cell = (it: NavItem) => {
     const on = isActive(path, it.href);
     const Icon = ICONS[it.href] ?? IconCompass;
@@ -50,15 +52,14 @@ export function BottomNav({ items, newLabel }: { items: NavItem[]; newLabel: str
     );
   };
   return (
-    <nav aria-label="Hauptnavigation" className="fixed inset-x-0 bottom-0 z-30 grid h-16 grid-cols-5 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav aria-label="Hauptnavigation" className="fixed inset-x-0 bottom-0 z-30 grid h-16 auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
       {cell(a)}
       {cell(b)}
       <Link href="/new" aria-label={newLabel} className="flex flex-col items-center justify-center gap-0.5 bg-ink text-[11px] font-bold leading-none text-on-ink no-underline">
         <IconPlus size={22} />
         {newLabel}
       </Link>
-      {cell(c)}
-      {cell(d)}
+      {rest.map(cell)}
     </nav>
   );
 }

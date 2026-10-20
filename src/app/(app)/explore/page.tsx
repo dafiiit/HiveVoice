@@ -232,7 +232,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
       {count === 0 && kind === "links" && (
         <div className="flex flex-col items-start gap-3 border-t border-line pt-6">
           <p className="m-0 text-muted">{q || rk ? tk("emptySearch") : tk("empty")}</p>
-          {q && <Link href={`/needs?title=${encodeURIComponent(q)}`} className="font-bold">{tk("ask")}</Link>}
+          {q && <Link href={`/anliegen?as=need&title=${encodeURIComponent(q)}`} className="font-bold">{tk("ask")}</Link>}
           {q && <span className="text-sm text-muted">{tk("askText")}</span>}
         </div>
       )}

@@ -7,14 +7,9 @@
   "needLeadShort": "Frag an, was dir fehlt.",
   "view": "Ansicht",
   "tabs": {
-    "offer": {
-      "you": "Wo du gebraucht wirst",
-      "near": "Alle Gesuche"
-    },
-    "need": {
-      "you": "Passt zu dir",
-      "near": "Alle Angebote"
-    },
+    "you": "Passt zu dir",
+    "offers": "Angebote",
+    "needs": "Gesuche",
     "inbox": "Eingang",
     "inboxN": "Eingang · {n}"
   },
@@ -172,7 +167,10 @@
     "pause": "Pausieren",
     "resume": "Fortsetzen",
     "close": "Abschließen",
-    "matchesLink": "ansehen"
+    "matchesLink": "ansehen",
+    "title": "Deine Einträge",
+    "gives": "bietet",
+    "seeks": "sucht"
   },
   "inbox": {
     "incoming": "Eingegangen",
@@ -212,8 +210,13 @@
     "employment": "gleiche Anstellung",
     "route": "gleiche Strecke",
     "budget": "im Budget",
-    "swap": "Tausch in beide Richtungen"
+    "swap": "Tausch in beide Richtungen",
+    "meaning": "ähnliche Bedeutung"
   },
   "browse": "Mit Filtern durchsuchen",
-  "category": "Kategorie"
+  "category": "Kategorie",
+  "title": "Anliegen",
+  "lead": "Biete, was du kannst oder hast, und frag an, was dir fehlt. Wir bringen beides zusammen und zeigen, warum es passt.",
+  "leadShort": "Bieten und suchen an einem Ort.",
+  "emptyYou": "Noch nichts Passendes. Trag oben ein, was du bietest oder suchst, oder ergänze in deinem Profil, was du kannst und brauchst."
 }

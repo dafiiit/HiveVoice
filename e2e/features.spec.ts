@@ -1,15 +1,8 @@
-import { createClient } from "@supabase/supabase-js";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { login, testClient } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 
 // A 1x1 PNG, enough to exercise the upload path.
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
@@ -319,8 +312,7 @@ test.describe("signed in", () => {
     await page.getByRole("button", { name: "Foto entfernen" }).click();
     await expect(page.getByRole("button", { name: "Foto hochladen" })).toBeVisible();
     // Do not leave the file behind in storage.
-    const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
-    await sb.auth.signInWithPassword({ email: process.env.TEST_USER_EMAIL!, password: process.env.TEST_USER_PASSWORD! });
+    const sb = await testClient();
     await sb.storage.from("images").remove([src!.split("/images/")[1]]);
   });
 });

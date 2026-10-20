@@ -40,5 +40,6 @@
     "none": "Keinen Ort gefunden.",
     "partOf": "Gehört zu"
   },
-  "searchPlaceholderShort": "Suchen …"
+  "searchPlaceholderShort": "Suchen …",
+  "anliegen": "Anliegen"
 }

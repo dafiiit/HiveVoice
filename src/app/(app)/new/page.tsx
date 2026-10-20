@@ -11,8 +11,8 @@ export default async function NewPage() {
   await requireSession("/new");
   const t = await getTranslations("new");
   const options = [
-    { href: "/needs", shape: "lupe", key: "need", dark: false },
-    { href: "/offers", shape: "gift", key: "offer", dark: false },
+    { href: "/anliegen?as=need", shape: "lupe", key: "need", dark: false },
+    { href: "/anliegen?as=offer", shape: "gift", key: "offer", dark: false },
     { href: "/new/group", shape: "flower", key: "group", dark: true },
     { href: "/connect?c=market", shape: "bubble", key: "voice", dark: false },
   ] as const;

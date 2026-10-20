@@ -1,16 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import postgres from "postgres";
+import { login } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 const migrator = process.env.MIGRATION_DATABASE_URL;
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 
 async function exec(statement: string) {
   const sql = postgres(migrator!, { max: 1, ssl: migrator!.includes("localhost") ? false : "require" });

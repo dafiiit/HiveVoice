@@ -44,6 +44,15 @@ async function insertListing(tx: Tx, input: ListingInput) {
   return id;
 }
 
+/** Lets the Edge Function compute missing embeddings (it only works off pending listings). Never fails the save. */
+async function embedListings() {
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed-listings`, { method: "POST", signal: AbortSignal.timeout(10_000) });
+  } catch {
+    // The next save picks it up.
+  }
+}
+
 export async function saveListing(input: ListingInput) {
   const res = await run(async (tx) => {
     const id = await insertListing(tx, input);
@@ -61,11 +70,17 @@ export async function saveListing(input: ListingInput) {
       });
       await tx`select app.pair_listings(${id}, ${pairId})`;
     }
-    for (const l of [id, pairId]) if (l) await tx`select app.notify_listing_matches(${l})`;
     return { id, pairId };
   });
-  revalidatePath("/offers");
-  revalidatePath("/needs");
+  if (res.ok) {
+    // Matching by meaning needs the embedding, so compute it first, then tell the people whose listings fit.
+    await embedListings();
+    await run(async (tx) => {
+      for (const l of [res.data.id, res.data.pairId]) if (l) await tx`select app.notify_listing_matches(${l})`;
+      return null;
+    });
+  }
+  revalidatePath("/anliegen");
   revalidatePath("/explore");
   return res;
 }
@@ -75,7 +90,8 @@ export async function setListingStatus(id: string, status: "active" | "paused" |
     await tx`update public.listings set status = ${status}::public.listing_status where id = ${id}`;
     return null;
   });
-  revalidatePath(kind === "offer" ? "/offers" : "/needs");
+  void kind;
+  revalidatePath("/anliegen");
   return res;
 }
 
@@ -84,8 +100,7 @@ export async function requestContact(listingId: string, message: string, viaList
     const [{ id }] = await tx<{ id: string }[]>`select app.request_contact(${listingId}, ${message}, ${viaListingId || null}::uuid) as id`;
     return id;
   });
-  revalidatePath("/offers");
-  revalidatePath("/needs");
+  revalidatePath("/anliegen");
   revalidatePath("/connect");
   return res;
 }
@@ -95,8 +110,7 @@ export async function decideContact(requestId: string, accept: boolean) {
     const [{ c }] = await tx<{ c: string | null }[]>`select app.decide_contact(${requestId}, ${accept}) as c`;
     return c;
   });
-  revalidatePath("/offers");
-  revalidatePath("/needs");
+  revalidatePath("/anliegen");
   revalidatePath("/connect");
   return res;
 }
@@ -106,8 +120,7 @@ export async function withdrawContact(requestId: string) {
     await tx`update public.contact_requests set status = 'withdrawn' where id = ${requestId}`;
     return null;
   });
-  revalidatePath("/offers");
-  revalidatePath("/needs");
+  revalidatePath("/anliegen");
   revalidatePath("/connect");
   return res;
 }

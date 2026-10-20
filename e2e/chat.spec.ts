@@ -1,6 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
-import { expect, request as pwRequest, test, type Page } from "@playwright/test";
+import { expect, request as pwRequest, test } from "@playwright/test";
 import postgres from "postgres";
+import { login, testClient } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 const migrator = process.env.MIGRATION_DATABASE_URL;
@@ -8,13 +8,6 @@ const migrator = process.env.MIGRATION_DATABASE_URL;
 // A 1x1 PNG: the browser turns it into a JPEG before it is uploaded.
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 
 /** The app's own database role cannot remove other people's rows, the migration connection can (via private.exec). */
 async function exec(statement: string) {
@@ -22,8 +15,7 @@ async function exec(statement: string) {
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
 async function removeStored(path: string) {
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!);
-  await supabase.auth.signInWithPassword({ email: process.env.TEST_USER_EMAIL!, password: process.env.TEST_USER_PASSWORD! });
+  const supabase = await testClient();
   await supabase.storage.from("files").remove([path]);
 }
 

@@ -28,7 +28,7 @@ const DICT: [RegExp, string][] = [
 ];
 const suggestTags = (text: string) => DICT.filter(([re]) => re.test(text)).map(([, tag]) => tag);
 
-export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, popular, initialTitle = "", groups = [], startWithLink = false }: { kind: "offer" | "need"; initialTitle?: string; groups?: { id: string; slug: string; name: string }[]; startWithLink?: boolean; ideas: string[]; regionId: string | null; regionName: string | null; popular: string[] }) {
+export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, popular, initialTitle = "", groups = [], startWithLink = false }: { kind: "offer" | "need"; initialTitle?: string; groups?: { id: string; slug: string; name: string }[]; startWithLink?: boolean; ideas: { offer: string[]; need: string[] }; regionId: string | null; regionName: string | null; popular: string[] }) {
   const t = useTranslations("market.editor");
   const tc = useTranslations("common");
   const tt = useTranslations("common.tags");
@@ -136,10 +136,10 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
           placeholder={t(give ? "placeholderOffer" : "placeholderNeed")} className={`${field.input} md:flex-1`} />
         {!edOpen && <button type="button" onClick={() => setOpen(true)} className={btn.primaryLg}>{t(give ? "startOffer" : "startNeed")}</button>}
       </div>
-      {!edOpen && ideas.length > 0 && (
+      {!edOpen && ideas[kind].length > 0 && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] text-muted">{tt("ideas")}</span>
-          <Carousel items={ideas} keyOf={(i) => i} loop label={tt("ideas")}
+          <Carousel items={ideas[kind]} keyOf={(i) => i} loop label={tt("ideas")}
             render={(i, hidden) => (
               <button type="button" tabIndex={hidden ? -1 : 0} aria-hidden={hidden || undefined} onClick={() => { setTitle(i); setOpen(true); }}
                 className={`${chip(false)} whitespace-nowrap`}>{i}</button>

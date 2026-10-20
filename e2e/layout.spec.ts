@@ -1,14 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
+import { login } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
 
-async function login(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
-  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
-  await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL(/\/(connect|onboarding)/);
-}
 
 const loaded = (page: Page, selector: string) =>
   page.locator(selector).evaluateAll((els) => els.map((el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth > 0));
@@ -123,13 +117,23 @@ test.describe("on a phone", () => {
     await login(page);
     await page.goto("/connect");
     const nav = page.getByRole("navigation", { name: "Hauptnavigation" });
-    for (const label of ["Entdecken", "Anfragen", "Neu", "Anbieten", "Verbinden"]) {
+    for (const label of ["Entdecken", "Anliegen", "Neu", "Verbinden"]) {
       const item = nav.getByRole("link", { name: label });
       await expect(item).toBeVisible();
       await expect(item.locator("svg")).toHaveCount(1);
       await expect(item).toContainText(label);
     }
     await expect(nav.getByRole("link", { name: "Verbinden" })).toHaveAttribute("aria-current", "page");
+  });
+
+  test("Anliegen joins offering and looking: one entry in the navigation, old links lead there", async ({ page }) => {
+    await login(page);
+    await page.goto("/needs?tab=near");
+    await expect(page).toHaveURL(/\/anliegen\?as=need&tab=offers/);
+    await expect(page.getByRole("radio", { name: "Ich suche" })).toBeChecked();
+    for (const name of ["Passt zu dir", "Angebote", "Gesuche", "Eingang"]) await expect(page.getByRole("tab", { name: new RegExp(`^${name}`) })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Anfragen", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Anliegen", exact: true }).first()).toHaveAttribute("aria-current", "page");
   });
 
   test("Verbinden puts the chats first and fills the screen without page scroll", async ({ page }, info) => {
@@ -174,9 +178,9 @@ test.describe("on a phone", () => {
 
   test("texts are short on a phone and in full on a wide screen", async ({ page }, info) => {
     await login(page);
-    await page.goto("/needs");
-    const short = page.getByText("Frag an, was dir fehlt.", { exact: true });
-    const long = page.getByText(/Ein Verein für dein Engagement/);
+    await page.goto("/anliegen");
+    const short = page.getByText("Bieten und suchen an einem Ort.", { exact: true });
+    const long = page.getByText(/Wir bringen beides zusammen/);
     if (info.project.name === "mobile") {
       await expect(short).toBeVisible();
       await expect(long).toBeHidden();

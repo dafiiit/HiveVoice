@@ -26,8 +26,11 @@ import { GroupRules } from "@/components/group/GroupRules";
 import { DangerZone } from "@/components/group/DangerZone";
 import { InviteBanner } from "@/components/group/InviteBanner";
 import { ShareBlock } from "@/components/ShareBlock";
+import { ShareMenu } from "@/components/refs/ShareMenu";
+import { Collection, type CollectionItem } from "@/components/refs/Collection";
+import { loadRefCards, type RefCard } from "@/lib/refs";
 
-const TABS = ["goals", "talk", "links", "needs", "tasks", "team", "about"] as const;
+const TABS = ["goals", "talk", "links", "collection", "needs", "tasks", "team", "about"] as const;
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
@@ -52,6 +55,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const tr = await getTranslations("grouprights");
   const tc = await getTranslations("common");
   const tl = await getTranslations("links");
+  const trf = await getTranslations("refs");
   const locale = await getLocale();
   await sql`select app.tick()`;
 
@@ -101,7 +105,11 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     const needs = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.group_id = ${g.id} and l.kind = 'need' and l.status = 'active' order by l.created_at desc`;
     const sentTo = me ? (await tx<{ listing_id: string }[]>`select listing_id from public.contact_requests where from_profile_id = ${me} and status = 'pending'`).map((x) => x.listing_id) : [];
     const tasks = active === "tasks" ? await tx<TaskView[]>`
-      select tk.id, tk.title, tk.status::text, tk.hourly_rate_cents,
+      select tk.id, tk.title, tk.status::text, tk.hourly_rate_cents, tk.read_scope, tk.write_scope,
+        app.object_access('task', tk.id, true) as can_write, app.object_manageable('task', tk.id) as manage,
+        app.task_link_token(tk.id) as link_token,
+        case when app.object_manageable('task', tk.id) then coalesce((select jsonb_agg(jsonb_build_object('profile_id', og.profile_id, 'name', p.display_name, 'seed', p.avatar_seed, 'can_write', og.can_write))
+          from public.object_grants og join public.profiles p on p.id = og.profile_id where og.object_type = 'task' and og.object_id = tk.id), '[]') else '[]' end as grants,
         coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'name', p.display_name, 'seed', p.avatar_seed)) from public.task_assignees a join public.profiles p on p.id = a.profile_id where a.task_id = tk.id), '[]') as assignees
       from public.tasks tk where tk.group_id = ${g.id} order by tk.position, tk.created_at` : [];
     const requests = active === "team" && can_manage ? await tx<{ id: string; profile_id: string; name: string; seed: number; path: string | null; message: string | null }[]>`
@@ -135,7 +143,18 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
       where g2.id <> ${g.id} and g2.archived_at is null and exists (
         select 1 from public.group_tags a join public.group_tags b on a.tag_id = b.tag_id where a.group_id = g2.id and b.group_id = ${g.id})
       order by g2.member_count desc limit 3`;
-    return { team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
+    // The collection: everything added to this group, read with the viewer's rights; subgroups and parent groups for the side.
+    const items = await tx<{ item_type: string; item_id: string; note: string | null; added_by: string | null; by_name: string | null }[]>`
+      select gi.item_type, gi.item_id, gi.note, gi.added_by, p.display_name as by_name from public.group_items gi left join public.profiles p on p.id = gi.added_by
+      where gi.group_id = ${g.id} order by gi.created_at desc limit 200`;
+    const parents = await tx<{ id: string }[]>`select gi.group_id as id from public.group_items gi where gi.item_type = 'group' and gi.item_id = ${g.id}`;
+    const cards = await loadRefCards(tx, [...items.map((i) => ({ type: i.item_type, id: i.item_id })), ...parents.map((p) => ({ type: "group", id: p.id }))]);
+    const collection: CollectionItem[] = items.flatMap((i) => {
+      const card = cards.get(`${i.item_type}:${i.item_id}`);
+      return card ? [{ card, note: i.note, byName: i.by_name, mine: i.added_by === me }] : [];
+    });
+    const partOf = parents.flatMap((p) => cards.get(`group:${p.id}`) ?? []) as RefCard[];
+    return { collection, partOf, team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
   });
   if (!data) notFound();
   const { g, role, active } = data;
@@ -146,6 +165,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const labels: Record<(typeof TABS)[number], string> = {
     goals: voting ? t("tabs.goalsVoting", { n: voting }) : t("tabs.goals"),
     talk: t("tabs.talk"),
+    collection: data.collection.length ? `${trf("collection.tab")} · ${data.collection.length}` : trf("collection.tab"),
     links: t("tabs.links"),
     needs: t("tabs.needs", { n: data.needs.length }),
     tasks: t("tabs.tasks"),
@@ -178,7 +198,10 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           </span>
           {session && <FollowButton type="group" id={g.id} following={data.following} />}
         </div>
-        <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} />
+        <div className="flex flex-wrap items-center gap-3">
+          {session && <ShareMenu type="group" id={g.id} title={g.name} />}
+          <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} />
+        </div>
         {g.archived_at && <p role="status" className="m-0 border-l-4 border-red bg-surface p-3 font-bold">{tr("danger.archived")}</p>}
         {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
         <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
@@ -219,6 +242,9 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             </div>
           </section>
         )}
+        {!locked && active === "collection" && (
+          <Collection groupId={g.id} items={data.collection} canRemoveAll={role === "admin" || role === "maintainer"} />
+        )}
         {!locked && active === "needs" && (
           <section className="flex flex-col gap-4">
             <p className="m-0 max-w-[640px]">{t("needsIntro")}</p>
@@ -240,7 +266,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             </div>
           </section>
         )}
-        {!locked && active === "tasks" && <Tasks slug={slug} groupId={g.id} tasks={data.tasks} canEdit={data.can_tasks} viewerId={me} />}
+        {!locked && active === "tasks" && <Tasks slug={slug} groupId={g.id} tasks={data.tasks} canEdit={data.can_tasks} viewerId={me} signedIn={!!session} />}
         {!locked && active === "team" && (
           <div className="flex flex-col gap-10">
             <Leadership slug={slug} groupId={g.id} ownerId={g.owner_id} ownerName={g.owner_name} orphaned={!!g.orphaned_at} viewerId={me} isMember={!!role}
@@ -283,6 +309,20 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
         )}
       </div>
       <aside className="flex flex-col gap-6">
+        {data.partOf.length > 0 && (
+          <section className="flex flex-col gap-2 border-t-[6px] border-ink pt-3">
+            <h2 className="m-0 text-lg font-bold">{trf("collection.partOf")}</h2>
+            {data.partOf.map((p) => <Link key={p.id} href={p.href} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={p.title} size={28} group /> <strong>{p.title}</strong></Link>)}
+          </section>
+        )}
+        {data.collection.some((i) => i.card.type === "group") && (
+          <section className="flex flex-col gap-2 border-t border-line pt-3">
+            <h2 className="m-0 text-lg font-bold">{trf("collection.subgroups")}</h2>
+            {data.collection.filter((i) => i.card.type === "group").map((i) => (
+              <Link key={i.card.id} href={i.card.href} className="flex items-center gap-2 text-sm text-ink no-underline"><Avatar name={i.card.title} size={28} group /> <strong>{i.card.title}</strong></Link>
+            ))}
+          </section>
+        )}
         {data.needs.length > 0 && (
           <section className="flex flex-col gap-2 border-t-[6px] border-ink pt-3">
             <h2 className="m-0 text-lg font-bold">{t("needsAside")}</h2>

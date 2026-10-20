@@ -218,5 +218,11 @@
   "title": "Matters",
   "lead": "Offer what you can or have, and ask for what you are missing. We bring both together and show why they fit.",
   "leadShort": "Offer and look in one place.",
-  "emptyYou": "Nothing matching yet. Post above what you offer or look for, or add in your profile what you can do and need."
+  "emptyYou": "Nothing matching yet. Post above what you offer or look for, or add in your profile what you can do and need.",
+  "edit": {
+    "button": "Edit",
+    "title": "Title",
+    "description": "Description",
+    "save": "Save"
+  }
 }

@@ -1,0 +1,77 @@
+{
+  "types": {
+    "listing": "Eintrag",
+    "resource": "Dokument",
+    "group": "Gruppe",
+    "task": "Aufgabe",
+    "initiative": "Initiative"
+  },
+  "offer": "Angebot",
+  "need": "Gesuch",
+  "members": "{n, plural, one {1 Mitglied} other {# Mitglieder}}",
+  "status": {
+    "open": "offen",
+    "in_progress": "in Arbeit",
+    "done": "erledigt"
+  },
+  "missing": "Nicht sichtbar für dich: gelöscht oder nur für bestimmte Personen freigegeben.",
+  "share": {
+    "button": "Weitergeben",
+    "title": "Weitergeben: {title}",
+    "chat": "In einen Chat",
+    "chatEmpty": "Noch keine Chats. Schreib zuerst jemandem.",
+    "group": "In eine Gruppe",
+    "groupEmpty": "Du bist in keiner Gruppe, in der du schreiben darfst.",
+    "groupCollect": "In die Sammlung legen",
+    "groupPost": "Im Gespräch der Gruppe posten",
+    "market": "Im Marktplatz deines Ortes",
+    "marketPost": "Im Marktplatz {place} posten",
+    "marketNone": "Wähle zuerst deinen Ort.",
+    "note": "Nachricht (optional)",
+    "notePlaceholder": "Schau mal, passt das zu dir?",
+    "send": "Senden",
+    "sent": "Gesendet.",
+    "added": "In der Sammlung von {name}.",
+    "posted": "Gepostet.",
+    "link": "Link",
+    "close": "Schließen",
+    "privateHint": "Nur wer es sehen darf, sieht den Inhalt der Karte. Für alle anderen steht dort „Nicht sichtbar“."
+  },
+  "access": {
+    "title": "Wer darf was?",
+    "read": "Lesen",
+    "write": "Bearbeiten",
+    "scopes": {
+      "me": "Nur ich",
+      "people": "Bestimmte Personen",
+      "group": "Die Gruppe",
+      "link": "Wer den Link hat",
+      "public": "Alle im Internet"
+    },
+    "writeHint": "Bearbeiten ist nie weiter offen als Lesen. Preis, Ort und Rechte ändert nur, wem es gehört.",
+    "people": "Personen",
+    "add": "Hinzufügen",
+    "search": "Name suchen",
+    "canWrite": "darf bearbeiten",
+    "canRead": "darf lesen",
+    "remove": "Entfernen",
+    "linkLabel": "Geheimer Link",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "saved": "Gespeichert.",
+    "noGroup": "Nur für Einträge einer Gruppe.",
+    "errors": {
+      "write_wider_than_read": "Bearbeiten darf nicht weiter offen sein als Lesen.",
+      "no_group": "Dieser Eintrag gehört zu keiner Gruppe."
+    }
+  },
+  "collection": {
+    "tab": "Sammlung",
+    "intro": "Alles, was zu dieser Gruppe gehört: Angebote, Gesuche, Dokumente, Aufgaben, Initiativen und Untergruppen. Hinzufügen geht über „Weitergeben“ an jedem Eintrag.",
+    "empty": "Noch nichts in der Sammlung.",
+    "subgroups": "Untergruppen",
+    "partOf": "Gehört zu",
+    "remove": "Aus der Sammlung nehmen",
+    "by": "von {name}"
+  }
+}

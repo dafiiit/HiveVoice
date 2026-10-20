@@ -372,6 +372,10 @@
     "listing_match_need": {
       "title": "Neue Anfrage passt zu „{for_title}“",
       "body": "„{title}“"
+    },
+    "object_shared": {
+      "title": "„{title}“ wurde für dich freigegeben",
+      "body": "Du darfst es lesen{write, select, true { und bearbeiten} other {}}."
     }
   }
 }

@@ -5,6 +5,7 @@ import { createGroup, similarGroups } from "@/lib/actions/groups";
 import { TagPicker } from "../TagPicker";
 import { RegionPicker } from "./RegionPicker";
 import { btn, chip, field } from "../ui/styles";
+import { COMMUNITIES, type CommunityPreset } from "@/lib/communities";
 
 export function GroupForm({ chain, ideas }: { chain: { id: string; name: string; level: string }[]; ideas: string[] }) {
   const t = useTranslations("group.form");
@@ -25,7 +26,15 @@ export function GroupForm({ chain, ideas }: { chain: { id: string; name: string;
   const [focus, setFocus] = useState("");
   const [modTasks, setModTasks] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [preset, setPreset] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const tp = useTranslations("group.presets");
+  const apply = (c: CommunityPreset | null) => {
+    setPreset(c?.key ?? null);
+    if (!c) return;
+    setKind(c.kind); setTemplate(c.template); setVisibility(c.visibility); setJoinPolicy(c.joinPolicy);
+    setAdultsOnly(c.adultsOnly); setModTasks(c.modTasks); setTags(Array.from(new Set([...tags, ...c.tags])));
+  };
   // While the name is typed: does a group like this exist already?
   useEffect(() => {
     const h = setTimeout(() => { similarGroups(name).then(setSimilar); }, 400);
@@ -39,6 +48,18 @@ export function GroupForm({ chain, ideas }: { chain: { id: string; name: string;
         if (res && !res.ok) setError(tc(`errors.${res.error}` as "errors.unknown"));
       });
     }}>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-bold">{tp("title")}</span>
+        <span className={field.hint}>{tp("text")}</span>
+        <div role="radiogroup" aria-label={tp("title")} className="grid gap-2 sm:grid-cols-2">
+          {COMMUNITIES.map((c) => (
+            <button key={c.key} type="button" role="radio" aria-checked={preset === c.key} onClick={() => apply(preset === c.key ? null : c)}
+              className={`flex flex-col items-start gap-1 p-3 text-left ${preset === c.key ? "bg-ink text-on-ink" : "border border-line-strong bg-surface text-ink"}`}>
+              <strong>{tp(`items.${c.key}.name`)}</strong><span className="text-sm">{tp(`items.${c.key}.text`)}</span>
+            </button>
+          ))}
+        </div>
+      </div>
       <label className={field.label}>{t("name")}<input required minLength={3} value={name} onChange={(e) => setName(e.target.value)} className={field.input} /></label>
       {similar.length > 0 && (
         <p role="status" className="m-0 border-l-4 border-ink bg-surface p-3 text-sm">

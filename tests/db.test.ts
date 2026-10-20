@@ -1356,3 +1356,66 @@ describe("market: categories, swaps and matching", () => {
     expect(refs.find((r) => r.id === rid2)!.via_listing_id).toBeNull();
   }));
 });
+
+describe("connections: cards, collections and separate rights", () => {
+  it("reads and writes by scope, passes on only what one may see, and nests groups", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const [{ id: lid }] = await as(tx, a, () => tx<{ id: string }[]>`select app.save_listing(${tx.json({ kind: "offer", title: "Werkbank teilen" })}) as id`);
+    const sees = (who: string | null) => as(tx, who, () => tx`select 1 from public.listings where id = ${lid}`).then((r) => r.length > 0);
+    expect(await sees(null)).toBe(true);
+
+    // only specific people: Ben may read, Cem may not; nobody but Ada may change the rights
+    await as(tx, a, () => tx`select app.set_object_access('listing', ${lid}, 'people', 'me')`);
+    await as(tx, a, () => tx`select app.grant_object('listing', ${lid}, ${b}, false)`);
+    expect(await sees(b)).toBe(true);
+    expect(await sees(c)).toBe(false);
+    expect(await sees(null)).toBe(false);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.set_object_access('listing', ${lid}, 'public', 'public')`))).toMatch(/forbidden/);
+    // reading only: Ben cannot edit; with the right to write he can, but not the price or the rights
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.save_listing(${sp.json({ id: lid, title: "Gekapert" })})`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.set_object_access('listing', ${lid}, 'people', 'people')`);
+    await as(tx, a, () => tx`select app.grant_object('listing', ${lid}, ${b}, true)`);
+    await as(tx, b, () => tx`select app.save_listing(${tx.json({ id: lid, title: "Werkbank und Säge teilen" })})`);
+    expect((await as(tx, a, () => tx<{ title: string }[]>`select title from public.listings where id = ${lid}`))[0].title).toBe("Werkbank und Säge teilen");
+    // writing is never wider than reading
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.set_object_access('listing', ${lid}, 'me', 'public')`))).toMatch(/write_wider_than_read/);
+
+    // a secret link: whoever has the token reads it
+    const [{ tok }] = await as(tx, a, () => tx<{ tok: string }[]>`select app.set_object_access('listing', ${lid}, 'link', 'me') as tok`);
+    expect(await sees(c)).toBe(false);
+    await tx`select set_config('app.link_token', ${tok}, true)`;
+    expect(await sees(c)).toBe(true);
+    await tx`select set_config('app.link_token', '', true)`;
+
+    // a card can only carry what the sender may see
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Werkstatt","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    expect(await fails(tx, (sp) => as(sp, c, () => sp`insert into public.posts (author_id, body, group_id, ref_type, ref_id) values (${c}, 'schau', ${gid}, 'listing', ${lid})`))).toMatch(/not_found/);
+    await as(tx, a, () => tx`insert into public.posts (author_id, body, group_id, ref_type, ref_id) values (${a}, 'schau', ${gid}, 'listing', ${lid})`);
+
+    // collections: a group holds a listing and another group (nesting); readers see the collection
+    const [{ sub }] = await as(tx, b, () => tx<{ sub: string }[]>`select app.create_group('{"name":"Holzgruppe","join_policy":"open"}'::jsonb) as sub`);
+    await as(tx, a, () => tx`insert into public.group_items (group_id, item_type, item_id, added_by) values (${gid}, 'group', ${sub}, ${a}), (${gid}, 'listing', ${lid}, ${a})`);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`insert into public.group_items (group_id, item_type, item_id, added_by) values (${gid}, 'group', ${gid}, ${a})`))).toBeTruthy();
+    const items = await as(tx, c, () => tx<{ item_type: string }[]>`select item_type from public.group_items where group_id = ${gid} order by item_type`);
+    expect(items.map((i) => i.item_type)).toEqual(["group", "listing"]);
+    // Cem may not remove what Ada added
+    await as(tx, c, () => tx`delete from public.group_items where group_id = ${gid} and item_type = 'group'`);
+    expect((await as(tx, c, () => tx`select 1 from public.group_items where group_id = ${gid}`)).length).toBe(2);
+  }));
+
+  it("tasks keep the group's rights by default and can be opened to specific people", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Geheimbund","join_policy":"request","visibility":"members"}'::jsonb) as gid`);
+    const [{ id: task }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.tasks (group_id, title, created_by) values (${gid}, 'Plakate drucken', ${a}) returning id`);
+    const seesTask = () => as(tx, b, () => tx`select 1 from public.tasks where id = ${task}`).then((r) => r.length > 0);
+    expect(await seesTask()).toBe(false);
+    await as(tx, a, () => tx`select app.set_object_access('task', ${task}, 'people', 'people')`);
+    await as(tx, a, () => tx`select app.grant_object('task', ${task}, ${b}, true)`);
+    expect(await seesTask()).toBe(true);
+    await as(tx, b, () => tx`update public.tasks set status = 'in_progress' where id = ${task}`);
+    expect((await as(tx, a, () => tx<{ status: string }[]>`select status::text from public.tasks where id = ${task}`))[0].status).toBe("in_progress");
+    const notes = await as(tx, b, () => tx`select 1 from public.notifications where profile_id = ${b} and kind = 'object_shared'`);
+    expect(notes.length).toBeGreaterThan(0);
+  }));
+});

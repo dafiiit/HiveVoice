@@ -14,6 +14,7 @@ import { Attachments } from "./Attachments";
 import { PollCard } from "./PollCard";
 import { ExtrasButtons, ExtrasPreview, useExtras } from "./ComposerExtras";
 import { btn, field } from "./ui/styles";
+import { RefCardView } from "./refs/RefCardView";
 
 const press = "inline-flex h-9 items-center border-0 bg-transparent p-0 transition-transform duration-150 ease-out active:scale-90";
 
@@ -106,6 +107,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
         {p.body && <p className="m-0 whitespace-pre-line">{p.body}</p>}
         <Attachments items={p.attachments} />
         {p.poll && <PollCard poll={p.poll} canVote={canWrite} signedIn={!!viewerId} loginPath={path} />}
+        <RefCardView card={p.ref} />
         {p.listing_id && (
           <Link href={`/${p.listing_kind === "offer" ? "offers" : "needs"}/${p.listing_id}`} className="flex flex-col gap-0.5 border border-ink bg-surface p-3 text-ink no-underline">
             <span className="text-xs font-bold">{p.listing_kind === "offer" ? t("offer") : t("need")}</span>

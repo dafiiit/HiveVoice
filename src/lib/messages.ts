@@ -2,13 +2,14 @@ import "server-only";
 import type { Tx } from "./db";
 import type { Message } from "./actions/messages";
 import { loadExtras } from "./extras";
+import { cardOf, loadRefCards } from "./refs";
 
-type Row = Omit<Message, "reply_to" | "attachments" | "poll"> & { reply_id: string | null; reply_body: string | null; reply_sender: string | null; reply_name: string | null; reply_kind: "text" | "photo" | "file" | "poll" | null };
+type Row = Omit<Message, "reply_to" | "attachments" | "poll" | "ref"> & { ref_type: string | null; ref_id: string | null; reply_id: string | null; reply_body: string | null; reply_sender: string | null; reply_name: string | null; reply_kind: "text" | "photo" | "file" | "poll" | null };
 
 /** Messages of a conversation with the quoted message, files and poll of each. Everything, only newer ones (polling), or one by id. */
 export async function loadMessages(tx: Tx, conversationId: string, opts: { since?: string; id?: string } = {}): Promise<Message[]> {
   const rows = await tx<Row[]>`
-    select m.id, m.body, m.created_at, m.edited_at, m.deleted_at, m.sender_id, p.display_name as sender_name, p.avatar_seed as sender_seed, p.avatar_path as sender_path,
+    select m.id, m.body, m.ref_type, m.ref_id, m.created_at, m.edited_at, m.deleted_at, m.sender_id, p.display_name as sender_name, p.avatar_seed as sender_seed, p.avatar_path as sender_path,
       rm.id as reply_id, rm.body as reply_body, rm.sender_id as reply_sender, rp.display_name as reply_name,
       case when rm.id is null then null
            when exists (select 1 from public.attachments a where a.message_id = rm.id and a.mime like 'image/%') then 'photo'
@@ -24,8 +25,10 @@ export async function loadMessages(tx: Tx, conversationId: string, opts: { since
       ${opts.id ? tx`and m.id = ${opts.id}` : tx``}
     order by m.created_at`;
   const ex = await loadExtras(tx, "message", rows.map((r) => r.id));
-  return rows.map(({ reply_id, reply_body, reply_sender, reply_name, reply_kind, ...m }) => ({
+  const cards = await loadRefCards(tx, rows.filter((r) => !r.deleted_at).map((r) => ({ type: r.ref_type, id: r.ref_id })));
+  return rows.map(({ reply_id, reply_body, reply_sender, reply_name, reply_kind, ref_type, ref_id, ...m }) => ({
     ...m,
+    ref: m.deleted_at ? null : cardOf(cards, { ref_type, ref_id }),
     reply_to: reply_id ? { id: reply_id, body: (reply_body ?? "").slice(0, 200), sender_id: reply_sender ?? "", sender_name: reply_name ?? "", kind: reply_kind ?? "text" } : null,
     attachments: ex.attachments.get(m.id) ?? [],
     poll: ex.polls.get(m.id) ?? null,

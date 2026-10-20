@@ -34,6 +34,7 @@ import ns_onboarding from "./onboarding.json";
 import ns_posts from "./posts.json";
 import ns_principles from "./principles.json";
 import ns_profile from "./profile.json";
+import ns_refs from "./refs.json";
 import ns_report from "./report.json";
 import ns_responsible from "./responsible.json";
 import ns_resprights from "./resprights.json";
@@ -78,6 +79,7 @@ const messages = {
   "posts": ns_posts,
   "principles": ns_principles,
   "profile": ns_profile,
+  "refs": ns_refs,
   "report": ns_report,
   "responsible": ns_responsible,
   "resprights": ns_resprights,

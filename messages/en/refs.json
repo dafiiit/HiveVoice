@@ -1,0 +1,77 @@
+{
+  "types": {
+    "listing": "Listing",
+    "resource": "Document",
+    "group": "Group",
+    "task": "Task",
+    "initiative": "Initiative"
+  },
+  "offer": "Offer",
+  "need": "Request",
+  "members": "{n, plural, one {1 member} other {# members}}",
+  "status": {
+    "open": "open",
+    "in_progress": "in progress",
+    "done": "done"
+  },
+  "missing": "Not visible to you: deleted or shared with specific people only.",
+  "share": {
+    "button": "Pass on",
+    "title": "Pass on: {title}",
+    "chat": "Into a chat",
+    "chatEmpty": "No chats yet. Write to someone first.",
+    "group": "Into a group",
+    "groupEmpty": "You are not in any group where you may write.",
+    "groupCollect": "Add to the collection",
+    "groupPost": "Post in the group's talk",
+    "market": "In your place's marketplace",
+    "marketPost": "Post in the marketplace of {place}",
+    "marketNone": "Choose your place first.",
+    "note": "Message (optional)",
+    "notePlaceholder": "Have a look, does this fit you?",
+    "send": "Send",
+    "sent": "Sent.",
+    "added": "In the collection of {name}.",
+    "posted": "Posted.",
+    "link": "Link",
+    "close": "Close",
+    "privateHint": "Only people allowed to see it see the card's content. Everyone else sees “Not visible”."
+  },
+  "access": {
+    "title": "Who may do what?",
+    "read": "Read",
+    "write": "Edit",
+    "scopes": {
+      "me": "Only me",
+      "people": "Specific people",
+      "group": "The group",
+      "link": "Anyone with the link",
+      "public": "Everyone on the internet"
+    },
+    "writeHint": "Editing is never more open than reading. Only the owner changes price, place and rights.",
+    "people": "People",
+    "add": "Add",
+    "search": "Search a name",
+    "canWrite": "may edit",
+    "canRead": "may read",
+    "remove": "Remove",
+    "linkLabel": "Secret link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "saved": "Saved.",
+    "noGroup": "Only for listings of a group.",
+    "errors": {
+      "write_wider_than_read": "Editing may not be more open than reading.",
+      "no_group": "This listing belongs to no group."
+    }
+  },
+  "collection": {
+    "tab": "Collection",
+    "intro": "Everything that belongs to this group: offers, requests, documents, tasks, initiatives and subgroups. Add things with “Pass on” on any of them.",
+    "empty": "Nothing in the collection yet.",
+    "subgroups": "Subgroups",
+    "partOf": "Part of",
+    "remove": "Remove from the collection",
+    "by": "by {name}"
+  }
+}

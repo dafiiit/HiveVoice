@@ -156,6 +156,8 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = "/me?tab=reports"; label = t("labels.jury");
     } else if (kind === "emergency_review" || kind === "admin_proposal" || kind === "emergency_access") {
       href = "/notifications"; label = t("labels.other");
+    } else if (kind === "object_shared") {
+      href = `/r/${p.type}/${p.id}`; category = "requests"; label = t("labels.other");
     } else if (kind === "listing_match") {
       kind = `listing_match_${p.kind === "need" ? "need" : "offer"}`;
       href = `/${p.kind === "need" ? "needs" : "offers"}/${p.listing_id}`; label = t("labels.request");

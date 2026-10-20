@@ -146,5 +146,52 @@
     "focusPlaceholder": "e.g. organisation, finances",
     "modTasks": "Task board",
     "submit": "Start group"
+  },
+  "presets": {
+    "title": "Who is the group for?",
+    "text": "A preset sets everything up to fit. You can change every setting afterwards.",
+    "none": "No preset",
+    "items": {
+      "sports": {
+        "name": "Sports club",
+        "text": "Publicly visible, joining on request. Departments as subgroups, training times as courses."
+      },
+      "school": {
+        "name": "School class or school",
+        "text": "Secret, invitation only. Letters to parents as documents, trips and duties as tasks."
+      },
+      "daycare": {
+        "name": "Day-care parents",
+        "text": "Secret, adults only, by invitation. Car pools and pick-up duties as tasks."
+      },
+      "neighbours": {
+        "name": "Neighbourhood or building",
+        "text": "Visible to members, joining on request. Lending and helping through Matters."
+      },
+      "faith": {
+        "name": "Faith community",
+        "text": "Public, joining on request. Volunteer duties as tasks, choir or youth as subgroups."
+      },
+      "firebrigade": {
+        "name": "Volunteer fire brigade or relief group",
+        "text": "For members, invitation only. Duty rosters and drills as tasks, papers as documents."
+      },
+      "foodsharing": {
+        "name": "Food sharing or food bank",
+        "text": "Open to everyone. Pick-ups as tasks, food as offers in the marketplace."
+      },
+      "repair": {
+        "name": "Repair café or open workshop",
+        "text": "Open to everyone. Dates as courses, tools to lend as offers."
+      },
+      "citizens": {
+        "name": "Citizens' initiative",
+        "text": "Public and open. Demands as initiatives with a vote, research as documents."
+      },
+      "housing": {
+        "name": "Housing project or cooperative",
+        "text": "For members, adults only, by invitation. Decisions as goals, cleaning and garden duties as tasks."
+      }
+    }
   }
 }

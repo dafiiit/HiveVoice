@@ -146,5 +146,52 @@
     "focusPlaceholder": "z. B. Organisation, Finanzen",
     "modTasks": "Aufgaben-Board",
     "submit": "Gruppe gründen"
+  },
+  "presets": {
+    "title": "Für wen ist die Gruppe?",
+    "text": "Eine Vorlage stellt alles passend ein. Du kannst danach jede Einstellung ändern.",
+    "none": "Ohne Vorlage",
+    "items": {
+      "sports": {
+        "name": "Sportverein",
+        "text": "Öffentlich sichtbar, Beitritt auf Anfrage. Abteilungen als Untergruppen, Trainingszeiten als Kurse."
+      },
+      "school": {
+        "name": "Schulklasse oder Schule",
+        "text": "Geheim, nur mit Einladung. Elternbriefe als Dokumente, Ausflüge und Dienste als Aufgaben."
+      },
+      "daycare": {
+        "name": "Kita-Eltern",
+        "text": "Geheim, nur Erwachsene mit Einladung. Fahrgemeinschaften und Abholdienste als Aufgaben."
+      },
+      "neighbours": {
+        "name": "Nachbarschaft oder Haus",
+        "text": "Nur für Mitglieder sichtbar, Beitritt auf Anfrage. Verleihen und Helfen über Anliegen."
+      },
+      "faith": {
+        "name": "Religiöse Gemeinde",
+        "text": "Öffentlich, Beitritt auf Anfrage. Ehrenamtsdienste als Aufgaben, Gruppen wie Chor oder Jugend als Untergruppen."
+      },
+      "firebrigade": {
+        "name": "Freiwillige Feuerwehr oder Hilfsorganisation",
+        "text": "Für Mitglieder, nur mit Einladung. Dienstpläne und Übungen als Aufgaben, Unterlagen als Dokumente."
+      },
+      "foodsharing": {
+        "name": "Foodsharing oder Tafel",
+        "text": "Offen für alle. Abholungen als Aufgaben, Lebensmittel als Angebote im Marktplatz."
+      },
+      "repair": {
+        "name": "Repair-Café oder offene Werkstatt",
+        "text": "Offen für alle. Termine als Kurse, Werkzeug zum Ausleihen als Angebote."
+      },
+      "citizens": {
+        "name": "Bürgerinitiative",
+        "text": "Öffentlich und offen. Forderungen als Initiativen mit Abstimmung, Recherche als Dokumente."
+      },
+      "housing": {
+        "name": "Wohnprojekt oder Genossenschaft",
+        "text": "Für Mitglieder, nur Erwachsene mit Einladung. Beschlüsse als Ziele, Putz- und Gartendienste als Aufgaben."
+      }
+    }
   }
 }

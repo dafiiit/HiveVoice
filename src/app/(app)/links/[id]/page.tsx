@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { ShareMenu } from "@/components/refs/ShareMenu";
 import { dateLong } from "@/lib/format";
 import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/queries";
 import { popularTags } from "@/lib/queries";
@@ -106,6 +107,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
       </div>
       <h1 className="display m-0 break-words">{r.title}</h1>
       {r.description && <p className="m-0 whitespace-pre-line text-lg">{r.description}</p>}
+      {session && !meta.trashed_at && <ShareMenu type="resource" id={id} title={r.title} className={`${btn.secondary} self-start`} />}
       {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/explore?kind=links&q=%23${x}`} className="inline-flex h-8 items-center border border-line px-3 text-sm text-ink no-underline">#{x}</Link>)}</div>}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
         {meta.visibility === "me" && <span>{td("page.private")}</span>}

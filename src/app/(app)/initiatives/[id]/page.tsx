@@ -18,6 +18,7 @@ import { CoAuthors, type AuthorRow, type PendingInvite, type RemovalRow } from "
 import { AuthorInviteBanner } from "@/components/initiative/AuthorInviteBanner";
 import { BlockInitiative } from "@/components/initiative/BlockInitiative";
 import { ShareBlock } from "@/components/ShareBlock";
+import { ShareMenu } from "@/components/refs/ShareMenu";
 import { WhyNot } from "@/components/WhyNot";
 import { BallotPanel, type BallotView } from "@/components/BallotPanel";
 import { Composer, PostList } from "@/components/PostList";
@@ -214,7 +215,10 @@ export default async function InitiativePage({ params, searchParams }: PageProps
           {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className="inline-flex h-[52px] items-center bg-ink px-6 font-bold text-on-ink no-underline">{t("help")}</Link>}
           <span className="tabular">{t("supports", { n: ini.support_count, formatted: num(ini.support_count, locale) })}</span>
         </div>
-        <ShareBlock path={path} title={ini.title} isPublic={!!ini.published_at && !ini.blocked_at} />
+        <div className="flex flex-wrap items-center gap-3">
+          {signedIn && <ShareMenu type="initiative" id={id} title={ini.title} />}
+          <ShareBlock path={path} title={ini.title} isPublic={!!ini.published_at && !ini.blocked_at} />
+        </div>
         {signedIn && !isAuthor && !ini.outcome && <WhyNot action="initiative.edit" objectId={id} />}
         {isAuthor && !ini.blocked_at && (
           <AuthorTools id={id} phase={ini.phase} outcome={ini.outcome} hasBallot={ballotOpen} hasGroup={!!ini.group_slug} title={ini.title}

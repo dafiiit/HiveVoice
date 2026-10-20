@@ -372,6 +372,10 @@
     "listing_match_need": {
       "title": "A new request fits “{for_title}”",
       "body": "“{title}”"
+    },
+    "object_shared": {
+      "title": "“{title}” was shared with you",
+      "body": "You may read{write, select, true { and edit} other {}} it."
     }
   }
 }

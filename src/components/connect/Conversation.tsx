@@ -10,6 +10,7 @@ import { IconClose } from "../ui/Icons";
 import { ReportButton } from "../ReportDialog";
 import { Attachments } from "../Attachments";
 import { PollCard } from "../PollCard";
+import { RefCardView } from "../refs/RefCardView";
 import { ExtrasButtons, ExtrasPreview, useExtras } from "../ComposerExtras";
 
 // `key` stays the same when a sent message gets its real id, so its bubble is not rebuilt; `fresh` bubbles slide in.
@@ -144,7 +145,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     x.clear();
     setReplyTo(null);
     stick.current = true;
-    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true, reply_to: quote, attachments: [], poll: null, edited_at: null, deleted_at: null }]);
+    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true, reply_to: quote, attachments: [], poll: null, ref: null, edited_at: null, deleted_at: null }]);
     const res = await sendMessage({ conversationId: id, body, replyToId: quote?.id ?? null, files, poll });
     if (res.ok) {
       setMessages((m) => m.some((y) => y.id === res.data.id)
@@ -211,6 +212,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                       {m.body && <span className="whitespace-pre-line break-words">{m.body}</span>}
                     </div>
                   )}
+                  {!m.deleted_at && m.ref && <div className={`w-full max-w-[360px] ${mine ? "self-end" : "self-start"}`}><RefCardView card={m.ref} /></div>}
                   <Attachments items={m.attachments} align={mine ? "end" : "start"} />
                   {m.poll && (
                     <PollCard poll={m.poll} canVote={verified} signedIn loginPath="/connect"

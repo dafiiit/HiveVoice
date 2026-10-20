@@ -134,3 +134,14 @@ export async function toggleAlly(listingId: string, on: boolean) {
   revalidatePath("/needs");
   return res;
 }
+
+/** Title and description, for the owner and for people with editing rights. */
+export async function updateListing(id: string, title: string, description: string, path: string) {
+  const res = await run(async (tx) => {
+    if (title.trim().length < 3) throw new Error("invalid");
+    await tx`select app.save_listing(${tx.json({ id, title: title.trim().slice(0, 200), description: description.slice(0, 5000) })})`;
+    return null;
+  });
+  revalidatePath(path);
+  return res;
+}

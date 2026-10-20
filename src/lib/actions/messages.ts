@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { run } from "../action";
 import { loadMessages } from "../messages";
+import type { RefCard } from "../refs";
 import { MAX_FILES, cleanPoll, pollReady, type Attachment, type PollDraft, type PollView, type UploadedFile } from "../files";
 
 export type Message = {
@@ -11,6 +12,8 @@ export type Message = {
   reply_to: { id: string; body: string; sender_id: string; sender_name: string; kind: "text" | "photo" | "file" | "poll" } | null;
   attachments: Attachment[];
   poll: PollView | null;
+  /** Something passed on as a card (an offer, a document, a group ...). */
+  ref: RefCard | "missing" | null;
 };
 
 export type MessageInput = { conversationId: string; body: string; replyToId?: string | null; files?: UploadedFile[]; poll?: PollDraft | null };

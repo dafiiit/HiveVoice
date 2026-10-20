@@ -13,12 +13,17 @@ import { ContactButton } from "./ContactButton";
 import { AllyButton } from "./MyListings";
 import { priceLabel } from "./price";
 import { ShareBlock } from "../ShareBlock";
+import { ShareMenu } from "../refs/ShareMenu";
+import { EditListing } from "./EditListing";
+import { AccessPanel } from "../refs/AccessPanel";
+import type { AccessGrant, Scope } from "@/lib/actions/share";
+import { headers } from "next/headers";
 import { attrFacts, customFields } from "@/lib/market";
 import { ListingCardView, reasonLabels } from "./ListingCardView";
 
 type Match = ListingCard & { score: number; reasons: string[]; sent: boolean };
 
-export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | "need" }) {
+export async function ListingDetail({ id, kind, linkToken = null }: { id: string; kind: "offer" | "need"; linkToken?: string | null }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
@@ -40,11 +45,20 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
       from app.listing_matches(${id}, 24) m join ${listingCardFrom(tx)} on l.id = m.id order by m.score desc`;
     const mine = me && l.owner_id !== me ? await tx<{ id: string; title: string }[]>`
       select id, title from public.listings where owner_id = ${me} and kind <> ${kind} and status = 'active' order by created_at desc limit 20` : [];
-    return { l, details, sent, allied, matches, mine };
-  });
+    // rights: only for the owner, who manages them
+    const access = l.owner_id === me ? (await tx<{ read_scope: Scope; write_scope: Scope; link_token: string | null }[]>`
+      select read_scope, write_scope, link_token from public.listings where id = ${id}`)[0] : null;
+    const grants = access ? await tx<AccessGrant[]>`
+      select g.profile_id, p.display_name as name, p.avatar_seed as seed, g.can_write from public.object_grants g join public.profiles p on p.id = g.profile_id
+      where g.object_type = 'listing' and g.object_id = ${id} order by p.display_name` : [];
+    const canEdit = !!me && l.owner_id !== me && (await tx<{ ok: boolean }[]>`select app.object_access('listing', ${id}, true) as ok`)[0].ok;
+    return { l, details, sent, allied, matches, mine, access, grants, canEdit };
+  }, { linkToken });
   if (!data) notFound();
   const { l } = data;
   const own = l.owner_id === me;
+  const h = await headers();
+  const origin = `${h.get("x-forwarded-proto") ?? "http"}://${h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000"}`;
   const tcat = await getTranslations("categories");
   const facts = attrFacts(l.category, l.attrs, (k, v) => tcat(k as "label", v), locale);
   const custom = customFields(l.attrs);
@@ -77,7 +91,15 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
       </span>
       <h1 className="display m-0">{l.title}</h1>
       {l.description && <p className="m-0 whitespace-pre-line text-lg">{l.description}</p>}
-      <ShareBlock path={`/${kind === "need" ? "needs" : "offers"}/${id}`} title={l.title} isPublic={!l.group_slug} />
+      <div className="flex flex-wrap items-center gap-3">
+        {session && <ShareMenu type="listing" id={l.id} title={l.title} />}
+        {(own || data.canEdit) && <EditListing id={l.id} title={l.title} description={l.description} path={`/${kind === "need" ? "needs" : "offers"}/${id}`} />}
+        {l.read_scope === "public" && <ShareBlock path={`/${kind === "need" ? "needs" : "offers"}/${id}`} title={l.title} isPublic />}
+      </div>
+      {data.access && (
+        <AccessPanel type="listing" id={l.id} read={data.access.read_scope} write={data.access.write_scope} hasGroup={!!l.group_slug}
+          linkUrl={data.access.link_token ? `${origin}/r/listing/${l.id}?k=${data.access.link_token}` : null} grants={data.grants} path={`/${kind === "need" ? "needs" : "offers"}/${id}`} />
+      )}
       <dl className="m-0 grid grid-cols-[140px_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">
         <dt className="font-bold">{t("category")}</dt><dd className="m-0">{tcat(`names.${l.category}` as "names.help")}</dd>
         {facts.map((f) => (<div key={f.key} className="contents"><dt className="font-bold">{f.label}</dt><dd className="m-0">{f.flag ? tcat("yes") : f.value}</dd></div>))}

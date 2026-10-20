@@ -218,5 +218,11 @@
   "title": "Anliegen",
   "lead": "Biete, was du kannst oder hast, und frag an, was dir fehlt. Wir bringen beides zusammen und zeigen, warum es passt.",
   "leadShort": "Bieten und suchen an einem Ort.",
-  "emptyYou": "Noch nichts Passendes. Trag oben ein, was du bietest oder suchst, oder ergänze in deinem Profil, was du kannst und brauchst."
+  "emptyYou": "Noch nichts Passendes. Trag oben ein, was du bietest oder suchst, oder ergänze in deinem Profil, was du kannst und brauchst.",
+  "edit": {
+    "button": "Bearbeiten",
+    "title": "Titel",
+    "description": "Beschreibung",
+    "save": "Speichern"
+  }
 }

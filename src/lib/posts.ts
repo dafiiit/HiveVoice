@@ -2,6 +2,7 @@ import "server-only";
 import type { Tx } from "./db";
 import { regionTree } from "./queries";
 import { loadExtras } from "./extras";
+import { cardOf, loadRefCards, type RefCard } from "./refs";
 import type { Attachment, PollView } from "./files";
 
 export type PostView = {
@@ -26,6 +27,10 @@ export type PostView = {
   replies: PostView[];
   attachments: Attachment[];
   poll: PollView | null;
+  /** Something passed on as a card. */
+  ref: RefCard | "missing" | null;
+  ref_type?: string | null;
+  ref_id?: string | null;
   /** Taken down by the group's moderators: the post stays as a visible gap. */
   removed: boolean;
   hidden_reason: string | null;
@@ -71,15 +76,17 @@ export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, o
     order by p.created_at asc`;
   for (const p of posts) p.replies = replies.filter((r) => r.parent_id === p.id);
   const ex = await loadExtras(tx, "post", [...posts, ...replies].map((p) => p.id));
+  const cards = await loadRefCards(tx, [...posts, ...replies].map((p) => ({ type: p.ref_type ?? null, id: p.ref_id ?? null })));
   for (const p of [...posts, ...replies]) {
     p.attachments = ex.attachments.get(p.id) ?? [];
     p.poll = ex.polls.get(p.id) ?? null;
+    p.ref = p.removed ? null : cardOf(cards, p);
   }
   return posts;
 }
 
 const postColumns = (tx: Tx, viewerId: string | null) => tx`
-  p.id, p.body, p.created_at, p.author_id, p.score, p.reply_count, p.is_pinned, p.listing_id, p.initiative_id,
+  p.id, p.body, p.created_at, p.author_id, p.score, p.reply_count, p.is_pinned, p.listing_id, p.initiative_id, p.ref_type, p.ref_id, null::jsonb as ref,
   a.display_name as author_name, a.avatar_seed as author_seed, a.avatar_path as author_path, a.display_mode as author_mode, ar.name as author_region,
   l.title as listing_title, l.kind::text as listing_kind, i.title as initiative_title,
   ${viewerId ? tx`coalesce((select v.value from public.post_votes v where v.post_id = p.id and v.profile_id = ${viewerId}), 0)` : tx`0`}::int as my_vote,

@@ -47,7 +47,7 @@ export async function ListingDetail({ id, kind, linkToken = null }: { id: string
       select id, title from public.listings where owner_id = ${me} and kind <> ${kind} and status = 'active' order by created_at desc limit 20` : [];
     // rights: only for the owner, who manages them
     const access = l.owner_id === me ? (await tx<{ read_scope: Scope; write_scope: Scope; link_token: string | null }[]>`
-      select read_scope, write_scope, link_token from public.listings where id = ${id}`)[0] : null;
+      select read_scope, write_scope, app.listing_link_token(${id}) as link_token from public.listings where id = ${id}`)[0] : null;
     const grants = access ? await tx<AccessGrant[]>`
       select g.profile_id, p.display_name as name, p.avatar_seed as seed, g.can_write from public.object_grants g join public.profiles p on p.id = g.profile_id
       where g.object_type = 'listing' and g.object_id = ${id} order by p.display_name` : [];

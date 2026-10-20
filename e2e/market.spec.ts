@@ -52,7 +52,7 @@ test.describe("offer with something in return", () => {
       await expect(page.getByLabel("Was suchst du im Gegenzug?")).toHaveValue("Hilfe im Garten");
       await page.getByRole("button", { name: "Veröffentlichen" }).click();
       await expect(page.getByText("Veröffentlicht und als Tausch verbunden.")).toBeVisible({ timeout: 20_000 });
-      await page.getByRole("link", { name: "Ansehen" }).click();
+      await page.getByRole("link", { name: "Ansehen", exact: true }).click();
       await expect(page.getByRole("heading", { name: title })).toBeVisible();
       await expect(page.getByText("Zu verschenken", { exact: true })).toBeVisible();
       await expect(page.getByText("Gebraucht", { exact: true })).toBeVisible();

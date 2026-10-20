@@ -168,7 +168,7 @@ test.describe("signed in", () => {
 
   test("the login is kept: an expired access token is renewed and stored", async ({ page, context, baseURL }, info) => {
     test.skip(info.project.name !== "desktop", "cookie surgery once is enough");
-    await login(page);
+    await login(page, { fresh: true });
     const cookie = (await context.cookies()).find((c) => c.name.endsWith("auth-token"));
     test.skip(!cookie, "the session is stored in chunks here");
     const session = JSON.parse(Buffer.from(cookie!.value.replace(/^base64-/, ""), "base64url").toString());

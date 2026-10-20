@@ -74,7 +74,8 @@
     "resource_suggest": "Suggest changes to documents",
     "resource_comment": "Comment on documents",
     "invite_try": "Enter an invitation code",
-    "invite_code": "Create invitation codes"
+    "invite_code": "Create invitation codes",
+    "people_search": "Search people"
   },
   "status": {
     "ok": "Yes",

@@ -74,7 +74,8 @@
     "resource_suggest": "Änderungen an Dokumenten vorschlagen",
     "resource_comment": "Dokumente kommentieren",
     "invite_try": "Einladungscode eingeben",
-    "invite_code": "Einladungscodes erzeugen"
+    "invite_code": "Einladungscodes erzeugen",
+    "people_search": "Menschen suchen"
   },
   "status": {
     "ok": "Ja",

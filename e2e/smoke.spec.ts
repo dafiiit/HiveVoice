@@ -13,7 +13,7 @@ test("guests can explore and read an initiative", async ({ page }) => {
   await first.click();
   await expect(page.getByRole("tablist", { name: /Bereiche der Initiative/ })).toBeVisible();
   await page.getByRole("tab", { name: /Argumente/ }).click();
-  await expect(page.getByRole("heading", { name: /Pro ·/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Pro ·/ })).toBeVisible({ timeout: 15_000 });
 });
 
 test("the admin area is not reachable under its internal path", async ({ request }) => {

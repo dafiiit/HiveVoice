@@ -21,8 +21,15 @@ test("the admin area is not reachable under its internal path", async ({ request
   expect(res.status()).toBe(404);
 });
 
+test("with bot protection on, the login form waits for the check", async ({ page }) => {
+  test.skip(!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY, "no captcha configured");
+  await page.goto("/login");
+  await expect(page.locator('script[data-turnstile]')).toHaveCount(1);
+});
+
 test("a test account can sign in and reaches Verbinden", async ({ page }) => {
   test.skip(!process.env.TEST_USER_EMAIL, "TEST_USER_EMAIL not set");
+  test.skip(!!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY, "the captcha cannot be solved by a test browser; the other tests sign in through e2e/auth.ts");
   await page.goto("/login");
   await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
   await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);

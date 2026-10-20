@@ -4,5 +4,8 @@
   "contactTitle": "Anfrage",
   "to": "An {name}",
   "message": "Nachricht",
-  "privacy": "Kontaktdaten werden erst geteilt, wenn {name} zustimmt."
+  "privacy": "Kontaktdaten werden erst geteilt, wenn {name} zustimmt.",
+  "via": "Passt zu meinem Eintrag",
+  "viaNone": "Ohne Bezug",
+  "viaLine": "passt zu „{title}“"
 }

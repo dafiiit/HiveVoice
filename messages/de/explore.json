@@ -6,6 +6,7 @@
   "what": "Was suchst du?",
   "kinds": {
     "initiatives": "Initiativen",
+    "market": "Marktplatz",
     "groups": "Gruppen",
     "people": "Menschen",
     "responsible": "Zuständige",
@@ -26,7 +27,8 @@
     "groups": "{n, plural, one {1 Gruppe} other {# Gruppen}}",
     "people": "{n, plural, one {1 Mensch} other {# Menschen}}",
     "responsible": "{n, plural, one {1 Zuständigkeit} other {# Zuständigkeiten}}",
-    "links": "{n, plural, one {1 Link} other {# Links}}"
+    "links": "{n, plural, one {1 Link} other {# Links}}",
+    "market": "{n, plural, one {1 Eintrag} other {# Einträge}}"
   },
   "nothing": "Nichts gefunden. Versuch einen anderen Begriff oder eine andere Ebene.",
   "groupMeta": "{n, plural, one {1 Mitglied} other {# Mitglieder}} · {place}",
@@ -43,5 +45,37 @@
   "filter": "Filter",
   "removeFilter": "{what} entfernen",
   "inPlace": "In {name}",
-  "searchChip": "Suche: „{q}“"
+  "searchChip": "Suche: „{q}“",
+  "market": {
+    "side": {
+      "offer": "Angebote",
+      "need": "Gesuche"
+    },
+    "sideLabel": "Angebote oder Gesuche",
+    "search": "Suchbegriff",
+    "searchPlaceholder": "z. B. Fahrrad, WG, Nachhilfe",
+    "freeOnly": "Nur kostenlos",
+    "maxPrice": "Höchstens (€)",
+    "minLabel": "mindestens {label}",
+    "dateFrom": "{label} ab",
+    "apply": "Anwenden",
+    "reset": "Filter zurücksetzen",
+    "view": "Ansicht",
+    "views": {
+      "list": "Liste",
+      "map": "Karte"
+    },
+    "sorts": {
+      "relevant": "Relevant",
+      "new": "Neu",
+      "price": "Preis aufsteigend",
+      "date": "Nächster Termin"
+    },
+    "post": "Eintragen",
+    "mapMissing": "{n, plural, one {1 Eintrag ohne Ort fehlt} other {# Einträge ohne Ort fehlen}} auf der Karte.",
+    "mapLabel": "Karte der Einträge",
+    "mapAt": "{n, plural, one {1 Eintrag} other {# Einträge}} in {place}",
+    "mapAll": "Alle in {place} zeigen",
+    "mapPrivacy": "Einträge erscheinen nur am Mittelpunkt ihres Ortes, nie an einer Adresse."
+  }
 }

@@ -3,6 +3,7 @@ import ns_admin from "./admin.json";
 import ns_arguments from "./arguments.json";
 import ns_auth from "./auth.json";
 import ns_ballot from "./ballot.json";
+import ns_categories from "./categories.json";
 import ns_common from "./common.json";
 import ns_connect from "./connect.json";
 import ns_docrights from "./docrights.json";
@@ -21,6 +22,7 @@ import ns_legal from "./legal.json";
 import ns_levels from "./levels.json";
 import ns_links from "./links.json";
 import ns_listings from "./listings.json";
+import ns_map from "./map.json";
 import ns_market from "./market.json";
 import ns_me from "./me.json";
 import ns_meta from "./meta.json";
@@ -45,6 +47,7 @@ const messages = {
   "arguments": ns_arguments,
   "auth": ns_auth,
   "ballot": ns_ballot,
+  "categories": ns_categories,
   "common": ns_common,
   "connect": ns_connect,
   "docrights": ns_docrights,
@@ -63,6 +66,7 @@ const messages = {
   "levels": ns_levels,
   "links": ns_links,
   "listings": ns_listings,
+  "map": ns_map,
   "market": ns_market,
   "me": ns_me,
   "meta": ns_meta,

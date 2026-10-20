@@ -1317,3 +1317,42 @@ describe("polls and the rights matrix", () => {
     expect((await as(tx, b, () => tx`select 1 from public.polls where id = ${poll}`)).length).toBe(0);
   }));
 });
+
+describe("market: categories, swaps and matching", () => {
+  it("matches with reasons, links a swap both ways, notifies good matches and keeps the reference of a request", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const save = (who: string, p: Record<string, unknown>) =>
+      as(tx, who, () => tx<{ id: string }[]>`select app.save_listing(${tx.json(p as never)}) as id`).then((r) => r[0].id);
+    const bike = await save(a, { kind: "offer", title: "Fahrrad zu verschenken", category: "item", attrs: { deal: "give" }, tags: ["fahrrad"], pay_mode: "swap", swap_text: "Gartenhilfe" });
+    const garden = await save(a, { kind: "need", title: "Hilfe im Garten", category: "help", tags: ["garten"], pay_mode: "swap", swap_text: "Fahrrad" });
+    // only two of one's own listings of different kinds can be paired
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.pair_listings(${bike}, ${garden})`))).toMatch(/forbidden/);
+    await as(tx, a, () => tx`select app.pair_listings(${bike}, ${garden})`);
+    const pairs = await as(tx, a, () => tx<{ id: string; pair_id: string }[]>`select id, pair_id from public.listings where id in (${bike}, ${garden})`);
+    expect(pairs.every((p) => p.pair_id === (p.id === bike ? garden : bike))).toBe(true);
+
+    // Ben needs a bike and offers garden work: a swap in both directions
+    const wants = await save(b, { kind: "need", title: "Suche ein Fahrrad", category: "item", attrs: { deal: "give" }, tags: ["fahrrad"] });
+    await save(b, { kind: "offer", title: "Ich helfe im Garten", category: "help", tags: ["garten"] });
+    const [m] = await as(tx, a, () => tx<{ id: string; score: number; reasons: string[] }[]>`select * from app.listing_matches(${bike}, 5)`);
+    expect(m.id).toBe(wants);
+    expect(m.reasons).toEqual(expect.arrayContaining(["tag:fahrrad", "category", "deal", "swap"]));
+    // a guest sees the same matches, nobody sees their own listings
+    expect((await as(tx, null, () => tx`select * from app.listing_matches(${bike}, 5)`)).length).toBeGreaterThan(0);
+    expect((await as(tx, b, () => tx<{ id: string }[]>`select id from app.listing_matches(${wants}, 5)`)).map((r) => r.id)).toContain(bike);
+
+    // a new listing tells the owners of good matches once
+    const cemBike = await save(c, { kind: "offer", title: "Fahrrad zu verschenken, blau", category: "item", attrs: { deal: "give" }, tags: ["fahrrad"] });
+    expect((await as(tx, c, () => tx<{ n: number }[]>`select app.notify_listing_matches(${cemBike}) as n`))[0].n).toBeGreaterThan(0);
+    await as(tx, c, () => tx`select app.notify_listing_matches(${cemBike})`);
+    const notes = await as(tx, b, () => tx`select 1 from public.notifications where profile_id = ${b} and kind = 'listing_match' and payload ->> 'listing_id' = ${cemBike}`);
+    expect(notes.length).toBe(1);
+
+    // a request may refer to one's own listing of the other kind, not to someone else's
+    const [{ rid }] = await as(tx, b, () => tx<{ rid: string }[]>`select app.request_contact(${bike}, 'Tauschen?', ${wants}) as rid`);
+    const [{ rid: rid2 }] = await as(tx, b, () => tx<{ rid: string }[]>`select app.request_contact(${cemBike}, 'Hallo', ${garden}) as rid`);
+    const refs = await as(tx, b, () => tx<{ id: string; via_listing_id: string | null }[]>`select id, via_listing_id from public.contact_requests where id in (${rid}, ${rid2})`);
+    expect(refs.find((r) => r.id === rid)!.via_listing_id).toBe(wants);
+    expect(refs.find((r) => r.id === rid2)!.via_listing_id).toBeNull();
+  }));
+});

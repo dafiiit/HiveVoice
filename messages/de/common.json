@@ -122,5 +122,6 @@
     "de": "Deutsch",
     "easy": "Leichte Sprache",
     "en": "English"
-  }
+  },
+  "perMonth": "{amount}/Monat"
 }

@@ -7,8 +7,10 @@ import { Avatar } from "../ui/Avatar";
 import { btn, field } from "../ui/styles";
 
 /** Opens a short message to the owner. Contact details are only shared once they accept. */
-export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, title, price, label, signedIn, sent: initiallySent, className }: {
+export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, title, price, label, signedIn, sent: initiallySent, className, mine = [], via: initialVia }: {
   listingId: string; ownerName: string; ownerSeed?: number; ownerPath?: string | null; title: string; price: string; label: string; signedIn: boolean; sent?: boolean; className?: string;
+  /** The viewer's own listings of the other kind: the request can say which of them it fits. */
+  mine?: { id: string; title: string }[]; via?: string | null;
 }) {
   const t = useTranslations("listings");
   const tc = useTranslations("common");
@@ -17,6 +19,7 @@ export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, titl
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(!!initiallySent);
   const [msg, setMsg] = useState("");
+  const [via, setVia] = useState(initialVia ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   if (!signedIn) return <Link href="/login" className={className ?? btn.primary}>{label}</Link>;
@@ -41,12 +44,20 @@ export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, titl
                 <span className="text-sm text-muted">{title} · {price}</span>
               </div>
             </div>
+            {mine.length > 0 && (
+              <label className="flex flex-col gap-1.5 text-sm font-bold">{t("via")}
+                <select value={via} onChange={(e) => setVia(e.target.value)} className={field.select}>
+                  <option value="">{t("viaNone")}</option>
+                  {mine.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}
+                </select>
+              </label>
+            )}
             <textarea rows={4} aria-label={t("message")} value={msg} onChange={(e) => setMsg(e.target.value)} className={field.textarea} />
             <span className="text-sm text-muted">{t("privacy", { name: ownerName })}</span>
             {error && <p role="alert" className="m-0 border-l-4 border-red pl-3 font-bold">{error}</p>}
             <div className="flex gap-3">
               <button type="button" disabled={pending || !msg.trim()} onClick={() => start(async () => {
-                const res = await requestContact(listingId, msg);
+                const res = await requestContact(listingId, msg, via || null);
                 if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
                 setRequestId(res.data); setSent(true); setOpen(false);
               })} className={btn.primaryLg}>{tc("send")}</button>

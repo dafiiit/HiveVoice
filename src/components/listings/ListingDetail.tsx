@@ -13,6 +13,10 @@ import { ContactButton } from "./ContactButton";
 import { AllyButton } from "./MyListings";
 import { priceLabel } from "./price";
 import { ShareBlock } from "../ShareBlock";
+import { attrFacts, customFields } from "@/lib/market";
+import { ListingCardView, reasonLabels } from "./ListingCardView";
+
+type Match = ListingCard & { score: number; reasons: string[]; sent: boolean };
 
 export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | "need" }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
@@ -21,6 +25,7 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
   const me = session?.profile.id;
   const t = await getTranslations("market");
   const tc = await getTranslations("common");
+  const tl = await getTranslations("listings");
   const locale = await getLocale();
   const data = await asViewer(viewer, async (tx) => {
     const [l] = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.id = ${id} and l.kind = ${kind}`;
@@ -28,11 +33,24 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
     const [{ details }] = await tx<{ details: string | null }[]>`select app.listing_private_details(${id}) as details`;
     const sent = me ? (await tx`select 1 from public.contact_requests where listing_id = ${id} and from_profile_id = ${me} and status in ('pending', 'accepted')`).length > 0 : false;
     const allied = me ? (await tx`select 1 from public.listing_allies where listing_id = ${id} and profile_id = ${me}`).length > 0 : false;
-    return { l, details, sent, allied };
+    // Matches with their reasons. The owner sees all of them; anyone else sees which of their own listings fit.
+    const matches = await tx<Match[]>`
+      select ${listingCardColumns(tx)}, m.score, m.reasons,
+        ${me ? tx`exists (select 1 from public.contact_requests c where c.listing_id = l.id and c.from_profile_id = ${me} and c.status in ('pending', 'accepted'))` : tx`false`} as sent
+      from app.listing_matches(${id}, 24) m join ${listingCardFrom(tx)} on l.id = m.id order by m.score desc`;
+    const mine = me && l.owner_id !== me ? await tx<{ id: string; title: string }[]>`
+      select id, title from public.listings where owner_id = ${me} and kind <> ${kind} and status = 'active' order by created_at desc limit 20` : [];
+    return { l, details, sent, allied, matches, mine };
   });
   if (!data) notFound();
   const { l } = data;
   const own = l.owner_id === me;
+  const tcat = await getTranslations("categories");
+  const facts = attrFacts(l.category, l.attrs, (k, v) => tcat(k as "label", v), locale);
+  const custom = customFields(l.attrs);
+  // For someone else: the best of their own listings that this one fits, preselected as the reference.
+  const fit = own ? null : data.matches.find((m) => m.owner_id === me) ?? null;
+  const fitReasons = fit ? await reasonLabels(fit.reasons) : [];
   return (
     <div className="flex max-w-[860px] flex-col gap-4 px-4 pb-6 pt-4 md:gap-6 md:px-10 md:pb-20 md:pt-10">
       <nav aria-label={t("breadcrumb")} className="flex gap-2 text-sm">
@@ -61,6 +79,9 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
       {l.description && <p className="m-0 whitespace-pre-line text-lg">{l.description}</p>}
       <ShareBlock path={`/${kind === "need" ? "needs" : "offers"}/${id}`} title={l.title} isPublic={!l.group_slug} />
       <dl className="m-0 grid grid-cols-[140px_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">
+        <dt className="font-bold">{t("category")}</dt><dd className="m-0">{tcat(`names.${l.category}` as "names.help")}</dd>
+        {facts.map((f) => (<div key={f.key} className="contents"><dt className="font-bold">{f.label}</dt><dd className="m-0">{f.flag ? tcat("yes") : f.value}</dd></div>))}
+        {custom.map((f, i) => (<div key={`c${i}`} className="contents"><dt className="font-bold">{f.label}</dt><dd className="m-0 whitespace-pre-line">{f.value}</dd></div>))}
         {l.goal_title && (<><dt className="font-bold">{t("forGoal")}</dt><dd className="m-0">{l.goal_title}</dd></>)}
         <dt className="font-bold">{t("where")}</dt><dd className="m-0">{l.location_text ?? l.region_name ?? "–"}</dd>
         {l.schedule_text && (<><dt className="font-bold">{t("when")}</dt><dd className="m-0">{l.schedule_text}{l.is_recurring ? ` · ${t("recurring")}` : ""}</dd></>)}
@@ -68,6 +89,11 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
         <dt className="font-bold">{t("price")}</dt><dd className="m-0">{priceLabel(l, tc, locale)}</dd>
         <dt className="font-bold">{t("since")}</dt><dd className="m-0">{dateLong(l.created_at, locale)}</dd>
       </dl>
+      {l.pair_id && l.pair_title && (
+        <Link href={`/${kind === "offer" ? "needs" : "offers"}/${l.pair_id}`} className="self-start border-l-4 border-ink pl-3 font-bold text-ink">
+          {t(kind === "offer" ? "pairOffer" : "pairNeed", { title: l.pair_title })}
+        </Link>
+      )}
       {l.tags.length > 0 && <div className="flex flex-wrap gap-2">{l.tags.map((x) => <span key={x} className={tag}>#{x}</span>)}</div>}
       {data.details && (
         <section className="flex flex-col gap-1 border-l-4 border-ink bg-surface p-4">
@@ -75,16 +101,32 @@ export async function ListingDetail({ id, kind }: { id: string; kind: "offer" | 
           <p className="m-0 whitespace-pre-line">{data.details}</p>
         </section>
       )}
+      {fit && (
+        <p className="m-0 border-l-4 border-red pl-3">
+          <strong>{tl("viaLine", { title: fit.title })}</strong> · {fitReasons.join(" · ")}
+        </p>
+      )}
       {l.status !== "active" && <p className="m-0 font-bold">{t(`state.${l.status}`)}</p>}
       <div className="flex flex-wrap items-center gap-4">
         {!own && l.status === "active" && (
           <ContactButton listingId={l.id} ownerName={l.group_name ?? l.owner_name} ownerSeed={l.owner_seed} ownerPath={l.group_name ? null : l.owner_path} title={l.title} price={priceLabel(l, tc, locale)}
-            label={t(kind === "offer" ? "ask" : "help")} signedIn={!!session} sent={data.sent} />
+            label={t(kind === "offer" ? "ask" : "help")} signedIn={!!session} sent={data.sent} mine={data.mine} via={fit ? fit.id : null} />
         )}
         {kind === "need" && l.seeking_allies && session && !own && <AllyButton id={l.id} on={data.allied} count={l.ally_count} />}
         {own && <span className="text-sm text-muted">{t("yours")}</span>}
         {!own && session && <ReportButton type="listing" id={l.id} />}
       </div>
+      {own && (
+        <section id="passt" aria-labelledby="passt-h" className="flex scroll-mt-24 flex-col gap-3 border-t-2 border-ink pt-4">
+          <h2 id="passt-h" className="m-0 text-xl font-bold md:text-2xl">{t(kind === "offer" ? "matchesOwnOffer" : "matchesOwnNeed")}</h2>
+          <p className="m-0 max-w-[680px] text-sm text-muted">{t("matchesHow")}</p>
+          {data.matches.length === 0
+            ? <p className="m-0">{t("matchesNone")}</p>
+            : <div className="grid gap-4 md:grid-cols-2">
+                {data.matches.map((m) => <ListingCardView key={m.id} c={m} signedIn={!!session} reasons={m.reasons} sent={m.sent} mine={[{ id: l.id, title: l.title }]} via={l.id} />)}
+              </div>}
+        </section>
+      )}
     </div>
   );
 }

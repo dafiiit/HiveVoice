@@ -40,7 +40,7 @@ Installierbar als PWA. Google-Anmeldung und „Aus Google Fotos“ einrichten: `
   Ehrlicher Hinweis: Wer Datenbank *und* Server-Secret zugleich hat, könnte Tokens nachrechnen.
   Für echte Ende-zu-Ende-Anonymität sind später Blind Signatures geplant (siehe `docs/architektur.md`).
 
-Mehr dazu in [docs/architektur.md](docs/architektur.md), [docs/selbsthosting.md](docs/selbsthosting.md), [docs/links.md](docs/links.md) und [docs/dateien.md](docs/dateien.md) (Dateien, Umfragen, Notizen) und [docs/rechte.md](docs/rechte.md) (Rechte, Stufen, Moderation).
+Mehr dazu in [docs/architektur.md](docs/architektur.md), [docs/selbsthosting.md](docs/selbsthosting.md), [docs/links.md](docs/links.md) und [docs/dateien.md](docs/dateien.md) (Dateien, Umfragen, Notizen) und [docs/rechte.md](docs/rechte.md) (Rechte, Stufen, Moderation), [docs/markt.md](docs/markt.md) (Kategorien, Tausch, Matching, Karte) und [docs/betrieb.md](docs/betrieb.md) (Bot-Schutz, Rechtstexte).
 
 ## Lokal starten
 

@@ -14,12 +14,13 @@ import { resourceColumns, resourceFrom, type ResourceRow } from "@/lib/links/que
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 import { MobileFinder } from "@/components/shell/MobileFinder";
+import { MarketExplore } from "@/components/listings/MarketExplore";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("explore"))("title") };
 }
 
-const KINDS = ["initiatives", "groups", "people", "responsible", "links"] as const;
+const KINDS = ["initiatives", "market", "groups", "people", "responsible", "links"] as const;
 const RKINDS = ["document", "sheet", "slides", "form", "folder", "file", "pdf", "image", "video", "code", "design", "map", "dataset", "page", "note"] as const;
 const LEVELS = ["all", "borough", "municipality", "district", "state", "country"] as const;
 const SORTS = ["relevant", "new", "soon", "support"] as const;
@@ -47,6 +48,24 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
   const t = await getTranslations("explore");
   const tl = await getTranslations("levels");
   const tk = await getTranslations("links");
+
+  const tabs = (
+    <div role="tablist" aria-label={t("what")} className="flex overflow-x-auto border-b border-line">
+      {KINDS.map((k) => (
+        <Link key={k} role="tab" aria-selected={kind === k} href={k === "initiatives" ? "/explore" : `/explore?kind=${k}`} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
+      ))}
+    </div>
+  );
+  if (kind === "market") {
+    return (
+      <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-5 md:px-10 md:pb-20 md:pt-10">
+        <MobileFinder />
+        <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
+        {tabs}
+        <MarketExplore sp={sp} session={session} homeRegions={home?.chain.map((r) => r.id) ?? []} />
+      </div>
+    );
+  }
 
   const [filterPlace] = placeId ? await asViewer(null, (tx) => tx<{ id: string; name: string }[]>`select id, name from public.regions where id = ${placeId}`) : [];
   const data = await asViewer(viewer, async (tx) => {

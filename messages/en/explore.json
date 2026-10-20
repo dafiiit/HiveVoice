@@ -6,6 +6,7 @@
   "what": "What are you looking for?",
   "kinds": {
     "initiatives": "Initiatives",
+    "market": "Marketplace",
     "groups": "Groups",
     "people": "People",
     "responsible": "Responsible",
@@ -26,7 +27,8 @@
     "groups": "{n, plural, one {1 group} other {# groups}}",
     "people": "{n, plural, one {1 person} other {# people}}",
     "responsible": "{n, plural, one {1 responsibility} other {# responsibilities}}",
-    "links": "{n, plural, one {1 link} other {# links}}"
+    "links": "{n, plural, one {1 link} other {# links}}",
+    "market": "{n, plural, one {1 listing} other {# listings}}"
   },
   "nothing": "Nothing found. Try another word or level.",
   "groupMeta": "{n, plural, one {1 member} other {# members}} · {place}",
@@ -43,5 +45,37 @@
   "filter": "Filter",
   "removeFilter": "Remove {what}",
   "inPlace": "In {name}",
-  "searchChip": "Search: “{q}”"
+  "searchChip": "Search: “{q}”",
+  "market": {
+    "side": {
+      "offer": "Offers",
+      "need": "Requests"
+    },
+    "sideLabel": "Offers or requests",
+    "search": "Search term",
+    "searchPlaceholder": "e.g. bike, flat share, tutoring",
+    "freeOnly": "Free only",
+    "maxPrice": "At most (€)",
+    "minLabel": "at least {label}",
+    "dateFrom": "{label} from",
+    "apply": "Apply",
+    "reset": "Reset filters",
+    "view": "View",
+    "views": {
+      "list": "List",
+      "map": "Map"
+    },
+    "sorts": {
+      "relevant": "Relevant",
+      "new": "New",
+      "price": "Price, lowest first",
+      "date": "Next date"
+    },
+    "post": "Post",
+    "mapMissing": "{n, plural, one {1 listing without a place is} other {# listings without a place are}} missing on the map.",
+    "mapLabel": "Map of listings",
+    "mapAt": "{n, plural, one {1 listing} other {# listings}} in {place}",
+    "mapAll": "Show all in {place}",
+    "mapPrivacy": "Listings only appear at the centre of their place, never at an address."
+  }
 }

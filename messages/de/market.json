@@ -147,7 +147,20 @@
     "modeLabel": "Was möchtest du teilen?",
     "modeOffer": "Etwas anbieten",
     "modeKnowledge": "Wissen teilen",
-    "knowledgeLead": "Teile einen Link zu Dateien, Ordnern, Karten, Code oder Designs, die du schon in Drive, Dropbox, GitHub, Figma und Co. abgelegt hast."
+    "knowledgeLead": "Teile einen Link zu Dateien, Ordnern, Karten, Code oder Designs, die du schon in Drive, Dropbox, GitHub, Figma und Co. abgelegt hast.",
+    "kindLabel": "Was möchtest du?",
+    "iOffer": "Ich biete",
+    "iNeed": "Ich suche",
+    "pairTitleOffer": "Was suchst du im Gegenzug?",
+    "pairTitleNeed": "Was bietest du dafür?",
+    "pairLead": "Wir tragen das zusätzlich als eigene Anfrage ein und verbinden beides als Tausch. So finden dich auch Leute, die genau das haben.",
+    "pairLeadNeed": "Wir tragen das zusätzlich als eigenes Angebot ein und verbinden beides als Tausch. So finden dich auch Leute, die genau das brauchen.",
+    "pairOnOffer": "Auch als Anfrage eintragen",
+    "pairOnNeed": "Auch als Angebot eintragen",
+    "pairPlaceholder": "Titel, z. B. Hilfe im Garten",
+    "publishedPair": "Veröffentlicht und als Tausch verbunden.",
+    "show": "Ansehen",
+    "matchHint": "Nach dem Veröffentlichen zeigen wir dir passende Einträge, und wer gut passt, bekommt eine Mitteilung."
   },
   "mine": {
     "offer": "Deine Angebote",
@@ -158,7 +171,8 @@
     "allies": "{n, plural, one {1 Mitstreiter:in} other {# Mitstreiter:innen}}",
     "pause": "Pausieren",
     "resume": "Fortsetzen",
-    "close": "Abschließen"
+    "close": "Abschließen",
+    "matchesLink": "ansehen"
   },
   "inbox": {
     "incoming": "Eingegangen",
@@ -178,5 +192,28 @@
       "declined": "Abgelehnt",
       "withdrawn": "Zurückgezogen"
     }
-  }
+  },
+  "pairOffer": "Tausch · sucht dafür „{title}“",
+  "pairNeed": "Tausch · bietet dafür „{title}“",
+  "matchesTitle": "Passt dazu",
+  "matchesOwnOffer": "Anfragen, die zu deinem Angebot passen",
+  "matchesOwnNeed": "Angebote, die zu deiner Anfrage passen",
+  "matchesNone": "Noch nichts Passendes. Sobald jemand einen passenden Eintrag macht, bekommst du eine Mitteilung.",
+  "matchesHow": "Ein Treffer entsteht aus gleichen Stichwörtern, ähnlichen Worten, gleicher Kategorie, passenden Angaben (z. B. gleiche Strecke) und Nähe. Beide Seiten sehen dieselben Gründe.",
+  "matchesWhy": "Warum es passt:",
+  "reasons": {
+    "tag": "#{tag}",
+    "words": "ähnliche Worte",
+    "category": "gleiche Kategorie",
+    "place": "am selben Ort",
+    "near": "in der Nähe",
+    "online": "online möglich",
+    "deal": "gleiche Art",
+    "employment": "gleiche Anstellung",
+    "route": "gleiche Strecke",
+    "budget": "im Budget",
+    "swap": "Tausch in beide Richtungen"
+  },
+  "browse": "Mit Filtern durchsuchen",
+  "category": "Kategorie"
 }

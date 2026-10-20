@@ -20,6 +20,9 @@ export type RequestView = {
   listing_id: string | null;
   listing_kind: string | null;
   group_slug: string | null;
+  via_id?: string | null;        // the sender's own listing this request refers to
+  via_title?: string | null;
+  via_kind?: string | null;
   other_id: string;
   other_name: string;
   other_seed: number;
@@ -29,6 +32,7 @@ export type RequestView = {
 /** A sent or received request, shown where the chat will open once it is accepted. */
 export function RequestPane({ r }: { r: RequestView }) {
   const t = useTranslations("connect");
+  const tl = useTranslations("listings");
   const locale = useLocale();
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -60,6 +64,9 @@ export function RequestPane({ r }: { r: RequestView }) {
               ? t(r.outgoing ? "req.outJoin" : "req.inJoin")
               : r.listing_id ? t(r.outgoing ? "req.outContact" : "req.inContact", { title: r.title ?? "" }) : t(r.outgoing ? "req.outDirect" : "req.inDirect")}
           </span>
+          {r.via_id && r.via_title && (
+            <Link href={`/${r.via_kind === "need" ? "needs" : "offers"}/${r.via_id}`} className="text-sm font-bold text-ink">{tl("viaLine", { title: r.via_title })}</Link>
+          )}
         </div>
         <span className={`ml-auto flex-none px-2 py-1 text-sm font-bold ${pendingState ? "border border-ink" : "bg-chip"}`}>
           {t(!pendingState ? "req.declined" : r.outgoing ? "req.pending" : "req.newTag")}

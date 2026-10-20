@@ -24,7 +24,7 @@ const FILTERS = ["all", "messages", "requests", "other"] as const;
 const GLYPH: Record<string, string> = {
   join_request: "flower", join_accepted: "flower", join_declined: "flower", goal_vote: "flower", goal_adopted: "flower", goal_rejected: "flower", working_group: "flower",
   initiative_vote: "arch", initiative_passed: "arch", initiative_failed: "arch",
-  request_answered: "lupe", request_forwarded: "lupe", responsibility_request: "lupe",
+  listing_match: "gift", request_answered: "lupe", request_forwarded: "lupe", responsibility_request: "lupe",
   post_reply: "bubble", jury_invite: "keyhole", report_decided: "split", content_hidden: "split",
 };
 
@@ -156,6 +156,9 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = "/me?tab=reports"; label = t("labels.jury");
     } else if (kind === "emergency_review" || kind === "admin_proposal" || kind === "emergency_access") {
       href = "/notifications"; label = t("labels.other");
+    } else if (kind === "listing_match") {
+      kind = `listing_match_${p.kind === "need" ? "need" : "offer"}`;
+      href = `/${p.kind === "need" ? "needs" : "offers"}/${p.listing_id}`; label = t("labels.request");
     } else if (kind === "report_decided" || kind === "content_hidden") {
       href = "/me?tab=reports"; label = t("labels.jury");
     }

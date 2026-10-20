@@ -1,0 +1,140 @@
+{
+  "label": "What is it?",
+  "all": "All",
+  "names": {
+    "help": "Help & skills",
+    "job": "Jobs & work",
+    "housing": "Housing",
+    "item": "Things",
+    "ride": "Rides",
+    "event": "Courses & meetups",
+    "custom": "Own form"
+  },
+  "hints": {
+    "help": "Tutoring, repairs, listening, moving help",
+    "job": "Positions, mini jobs, internships, volunteering",
+    "housing": "Flats, shared rooms, sublets, a place to sleep",
+    "item": "Give away, sell, lend, swap",
+    "ride": "Lifts and car pools",
+    "event": "Courses, workshops, meetups, sport",
+    "custom": "For everything else: create your own fields"
+  },
+  "guess": "Suggested from the title",
+  "units": {
+    "hours": "{n} h/week",
+    "m2": "{n} m²",
+    "rooms": "{n} rooms"
+  },
+  "pay": {
+    "job": {
+      "fixed": "Monthly salary",
+      "hourly": "Hourly wage",
+      "free": "Volunteer"
+    },
+    "housing": {
+      "fixed": "Rent or price",
+      "free": "Free",
+      "swap": "Swap"
+    },
+    "item": {
+      "fixed": "Price",
+      "free": "Free",
+      "swap": "Swap"
+    }
+  },
+  "fixedHint": {
+    "job": "Gross per month in €",
+    "housing": "Rent per month incl. costs, or purchase price in €"
+  },
+  "help": {
+    "online": "Also possible online",
+    "onlineYes": "online possible"
+  },
+  "job": {
+    "employment": "Employment",
+    "employmentOptions": {
+      "fulltime": "Full time",
+      "parttime": "Part time",
+      "minijob": "Mini job",
+      "freelance": "Freelance",
+      "internship": "Internship",
+      "apprenticeship": "Apprenticeship",
+      "volunteer": "Volunteer"
+    },
+    "remote": "Workplace",
+    "remoteOptions": {
+      "onsite": "On site",
+      "hybrid": "Hybrid",
+      "remote": "Remote"
+    },
+    "hours": "Hours per week",
+    "field": "Field",
+    "start": "Start"
+  },
+  "housing": {
+    "deal": "Type",
+    "dealOptions": {
+      "rent": "Rent",
+      "share": "Shared room",
+      "sublet": "Sublet",
+      "sale": "Purchase",
+      "swap": "Home swap",
+      "stay": "Place to sleep"
+    },
+    "rooms": "Rooms",
+    "area": "Area",
+    "from": "Available from",
+    "furnished": "Furnished",
+    "furnishedYes": "furnished",
+    "pets": "Pets allowed",
+    "petsYes": "pets ok"
+  },
+  "item": {
+    "deal": "Type",
+    "dealOptions": {
+      "give": "To give away",
+      "sell": "For sale",
+      "lend": "To lend",
+      "swap": "To swap"
+    },
+    "condition": "Condition",
+    "conditionOptions": {
+      "new": "New",
+      "like_new": "Like new",
+      "used": "Used",
+      "defect": "Broken"
+    },
+    "shipping": "Shipping possible",
+    "shippingYes": "shipping possible"
+  },
+  "ride": {
+    "from": "From",
+    "to": "To",
+    "date": "Date",
+    "time": "Departure",
+    "route": "Route"
+  },
+  "event": {
+    "date": "Date",
+    "time": "Time",
+    "level": "Level",
+    "levelOptions": {
+      "all": "For everyone",
+      "beginner": "Beginners",
+      "advanced": "Advanced"
+    },
+    "online": "Online",
+    "onlineYes": "online"
+  },
+  "custom": {
+    "lead": "Create your own fields, for example size, brand, language or age.",
+    "label": "Field",
+    "labelPlaceholder": "e.g. size",
+    "value": "Content",
+    "valuePlaceholder": "e.g. 42",
+    "add": "Add field",
+    "remove": "Remove field"
+  },
+  "any": "Any",
+  "yes": "Yes"
+}

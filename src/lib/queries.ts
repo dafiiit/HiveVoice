@@ -1,4 +1,5 @@
 import "server-only";
+import type { Attrs } from "./market";
 import type { Tx } from "./db";
 
 export type InitiativeCard = {
@@ -40,6 +41,11 @@ export type ListingCard = {
   kind: "offer" | "need";
   title: string;
   description: string | null;
+  category: string;
+  attrs: Attrs;
+  pair_id: string | null;
+  pair_title: string | null;
+  region_id: string | null;
   pay_mode: "free" | "hourly" | "fixed" | "swap";
   hourly_rate_cents: number | null;
   fixed_price_cents: number | null;
@@ -66,7 +72,8 @@ export type ListingCard = {
 };
 
 export const listingCardColumns = (tx: Tx) => tx`
-  l.id, l.kind, l.title, l.description, l.pay_mode, l.hourly_rate_cents, l.fixed_price_cents, l.swap_text,
+  l.id, l.kind, l.title, l.description, l.category, l.attrs, l.pair_id, l.region_id,
+  (select pl.title from public.listings pl where pl.id = l.pair_id and pl.status = 'active') as pair_title, l.pay_mode, l.hourly_rate_cents, l.fixed_price_cents, l.swap_text,
   l.location_text, l.schedule_text, l.seats, l.is_recurring, l.seeking_allies, l.ally_count, l.cover_seed, l.status,
   l.owner_id, l.created_at, p.display_name as owner_name, p.avatar_seed as owner_seed, p.avatar_path as owner_path, g.name as group_name, g.slug as group_slug,
   go.title as goal_title, r.name as region_name,

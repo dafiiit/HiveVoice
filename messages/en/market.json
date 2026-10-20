@@ -147,7 +147,20 @@
     "modeLabel": "What do you want to share?",
     "modeOffer": "Offer something",
     "modeKnowledge": "Share knowledge",
-    "knowledgeLead": "Share a link to files, folders, maps, code or designs you already keep in Drive, Dropbox, GitHub, Figma and the like."
+    "knowledgeLead": "Share a link to files, folders, maps, code or designs you already keep in Drive, Dropbox, GitHub, Figma and the like.",
+    "kindLabel": "What would you like?",
+    "iOffer": "I offer",
+    "iNeed": "I am looking for",
+    "pairTitleOffer": "What would you like in return?",
+    "pairTitleNeed": "What do you give for it?",
+    "pairLead": "We also post this as a request of its own and link both as a swap. That way people who have exactly that find you too.",
+    "pairLeadNeed": "We also post this as an offer of its own and link both as a swap. That way people who need exactly that find you too.",
+    "pairOnOffer": "Also post as a request",
+    "pairOnNeed": "Also post as an offer",
+    "pairPlaceholder": "Title, e.g. help in the garden",
+    "publishedPair": "Published and linked as a swap.",
+    "show": "Show",
+    "matchHint": "Once published we show you matching listings, and people who fit well get a notification."
   },
   "mine": {
     "offer": "Your offers",
@@ -158,7 +171,8 @@
     "allies": "{n, plural, one {1 ally} other {# allies}}",
     "pause": "Pause",
     "resume": "Resume",
-    "close": "Close"
+    "close": "Close",
+    "matchesLink": "show"
   },
   "inbox": {
     "incoming": "Received",
@@ -178,5 +192,28 @@
       "declined": "Declined",
       "withdrawn": "Withdrawn"
     }
-  }
+  },
+  "pairOffer": "Swap · looks for “{title}” in return",
+  "pairNeed": "Swap · gives “{title}” in return",
+  "matchesTitle": "Matches",
+  "matchesOwnOffer": "Requests that match your offer",
+  "matchesOwnNeed": "Offers that match your request",
+  "matchesNone": "Nothing matching yet. As soon as someone posts something that fits, you get a notification.",
+  "matchesHow": "A match comes from shared keywords, similar words, the same category, fitting details (e.g. the same route) and distance. Both sides see the same reasons.",
+  "matchesWhy": "Why it fits:",
+  "reasons": {
+    "tag": "#{tag}",
+    "words": "similar words",
+    "category": "same category",
+    "place": "same place",
+    "near": "nearby",
+    "online": "possible online",
+    "deal": "same type",
+    "employment": "same employment",
+    "route": "same route",
+    "budget": "within budget",
+    "swap": "swap both ways"
+  },
+  "browse": "Search with filters",
+  "category": "Category"
 }

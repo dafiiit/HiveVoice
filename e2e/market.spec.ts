@@ -1,0 +1,75 @@
+import { expect, test, type Page } from "@playwright/test";
+import postgres from "postgres";
+
+const signedIn = !!process.env.TEST_USER_EMAIL;
+const migrator = process.env.MIGRATION_DATABASE_URL;
+
+async function login(page: Page) {
+  await page.goto("/login");
+  await page.getByLabel("E-Mail").fill(process.env.TEST_USER_EMAIL!);
+  await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
+  await page.getByRole("button", { name: "Anmelden" }).click();
+  await page.waitForURL(/\/(connect|onboarding)/);
+}
+
+async function exec(statement: string) {
+  const sql = postgres(migrator!, { max: 1, ssl: migrator!.includes("localhost") ? false : "require" });
+  try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
+}
+
+test("Entdecken: the marketplace filters by category and its own fields, and the map asks before it loads", async ({ page }) => {
+  await page.goto("/explore?kind=market");
+  await expect(page.getByRole("tab", { name: "Marktplatz" })).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("link", { name: /^Wohnen/ }).click();
+  await expect(page).toHaveURL(/cat=housing/);
+  await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toBeVisible();
+  await expect(page.getByText(/520\s€\/Monat/)).toBeVisible();
+  await page.getByText("Filter").click();
+  await page.getByLabel("Art").selectOption({ label: "Schlafplatz" });
+  await page.getByRole("button", { name: "Anwenden" }).click();
+  await expect(page).toHaveURL(/a_deal=stay/);
+  await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toHaveCount(0);
+  await expect(page.getByText("Schlafsofa im Wohnzimmer für Durchreisende")).toBeVisible();
+  await page.getByRole("radio", { name: "Gesuche" }).click();
+  await expect(page).toHaveURL(/side=need/);
+  await page.getByRole("radio", { name: "Karte" }).click();
+  await expect(page.getByRole("button", { name: "Karte laden" })).toBeVisible();
+  await expect(page.getByText(/tiles\.openfreemap\.org/)).toBeVisible();
+});
+
+test.describe("offer with something in return", () => {
+  test.skip(!signedIn || !migrator, "needs a test account and the migration connection for cleaning up");
+
+  test("the form follows the category, a swap also posts the request, and the detail page shows the matches", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "writes data");
+    const title = `E2E Fahrrad zu verschenken ${Date.now()}`;
+    try {
+      await login(page);
+      await page.goto("/offers");
+      await expect(page.getByRole("radio", { name: "Ich biete" })).toBeChecked();
+      await page.locator("main input").first().fill(title);
+      // The title suggests the category, and its own fields appear.
+      await expect(page.getByRole("radio", { name: /^Dinge/ })).toBeChecked();
+      await page.getByRole("radio", { name: "Zu verschenken" }).click();
+      await page.getByRole("radio", { name: "Gebraucht" }).click();
+      await page.getByRole("radio", { name: "Tausch", exact: true }).click();
+      await page.getByLabel("Im Tausch gegen").fill("Hilfe im Garten");
+      await expect(page.getByLabel("Auch als Anfrage eintragen")).toBeChecked();
+      await expect(page.getByLabel("Was suchst du im Gegenzug?")).toHaveValue("Hilfe im Garten");
+      await page.getByRole("button", { name: "Veröffentlichen" }).click();
+      await expect(page.getByText("Veröffentlicht und als Tausch verbunden.")).toBeVisible({ timeout: 20_000 });
+      await page.getByRole("link", { name: "Ansehen" }).click();
+      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      await expect(page.getByText("Zu verschenken", { exact: true })).toBeVisible();
+      await expect(page.getByText("Gebraucht", { exact: true })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Tausch · sucht dafür „Hilfe im Garten“" })).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Anfragen, die zu deinem Angebot passen" })).toBeVisible();
+      await page.getByRole("link", { name: "Tausch · sucht dafür „Hilfe im Garten“" }).click();
+      await expect(page.getByRole("heading", { name: "Hilfe im Garten" })).toBeVisible();
+      await expect(page.getByRole("link", { name: `Tausch · bietet dafür „${title}“` })).toBeVisible();
+    } finally {
+      await exec(`delete from public.notifications where payload ->> 'title' in ('${title}', 'Hilfe im Garten') and kind = 'listing_match'`);
+      await exec(`delete from public.listings where title = '${title}' or (title = 'Hilfe im Garten' and swap_text = '${title}')`);
+    }
+  });
+});

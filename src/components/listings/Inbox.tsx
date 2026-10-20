@@ -7,10 +7,11 @@ import { relTime } from "@/lib/format";
 import { Avatar } from "../ui/Avatar";
 import { btn } from "../ui/styles";
 
-export type ContactRow = { id: string; status: string; message: string; created_at: string; listing_title: string | null; other_id: string; other_name: string; other_seed: number; other_path: string | null; conversation_id: string | null };
+export type ContactRow = { id: string; status: string; message: string; created_at: string; listing_title: string | null; via_title?: string | null; other_id: string; other_name: string; other_seed: number; other_path: string | null; conversation_id: string | null };
 
 export function Inbox({ incoming, outgoing }: { incoming: ContactRow[]; outgoing: ContactRow[] }) {
   const t = useTranslations("market.inbox");
+  const tl = useTranslations("listings");
   const locale = useLocale();
   const [pending, start] = useTransition();
   return (
@@ -25,6 +26,7 @@ export function Inbox({ incoming, outgoing }: { incoming: ContactRow[]; outgoing
               <div className="flex flex-col"><Link href={`/profile/${r.other_id}`} className="font-bold text-ink no-underline">{r.other_name}</Link>
                 <span className="text-sm text-muted">{t("about", { title: r.listing_title ?? "–" })} · {relTime(r.created_at, locale)}</span></div>
             </div>
+            {r.via_title && <span className="text-sm font-bold">{tl("viaLine", { title: r.via_title })}</span>}
             <p className="m-0">{r.message}</p>
             {r.status === "pending" && (
               <div className="flex gap-2">
@@ -43,7 +45,7 @@ export function Inbox({ incoming, outgoing }: { incoming: ContactRow[]; outgoing
         {outgoing.map((r) => (
           <div key={r.id} className="flex items-center gap-3 border-b border-line py-3">
             <Avatar name={r.other_name} seed={r.other_seed} path={r.other_path} size={32} />
-            <div className="flex min-w-0 flex-1 flex-col"><strong>{r.other_name}</strong><span className="text-sm">{r.listing_title}</span></div>
+            <div className="flex min-w-0 flex-1 flex-col"><strong>{r.other_name}</strong><span className="text-sm">{r.listing_title}{r.via_title ? ` · ${tl("viaLine", { title: r.via_title })}` : ""}</span></div>
             <span className="text-sm font-bold">{t(`status.${r.status}`)}</span>
             {r.status === "pending" && <button type="button" disabled={pending} onClick={() => start(async () => { await withdrawContact(r.id); })} className="border-0 bg-transparent text-sm text-muted underline">{t("withdraw")}</button>}
             {r.status === "accepted" && r.conversation_id && <Link href={`/connect?c=d:${r.conversation_id}`} className="text-sm font-bold">{t("write")}</Link>}

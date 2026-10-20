@@ -364,6 +364,14 @@
     "invitee_violation": {
       "title": "Notice about an invited person",
       "body": "Case {case_no}: a person you invited broke the rules."
+    },
+    "listing_match_offer": {
+      "title": "A new offer fits “{for_title}”",
+      "body": "“{title}”"
+    },
+    "listing_match_need": {
+      "title": "A new request fits “{for_title}”",
+      "body": "“{title}”"
     }
   }
 }

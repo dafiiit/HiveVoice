@@ -75,15 +75,18 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
     const requests = me ? await tx<RequestView[]>`
       select r.id, 'contact' as type, (r.from_profile_id = ${me}) as outgoing, r.status::text, r.message, r.created_at,
              l.title, l.id as listing_id, l.kind::text as listing_kind, null::text as group_slug,
+             v.id as via_id, v.title as via_title, v.kind::text as via_kind,
              o.id as other_id, o.display_name as other_name, o.avatar_seed as other_seed, o.avatar_path as other_path
       from public.contact_requests r
       join public.profiles o on o.id = case when r.from_profile_id = ${me} then r.to_profile_id else r.from_profile_id end
       left join public.listings l on l.id = r.listing_id
+      left join public.listings v on v.id = r.via_listing_id
       where (r.from_profile_id = ${me} or r.to_profile_id = ${me})
         and (r.status = 'pending' or (r.status = 'declined' and r.from_profile_id = ${me} and r.decided_at > now() - interval '14 days'))
       union all
       select j.id, 'join', (j.profile_id = ${me}), j.status::text, j.message, j.created_at,
              g.name, null, null, g.slug::text,
+             null, null, null,
              o.id, o.display_name, o.avatar_seed, o.avatar_path
       from public.group_join_requests j
       join public.groups g on g.id = j.group_id

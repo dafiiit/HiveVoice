@@ -1,6 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { run } from "../action";
+import type { Tx } from "../db";
+import { cleanAttrs, isCategory, type Category } from "../market";
 
 export type ListingInput = {
   kind: "offer" | "need";
@@ -21,26 +23,50 @@ export type ListingInput = {
   responsibilityIds: string[];
   groupId?: string;
   images?: string[];
+  category?: Category;
+  attrs?: Record<string, unknown>;
+  /** The other half of a swap: an offer that expects something in return also becomes a request, and the other way round. */
+  pair?: { title: string; description: string; category: Category; tags: string[] } | null;
 };
 
 const cents = (s: string) => (s ? String(Math.round(Number(s.replace(",", ".")) * 100) || "") : "");
 
+async function insertListing(tx: Tx, input: ListingInput) {
+  const category = isCategory(input.category) ? input.category : "help";
+  const [{ id }] = await tx<{ id: string }[]>`select app.save_listing(${tx.json({
+    kind: input.kind, title: input.title, description: input.description, details_private: input.detailsPrivate,
+    pay_mode: input.payMode, hourly_rate_cents: input.payMode === "hourly" ? cents(input.rateEuro) : "",
+    fixed_price_cents: input.payMode === "fixed" ? cents(input.fixedEuro) : "", swap_text: input.payMode === "swap" ? input.swapText : "",
+    location_text: input.locationText, schedule_text: input.scheduleText, is_recurring: input.isRecurring, seats: input.seats,
+    seeking_allies: input.seekingAllies, tags: input.tags, region_id: input.regionId ?? "", group_id: input.groupId ?? "",
+    category, attrs: cleanAttrs(category, input.attrs),
+  })}) as id`;
+  return id;
+}
+
 export async function saveListing(input: ListingInput) {
   const res = await run(async (tx) => {
-    const [{ id }] = await tx<{ id: string }[]>`select app.save_listing(${tx.json({
-      kind: input.kind, title: input.title, description: input.description, details_private: input.detailsPrivate,
-      pay_mode: input.payMode, hourly_rate_cents: input.payMode === "hourly" ? cents(input.rateEuro) : "",
-      fixed_price_cents: input.payMode === "fixed" ? cents(input.fixedEuro) : "", swap_text: input.payMode === "swap" ? input.swapText : "",
-      location_text: input.locationText, schedule_text: input.scheduleText, is_recurring: input.isRecurring, seats: input.seats,
-      seeking_allies: input.seekingAllies, tags: input.tags, region_id: input.regionId ?? "", group_id: input.groupId ?? "",
-    })}) as id`;
+    const id = await insertListing(tx, input);
     if (input.images?.length) await tx`select app.set_listing_images(${id}, ${input.images.slice(0, 4)}::text[])`;
     for (const rid of input.responsibilityIds.slice(0, 3)) {
       await tx`select app.create_request(${tx.json({ responsibility_id: rid, listing_id: id, body: [input.title, input.description].filter(Boolean).join("\n\n") })})`;
     }
-    return id;
+    let pairId: string | null = null;
+    const pair = input.payMode === "swap" ? input.pair : null;
+    if (pair && pair.title.trim().length >= 3) {
+      pairId = await insertListing(tx, {
+        ...input, kind: input.kind === "offer" ? "need" : "offer", title: pair.title.trim(), description: pair.description, detailsPrivate: "",
+        category: pair.category, attrs: {}, swapText: input.title, seats: "", seekingAllies: false, scheduleText: "", isRecurring: false,
+        tags: pair.tags, responsibilityIds: [], images: [], pair: null,
+      });
+      await tx`select app.pair_listings(${id}, ${pairId})`;
+    }
+    for (const l of [id, pairId]) if (l) await tx`select app.notify_listing_matches(${l})`;
+    return { id, pairId };
   });
-  revalidatePath(input.kind === "offer" ? "/offers" : "/needs");
+  revalidatePath("/offers");
+  revalidatePath("/needs");
+  revalidatePath("/explore");
   return res;
 }
 
@@ -53,9 +79,9 @@ export async function setListingStatus(id: string, status: "active" | "paused" |
   return res;
 }
 
-export async function requestContact(listingId: string, message: string) {
+export async function requestContact(listingId: string, message: string, viaListingId?: string | null) {
   const res = await run(async (tx) => {
-    const [{ id }] = await tx<{ id: string }[]>`select app.request_contact(${listingId}, ${message}) as id`;
+    const [{ id }] = await tx<{ id: string }[]>`select app.request_contact(${listingId}, ${message}, ${viaListingId || null}::uuid) as id`;
     return id;
   });
   revalidatePath("/offers");

@@ -1,0 +1,140 @@
+{
+  "label": "Was ist es?",
+  "all": "Alle",
+  "names": {
+    "help": "Hilfe & Können",
+    "job": "Jobs & Mitarbeit",
+    "housing": "Wohnen",
+    "item": "Dinge",
+    "ride": "Mitfahrt",
+    "event": "Kurse & Treffen",
+    "custom": "Eigenes Formular"
+  },
+  "hints": {
+    "help": "Nachhilfe, Reparieren, Zuhören, Umzugshilfe",
+    "job": "Stellen, Minijobs, Praktika, Ehrenamt",
+    "housing": "Wohnungen, WG-Zimmer, Zwischenmiete, Schlafplatz",
+    "item": "Verschenken, verkaufen, verleihen, tauschen",
+    "ride": "Mitfahrgelegenheiten und Fahrgemeinschaften",
+    "event": "Kurse, Workshops, Treffs, Sport",
+    "custom": "Für alles andere: lege deine eigenen Felder an"
+  },
+  "guess": "Vorschlag aus dem Titel",
+  "units": {
+    "hours": "{n} h/Woche",
+    "m2": "{n} m²",
+    "rooms": "{n} Zimmer"
+  },
+  "pay": {
+    "job": {
+      "fixed": "Monatsgehalt",
+      "hourly": "Stundenlohn",
+      "free": "Ehrenamtlich"
+    },
+    "housing": {
+      "fixed": "Miete oder Preis",
+      "free": "Kostenlos",
+      "swap": "Tausch"
+    },
+    "item": {
+      "fixed": "Preis",
+      "free": "Kostenlos",
+      "swap": "Tausch"
+    }
+  },
+  "fixedHint": {
+    "job": "Brutto pro Monat in €",
+    "housing": "Warmmiete pro Monat oder Kaufpreis in €"
+  },
+  "help": {
+    "online": "Auch online möglich",
+    "onlineYes": "online möglich"
+  },
+  "job": {
+    "employment": "Anstellung",
+    "employmentOptions": {
+      "fulltime": "Vollzeit",
+      "parttime": "Teilzeit",
+      "minijob": "Minijob",
+      "freelance": "Freiberuflich",
+      "internship": "Praktikum",
+      "apprenticeship": "Ausbildung",
+      "volunteer": "Ehrenamt"
+    },
+    "remote": "Arbeitsort",
+    "remoteOptions": {
+      "onsite": "Vor Ort",
+      "hybrid": "Hybrid",
+      "remote": "Remote"
+    },
+    "hours": "Stunden pro Woche",
+    "field": "Branche",
+    "start": "Beginn"
+  },
+  "housing": {
+    "deal": "Art",
+    "dealOptions": {
+      "rent": "Miete",
+      "share": "WG-Zimmer",
+      "sublet": "Zwischenmiete",
+      "sale": "Kauf",
+      "swap": "Wohnungstausch",
+      "stay": "Schlafplatz"
+    },
+    "rooms": "Zimmer",
+    "area": "Fläche",
+    "from": "Frei ab",
+    "furnished": "Möbliert",
+    "furnishedYes": "möbliert",
+    "pets": "Haustiere erlaubt",
+    "petsYes": "Haustiere ok"
+  },
+  "item": {
+    "deal": "Art",
+    "dealOptions": {
+      "give": "Zu verschenken",
+      "sell": "Zu verkaufen",
+      "lend": "Zum Ausleihen",
+      "swap": "Zum Tauschen"
+    },
+    "condition": "Zustand",
+    "conditionOptions": {
+      "new": "Neu",
+      "like_new": "Wie neu",
+      "used": "Gebraucht",
+      "defect": "Defekt"
+    },
+    "shipping": "Versand möglich",
+    "shippingYes": "Versand möglich"
+  },
+  "ride": {
+    "from": "Von",
+    "to": "Nach",
+    "date": "Datum",
+    "time": "Abfahrt",
+    "route": "Strecke"
+  },
+  "event": {
+    "date": "Datum",
+    "time": "Uhrzeit",
+    "level": "Niveau",
+    "levelOptions": {
+      "all": "Für alle",
+      "beginner": "Einsteiger",
+      "advanced": "Fortgeschrittene"
+    },
+    "online": "Online",
+    "onlineYes": "online"
+  },
+  "custom": {
+    "lead": "Lege eigene Felder an, zum Beispiel Größe, Marke, Sprache oder Alter.",
+    "label": "Feld",
+    "labelPlaceholder": "z. B. Größe",
+    "value": "Inhalt",
+    "valuePlaceholder": "z. B. 42",
+    "add": "Feld hinzufügen",
+    "remove": "Feld entfernen"
+  },
+  "any": "Egal",
+  "yes": "Ja"
+}

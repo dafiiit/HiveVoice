@@ -4,5 +4,8 @@
   "contactTitle": "Request",
   "to": "To {name}",
   "message": "Message",
-  "privacy": "Contact details are only shared once {name} agrees."
+  "privacy": "Contact details are only shared once {name} agrees.",
+  "via": "Fits my listing",
+  "viaNone": "No reference",
+  "viaLine": "fits “{title}”"
 }

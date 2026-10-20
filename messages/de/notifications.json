@@ -364,6 +364,14 @@
     "invitee_violation": {
       "title": "Hinweis zu einer eingeladenen Person",
       "body": "Fall {case_no}: Eine Person, die du eingeladen hast, hat gegen Regeln verstoßen."
+    },
+    "listing_match_offer": {
+      "title": "Neues Angebot passt zu „{for_title}“",
+      "body": "„{title}“"
+    },
+    "listing_match_need": {
+      "title": "Neue Anfrage passt zu „{for_title}“",
+      "body": "„{title}“"
     }
   }
 }

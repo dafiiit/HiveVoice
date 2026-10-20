@@ -17,7 +17,9 @@ export function MyListings({ kind, items }: { kind: "offer" | "need"; items: MyL
         <div key={x.id} className={`flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-line py-3 ${x.status === "paused" ? "opacity-60" : ""}`}>
           <Link href={`/${kind === "offer" ? "offers" : "needs"}/${x.id}`} className="min-w-[200px] flex-1 font-bold text-ink no-underline">{x.title}</Link>
           <span className="text-sm">{x.price}</span>
-          <span className="text-sm text-muted">{x.status === "paused" ? t("paused") : t("matches", { n: x.matches })}</span>
+          {x.status === "paused" || x.matches === 0
+            ? <span className="text-sm text-muted">{x.status === "paused" ? t("paused") : t("matches", { n: x.matches })}</span>
+            : <Link href={`/${kind === "offer" ? "offers" : "needs"}/${x.id}#passt`} className="text-sm font-bold text-ink">{t("matches", { n: x.matches })} · {t("matchesLink")}</Link>}
           {kind === "need" && x.similar > 0 && <span className="text-sm font-bold">{t("similar", { n: x.similar })}</span>}
           {x.ally_count > 0 && <span className="text-sm">{t("allies", { n: x.ally_count })}</span>}
           <button type="button" disabled={pending} onClick={() => start(async () => { await setListingStatus(x.id, x.status === "paused" ? "active" : "paused", kind); })}

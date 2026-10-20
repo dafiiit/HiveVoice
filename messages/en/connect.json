@@ -1,6 +1,8 @@
 {
   "title": "Connect",
   "order": "Order",
+  "listSearch": "Search conversations",
+  "listNone": "Nothing found.",
   "mode": {
     "chrono": "Chronological",
     "suggested": "Suggested"

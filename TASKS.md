@@ -1,14 +1,20 @@
 # Tasks
 
 ## Active
-- [ ] **Bot-Schutz: Live-Login reparieren** - Supabase verlangt das Captcha bereits (geprüft), aber die Live-Seite lädt kein Turnstile: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` fehlt im Vercel-Build oder wurde nach dem letzten Deploy gesetzt. In Vercel für Production prüfen, dann neu deployen (der nächste Push baut auch neu). Bis dahin scheitert Anmelden mit Passwort live
-- [ ] **E2E-Tests wieder anmeldefähig machen** - `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` eintragen (Supabase → Project Settings → API); `e2e/auth.ts` meldet sich damit ohne Captcha an
 - [ ] **Rechtstexte festlegen** - Checkliste in docs/betrieb.md; Datenschutztext nennt alle Dienste. Offen: Impressum-Angaben, Rechtsgrundlagen, AV-Verträge, DSA-Kontaktstelle, Umgang mit Behördenanfragen – vom Betreiber zu klären und prüfen zu lassen
-- [ ] **Login permanent machen**
+- [ ] **Füge eine Sektion: "Meine Inhalte" unter der sektion "Verbinden" hinzu** - diese soll Dokumente, Todolisten, Projekte, etc. die man selber erstellt hat enthalten
+  - [ ] per default privat
 
 ## GUI mobile
+- [ ] **Doppelte Chats in Verbinden** - auf dem Handy erscheinen Mia Schuster, Felix Wolf und Ali Rahimi je zweimal (gleiche Vorschau). Sieht nach doppelt angelegten Demo-Chats aus (`app.ensure_demo_chats()` beim Laden von /connect, evtl. parallele Aufrufe); noch nicht untersucht
+- [ ] **Kopfzeile: „Anmelden“ ragt über den Rand** - abgemeldet auf 390 px Breite (z. B. /explore) passen Logo, „Haltung“, Sprachwahl und Anmelden nicht nebeneinander, der Knopf wird rechts abgeschnitten. Bei 360 und 390 px prüfen (src/components/shell/)
 
 ## GUI desktop and mobile
+- [ ] **GUI cleanup**
+  - [ ] we need alignment of buttons, button hights etc.
+  - [ ] we need to have less scrollbars taking up space in the app. I would like the things to stay scrollable but no scrollbar visible
+  - [ ] Wir müssen es schaffen die App übersichtlicher zu gestalten. Dazu gehe bitte visuell alle screens durch und schaue das design guidlines eingehalten werden. Teilweise ist es mir gerade einfach zu viel. Zu viel Text, zu viele Buttons, zu viel...
+  - [ ] Das prinzip der App muss nicht an jeder ecke in der App erklärt werden, soll aber an den relevanten ecken erklärt werden. Also Es muss möglich sein einzusehen warum man was vorgeschlagen bekommt und wie die algorithmen funktionieren, aber ich brauch nicht die ganzen Kommentare wie "Offen für alle in München · jede:r kann schreiben". So etwas kann an anderer Stelle klar werden.
 
 ## Waiting On
 
@@ -25,6 +31,9 @@
 - [ ] **Föderation über Stufe 1 hinaus** - Remote-Profile sind höchstens Stufe 1, mehr ist noch nicht gebaut
 
 ## Done
+- [x] **~~Login permanent machen~~ (2026-10-20)** - Anmelden/Registrieren leitet Angemeldete direkt weiter; „Weiter als …“ mit gemerktem Konto (Google mit login_hint); Sitzungs-Cookies werden täglich vom Server neu gesetzt (Safari begrenzt per Skript gesetzte Cookies auf 7 Tage)
+- [x] **~~Bot-Schutz live~~ (2026-10-20)** - Turnstile lädt live, Supabase erzwingt es
+- [x] **~~E2E-Tests anmeldefähig~~ (2026-10-20)** - Service-Schlüssel lokal, eine Sitzung pro Lauf
 - [x] **~~Bot-Schutz prüfen~~ (2026-10-20)** - Supabase erzwingt das Captcha; Live-Seite ohne Site Key (siehe Active)
 - [x] **~~Matching mit KI~~ (2026-10-20)** - Embeddings mit gte-small in der Supabase Edge Function `embed-listings`, Grund „ähnliche Bedeutung“
 - [x] **~~Werbematerial~~ (2026-10-20)** - docs/werbung/anwendungsfaelle.md (10 Personas, Vergleich), docs/werbung/HiveVoice.pptx (15 Folien)

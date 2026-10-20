@@ -195,8 +195,8 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                     <div className="flex w-full min-w-[240px] flex-col gap-1.5">
                       <textarea value={editing.text} rows={3} maxLength={5000} aria-label={ts("editLabel")} autoFocus onChange={(e) => setEditing({ id: m.id, text: e.target.value })} className={`${field.textarea} min-h-16 resize-y border-line py-2`} />
                       <span className="flex gap-2">
-                        <button type="button" onClick={() => void saveEdit()} className={`${btn.primary} h-9 px-3 text-sm`}>{ts("save")}</button>
-                        <button type="button" onClick={() => setEditing(null)} className={`${btn.secondary} h-9 px-3 text-sm`}>{ts("cancel")}</button>
+                        <button type="button" onClick={() => void saveEdit()} className={btn.primarySm}>{ts("save")}</button>
+                        <button type="button" onClick={() => setEditing(null)} className={btn.secondarySm}>{ts("cancel")}</button>
                       </span>
                     </div>
                   )}

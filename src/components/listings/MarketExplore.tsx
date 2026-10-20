@@ -174,7 +174,7 @@ export async function MarketExplore({ sp, session, homeRegions }: { sp: SP; sess
         </div>
         {place && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: place.name })}>{t("inPlace", { name: place.name })} <span aria-hidden="true">✕</span></Link>}
         {q && <Link href={href({ q: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
-        <Link href={session ? `/anliegen?as=${side}` : "/login?next=/anliegen"} className={`${btn.primary} h-9 text-sm`}>+ {tm("post")}</Link>
+        <Link href={session ? `/anliegen?as=${side}` : "/login?next=/anliegen"} className={btn.primarySm}>+ {tm("post")}</Link>
         <span className="ml-auto text-muted">{t("count.market", { n: data.total })}</span>
       </div>
 

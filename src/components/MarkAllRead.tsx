@@ -7,5 +7,5 @@ import { btn } from "./ui/styles";
 export function MarkAllRead({ label }: { label: string }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  return <button type="button" disabled={pending} onClick={() => start(async () => { await markAllRead(); router.refresh(); })} className={`${btn.secondary} h-9 text-sm`}>{label}</button>;
+  return <button type="button" disabled={pending} onClick={() => start(async () => { await markAllRead(); router.refresh(); })} className={btn.secondarySm}>{label}</button>;
 }

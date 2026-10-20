@@ -16,7 +16,9 @@ import { RequestPane, type RequestView } from "@/components/connect/RequestPane"
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { ChatScroll } from "@/components/ChatScroll";
 import { MarketFilter, type Radius } from "@/components/connect/MarketFilter";
-import { IconBack, IconPlus } from "@/components/ui/Icons";
+import { ListSearch } from "@/components/connect/ListSearch";
+import { Popover } from "@/components/ui/Popover";
+import { IconBack, IconCheck, IconPlus } from "@/components/ui/Icons";
 import { btn } from "@/components/ui/styles";
 
 export async function generateMetadata() {
@@ -46,6 +48,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
   const sel = typeof sp.c === "string" ? sp.c : "market";
   const q = typeof sp.q === "string" ? sp.q.trim().slice(0, 80) : "";
   const radiusParam = typeof sp.r === "string" ? sp.r : "";
+  const s = typeof sp.s === "string" ? sp.s.trim().slice(0, 80) : "";
 
   const data = await asViewer(viewer, async (tx) => {
     // Test phase: demo profiles send a few chats and requests so this page is not empty.
@@ -168,7 +171,8 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       };
     }),
   ];
-  const shown = rows.filter((r) => FILTER_KINDS[filter].includes(r.kind));
+  const haystack = (r: Row) => [r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase();
+  const shown = rows.filter((r) => FILTER_KINDS[filter].includes(r.kind) && (!s || haystack(r).includes(s.toLowerCase())));
   // The marketplace stays pinned. "Chronologisch": newest first. "Vorgeschlagen": what waits for an answer first, then newest.
   const needsAnswer = (r: Row) => (r.unread > 0 || r.tag === t("req.newTag") ? 1 : 0);
   const newest = (r: Row) => (r.at ? new Date(r.at).getTime() : 0);
@@ -185,6 +189,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
       if (q) p.set("q", q);
       if (radiusParam) p.set("r", radiusParam);
     }
+    if (s && !("s" in patch)) p.set("s", s);
     if (p.get("mode") === "chrono") p.delete("mode");
     if (p.get("f") === "all") p.delete("f");
     if (!p.get("c")) p.delete("c");
@@ -203,16 +208,11 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
         <h1 className="display m-0 max-md:sr-only">{t("title")}</h1>
         <div className="flex flex-wrap items-center gap-4 max-md:hidden">
           {session && <Link href="/new/group" className={`${btn.secondary} gap-1.5`}><IconPlus size={16} /> {t("newGroup")}</Link>}
-          <div role="group" aria-label={t("order")} className="flex gap-4">
-            {(["chrono", "suggested"] as const).map((m) => (
-              <Link key={m} href={href({ mode: m })} aria-pressed={mode === m} className={`pb-1 text-ink no-underline ${mode === m ? "border-b-[3px] border-ink font-bold" : "text-muted"}`}>{t(`mode.${m}`)}</Link>
-            ))}
-          </div>
         </div>
       </div>
       {!session && <p className="m-0 border-l-4 border-ink bg-surface px-3 py-2 text-sm md:mx-0 md:px-4 md:py-3 md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/connect" className="font-bold">{t("signIn")}</Link></p>}
       <div className="flex min-h-[70dvh] flex-col border-y border-line bg-surface max-md:min-h-0 max-md:flex-1 lg:min-h-0 lg:flex-1 lg:flex-row lg:border">
-        <section aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line max-md:min-h-0 max-md:flex-1 lg:w-[360px] lg:border-r`}>
+        <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden lg:flex" : "flex"} w-full flex-none flex-col overflow-y-auto border-line max-md:min-h-0 max-md:flex-1 lg:w-[360px] lg:border-r`}>
           {session && (
             <div role="group" aria-label={t("filter.label")} className="sticky top-0 z-10 grid flex-none grid-cols-[repeat(4,minmax(0,1fr))_44px] border-b border-line bg-surface md:grid-cols-4 md:gap-1 md:p-2">
               {FILTERS.map((f) => (
@@ -225,26 +225,38 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
               <Link href="/new/group" aria-label={t("newGroup")} title={t("newGroup")} className="inline-flex h-11 w-11 items-center justify-center bg-surface text-ink md:hidden"><IconPlus size={18} /></Link>
             </div>
           )}
-          <div role="group" aria-label={t("order")} className="grid flex-none grid-cols-2 border-b border-line md:hidden">
-            {(["chrono", "suggested"] as const).map((m, i) => (
-              <Link key={m} href={href({ mode: m })} aria-pressed={mode === m}
-                className={`relative inline-flex h-11 items-center justify-center text-sm no-underline ${i === 0 ? "border-r border-line" : ""} ${mode === m ? "font-bold text-ink after:absolute after:inset-x-4 after:bottom-0 after:h-[3px] after:bg-ink" : "text-muted"}`}>{t(`mode.${m}`)}</Link>
-            ))}
+          {/* Search on the left, order on the right. */}
+          <div className="flex flex-none items-center gap-2 border-b border-line px-3 py-2 md:px-4">
+            <ListSearch listId="chat-list" value={s} label={t("listSearch")}
+              keep={{ ...(mode !== "chrono" ? { mode } : {}), ...(filter !== "all" ? { f: filter } : {}) }} />
+            <Popover align="right" label={t(`mode.${mode}`)}>
+              <div className="flex flex-col" role="group" aria-label={t("order")}>
+                {(["chrono", "suggested"] as const).map((m) => (
+                  <Link key={m} href={href({ mode: m })} aria-current={mode === m ? "true" : undefined}
+                    className={`flex h-10 items-center justify-between border-b border-line text-ink no-underline last:border-b-0 ${mode === m ? "font-bold" : ""}`}>
+                    {t(`mode.${m}`)}{mode === m && <IconCheck size={12} />}
+                  </Link>
+                ))}
+              </div>
+            </Popover>
           </div>
           {shown.map((r) => (
-            <Link key={r.key} href={href({ c: r.key })} aria-current={sel === r.key ? "true" : undefined}
-              className={`flex gap-3 border-b border-line px-3 py-2 text-ink no-underline md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
+            // Two lines like the marketplace: name and time, then the latest message (or what it is about).
+            <Link key={r.key} href={href({ c: r.key })} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
+              className={`flex items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
               <Avatar name={r.name} seed={r.seed} path={r.path} size={40} group={r.groupAvatar ?? (r.kind === "market" || r.kind === "group")} />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="flex justify-between gap-2"><strong className="truncate">{r.name}</strong>{r.at && <span className="flex-none text-xs text-muted">{relTime(r.at, locale)}</span>}</span>
-                <span className="truncate text-xs text-muted">{r.kind === "market" ? `${t("pinned")} · ` : ""}{r.sub}</span>
-                {r.preview && <span className={`truncate text-sm ${r.unread ? "font-bold" : "text-muted"}`}>{r.preview}</span>}
+                <span className="flex items-baseline justify-between gap-2"><strong className="truncate">{r.name}</strong>{r.at && <span className="flex-none text-xs text-muted">{relTime(r.at, locale)}</span>}</span>
+                {r.kind === "market" ? <span className="truncate text-sm text-muted">{t("pinned")} · {r.sub}</span>
+                  : (r.kind === "direct" || r.kind === "group") && r.preview ? <span className={`truncate text-sm ${r.unread ? "font-bold" : "text-muted"}`}>{r.preview}</span>
+                  : <span className="truncate text-sm text-muted">{r.sub}</span>}
               </span>
               {r.unread > 0 && <span className="inline-flex h-5 min-w-5 items-center justify-center self-center bg-ink px-1 text-xs font-bold text-on-ink" aria-label={t("unread", { n: r.unread })}>{r.unread}</span>}
               {r.tag && <span className={`self-center whitespace-nowrap px-1.5 py-0.5 text-xs font-bold ${r.tag === t("req.newTag") ? "bg-red text-on-red" : "border border-line-strong"}`}>{r.tag}</span>}
             </Link>
           ))}
-          {session && shown.length <= (filter === "all" || filter === "groups" ? 1 : 0) && (
+          <p data-search-none hidden={!(s && shown.length === 0)} className="m-0 px-4 py-6 text-sm text-muted">{t("listNone")}</p>
+          {!s && session && shown.length <= (filter === "all" || filter === "groups" ? 1 : 0) && (
             <p className="m-0 px-4 py-6 text-sm text-muted">{hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyList")}</p>
           )}
           {session && (filter === "all" || filter === "groups") && (

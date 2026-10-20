@@ -100,7 +100,8 @@ test.describe("on a phone", () => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
     await page.goto("/connect");
-    await expect(page.getByRole("search")).toHaveCount(0);
+    // the top bar has no search (the list of conversations has its own)
+    await expect(page.locator("header").first().getByRole("search")).toHaveCount(0);
     await expect(page.getByRole("button", { name: /^Dein Ort/ })).toHaveCount(0);
     expect((await page.locator("header").first().boundingBox())!.height).toBeLessThanOrEqual(58);
 
@@ -155,17 +156,33 @@ test.describe("on a phone", () => {
     expect((await field.boundingBox())!.y + (await field.boundingBox())!.height).toBeLessThanOrEqual(bottom.y);
   });
 
-  test("sorting stays in the list, and the marketplace filter opens inside the screen", async ({ page }, info) => {
+  test("search and order sit above the list, rows are as tall as the marketplace", async ({ page }, info) => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
     await page.goto("/connect");
-    const bars = [page.getByRole("group", { name: "Anzeigen" }), page.getByRole("group", { name: "Reihenfolge" })];
-    const heights = await Promise.all(bars.map(async (b) => Math.round((await b.boundingBox())!.height)));
-    expect(heights[1], "both bars are equally tall").toBe(heights[0]);
-    await page.getByRole("link", { name: "Vorgeschlagen" }).first().click();
+    const list = page.getByRole("region", { name: "Unterhaltungen" });
+    const search = list.getByRole("searchbox", { name: "Unterhaltungen durchsuchen" });
+    const order = list.locator("summary", { hasText: "Chronologisch" });
+    const [sb, ob] = [(await search.boundingBox())!, (await order.boundingBox())!];
+    expect(sb.x, "search on the left").toBeLessThan(ob.x);
+    expect(Math.abs(sb.y - ob.y), "on one line").toBeLessThan(8);
+
+    const rows = list.locator("a[data-search]");
+    const heights = await rows.evaluateAll((els) => els.slice(0, 4).map((e) => Math.round(e.getBoundingClientRect().height)));
+    for (const h of heights.slice(1)) expect(h, "chat rows as tall as the marketplace row").toBe(heights[0]);
+
+    await search.fill("zzzz-nichts");
+    await expect(rows.first()).toBeHidden();
+    await expect(list.getByText("Nichts gefunden.")).toBeVisible();
+    await search.fill("");
+    await expect(rows.first()).toBeVisible();
+
+    await order.click();
+    await list.getByRole("link", { name: "Vorgeschlagen" }).click();
     await expect(page).toHaveURL(/mode=suggested/);
     await expect(page).not.toHaveURL(/[?&]c=/);
-    await expect(page.getByRole("region", { name: "Unterhaltungen" })).toBeVisible();
+    await expect(list.locator("summary", { hasText: "Vorgeschlagen" })).toBeVisible();
+    await expect(list.getByRole("link", { name: "Chronologisch" }), "dropdown closes after choosing").toBeHidden();
 
     await page.goto("/connect?c=market");
     await page.locator("summary", { hasText: "Filter" }).first().click();

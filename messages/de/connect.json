@@ -1,6 +1,8 @@
 {
   "title": "Verbinden",
   "order": "Reihenfolge",
+  "listSearch": "Unterhaltungen durchsuchen",
+  "listNone": "Nichts gefunden.",
   "mode": {
     "chrono": "Chronologisch",
     "suggested": "Vorgeschlagen"

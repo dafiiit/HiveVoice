@@ -1,4 +1,5 @@
-/** A small dropdown that works without JavaScript (a native details element). */
+"use client";
+/** A small dropdown that works without JavaScript (a native details element). Choosing a link closes it. */
 export function Popover({ label, badge, align = "left", children }: { label: React.ReactNode; badge?: number; align?: "left" | "right"; children: React.ReactNode }) {
   return (
     <details className="group relative">
@@ -7,7 +8,7 @@ export function Popover({ label, badge, align = "left", children }: { label: Rea
         {!!badge && <span className="inline-flex h-4 min-w-4 items-center justify-center bg-ink px-1 text-[11px] font-bold text-on-ink">{badge}</span>}
         <span aria-hidden="true" className="text-xs transition-transform group-open:rotate-180">▾</span>
       </summary>
-      <div className={`absolute z-20 mt-1 flex w-[min(320px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-3 ${align === "right" ? "right-0" : "left-0"}`}>{children}</div>
+      <div onClick={(e) => { if ((e.target as HTMLElement).closest("a")) e.currentTarget.closest("details")?.removeAttribute("open"); }} className={`absolute z-20 mt-1 flex w-[min(320px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-3 ${align === "right" ? "right-0" : "left-0"}`}>{children}</div>
     </details>
   );
 }

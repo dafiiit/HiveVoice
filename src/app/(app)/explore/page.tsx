@@ -223,7 +223,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
         {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} h-8 gap-1.5 px-2.5 no-underline`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
         {kind === "links" && (
-          <Link href={session ? "/new/link" : "/login?next=/new/link"} className={`${btn.primary} h-9 text-sm`}>+ {tk("share")}</Link>
+          <Link href={session ? "/new/link" : "/login?next=/new/link"} className={btn.primarySm}>+ {tk("share")}</Link>
         )}
         <span className="ml-auto text-muted">{t(`count.${kind}`, { n: count })}</span>
       </div>

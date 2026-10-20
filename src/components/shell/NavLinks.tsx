@@ -36,6 +36,7 @@ export function SideLinks({ items }: { items: NavItem[] }) {
 export function BottomNav({ items, newLabel }: { items: NavItem[]; newLabel: string }) {
   const path = usePathname();
   // Mobile: the sections with an icon and a short label, the "new" button after the first two.
+  // The bar is 4rem tall above the system gesture area (Android edge-to-edge, iPhone home bar), not inside it.
   const [a, b, ...rest] = items;
   const cell = (it: NavItem) => {
     const on = isActive(path, it.href);
@@ -52,7 +53,7 @@ export function BottomNav({ items, newLabel }: { items: NavItem[]; newLabel: str
     );
   };
   return (
-    <nav aria-label="Hauptnavigation" className="fixed inset-x-0 bottom-0 z-30 grid h-16 auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav aria-label="Hauptnavigation" className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(4rem+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
       {cell(a)}
       {cell(b)}
       <Link href="/new" aria-label={newLabel} className="flex flex-col items-center justify-center gap-0.5 bg-ink text-[11px] font-bold leading-none text-on-ink no-underline">

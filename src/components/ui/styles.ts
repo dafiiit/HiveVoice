@@ -4,6 +4,11 @@ export const btn = {
     "inline-flex items-center justify-center gap-2 h-11 px-4 bg-ink text-on-ink font-bold no-underline cursor-pointer border-0 disabled:opacity-45 disabled:cursor-not-allowed",
   primaryLg:
     "inline-flex items-center justify-center gap-2 h-12 px-5 md:h-[52px] md:px-6 bg-ink text-on-ink font-bold no-underline cursor-pointer border-0 disabled:opacity-45 disabled:cursor-not-allowed",
+  // Small buttons next to Popover dropdowns (h-9), so a row of controls lines up.
+  primarySm:
+    "inline-flex items-center justify-center gap-2 h-9 px-3 text-sm bg-ink text-on-ink font-bold no-underline cursor-pointer border-0 disabled:opacity-45 disabled:cursor-not-allowed",
+  secondarySm:
+    "inline-flex items-center justify-center gap-2 h-9 px-3 text-sm border border-line-strong bg-transparent text-ink font-bold no-underline cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed",
   secondary:
     "inline-flex items-center justify-center gap-2 h-11 px-4 border border-line-strong bg-transparent text-ink font-bold no-underline cursor-pointer disabled:opacity-45 disabled:cursor-not-allowed",
   secondaryLg:

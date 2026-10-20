@@ -5,16 +5,19 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { emailAllowed } from "@/lib/actions/growth";
+import { forgetLastLogin } from "@/lib/actions/lastLogin";
+import type { LastLogin } from "@/lib/lastLogin";
 import { Captcha, captchaOn } from "./Captcha";
 import { btn, field } from "../ui/styles";
 
 const providers = (process.env.NEXT_PUBLIC_AUTH_PROVIDERS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
 const passkeys = process.env.NEXT_PUBLIC_PASSKEYS === "1";
 
-export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: string }) {
+export function AuthForm({ mode, next, remembered: initialRemembered = null }: { mode: "login" | "signup"; next?: string; remembered?: LastLogin | null }) {
   const t = useTranslations("auth");
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [remembered, setRemembered] = useState(initialRemembered);
+  const [email, setEmail] = useState(initialRemembered?.provider === "email" ? initialRemembered.email : "");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +54,10 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
     else setSent(true);
   }
 
-  async function oauth(provider: "google" | "apple") {
+  // With the remembered address as a hint, Google skips its account chooser when that account is signed in there.
+  async function oauth(provider: "google" | "apple", hint?: string) {
     const supabase = createSupabaseBrowser();
-    await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: callback() } });
+    await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: callback(), queryParams: hint && provider === "google" ? { login_hint: hint } : undefined } });
   }
 
   async function passkey() {
@@ -77,6 +81,21 @@ export function AuthForm({ mode, next }: { mode: "login" | "signup"; next?: stri
   return (
     <section className="flex flex-col gap-6">
       <h1 className="display m-0">{mode === "login" ? t("loginTitle") : t("signupTitle")}</h1>
+      {mode === "login" && remembered && (remembered.provider === "google" || remembered.provider === "apple") && (
+        <div className="flex max-w-[520px] flex-col gap-3 border border-ink bg-surface p-4">
+          <strong>{t("remembered.title")}</strong>
+          <button type="button" onClick={() => oauth(remembered.provider as "google" | "apple", remembered.email)} className={btn.primaryLg}>
+            {t("remembered.continue", { email: remembered.email })}
+          </button>
+          <button type="button" onClick={async () => { await forgetLastLogin(); setRemembered(null); }} className={`${btn.ghost} self-start`}>{t("remembered.other")}</button>
+        </div>
+      )}
+      {mode === "login" && remembered?.provider === "email" && (
+        <p className="m-0 flex flex-wrap items-center gap-x-3 text-sm">
+          <span>{t("remembered.asEmail", { email: remembered.email })}</span>
+          <button type="button" onClick={async () => { await forgetLastLogin(); setRemembered(null); setEmail(""); }} className="border-0 bg-transparent p-0 text-sm text-muted underline">{t("remembered.other")}</button>
+        </p>
+      )}
       <p className="m-0 max-w-[520px]">{t("intro")}</p>
       {(providers.length > 0 || passkeys) && (
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">

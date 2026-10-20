@@ -1,8 +1,5 @@
 {
   "title": "Server administration",
-  "loginFirst": "Please sign in first.",
-  "login": "Sign in",
-  "unconfigured": "No admin is registered for this instance yet. The operator sets admins at the hosting provider: the setting ADMIN_EMAILS with confirmed email addresses, separated by commas. Then reload.",
   "mfaRequired": "The admin area needs a login with a second factor. Sign out and sign in again with your second factor.",
   "done": "Saved.",
   "stats": {
@@ -39,5 +36,9 @@
   "demoChats": "Demo chats for new accounts",
   "on": "On",
   "off": "Off",
-  "demoChatsText": "On: whoever opens Connect for the first time gets a few sample chats and contact requests from demo profiles. Turn off and delete the demo data before the real launch."
+  "demoChatsText": "On: whoever opens Connect for the first time gets a few sample chats and contact requests from demo profiles. Turn off and delete the demo data before the real launch.",
+  "view": "View",
+  "viewUser": "User",
+  "viewAdmin": "Admin",
+  "viewText": "As an admin you can switch between the normal view and the admin area."
 }

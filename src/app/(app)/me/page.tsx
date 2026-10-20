@@ -16,6 +16,7 @@ import { Responsibilities, type MyResp } from "@/components/me/Responsibilities"
 import { Appeal } from "@/components/me/Appeal";
 import { Settings } from "@/components/me/Settings";
 import { PrivacySettings } from "@/components/me/PrivacySettings";
+import { ViewSwitch } from "@/components/admin/ViewSwitch";
 
 const TABS = ["profile", "reports", "resp", "settings"] as const;
 
@@ -33,6 +34,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
   const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "profile";
   const t = await getTranslations("me");
   const tm = await getTranslations("modrights");
+  const ta = await getTranslations("admin");
   const tgr = await getTranslations("growth");
   const tr = await getTranslations("rights");
   const locale = await getLocale();
@@ -196,6 +198,13 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       {active === "resp" && <Responsibilities items={d.resps} homeRegion={d.home} incoming={d.incoming} substituting={d.substituting} />}
       {active === "settings" && (
         <>
+        {session.profile.is_admin && (
+          <section className="flex flex-col gap-3">
+            <h2 className="m-0 text-2xl font-bold">{ta("view")}</h2>
+            <p className="m-0 max-w-[720px] text-sm text-muted">{ta("viewText")}</p>
+            <ViewSwitch admin={false} />
+          </section>
+        )}
         <PrivacySettings findable={d.privacy?.findable ?? "all"} contactFrom={d.privacy?.contact_from ?? "all"} minor={!!d.privacy?.is_minor} blocked={d.blocked} />
         <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} places={d.places} interests={interests} suggestions={d.suggestions} />
         </>

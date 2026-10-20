@@ -37,7 +37,7 @@ docker build -t hivevoice \
 docker run --env-file .env -p 3000:3000 hivevoice
 ```
 
-Danach den geheimen Admin-Pfad (`ADMIN_PATH`) öffnen und dich als ersten Admin eintragen.
+Vorher `ADMIN_EMAILS` mit deiner E-Mail-Adresse setzen. Danach anmelden und unter Einstellungen → Ansicht auf „Verwaltung“ wechseln.
 Dort trägst du auch die offiziellen E-Mail-Domains ein und schaltest später auf „Nur Online-Ausweis“ um.
 
 ## Fotos

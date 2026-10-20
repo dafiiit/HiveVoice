@@ -16,9 +16,9 @@ test("guests can explore and read an initiative", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /Pro ·/ })).toBeVisible({ timeout: 15_000 });
 });
 
-test("the admin area is not reachable under its internal path", async ({ request }) => {
-  const res = await request.get("/sysadmin");
-  expect(res.status()).toBe(404);
+test("the admin area sends guests to the login", async ({ page }) => {
+  await page.goto("/verwaltung");
+  await expect(page).toHaveURL(/\/login/);
 });
 
 test("with bot protection on, the login form waits for the check", async ({ page }) => {

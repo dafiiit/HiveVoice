@@ -1,16 +1,9 @@
 import "server-only";
-import { headers } from "next/headers";
 import { sql } from "./db";
 import { getSession } from "./session";
 import { adminEmails } from "./admin-emails";
 
 export { adminEmails };
-
-/** True only for requests that came in through the secret ADMIN_PATH (see proxy.ts). */
-export async function viaAdminGate() {
-  const gate = (await headers()).get("x-hv-admin-gate");
-  return !!process.env.ADMIN_PATH && gate === process.env.ADMIN_PATH;
-}
 
 /** Brings public.server_admins in line with ADMIN_EMAILS (only confirmed addresses count). */
 export async function syncAdmins() {
@@ -26,7 +19,6 @@ export function adminNeedsMfa() {
 }
 
 export async function adminState() {
-  if (!(await viaAdminGate())) return { allowed: false as const, reason: "gate" as const };
   const session = await getSession();
   if (!session) return { allowed: false as const, reason: "login" as const };
   await syncAdmins();

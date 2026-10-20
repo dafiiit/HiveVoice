@@ -1,8 +1,5 @@
 {
   "title": "Server-Verwaltung",
-  "loginFirst": "Bitte melde dich zuerst an.",
-  "login": "Anmelden",
-  "unconfigured": "Für diese Instanz ist noch niemand als Admin eingetragen. Admins legt der Betreiber beim Hosting-Anbieter fest: die Einstellung ADMIN_EMAILS mit bestätigten E-Mail-Adressen, durch Komma getrennt. Danach neu laden.",
   "mfaRequired": "Für die Verwaltung brauchst du eine Anmeldung mit zweitem Faktor. Melde dich ab und mit zweitem Faktor wieder an.",
   "done": "Gespeichert.",
   "stats": {
@@ -39,5 +36,9 @@
   "demoChats": "Demo-Chats für neue Konten",
   "on": "An",
   "off": "Aus",
-  "demoChatsText": "An: Wer Verbinden zum ersten Mal öffnet, bekommt ein paar Beispiel-Chats und Kontaktanfragen von Demo-Profilen. Vor dem echten Start ausschalten und die Demo-Daten löschen."
+  "demoChatsText": "An: Wer Verbinden zum ersten Mal öffnet, bekommt ein paar Beispiel-Chats und Kontaktanfragen von Demo-Profilen. Vor dem echten Start ausschalten und die Demo-Daten löschen.",
+  "view": "Ansicht",
+  "viewUser": "Nutzer",
+  "viewAdmin": "Verwaltung",
+  "viewText": "Als Admin kannst du zwischen der normalen Ansicht und der Verwaltung wechseln."
 }

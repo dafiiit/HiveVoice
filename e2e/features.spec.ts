@@ -31,7 +31,7 @@ test.describe("signed in", () => {
   test("Verbinden lists chats and everything I sent or must answer", async ({ page }) => {
     await login(page);
     await page.goto("/connect");
-    await expect(page.getByRole("link", { name: "Gruppe gründen" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Gruppe gründen" }).filter({ visible: true }).first()).toBeVisible();
     await page.getByRole("link", { name: /^Chats/ }).click();
     const chat = page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first();
     await expect(chat).toBeVisible();

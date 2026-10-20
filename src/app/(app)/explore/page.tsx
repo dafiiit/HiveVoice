@@ -245,7 +245,7 @@ export default async function Explore({ searchParams }: PageProps<"/explore">) {
 
       {data.initiatives && (
         <div className="grid gap-x-5 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
-          {data.initiatives.map((it) => <InitiativeCard key={it.id} it={it} showArgs />)}
+          {data.initiatives.map((it) => <InitiativeCard key={it.id} it={it} />)}
         </div>
       )}
 

@@ -17,6 +17,7 @@ type MyGroup = { slug: string; name: string };
 export async function Shell({ session, children }: { session: Session | null; children: React.ReactNode }) {
   const t = await getTranslations("nav");
   const tp = await getTranslations("principles");
+  const tm = await getTranslations("mine");
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   // Verbinden carries what waits for an answer: unread chats, requests to me, people asking to join my groups.
   const [groups, waiting] = session
@@ -39,6 +40,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
     { href: "/explore", label: t("explore") },
     { href: "/anliegen", label: t("anliegen") },
     { href: "/connect", label: t("connect"), badge: waiting },
+    ...(session ? [{ href: "/inhalte", label: tm("title"), short: tm("nav") }] : []),
   ];
   const place = await getPlace();
 
@@ -70,7 +72,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-line bg-paper px-4 md:h-[72px] md:px-10">
           <div className="flex min-w-0 flex-1 items-center gap-2 md:contents">
             <Link href={session ? "/connect" : "/"} className="flex flex-1 items-center text-ink no-underline md:hidden" aria-label="HiveVoice">
-              <Logo size={36} />
+              <Logo size={36} compact={!session} />
             </Link>
             <div className="flex items-center gap-2 md:order-3 md:ml-auto">
               <Link href="/principles" className="inline-flex h-11 items-center px-1 text-sm font-bold text-ink no-underline sm:px-2 md:px-3">{tp("nav")}</Link>

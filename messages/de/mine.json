@@ -1,0 +1,61 @@
+{
+  "title": "Meine Inhalte",
+  "nav": "Inhalte",
+  "lead": "Alles, was du angelegt hast. Neues ist erst nur für dich sichtbar, bis du es teilst.",
+  "newDoc": "Dokument",
+  "newList": "Liste",
+  "filters": {
+    "all": "Alle",
+    "docs": "Dokumente",
+    "lists": "Listen",
+    "notes": "Notizen",
+    "projects": "Initiativen",
+    "listings": "Anliegen"
+  },
+  "filterLabel": "Inhalte filtern",
+  "kind": {
+    "doc": "Dokument",
+    "file": "Datei",
+    "link": "Link",
+    "list": "Liste",
+    "note": "Notiz",
+    "project": "Initiative",
+    "offer": "Angebot",
+    "need": "Gesuch"
+  },
+  "vis": {
+    "me": "Privat",
+    "invited": "Eingeladene",
+    "group": "Gruppe",
+    "link": "Mit Link",
+    "public": "Öffentlich",
+    "people": "Bestimmte Menschen"
+  },
+  "empty": "Hier ist noch nichts. Leg ein Dokument oder eine Liste an.",
+  "emptyFilter": "Davon gibt es noch nichts.",
+  "listCount": "{done} von {total} erledigt",
+  "notesCount": "{n, plural, one {1 Notiz} other {# Notizen}}",
+  "list": {
+    "titleLabel": "Name der Liste",
+    "titlePlaceholder": "z. B. Einkauf fürs Straßenfest",
+    "create": "Anlegen",
+    "add": "Hinzufügen",
+    "addPlaceholder": "Neuer Punkt",
+    "addLabel": "Neuen Punkt hinzufügen",
+    "empty": "Noch keine Punkte.",
+    "done": "Erledigt",
+    "remove": "Entfernen",
+    "rename": "Umbenennen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "private": "Nur du siehst diese Liste.",
+    "public": "Alle mit dem Link können die Liste lesen, nur du bearbeitest sie.",
+    "makePublic": "Lesbar machen",
+    "makePrivate": "Wieder privat",
+    "delete": "Liste löschen",
+    "deleteConfirm": "Liste mit allen Punkten löschen?",
+    "back": "Meine Inhalte",
+    "readOnly": "Liste von {name}"
+  },
+  "newDocTitle": "Neues Dokument"
+}

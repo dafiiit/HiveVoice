@@ -37,8 +37,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang={locale} data-theme={theme}>
       <body className="min-h-dvh">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
-        <ServiceWorker />
+        <NextIntlClientProvider>
+          {children}
+          <ServiceWorker />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

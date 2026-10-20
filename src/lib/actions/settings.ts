@@ -60,6 +60,7 @@ export async function setProfileTags(relation: "interest" | "offers" | "needs", 
     return null;
   });
   revalidatePath("/me");
+  revalidatePath("/inhalte");
   return res;
 }
 
@@ -70,6 +71,7 @@ export async function saveNote(id: string | null, body: string) {
     return null;
   });
   revalidatePath("/me");
+  revalidatePath("/inhalte");
   return res;
 }
 
@@ -79,6 +81,7 @@ export async function deleteNote(id: string) {
     return null;
   });
   revalidatePath("/me");
+  revalidatePath("/inhalte");
   return res;
 }
 

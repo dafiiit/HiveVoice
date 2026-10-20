@@ -345,7 +345,7 @@ test.describe("language without signing in", () => {
 });
 
 test.describe("a guest can pick a place", () => {
-  test("it is remembered in the browser and drives the marketplace", async ({ page }, info) => {
+  test("it is remembered in the browser and drives the marketplace", async ({ page }) => {
     await page.goto("/explore");
     await page.getByRole("button", { name: "Ort wählen" }).click();
     await page.getByPlaceholder("Postleitzahl oder Ort").fill("80336");
@@ -354,7 +354,7 @@ test.describe("a guest can pick a place", () => {
     if (await whole.isVisible().catch(() => false)) await whole.click();
     await expect(page.getByRole("button", { name: /^Gewählter Ort/ })).toBeVisible();
     await page.goto("/connect?c=market");
-    await expect(page.getByText(info.project.name === "mobile" ? "Offen für alle in München" : /Offen für alle in München · jede/, { exact: info.project.name === "mobile" })).toBeVisible();
+    await expect(page.getByRole("main").getByText("München", { exact: true }).first()).toBeVisible();
   });
 });
 

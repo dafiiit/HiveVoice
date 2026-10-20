@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
@@ -10,15 +11,12 @@ import { IconCheck } from "@/components/ui/Icons";
 import { tab } from "@/components/ui/styles";
 import { PhaseRail } from "@/components/InitiativeCard";
 import { DisplayToggle, TagEditor } from "@/components/me/ProfileEditor";
-import { Notes } from "@/components/me/Notes";
 import { Responsibilities, type MyResp } from "@/components/me/Responsibilities";
 import { Appeal } from "@/components/me/Appeal";
-import { MyDocuments, type DocRow, type SharedRow, type IncomingTransfer } from "@/components/me/MyDocuments";
-import { formatSize } from "@/lib/files";
 import { Settings } from "@/components/me/Settings";
 import { PrivacySettings } from "@/components/me/PrivacySettings";
 
-const TABS = ["profile", "notes", "docs", "reports", "resp", "settings"] as const;
+const TABS = ["profile", "reports", "resp", "settings"] as const;
 
 export async function generateMetadata() {
   return { title: (await getTranslations("nav"))("me") };
@@ -26,6 +24,8 @@ export async function generateMetadata() {
 
 export default async function Me({ searchParams }: PageProps<"/me">) {
   const sp = await searchParams;
+  // Notes and documents moved to "Meine Inhalte".
+  if (sp.tab === "docs" || sp.tab === "notes") redirect(`/inhalte?f=${sp.tab}`);
   const session = await requireSession("/me");
   const viewer = { authId: session.authId, profileId: session.profile.id };
   const me = session.profile.id;
@@ -42,7 +42,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       from public.profiles where id = ${me}`;
     const places = (await tx<{ name: string }[]>`
       select r.name from public.user_regions ur join public.regions r on r.id = ur.region_id where ur.profile_id = ${me}
-      order by array_position(array['borough','municipality','district','state','country'], r.level::text)`).map((r) => r.name).join(" · ");
+      order by array_position(array['borough','municipality','district','state','country'], r.level::text)`).map((r) => r.name).filter((n, i, all) => all.indexOf(n) === i).join(" · ");
     const tags = await tx<{ slug: string; relation: string }[]>`select t.slug::text, ui.relation from public.user_interests ui join public.tags t on t.id = ui.tag_id where ui.profile_id = ${me} order by t.slug`;
     const suggestions = await popularTags(tx);
     const inis = active === "profile" ? await tx<{ id: string; title: string; phase: "idea"; outcome: null; region_name: string }[]>`
@@ -53,7 +53,6 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       where a.author_id = ${me} order by a.created_at desc limit 10` : [];
     const groups = active === "profile" ? await tx<{ slug: string; name: string; role: string }[]>`
       select g.slug::text, g.name, m.role::text from public.group_members m join public.groups g on g.id = m.group_id where m.profile_id = ${me} order by g.name` : [];
-    const notes = active === "notes" ? await tx<{ id: string; body: string; updated_at: string }[]>`select id, body, updated_at from public.notes where profile_id = ${me} order by updated_at desc` : [];
     const reports = active === "reports" ? await tx<{ id: string; rule: string; status: string; created_at: string; case_no: string | null; mine: boolean; emergency: boolean; can_appeal: boolean; appealed: boolean }[]>`
       select r.id, r.rule::text, r.status::text, r.created_at, r.case_no, r.reporter_id = ${me} as mine, r.emergency,
              app.can_appeal(r.id) as can_appeal, exists (select 1 from public.appeals a where a.report_id = r.id) as appealed
@@ -81,15 +80,6 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
         (select m.confirm_min from (select app.param('resp_confirm_min') as confirm_min) m) as confirm_min
       from public.responsibilities s left join public.regions r on r.id = s.region_id left join public.profiles sp on sp.id = s.substitute_id
       where exists (select 1 from public.responsibility_holders hh where hh.responsibility_id = s.id and hh.profile_id = ${me}) order by s.created_at` : [];
-    const docs = active === "docs" ? await tx<DocRow[]>`
-      select id, title, origin, visibility, license, version_no, trashed_at, updated_at from public.resources where owner_id = ${me} order by trashed_at nulls first, updated_at desc limit 200` : [];
-    const sharedDocs = active === "docs" ? await tx<SharedRow[]>`
-      select r.id, r.title, g.level, o.display_name as owner from public.resource_grants g join public.resources r on r.id = g.resource_id join public.profiles o on o.id = r.owner_id
-      where g.profile_id = ${me} and (g.expires_at is null or g.expires_at > now()) and r.trashed_at is null order by g.created_at desc limit 100` : [];
-    const docTransfers = active === "docs" ? await tx<IncomingTransfer[]>`
-      select t.id, r.title, p.display_name as by from public.resource_transfers t join public.resources r on r.id = t.resource_id join public.profiles p on p.id = t.from_id
-      where t.to_id = ${me} and t.status = 'proposed'` : [];
-    const [usage] = active === "docs" ? await tx<{ u: { used: number; limit: number } }[]>`select app.storage_usage() as u` : [{ u: { used: 0, limit: 0 } }];
     const incoming = active === "resp" ? await tx<{ id: string; title: string; by: string }[]>`
       select t.id, s.title, p.display_name as by from public.responsibility_transfers t join public.responsibilities s on s.id = t.responsibility_id
       join public.profiles p on p.id = t.from_id where t.to_id = ${me} and t.status = 'proposed'` : [];
@@ -101,7 +91,7 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
       select us.findable, us.contact_from, p.is_minor from public.user_settings us join public.profiles p on p.id = us.profile_id where us.profile_id = ${me}`;
     const blocked = await tx<{ id: string; name: string }[]>`
       select p.id, p.display_name as name from public.blocks b join public.profiles p on p.id = b.blocked_id where b.blocker_id = ${me} order by b.created_at`;
-    return { p, places, tags, suggestions, inis, args, groups, notes, reports, seats, violations, rules, resps, incoming, substituting, docs, sharedDocs, docTransfers, usage: usage.u, home: home ?? null, privacy, blocked };
+    return { p, places, tags, suggestions, inis, args, groups, reports, seats, violations, rules, resps, incoming, substituting, home: home ?? null, privacy, blocked };
   });
 
   const s = session.profile.settings;
@@ -166,7 +156,6 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           </div>
         </div>
       )}
-      {active === "notes" && <Notes notes={d.notes} />}
       {active === "reports" && (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <section className="flex flex-col">
@@ -209,7 +198,6 @@ export default async function Me({ searchParams }: PageProps<"/me">) {
           </section>
         </div>
       )}
-      {active === "docs" && <MyDocuments docs={d.docs} shared={d.sharedDocs} incoming={d.docTransfers} trashDays={30} usage={{ used: formatSize(d.usage.used), limit: formatSize(d.usage.limit) }} />}
       {active === "resp" && <Responsibilities items={d.resps} homeRegion={d.home} incoming={d.incoming} substituting={d.substituting} />}
       {active === "settings" && (
         <>

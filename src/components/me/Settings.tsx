@@ -95,7 +95,7 @@ export function Settings({ language, easy, theme, places, interests, suggestions
         <strong>{t("security")}</strong>
         <div className="flex flex-wrap gap-2">
           {passkeys && <button type="button" onClick={registerPasskey} className={btn.secondary}>{t("addPasskey")}</button>}
-          <form action="/auth/signout" method="post"><button type="submit" className={btn.secondary}>{t("signOut")}</button></form>
+          <form action="/auth/signout" method="post" onSubmit={() => { try { localStorage.removeItem("hv-outbox"); } catch {} }}><button type="submit" className={btn.secondary}>{t("signOut")}</button></form>
         </div>
       </section>
       {msg && <p role="status" className="m-0 font-bold">{msg}</p>}

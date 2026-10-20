@@ -92,6 +92,14 @@ textarea,
 select {
   border-radius: 0;
 }
+
+/* Everything stays scrollable (wheel, touch, keyboard), but no scroll bar takes up room. Text fields keep theirs. */
+*:not(textarea) {
+  scrollbar-width: none;
+}
+*:not(textarea)::-webkit-scrollbar {
+  display: none;
+}
 }
 
 .display-xl {

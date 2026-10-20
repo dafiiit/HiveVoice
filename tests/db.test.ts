@@ -1419,3 +1419,20 @@ describe("connections: cards, collections and separate rights", () => {
     expect(notes.length).toBeGreaterThan(0);
   }));
 });
+
+describe("to-do lists", () => {
+  it("are private by default, readable when opened, and only the owner writes", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ id }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.todo_lists (title) values ('Einkauf') returning id`);
+    await as(tx, a, () => tx`insert into public.todo_items (list_id, title) values (${id}, 'Brot')`);
+    const [own] = await as(tx, a, () => tx<{ visibility: string }[]>`select visibility from public.todo_lists where id = ${id}`);
+    expect(own.visibility).toBe("me");
+    expect(await as(tx, b, () => tx`select 1 from public.todo_lists where id = ${id}`)).toHaveLength(0);
+    expect(await as(tx, b, () => tx`select 1 from public.todo_items where list_id = ${id}`)).toHaveLength(0);
+
+    await as(tx, a, () => tx`update public.todo_lists set visibility = 'public' where id = ${id}`);
+    expect(await as(tx, b, () => tx`select 1 from public.todo_items where list_id = ${id}`)).toHaveLength(1);
+    await fails(tx, (sp) => as(sp, b, () => sp`insert into public.todo_items (list_id, title) values (${id}, 'Fremd')`));
+    expect(await as(tx, b, () => tx`update public.todo_items set done_at = now() where list_id = ${id} returning id`)).toHaveLength(0);
+  }));
+});

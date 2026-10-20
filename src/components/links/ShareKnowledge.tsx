@@ -10,10 +10,10 @@ type Group = { id: string; slug: string; name: string };
 type Mode = "link" | "file" | "note";
 
 /** Sharing knowledge in three ways: a link to something elsewhere, a file (photo, PDF), or a Markdown note written here. */
-export function ShareKnowledge({ groups, initialGroup, ideas }: { groups: Group[]; initialGroup: string | null; ideas: string[] }) {
+export function ShareKnowledge({ groups, initialGroup, ideas, initialMode = "link" }: { groups: Group[]; initialGroup: string | null; ideas: string[]; initialMode?: Mode }) {
   const t = useTranslations("knowledge");
   const tl = useTranslations("links");
-  const [mode, setMode] = useState<Mode>("link");
+  const [mode, setMode] = useState<Mode>(initialMode);
   // A Markdown file picked in the file form lands in the note editor; the key restarts the editor with its text.
   const [seed, setSeed] = useState<{ n: number; title: string; body: string }>({ n: 0, title: "", body: "" });
   const [notice, setNotice] = useState(false);

@@ -1,25 +1,17 @@
 # Tasks
 
 ## Active
-- [ ] **Rechtstexte festlegen** - Checkliste in docs/betrieb.md; Datenschutztext nennt alle Dienste. Offen: Impressum-Angaben, Rechtsgrundlagen, AV-Verträge, DSA-Kontaktstelle, Umgang mit Behördenanfragen – vom Betreiber zu klären und prüfen zu lassen
-- [ ] **Füge eine Sektion: "Meine Inhalte" unter der sektion "Verbinden" hinzu** - diese soll Dokumente, Todolisten, Projekte, etc. die man selber erstellt hat enthalten
-  - [ ] per default privat
+- [ ] **Kalender und wiederkehrende Aufgaben** - häufigste Lücke aller zehn Gemeinschaften (docs/verknuepfungen.md)
 
 ## GUI mobile
-- [ ] **Doppelte Chats in Verbinden** - auf dem Handy erscheinen Mia Schuster, Felix Wolf und Ali Rahimi je zweimal (gleiche Vorschau). Sieht nach doppelt angelegten Demo-Chats aus (`app.ensure_demo_chats()` beim Laden von /connect, evtl. parallele Aufrufe); noch nicht untersucht
-- [ ] **Kopfzeile: „Anmelden“ ragt über den Rand** - abgemeldet auf 390 px Breite (z. B. /explore) passen Logo, „Haltung“, Sprachwahl und Anmelden nicht nebeneinander, der Knopf wird rechts abgeschnitten. Bei 360 und 390 px prüfen (src/components/shell/)
 
 ## GUI desktop and mobile
-- [ ] **GUI cleanup**
-  - [ ] we need alignment of buttons, button hights etc.
-  - [ ] we need to have less scrollbars taking up space in the app. I would like the things to stay scrollable but no scrollbar visible
-  - [ ] Wir müssen es schaffen die App übersichtlicher zu gestalten. Dazu gehe bitte visuell alle screens durch und schaue das design guidlines eingehalten werden. Teilweise ist es mir gerade einfach zu viel. Zu viel Text, zu viele Buttons, zu viel...
-  - [ ] Das prinzip der App muss nicht an jeder ecke in der App erklärt werden, soll aber an den relevanten ecken erklärt werden. Also Es muss möglich sein einzusehen warum man was vorgeschlagen bekommt und wie die algorithmen funktionieren, aber ich brauch nicht die ganzen Kommentare wie "Offen für alle in München · jede:r kann schreiben". So etwas kann an anderer Stelle klar werden.
+- [ ] **GUI cleanup, weitere Runden** - erste Runde erledigt (siehe Done). Offen: Formulare mit vielen Feldern (Anliegen anlegen, Gruppe gründen, Initiative) und die Einstellungen visuell durchgehen; Erklärtexte bündeln (z. B. eine Seite „So funktionieren Vorschläge“ statt Hinweisen an vielen Stellen)
 
 ## Waiting On
+- [ ] **Rechtstexte festlegen** - Checkliste in docs/betrieb.md; Datenschutztext nennt alle Dienste. Offen: Impressum-Angaben, Rechtsgrundlagen, AV-Verträge, DSA-Kontaktstelle, Umgang mit Behördenanfragen – vom Betreiber zu klären und prüfen zu lassen (Anleitung: docs/betrieb.md, Abschnitt Rechtstexte)
 
 ## Someday
-- [ ] **Kalender und wiederkehrende Aufgaben** - häufigste Lücke aller zehn Gemeinschaften (docs/verknuepfungen.md)
 - [ ] **Mehrsprachiges Embedding-Modell** - gte-small ist für Deutsch schwach; multilingual-e5-small in der Edge Function, Schwelle neu eichen (docs/markt.md)
 - [ ] **Unabhängigkeit Stufe 1** - Speicher-Schicht mit S3, SMTP statt Resend, `EMBEDDING_URL`, Codeberg-Spiegel (docs/unabhaengigkeit.md)
 - [ ] **eID-Anbindung** - Modus `eid` ist vorbereitet, aber noch kein eID-Dienst angebunden
@@ -31,6 +23,11 @@
 - [ ] **Föderation über Stufe 1 hinaus** - Remote-Profile sind höchstens Stufe 1, mehr ist noch nicht gebaut
 
 ## Done
+- [x] **~~Meine Inhalte~~ (2026-10-20)** - vierter Bereich nach Verbinden (/inhalte): Dokumente, Todo-Listen, Notizen, Initiativen, Anliegen; neue Dokumente, Dateien und Listen sind privat, bis man sie teilt; Notizen und Dokumente aus „Für mich“ hierher umgezogen
+- [x] **~~Offline fähig~~ (2026-10-20)** - Service Worker behält geöffnete Seiten und Bilder (beim Abmelden gelöscht), Chats offline lesbar, Nachrichten warten auf dem Gerät und gehen bei Verbindung raus (ohne Doppelungen), Hinweis „Offline“
+- [x] **~~Doppelte Chats in Verbinden~~ (2026-10-20)** - gleichzeitige Seitenaufrufe legten Demo-Chats doppelt an; Sperre pro Person, Duplikate entfernt
+- [x] **~~Kopfzeile auf 360/390 px~~ (2026-10-20)** - abgemeldet nur das Logo-Zeichen unter 440 px, Test für 360 und 390 px
+- [x] **~~GUI aufräumen, erste Runde~~ (2026-10-20)** - keine sichtbaren Scrollbalken, ein „Weitergeben“ statt zwei Knöpfen, kürzere Karten und Untertitel (z. B. Marktplatz nur „München“), Schreibfeld ohne Knopfzeile bis man tippt, Knopf- und Chiphöhen vereinheitlicht
 - [x] **~~Login permanent machen~~ (2026-10-20)** - Anmelden/Registrieren leitet Angemeldete direkt weiter; „Weiter als …“ mit gemerktem Konto (Google mit login_hint); Sitzungs-Cookies werden täglich vom Server neu gesetzt (Safari begrenzt per Skript gesetzte Cookies auf 7 Tage)
 - [x] **~~Bot-Schutz live~~ (2026-10-20)** - Turnstile lädt live, Supabase erzwingt es
 - [x] **~~E2E-Tests anmeldefähig~~ (2026-10-20)** - Service-Schlüssel lokal, eine Sitzung pro Lauf

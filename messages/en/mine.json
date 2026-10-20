@@ -1,0 +1,61 @@
+{
+  "title": "My content",
+  "nav": "Content",
+  "lead": "Everything you created. New things are visible only to you until you share them.",
+  "newDoc": "Document",
+  "newList": "List",
+  "filters": {
+    "all": "All",
+    "docs": "Documents",
+    "lists": "Lists",
+    "notes": "Notes",
+    "projects": "Initiatives",
+    "listings": "Offers and requests"
+  },
+  "filterLabel": "Filter content",
+  "kind": {
+    "doc": "Document",
+    "file": "File",
+    "link": "Link",
+    "list": "List",
+    "note": "Note",
+    "project": "Initiative",
+    "offer": "Offer",
+    "need": "Request"
+  },
+  "vis": {
+    "me": "Private",
+    "invited": "Invited",
+    "group": "Group",
+    "link": "With link",
+    "public": "Public",
+    "people": "Specific people"
+  },
+  "empty": "Nothing here yet. Create a document or a list.",
+  "emptyFilter": "Nothing of this kind yet.",
+  "listCount": "{done} of {total} done",
+  "notesCount": "{n, plural, one {1 note} other {# notes}}",
+  "list": {
+    "titleLabel": "Name of the list",
+    "titlePlaceholder": "e.g. Shopping for the street party",
+    "create": "Create",
+    "add": "Add",
+    "addPlaceholder": "New item",
+    "addLabel": "Add a new item",
+    "empty": "No items yet.",
+    "done": "Done",
+    "remove": "Remove",
+    "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel",
+    "private": "Only you see this list.",
+    "public": "Anyone with the link can read the list; only you edit it.",
+    "makePublic": "Make readable",
+    "makePrivate": "Private again",
+    "delete": "Delete list",
+    "deleteConfirm": "Delete the list with all items?",
+    "back": "My content",
+    "readOnly": "List by {name}"
+  },
+  "newDocTitle": "New document"
+}

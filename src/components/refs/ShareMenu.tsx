@@ -4,15 +4,17 @@ import { useTranslations } from "next-intl";
 import { shareTargets, shareToChat, shareToGroup, shareToMarket, type ShareTargets } from "@/lib/actions/share";
 import type { RefType } from "@/lib/refs";
 import { IconCheck } from "../ui/Icons";
+import { ShareButtons } from "../ShareButtons";
 import { btn, chip, field } from "../ui/styles";
 
-type Where = "chat" | "group" | "market";
+type Where = "chat" | "group" | "market" | "out";
 
 /**
  * "Weitergeben": send something as a card into a chat, a group (its collection, optionally its talk) or the
  * marketplace of one's place. Works the same for offers, requests, documents, groups, tasks and initiatives.
+ * Public things can also leave HiveVoice: share sheet, link and QR code (`external`).
  */
-export function ShareMenu({ type, id, title, className }: { type: RefType; id: string; title: string; className?: string }) {
+export function ShareMenu({ type, id, title, className, external }: { type: RefType; id: string; title: string; className?: string; external?: { url: string; text: string } }) {
   const t = useTranslations("refs.share");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -62,10 +64,12 @@ export function ShareMenu({ type, id, title, className }: { type: RefType; id: s
           <div role="dialog" aria-modal="true" aria-label={t("title", { title })} onClick={(e) => e.stopPropagation()} className="flex max-h-[90dvh] w-full max-w-[520px] flex-col gap-4 overflow-y-auto bg-surface p-6">
             <strong className="text-lg leading-tight">{t("title", { title })}</strong>
             <div role="radiogroup" aria-label={t("button")} className="flex flex-wrap gap-2">
-              {(["chat", "group", "market"] as const).map((w) => (
+              {(external ? ["chat", "group", "market", "out"] as const : ["chat", "group", "market"] as const).map((w) => (
                 <button key={w} type="button" role="radio" aria-checked={where === w} onClick={() => pick(w)} className={chip(where === w)}>{t(w)}</button>
               ))}
             </div>
+            {where === "out" && external && <ShareButtons url={external.url} title={title} text={external.text} />}
+            {where !== "out" && <>
             {targets && where !== "market" && (options.length === 0
               ? <p className="m-0 text-sm text-muted">{empty}</p>
               : <label className={field.label}>{t(where)}
@@ -87,6 +91,8 @@ export function ShareMenu({ type, id, title, className }: { type: RefType; id: s
               <button type="button" disabled={pending || !ready} onClick={send} className={btn.primaryLg}>{where === "group" && !asPost ? t("groupCollect") : t("send")}</button>
               <button type="button" onClick={() => setOpen(false)} className={btn.secondaryLg}>{t("close")}</button>
             </div>
+            </>}
+            {where === "out" && <button type="button" onClick={() => setOpen(false)} className={`${btn.secondaryLg} self-start`}>{t("close")}</button>}
           </div>
         </div>
       )}

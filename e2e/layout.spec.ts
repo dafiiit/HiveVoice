@@ -212,3 +212,15 @@ test("the installed app opens on Verbinden", async ({ request }) => {
   const res = await request.get("/manifest.webmanifest");
   expect((await res.json()).start_url).toBe("/connect");
 });
+
+for (const width of [360, 390]) {
+  test(`the guest header fits on ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/explore");
+    const button = page.locator("header").getByRole("link", { name: "Anmelden" });
+    await expect(button).toBeVisible();
+    const box = (await button.boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  });
+}

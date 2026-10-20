@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { myRegionIds } from "@/lib/queries";
 import { Avatar } from "@/components/ui/Avatar";
 import { btn } from "@/components/ui/styles";
+import { IconPlus } from "@/components/ui/Icons";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("group"))("groups") };
@@ -42,7 +43,7 @@ export default async function Groups() {
     <div className="flex flex-col gap-4 px-4 pb-6 pt-4 md:gap-8 md:px-10 md:pb-20 md:pt-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="display m-0">{t("groups")}</h1>
-        <Link href="/new/group" className={btn.primaryLg}>+ {t("found")}</Link>
+        <Link href="/new/group" className={btn.primary}><IconPlus size={16} /> {t("found")}</Link>
       </div>
       <div className="grid gap-10 md:grid-cols-2">
         {session && (

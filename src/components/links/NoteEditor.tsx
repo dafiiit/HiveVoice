@@ -30,7 +30,7 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
   const [groupId, setGroupId] = useState(groups.find((g) => g.slug === initialGroup)?.id ?? "");
   const [view, setView] = useState<"write" | "preview">("write");
   const [changeNote, setChangeNote] = useState("");
-  const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "public", license: "cc_by_sa" });
+  const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "me", license: "cc_by_sa" });
   const [lockedBy, setLockedBy] = useState<string | null>(null);
   const suggesting = editing && mode === "suggest";
   const [error, setError] = useState<string | null>(null);
@@ -134,7 +134,7 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
       )}
       {!editing && groups.length > 0 && (
         <label className={field.label}>{tl("groupLabel")}
-          <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "public" })); }} className={`${field.select} h-12`}>
+          <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select} h-12`}>
             <option value="">{tl("everyone")}</option>
             {groups.map((g) => <option key={g.id} value={g.id}>{tl("inGroup", { name: g.name })}</option>)}
           </select>

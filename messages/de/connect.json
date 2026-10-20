@@ -14,15 +14,14 @@
   "conversations": "Unterhaltungen",
   "pane": "Unterhaltung",
   "market": "Marktplatz",
-  "marketSub": "Offen für alle in {place}",
+  "marketSub": "{place}",
   "marketSubAll": "Neues aus allen Orten",
-  "marketOpen": "Offen für alle in {place} · jede:r kann schreiben",
   "marketPlaceholder": "Was gibt’s Neues im Viertel?",
   "marketEmpty": "Noch nichts los. Schreib den ersten Beitrag!",
   "readOnly": "Lesen kann jede:r. Zum Schreiben anmelden.",
   "pinned": "Angeheftet",
-  "private": "Privat · {title}",
-  "groupSub": "Gruppe · {n, plural, one {1 Mitglied} other {# Mitglieder}}",
+  "private": "{title}",
+  "groupSub": "{n, plural, one {1 Mitglied} other {# Mitglieder}}",
   "groupPlaceholder": "In „{name}“ schreiben …",
   "groupEmpty": "Noch kein Beitrag in dieser Gruppe.",
   "openGroup": "Zur Gruppe",
@@ -103,5 +102,7 @@
     "only": "Nur: {what}",
     "clear": "Filter entfernen",
     "none": "Keine Beiträge dazu. Ändere den Umkreis oder die Suche."
-  }
+  },
+  "waiting": "Wartet auf Verbindung",
+  "offlineExtras": "Ohne Verbindung geht nur Text. Fotos, Dateien und Umfragen bitte später senden."
 }

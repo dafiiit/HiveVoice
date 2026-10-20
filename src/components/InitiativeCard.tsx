@@ -27,7 +27,7 @@ export async function InitiativeCard({ it, showArgs = false }: { it: Card; showA
     <article className="flex min-w-0 flex-col max-md:border max-md:border-line max-md:bg-surface md:gap-3.5">
       <Link href={`/initiatives/${it.id}`} tabIndex={-1} aria-hidden="true"><Cover seed={it.cover_seed} src={it.cover_path} ratio="3 / 2" /></Link>
       <div className="flex min-w-0 flex-col gap-2.5 max-md:p-3 md:gap-3.5">
-        <span className="text-[13px] font-bold">{t("kind")} · {it.region_name} · {tl(it.region_level as "municipality")}</span>
+        <span className="text-[13px] font-bold">{it.region_name} · {tl(it.region_level as "municipality")}</span>
         <Link href={`/initiatives/${it.id}`} className="text-xl font-bold leading-[1.15] tracking-[-0.01em] text-ink no-underline hover:underline md:text-2xl">
           {it.title}
         </Link>

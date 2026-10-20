@@ -35,7 +35,8 @@
     "posted": "Posted.",
     "link": "Link",
     "close": "Close",
-    "privateHint": "Only people allowed to see it see the card's content. Everyone else sees “Not visible”."
+    "privateHint": "Only people allowed to see it see the card's content. Everyone else sees “Not visible”.",
+    "out": "Outside HiveVoice"
   },
   "access": {
     "title": "Who may do what?",

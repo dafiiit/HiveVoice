@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { chip } from "@/components/ui/styles";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer, type Tx } from "@/lib/db";
 import { requireSession } from "@/lib/session";
@@ -141,7 +142,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
     } else if (kind === "group_removed" || kind === "group_delete_requested" || kind === "group_archived" || kind === "group_rule_changed") {
       href = kind === "group_removed" ? "/connect" : `/groups/${p.slug}`; label = t("labels.group");
     } else if (kind === "resource_transfer" || kind === "resource_transfer_answer") {
-      href = "/me?tab=docs"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
+      href = "/inhalte?f=docs"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
     } else if (kind.startsWith("resource_")) {
       href = `/links/${p.resource_id}`; label = t("labels.other");
     } else if (kind === "invite_used" || kind === "invitee_violation") {
@@ -205,7 +206,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       <div role="group" aria-label={t("filter.label")} className="flex flex-wrap gap-1.5">
         {FILTERS.map((f) => (
           <Link key={f} href={f === "all" ? "/notifications" : `/notifications?f=${f}`} aria-pressed={filter === f}
-            className={`inline-flex h-8 items-center gap-1.5 px-3 text-[13px] no-underline ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-chip text-ink"}`}>
+            className={`${chip(filter === f)} gap-1.5 no-underline`}>
             {t(`filter.${f}`)}
             {counts[f] > 0 && f !== "all" && <span className={`inline-flex h-4 min-w-4 items-center justify-center px-1 text-[10px] font-bold ${filter === f ? "bg-on-ink text-ink" : "bg-ink text-on-ink"}`}>{counts[f]}</span>}
           </Link>

@@ -14,15 +14,14 @@
   "conversations": "Conversations",
   "pane": "Conversation",
   "market": "Marketplace",
-  "marketSub": "Open to everyone in {place}",
+  "marketSub": "{place}",
   "marketSubAll": "News from all places",
-  "marketOpen": "Open to everyone in {place} · anyone can write",
   "marketPlaceholder": "What’s new in the neighbourhood?",
   "marketEmpty": "Nothing going on yet. Write the first post!",
   "readOnly": "Anyone can read. Sign in to write.",
   "pinned": "Pinned",
-  "private": "Private · {title}",
-  "groupSub": "Group · {n, plural, one {1 member} other {# members}}",
+  "private": "{title}",
+  "groupSub": "{n, plural, one {1 member} other {# members}}",
   "groupPlaceholder": "Write in “{name}” …",
   "groupEmpty": "No posts in this group yet.",
   "openGroup": "Open group",
@@ -103,5 +102,7 @@
     "only": "Only: {what}",
     "clear": "Clear filters",
     "none": "No posts match. Change the area or the search."
-  }
+  },
+  "waiting": "Waiting for connection",
+  "offlineExtras": "Without a connection only text can be sent. Please send photos, files and polls later."
 }

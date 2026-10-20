@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { fetchMessages, sendMessage, type Message } from "@/lib/actions/messages";
+import { OUTBOX_EVENT, enqueue, flushOutbox, offline, queued, type OutboxDetail } from "@/lib/outbox";
 import { deleteMessage, editMessage } from "@/lib/actions/safety";
 import { cleanPoll, isImage, pollReady } from "@/lib/files";
 import { Avatar } from "../ui/Avatar";
@@ -14,7 +15,7 @@ import { RefCardView } from "../refs/RefCardView";
 import { ExtrasButtons, ExtrasPreview, useExtras } from "../ComposerExtras";
 
 // `key` stays the same when a sent message gets its real id, so its bubble is not rebuilt; `fresh` bubbles slide in.
-type Local = Omit<Message, "created_at"> & { created_at: string | Date; sending?: boolean; key: string; fresh?: boolean };
+type Local = Omit<Message, "created_at"> & { created_at: string | Date; sending?: boolean; waiting?: boolean; key: string; fresh?: boolean };
 type Quote = NonNullable<Message["reply_to"]>;
 const ms = (d: string | Date) => new Date(d).getTime();
 const dayKey = (d: string | Date) => new Date(d).toDateString();
@@ -48,16 +49,15 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const inner = useRef<HTMLDivElement>(null);
   const field_ = useRef<HTMLTextAreaElement>(null);
   const stick = useRef(true);
-  const seq = useRef(0);
   const arrived = useRef(false);
   const swipe = useRef<{ x: number; y: number } | null>(null);
 
   // Polling keeps the setup portable: no realtime service needed. The server clock of the last answer marks "what is new".
   useEffect(() => {
     const tick = async () => {
-      if (document.visibilityState !== "visible") return;
-      const res = await fetchMessages(id, new Date(new Date(asOf.current).getTime() - 2000).toISOString());
-      if (!res.ok) return;
+      if (document.visibilityState !== "visible" || offline()) return;
+      const res = await fetchMessages(id, new Date(new Date(asOf.current).getTime() - 2000).toISOString()).catch(() => null);
+      if (!res?.ok) return;
       asOf.current = res.data.asOf;
       setReadAt(res.data.otherReadAt);
       if (res.data.messages.length) setMessages((m) => merge(m, res.data.messages));
@@ -65,6 +65,28 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     const h = setInterval(tick, 4000);
     return () => clearInterval(h);
   }, [id]);
+
+  // Written without a connection: shown as waiting, sent by the outbox once the connection is back.
+  useEffect(() => {
+    // The device's storage is only readable after hydration, so the waiting messages join one tick later.
+    const show = setTimeout(() => {
+      const waiting = queued(id);
+      if (waiting.length) setMessages((m) => [...m, ...waiting.filter((q) => !m.some((y) => y.key === q.key)).map((q): Local => ({
+        id: q.key, key: q.key, body: q.body, created_at: q.at, sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null,
+        sending: true, waiting: true, reply_to: null, attachments: [], poll: null, ref: null, edited_at: null, deleted_at: null,
+      }))]);
+    }, 0);
+    const onSent = (e: Event) => {
+      const d = (e as CustomEvent<OutboxDetail>).detail;
+      if (d.conversationId !== id) return;
+      if (d.failed) { setMessages((m) => m.filter((y) => y.key !== d.key)); setError(t("sendFailed")); return; }
+      const sent = d.message!;
+      setMessages((m) => m.some((y) => y.id === sent.id) ? m.filter((y) => y.key !== d.key) : m.map((y) => (y.key === d.key ? { ...sent, key: d.key } : y)));
+    };
+    window.addEventListener(OUTBOX_EVENT, onSent);
+    void flushOutbox();
+    return () => { clearTimeout(show); window.removeEventListener(OUTBOX_EVENT, onSent); };
+  }, [id, viewerId, t]);
 
   // The "edit" link disappears 15 minutes after sending.
   useEffect(() => {
@@ -138,16 +160,25 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     const body = draft.trim();
     const poll = x.poll && pollReady(x.poll) ? cleanPoll(x.poll) : null;
     if ((!body && !x.files.length && !poll) || x.blocked) return;
-    const tmp = `tmp-${++seq.current}`;
+    if (offline() && (x.files.length || poll)) { setError(t("offlineExtras")); return; }
+    const tmp = crypto.randomUUID();
     const files = x.files, rawPoll = x.poll, quote = replyTo;
     setDraft("");
     setError(null);
     x.clear();
     setReplyTo(null);
     stick.current = true;
-    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: new Date(), sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true, reply_to: quote, attachments: [], poll: null, ref: null, edited_at: null, deleted_at: null }]);
-    const res = await sendMessage({ conversationId: id, body, replyToId: quote?.id ?? null, files, poll });
-    if (res.ok) {
+    const at = new Date();
+    setMessages((m) => [...m, { id: tmp, key: tmp, fresh: true, body, created_at: at, sender_id: viewerId, sender_name: "", sender_seed: 0, sender_path: null, sending: true, reply_to: quote, attachments: [], poll: null, ref: null, edited_at: null, deleted_at: null }]);
+    // No connection (or it breaks while sending): text waits on the device and goes out later.
+    const wait = () => {
+      enqueue({ key: tmp, conversationId: id, body, replyToId: quote?.id ?? null, at: at.toISOString() });
+      setMessages((m) => m.map((y) => (y.key === tmp ? { ...y, waiting: true } : y)));
+    };
+    if (offline() && !files.length && !poll) { wait(); return; }
+    const res = await sendMessage({ conversationId: id, body, replyToId: quote?.id ?? null, files, poll, clientKey: tmp }).catch(() => null);
+    if (!res && !files.length && !poll) { wait(); return; }
+    if (res?.ok) {
       setMessages((m) => m.some((y) => y.id === res.data.id)
         ? m.filter((y) => y.id !== tmp)
         : m.map((y) => (y.id === tmp ? { ...res.data, key: tmp, fresh: true } : y)));
@@ -219,7 +250,7 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                       onChange={(p) => setMessages((all) => all.map((y) => (y.id === m.id ? { ...y, poll: p } : y)))} />
                   )}
                   <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
-                    {m.sending ? t("sending") : fmt.time.format(new Date(m.created_at))}
+                    {m.waiting ? t("waiting") : m.sending ? t("sending") : fmt.time.format(new Date(m.created_at))}
                     {m.edited_at && !m.deleted_at && <span>· {ts("edited")}</span>}
                     {mine && lastMine?.id === m.id && readAt && ms(readAt) >= ms(m.created_at) - 1000 && <span>· {t("read")}</span>}
                     {!m.sending && !m.deleted_at && <button type="button" onClick={() => startReply(m)} className="border-0 bg-transparent p-0 text-xs text-muted underline">{te("reply")}</button>}

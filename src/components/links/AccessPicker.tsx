@@ -7,7 +7,7 @@ export type Access = { visibility: "me" | "group" | "link" | "public"; license: 
 /** Who sees a new document, and under which licence others may reuse it when it is public. */
 export function AccessPicker({ value, onChange, inGroup }: { value: Access; onChange: (a: Access) => void; inGroup: boolean }) {
   const t = useTranslations("docrights");
-  const options = (inGroup ? ["group", "me", "link", "public"] : ["public", "me", "link"]) as Access["visibility"][];
+  const options = (inGroup ? ["group", "me", "link", "public"] : ["me", "link", "public"]) as Access["visibility"][];
   return (
     <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
       <legend className="p-0 font-bold">{t("visibility.label")}</legend>

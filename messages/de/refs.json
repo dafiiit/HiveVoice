@@ -35,7 +35,8 @@
     "posted": "Gepostet.",
     "link": "Link",
     "close": "Schließen",
-    "privateHint": "Nur wer es sehen darf, sieht den Inhalt der Karte. Für alle anderen steht dort „Nicht sichtbar“."
+    "privateHint": "Nur wer es sehen darf, sieht den Inhalt der Karte. Für alle anderen steht dort „Nicht sichtbar“.",
+    "out": "Nach außen"
   },
   "access": {
     "title": "Wer darf was?",

@@ -16,17 +16,23 @@ export type Message = {
   ref: RefCard | "missing" | null;
 };
 
-export type MessageInput = { conversationId: string; body: string; replyToId?: string | null; files?: UploadedFile[]; poll?: PollDraft | null };
+/** `clientKey` comes from the device: a message sent again after a lost connection is stored only once. */
+export type MessageInput = { conversationId: string; body: string; replyToId?: string | null; files?: UploadedFile[]; poll?: PollDraft | null; clientKey?: string | null };
 
 export async function sendMessage(input: MessageInput) {
   const body = input.body.trim().slice(0, 5000);
   const files = (input.files ?? []).slice(0, MAX_FILES);
   const poll = input.poll && pollReady(input.poll) ? cleanPoll(input.poll) : null;
   if (!body && !files.length && !poll) return { ok: false as const, error: "invalid" };
+  const key = input.clientKey?.slice(0, 64) || null;
   return run(async (tx, s) => {
+    if (key) {
+      const [known] = await tx<{ id: string }[]>`select id from public.messages where conversation_id = ${input.conversationId} and sender_id = ${s.profile.id} and client_key = ${key}`;
+      if (known) return (await loadMessages(tx, input.conversationId, { id: known.id }))[0];
+    }
     const [row] = await tx<{ id: string }[]>`
-      insert into public.messages (conversation_id, sender_id, body, reply_to_id)
-      values (${input.conversationId}, ${s.profile.id}, ${body}, ${input.replyToId ?? null}) returning id`;
+      insert into public.messages (conversation_id, sender_id, body, reply_to_id, client_key)
+      values (${input.conversationId}, ${s.profile.id}, ${body}, ${input.replyToId ?? null}, ${key}) returning id`;
     if (files.length || poll) await tx`select app.add_extras('message', ${row.id}, ${tx.json(files)}, ${poll ? tx.json(poll) : null})`;
     const [m] = await loadMessages(tx, input.conversationId, { id: row.id });
     return m;

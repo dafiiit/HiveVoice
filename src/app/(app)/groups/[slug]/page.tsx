@@ -26,7 +26,6 @@ import { GroupRules } from "@/components/group/GroupRules";
 import { DangerZone } from "@/components/group/DangerZone";
 import { InviteBanner } from "@/components/group/InviteBanner";
 import { ShareBlock } from "@/components/ShareBlock";
-import { ShareMenu } from "@/components/refs/ShareMenu";
 import { Collection, type CollectionItem } from "@/components/refs/Collection";
 import { loadRefCards, type RefCard } from "@/lib/refs";
 
@@ -199,8 +198,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           {session && <FollowButton type="group" id={g.id} following={data.following} />}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {session && <ShareMenu type="group" id={g.id} title={g.name} />}
-          <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} />
+          <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} item={session ? { type: "group", id: g.id } : null} />
         </div>
         {g.archived_at && <p role="status" className="m-0 border-l-4 border-red bg-surface p-3 font-bold">{tr("danger.archived")}</p>}
         {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}

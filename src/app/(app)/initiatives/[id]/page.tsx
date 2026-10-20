@@ -10,7 +10,7 @@ import { Cover } from "@/components/ui/Cover";
 import { Avatar } from "@/components/ui/Avatar";
 import { Glyph } from "@/components/ui/Glyph";
 import { IconCheck } from "@/components/ui/Icons";
-import { tab, tag } from "@/components/ui/styles";
+import { btn, tab, tag } from "@/components/ui/styles";
 import { SupportButton } from "@/components/initiative/SupportButton";
 import { ArgumentBoard, type ArgumentView } from "@/components/initiative/ArgumentBoard";
 import { AuthorTools } from "@/components/initiative/AuthorTools";
@@ -18,7 +18,6 @@ import { CoAuthors, type AuthorRow, type PendingInvite, type RemovalRow } from "
 import { AuthorInviteBanner } from "@/components/initiative/AuthorInviteBanner";
 import { BlockInitiative } from "@/components/initiative/BlockInitiative";
 import { ShareBlock } from "@/components/ShareBlock";
-import { ShareMenu } from "@/components/refs/ShareMenu";
 import { WhyNot } from "@/components/WhyNot";
 import { BallotPanel, type BallotView } from "@/components/BallotPanel";
 import { Composer, PostList } from "@/components/PostList";
@@ -211,13 +210,12 @@ export default async function InitiativePage({ params, searchParams }: PageProps
         )}
         <div className="flex flex-wrap items-center gap-4">
           {!ini.outcome && !ini.blocked_at && (ini.phase === "idea" || ini.phase === "debate") && !ballotOpen && <SupportButton id={id} supported={data.supported} signedIn={signedIn} />}
-          {ballotOpen && <Link href={`${path}?tab=vote`} className="inline-flex h-[52px] items-center bg-ink px-6 font-bold text-on-ink no-underline">{t("voteNow")}</Link>}
-          {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className="inline-flex h-[52px] items-center bg-ink px-6 font-bold text-on-ink no-underline">{t("help")}</Link>}
+          {ballotOpen && <Link href={`${path}?tab=vote`} className={btn.primaryLg}>{t("voteNow")}</Link>}
+          {ini.phase === "implementation" && ini.group_slug && <Link href={`/groups/${ini.group_slug}`} className={btn.primaryLg}>{t("help")}</Link>}
           <span className="tabular">{t("supports", { n: ini.support_count, formatted: num(ini.support_count, locale) })}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {signedIn && <ShareMenu type="initiative" id={id} title={ini.title} />}
-          <ShareBlock path={path} title={ini.title} isPublic={!!ini.published_at && !ini.blocked_at} />
+          <ShareBlock path={path} title={ini.title} isPublic={!!ini.published_at && !ini.blocked_at} item={signedIn ? { type: "initiative", id } : null} />
         </div>
         {signedIn && !isAuthor && !ini.outcome && <WhyNot action="initiative.edit" objectId={id} />}
         {isAuthor && !ini.blocked_at && (

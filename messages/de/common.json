@@ -123,5 +123,6 @@
     "easy": "Leichte Sprache",
     "en": "English"
   },
-  "perMonth": "{amount}/Monat"
+  "perMonth": "{amount}/Monat",
+  "offline": "Offline – du siehst den zuletzt geladenen Stand. Nachrichten gehen raus, sobald du wieder online bist."
 }

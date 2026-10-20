@@ -283,7 +283,7 @@ export default async function Connect({ searchParams }: PageProps<"/connect">) {
           {pane?.kind === "market" && (
             <>
               <header className="flex flex-none items-center justify-between gap-2 border-b border-line pb-2 md:gap-3 md:pb-3">
-                <div className="flex min-w-0 items-center gap-1">{back}<div className="flex min-w-0 flex-col"><strong className="text-lg leading-tight">{t("market")}</strong><span className="truncate text-sm text-muted"><span className="md:hidden">{data.muni ? t("marketSub", { place: data.muni.name }) : t("marketSubAll")}</span><span className="max-md:hidden">{data.muni ? t("marketOpen", { place: data.muni.name }) : t("marketSubAll")}</span></span></div></div>
+                <div className="flex min-w-0 items-center gap-1">{back}<div className="flex min-w-0 flex-col"><strong className="text-lg leading-tight">{t("market")}</strong><span className="truncate text-sm text-muted">{data.muni ? t("marketSub", { place: data.muni.name }) : t("marketSubAll")}</span></div></div>
                 <MarketFilter radii={data.radii} radius={pane.area} q={q} tags={pane.tags} keep={{ ...(mode !== "chrono" ? { mode } : {}), ...(filter !== "all" ? { f: filter } : {}) }} />
               </header>
               {session && data.muni ? <div className="flex-none py-3"><Composer ctx={{ regionId: data.muni.id }} path="/connect" placeholder={t("marketPlaceholder")} viewerName={session.profile.display_name} viewerSeed={session.profile.avatar_seed} viewerPath={session.profile.avatar_path} /></div>

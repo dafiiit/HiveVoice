@@ -26,6 +26,7 @@ import ns_map from "./map.json";
 import ns_market from "./market.json";
 import ns_me from "./me.json";
 import ns_meta from "./meta.json";
+import ns_mine from "./mine.json";
 import ns_modrights from "./modrights.json";
 import ns_nav from "./nav.json";
 import ns_new from "./new.json";
@@ -71,6 +72,7 @@ const messages = {
   "market": ns_market,
   "me": ns_me,
   "meta": ns_meta,
+  "mine": ns_mine,
   "modrights": ns_modrights,
   "nav": ns_nav,
   "new": ns_new,

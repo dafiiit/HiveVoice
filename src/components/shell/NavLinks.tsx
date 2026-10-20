@@ -2,11 +2,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
-import { IconChat, IconCompass, IconPlus, IconShare } from "../ui/Icons";
+import { IconChat, IconCompass, IconFolder, IconPlus, IconShare } from "../ui/Icons";
 
-export type NavItem = { href: string; label: string; badge?: number };
+/** `short` is the label under the icon in the bottom bar on phones. */
+export type NavItem = { href: string; label: string; short?: string; badge?: number };
 
-const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/anliegen": IconShare, "/connect": IconChat };
+const ICONS: Record<string, ComponentType<{ size?: number }>> = { "/explore": IconCompass, "/anliegen": IconShare, "/connect": IconChat, "/inhalte": IconFolder };
 
 // "Anliegen" also covers the pages of single offers and requests.
 const ALSO: Record<string, string[]> = { "/anliegen": ["/offers", "/needs"] };
@@ -48,7 +49,7 @@ export function BottomNav({ items, newLabel }: { items: NavItem[]; newLabel: str
           <Icon size={22} />
           {!!it.badge && <span className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center bg-red px-1 text-[10px] font-bold text-on-red">{it.badge}</span>}
         </span>
-        {it.label}
+        {it.short ?? it.label}
       </Link>
     );
   };

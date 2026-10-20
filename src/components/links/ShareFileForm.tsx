@@ -27,7 +27,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [groupId, setGroupId] = useState(groups.find((g) => g.slug === initialGroup)?.id ?? "");
-  const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "public", license: "all_rights" });
+  const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "me", license: "all_rights" });
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -86,7 +86,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
           <TagPicker label={tl("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={tl("tagsPlaceholder")} max={10} />
           {groups.length > 0 && (
             <label className={field.label}>{tl("groupLabel")}
-              <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "public" })); }} className={`${field.select} h-12`}>
+              <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select} h-12`}>
                 <option value="">{tl("everyone")}</option>
                 {groups.map((g) => <option key={g.id} value={g.id}>{tl("inGroup", { name: g.name })}</option>)}
               </select>

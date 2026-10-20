@@ -13,7 +13,6 @@ import { ContactButton } from "./ContactButton";
 import { AllyButton } from "./MyListings";
 import { priceLabel } from "./price";
 import { ShareBlock } from "../ShareBlock";
-import { ShareMenu } from "../refs/ShareMenu";
 import { EditListing } from "./EditListing";
 import { AccessPanel } from "../refs/AccessPanel";
 import type { AccessGrant, Scope } from "@/lib/actions/share";
@@ -92,9 +91,8 @@ export async function ListingDetail({ id, kind, linkToken = null }: { id: string
       <h1 className="display m-0">{l.title}</h1>
       {l.description && <p className="m-0 whitespace-pre-line text-lg">{l.description}</p>}
       <div className="flex flex-wrap items-center gap-3">
-        {session && <ShareMenu type="listing" id={l.id} title={l.title} />}
         {(own || data.canEdit) && <EditListing id={l.id} title={l.title} description={l.description} path={`/${kind === "need" ? "needs" : "offers"}/${id}`} />}
-        {l.read_scope === "public" && <ShareBlock path={`/${kind === "need" ? "needs" : "offers"}/${id}`} title={l.title} isPublic />}
+        <ShareBlock path={`/${kind === "need" ? "needs" : "offers"}/${id}`} title={l.title} isPublic={l.read_scope === "public"} item={session ? { type: "listing", id: l.id } : null} />
       </div>
       {data.access && (
         <AccessPanel type="listing" id={l.id} read={data.access.read_scope} write={data.access.write_scope} hasGroup={!!l.group_slug}

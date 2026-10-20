@@ -21,3 +21,4 @@ export const IconShare = ({ size = 22, className }: P) => <svg {...base(size)} s
 export const IconAttach = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M20 11l-8.5 8.5a5 5 0 0 1-7-7L13 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L14 7" /></svg>;
 export const IconPoll = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 20V10M12 20V4M19 20v-7" /></svg>;
 export const IconFile = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4" /></svg>;
+export const IconFolder = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 5h7l2 2h9v12H3z" /><path d="M3 10h18" /></svg>;

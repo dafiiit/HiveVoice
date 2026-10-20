@@ -34,6 +34,8 @@ test.describe("knowledge: notes, files and images", () => {
       await expect(preview.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
       await expect(preview.getByText("fett")).toBeVisible();
       await expect(preview.getByRole("img", { name: "Diagramm" }).locator("svg")).toBeVisible({ timeout: 20_000 });
+      // Documents start private; this one is shared with everybody so Wissen can find it.
+      await page.getByLabel("Wer darf das sehen?").selectOption("public");
       await page.getByRole("button", { name: "Notiz veröffentlichen" }).click();
       await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
       const article = page.locator("article.border");

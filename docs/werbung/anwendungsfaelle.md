@@ -2,6 +2,7 @@
 
 Wofür HiveVoice gemacht ist, an zehn Personas. Jede zeigt eine Stärke, die andere Plattformen so nicht haben.
 Grundlage für Werbung, Präsentationen (`HiveVoice.pptx`) und Gespräche mit Vereinen und Kommunen.
+Bei drei Personas steht ein Hintergrund mit Zahlen aus München, Deutschland und Europa (Stand Oktober 2026).
 
 ---
 
@@ -14,11 +15,13 @@ Grundlage für Werbung, Präsentationen (`HiveVoice.pptx`) und Gespräche mit Ve
 **Situation:** Er braucht ein WG-Zimmer und einen Nebenjob für die Wochenenden.
 **Mit HiveVoice:** Im Marktplatz filtert er Wohnen nach „WG-Zimmer, ab 1 Zimmer, höchstens 550 €“ und Jobs nach „Minijob, vor Ort“, auf der Karte sieht er, was in seiner Nähe liegt. Sein Gesuch „Zimmer gesucht“ meldet ihm neue passende Angebote.
 **Warum HiveVoice:** Filter wie bei Immobilien- und Jobportalen, aber von Menschen aus dem Viertel, ohne Makler und ohne Werbung.
+**Hintergrund München:** Kein Mietmarkt in Deutschland ist teurer. Neu angebotene Wohnungen kosten im Schnitt 23,35 € pro m² kalt, fast 9 € mehr als im Bundesschnitt (14,41 €); rund ein Drittel der Inserate ist befristet oder möbliert. ([IfW Kiel, GREIX-Mietpreisindex Q4/2025](https://www.boerse-online.de/dpa-afx/mieten-steigen-stark-immer-mehr-befristete-angebote-496193.html))
 
 ### 3. Erika, 72, Rentnerin, lebt allein
 **Situation:** Seit dem Tod ihres Mannes ist es still. Sie backt gern und hat Zeit.
 **Mit HiveVoice:** Sie bietet „Kuchen backen und Leute kennenlernen, sonntags“ an. Die App gibt es auch in Leichter Sprache. Zwei junge Familien und ein Student melden sich. Ihre Enkelin hilft beim ersten Eintrag.
 **Warum HiveVoice:** Gesellschaft ist ein Angebot wie jedes andere. Keine Selbstdarstellung, keine Likes.
+**Hintergrund Deutschland:** Gut jede:r Neunte (11,3 %) fühlt sich häufig einsam; über lange Zeit sind Menschen über 75 am stärksten betroffen. Die Bundesregierung hat dazu eine eigene Strategie gegen Einsamkeit. ([Einsamkeitsbarometer 2024, BMFSFJ](https://www.bmfsfj.de/resource/blob/240528/5a00706c4e1d60528b4fed062e9debcc/einsamkeitsbarometer-2024-data.pdf))
 
 ### 4. Thomas, 45, Vorsitzender eines Sportvereins
 **Situation:** 400 Mitglieder, fünf Abteilungen, jedes Jahr dieselbe Suche nach Helfern fürs Sommerturnier. Infos in 12 WhatsApp-Gruppen.
@@ -54,6 +57,7 @@ Grundlage für Werbung, Präsentationen (`HiveVoice.pptx`) und Gespräche mit Ve
 **Situation:** Jeden Abend werden Lebensmittel von Bäckereien gerettet, Abholer:innen fallen kurzfristig aus.
 **Mit HiveVoice:** Abholungen sind Aufgaben mit Zuständigen, gerettetes Brot steht als kostenloses Angebot auf der Karte. Über „Weitergeben“ landet ein Angebot sofort im Chat der Nachbarschaftsgruppe.
 **Warum HiveVoice:** Vom Angebot bis zur Übergabe in einer App, schnell und ohne Werbung.
+**Hintergrund Europa:** In der EU fallen jedes Jahr 58 Millionen Tonnen Lebensmittelabfälle an, rund 130 kg pro Kopf, mehr als die Hälfte davon in Haushalten. ([Eurostat, Daten für 2023, Zusammenfassung](https://www.statistiques.developpement-durable.gouv.fr/dechets-alimentaires-en-france-et-dans-lunion-europeenne-en-2023))
 
 ---
 

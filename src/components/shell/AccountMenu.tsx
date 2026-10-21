@@ -8,7 +8,7 @@ import { Avatar } from "../ui/Avatar";
  * Top right: everything about the account (profile, settings, responsibilities, reports, principles, signing out).
  * Not the own content, that is the area "Ich" in the rail.
  */
-export function AccountMenu({ id, name, seed, path }: { id: string; name: string; seed: number; path: string | null }) {
+export function AccountMenu({ id, name, seed, path, admin }: { id: string; name: string; seed: number; path: string | null; admin: boolean }) {
   const t = useTranslations("nav.account");
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
@@ -35,6 +35,8 @@ export function AccountMenu({ id, name, seed, path }: { id: string; name: string
         <Link href="/settings" className={item}>{t("settings")}</Link>
         <Link href="/settings?tab=resp" className={item}>{t("resp")}</Link>
         <Link href="/settings?tab=reports" className={item}>{t("reports")}</Link>
+        {/* Server admins (ADMIN_EMAILS, confirmed address) switch to the admin view here. */}
+        {admin && <Link href="/admin" className={`${item} font-bold`}>{t("admin")}</Link>}
         <Link href="/principles" className={item}>{t("principles")}</Link>
         <form method="post" action="/auth/signout">
           <button type="submit" className="flex h-11 w-full items-center border-0 bg-transparent px-4 text-left text-ink hover:bg-chip">{t("signOut")}</button>

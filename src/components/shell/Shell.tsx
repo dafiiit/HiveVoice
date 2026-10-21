@@ -51,7 +51,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
                   </span>
                 )}
               </Link>
-              <AccountMenu id={session.profile.id} name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} />
+              <AccountMenu id={session.profile.id} name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} admin={session.profile.is_admin} />
             </>
           ) : (
             <>

@@ -2,7 +2,7 @@ import "server-only";
 import type { Tx } from "./db";
 
 // Everything that can travel as a card: into a chat, a group's talk, the marketplace, a group's collection.
-export const REF_TYPES = ["listing", "resource", "group", "task", "initiative"] as const;
+export const REF_TYPES = ["listing", "resource", "group", "task", "initiative", "list"] as const;
 export type RefType = (typeof REF_TYPES)[number];
 export type Ref = { type: RefType; id: string };
 export const isRefType = (v: unknown): v is RefType => (REF_TYPES as readonly unknown[]).includes(v);
@@ -38,6 +38,9 @@ export async function loadRefCards(tx: Tx, refs: { type: string | null; id: stri
   if (by.has("initiative")) add(await tx<RefCard[]>`
     select 'initiative' as type, i.id, i.title, null as kind, i.summary as sub, '/initiatives/' || i.id as href
     from public.initiatives i where i.id = any(${ids("initiative")}::uuid[])`);
+  if (by.has("list")) add(await tx<RefCard[]>`
+    select 'list' as type, l.id, l.title, null as kind, null as sub, '/me/lists/' || l.id as href
+    from public.todo_lists l where l.id = any(${ids("list")}::uuid[])`);
   return out;
 }
 

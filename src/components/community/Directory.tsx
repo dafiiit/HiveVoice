@@ -11,10 +11,11 @@ import { Toolbar, Notice } from "@/components/ui/Page";
 import { SearchField } from "@/components/ui/SearchField";
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
+import { AutoOpen } from "@/components/shell/AutoOpen";
+import { feedOrder } from "@/lib/order";
 
 type Kind = "initiatives" | "groups" | "people";
 const LEVELS = ["all", "borough", "municipality", "district", "state", "country"] as const;
-const SORTS = ["relevant", "new", "soon", "support"] as const;
 
 type Group = { id: string; slug: string; name: string; summary: string | null; member_count: number; join_policy: string; region_name: string | null; tags: string[]; is_member: boolean };
 type Person = { id: string; display_name: string; avatar_seed: number; avatar_path: string | null; headline: string | null; region_name: string | null; offers: string[]; needs: string[]; following: boolean; resp: { id: string; title: string }[] };
@@ -27,7 +28,8 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const kind: Kind = area === "people" ? "people" : str("kind") === "initiatives" ? "initiatives" : "groups";
   const level = (LEVELS as readonly string[]).includes(str("level")) ? str("level") : "all";
-  const sort = (SORTS as readonly string[]).includes(str("sort")) ? str("sort") : "relevant";
+  // One order for every list, chosen in the settings: newest first or what fits first.
+  const sort = (await feedOrder()) === "chrono" ? "new" : "relevant";
   const mine = str("mine") === "1";
   const q = str("q").trim();
   const placeId = /^[0-9a-f-]{36}$/.test(str("place")) ? str("place") : "";
@@ -51,8 +53,6 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
     if (kind === "initiatives") {
       const order =
         sort === "new" ? tx`i.created_at desc`
-        : sort === "soon" ? tx`(select min(b.closes_at) from public.ballots b where b.initiative_id = i.id and b.status = 'open') asc nulls last, i.created_at desc`
-        : sort === "support" ? tx`i.support_count desc`
         : tx`(i.region_id = any(${regions}::uuid[])) desc, (i.outcome is null) desc, i.support_count + i.argument_count * 3 desc`;
       return {
         initiatives: await tx<Card[]>`
@@ -109,8 +109,8 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
   });
 
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ kind: area === "groups" && kind === "initiatives" ? "initiatives" : "", level, sort, q, mine: mine ? "1" : "", place: filterPlace?.id ?? "", ...patch });
-    for (const [k, v] of [...p.entries()]) if (!v || (k === "level" && v === "all") || (k === "sort" && v === "relevant") || (k === "kind" && v === "groups")) p.delete(k);
+    const p = new URLSearchParams({ kind: area === "groups" && kind === "initiatives" ? "initiatives" : "", level, q, mine: mine ? "1" : "", place: filterPlace?.id ?? "", ...patch });
+    for (const [k, v] of [...p.entries()]) if (!v || (k === "level" && v === "all") || (k === "kind" && v === "groups")) p.delete(k);
     const s = p.toString();
     return `/community/${area}${s ? `?${s}` : ""}`;
   };
@@ -124,6 +124,7 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
       <span className="flex min-w-0 flex-col"><strong className="truncate">{title}</strong><span className="truncate text-sm text-muted">{sub}</span></span>
     </Link>
   );
+  const first = data.initiatives?.[0] ? `/community/groups/i/${data.initiatives[0].id}` : data.groups?.[0] ? `/community/groups/${data.groups[0].slug}` : data.people?.[0] ? `/community/people/${data.people[0].id}` : null;
   const create = kind === "initiatives" ? { href: "/new/initiative", label: t("create.initiatives") }
     : kind === "groups" ? { href: "/new/group", label: t("create.groups") } : null;
   return (
@@ -161,18 +162,6 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
             )}
           </Popover>
         )}
-        {kind === "initiatives" && (
-          <Popover label={<>{t("sort")} <span className="font-normal">{t(`sorts.${sort as "relevant"}`)}</span></>}>
-            <div className="flex flex-col" role="group" aria-label={t("sort")}>
-              {SORTS.map((s) => (
-                <Link key={s} href={href({ sort: s })} aria-current={sort === s ? "true" : undefined}
-                  className={`flex h-10 items-center justify-between border-b border-line text-ink no-underline last:border-b-0 ${sort === s ? "font-bold" : ""}`}>
-                  {t(`sorts.${s}`)}{sort === s && <IconCheck size={12} />}
-                </Link>
-              ))}
-            </div>
-          </Popover>
-        )}
         {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
         {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
@@ -183,6 +172,7 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
 
       {/* Each row opens next to the list and keeps the filters. */}
       <div className="-mx-4 flex flex-col">
+        {!selected && first && <AutoOpen href={`${first}${keep}`} />}
         {(data.initiatives ?? []).map((it) => row(`/community/groups/i/${it.id}`, it.id, it.title, [it.region_name, t("supporters", { n: it.support_count })].filter(Boolean).join(" · "), { name: it.title, group: true }))}
         {(data.groups ?? []).map((g) => row(`/community/groups/${g.slug}`, g.slug, g.name, `${t("groupMeta", { n: g.member_count, place: g.region_name ?? "–" })}`, { name: g.name, group: true }))}
         {(data.people ?? []).map((p) => row(`/community/people/${p.id}`, p.id, p.display_name,

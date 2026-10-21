@@ -83,7 +83,7 @@ export async function removeFromGroup(groupId: string, ref: Ref) {
 export type Scope = "me" | "people" | "group" | "link" | "public";
 export type AccessGrant = { profile_id: string; name: string; seed: number; can_write: boolean };
 
-export async function setAccess(type: "listing" | "task", id: string, read: Scope, write: Scope, path: string) {
+export async function setAccess(type: "listing" | "task" | "list", id: string, read: Scope, write: Scope, path: string) {
   const res = await run(async (tx) => {
     const [{ token }] = await tx<{ token: string | null }[]>`select app.set_object_access(${type}, ${id}, ${read}, ${write}) as token`;
     return token;
@@ -92,7 +92,7 @@ export async function setAccess(type: "listing" | "task", id: string, read: Scop
   return res;
 }
 
-export async function grantAccess(type: "listing" | "task", id: string, profileId: string, write: boolean, path: string) {
+export async function grantAccess(type: "listing" | "task" | "list", id: string, profileId: string, write: boolean, path: string) {
   const res = await run(async (tx) => {
     await tx`select app.grant_object(${type}, ${id}, ${profileId}, ${write})`;
     return null;
@@ -101,7 +101,7 @@ export async function grantAccess(type: "listing" | "task", id: string, profileI
   return res;
 }
 
-export async function revokeAccess(type: "listing" | "task", id: string, profileId: string, path: string) {
+export async function revokeAccess(type: "listing" | "task" | "list", id: string, profileId: string, path: string) {
   const res = await run(async (tx) => {
     await tx`select app.revoke_object(${type}, ${id}, ${profileId})`;
     return null;

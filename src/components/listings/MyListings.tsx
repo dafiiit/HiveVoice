@@ -49,9 +49,9 @@ export function ListingStatus({ id, kind, status }: { id: string; kind: "offer" 
   const set = (next: "active" | "paused" | "closed") => start(async () => { await setListingStatus(id, next, kind); router.refresh(); });
   if (status === "closed") return null;
   return (
-    <span className="flex items-center gap-3">
+    <>
       <button type="button" disabled={pending} onClick={() => set(status === "paused" ? "active" : "paused")} className={btn.secondarySm}>{status === "paused" ? t("resume") : t("pause")}</button>
-      <button type="button" disabled={pending} onClick={() => set("closed")} className={`${btn.linkMuted} text-sm`}>{t("close")}</button>
-    </span>
+      <button type="button" disabled={pending} onClick={() => set("closed")} className={btn.secondarySm}>{t("close")}</button>
+    </>
   );
 }

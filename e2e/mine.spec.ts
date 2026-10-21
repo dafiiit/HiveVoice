@@ -33,7 +33,7 @@ test.describe("Ich: my own things", () => {
     await page.getByLabel("Name der Liste").fill(name);
     await page.getByRole("button", { name: "Anlegen" }).click();
     await expect(page.getByRole("heading", { name })).toBeVisible();
-    await expect(page.getByText("Nur du siehst diese Liste.")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Teilen" }), "lists share like everything else").toBeVisible();
 
     await page.getByLabel("Neuen Punkt hinzufügen").fill("Brot kaufen");
     await page.getByRole("button", { name: "Hinzufügen" }).click();
@@ -49,7 +49,7 @@ test.describe("Ich: my own things", () => {
     await page.getByRole("link", { name: new RegExp(name) }).click();
     await page.getByRole("button", { name: "Liste löschen" }).click();
     await page.getByRole("button", { name: "Ja", exact: true }).click();
-    await expect(page).toHaveURL(/\/me\/lists$/);
+    await expect(page).toHaveURL(/\/me\/lists/);
     await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveCount(0);
   });
 

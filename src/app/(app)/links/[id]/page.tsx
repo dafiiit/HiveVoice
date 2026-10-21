@@ -97,7 +97,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       where c.resource_id = ${id} order by c.created_at limit 100`;
     const [transfer] = level >= 4 ? await tx<{ id: string; to_name: string }[]>`
       select t.id, p.display_name as to_name from public.resource_transfers t join public.profiles p on p.id = t.to_id where t.resource_id = ${id} and t.status = 'proposed'` : [];
-    const canCopy = !!me && (level >= 3 || ["cc_by", "cc_by_sa", "cc0"].includes(meta.license ?? "") || (meta.allow_download && meta.license !== "all_rights") || r.origin === "link");
+    const canCopy = !!me && r.owner_id !== me && (level >= 3 || ["cc_by", "cc_by_sa", "cc0"].includes(meta.license ?? "") || (meta.allow_download && meta.license !== "all_rights") || r.origin === "link");
     return { r, meta, body, ideas, grants, myGroups, versions, suggestions, comments, transfer: transfer ?? null, canCopy, level };
   }, { linkToken: key });
   if (!data) notFound();
@@ -122,34 +122,45 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       {!embedded && <BackLink href={isNote ? "/me/notes" : "/me/uploads"} label={tm(isNote ? "filters.notes" : "filters.uploads")} />}
       {meta.trashed_at && level >= 4 && <RestoreResource id={id} />}
       {isLink && <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />}
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <strong>{kind}</strong><span className="text-muted">{[addsInfo(kind, provider) ? provider : null, isLink ? host : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
-        {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
-      </div>
+      {!isNote && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <strong>{kind}</strong><span className="text-muted">{[addsInfo(kind, provider) ? provider : null, isLink ? host : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
+          {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
+        </div>
+      )}
       <h1 className="display m-0 break-words">{r.title}</h1>
       <span className="flex flex-wrap items-center gap-2 text-sm">
         <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={28} />
         <Link href={`/profile/${r.owner_id}`} className="font-bold text-ink no-underline">{r.owner_name}</Link>
         {r.group_name && <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink underline">{t("inGroupName", { name: r.group_name })}</Link>}
-        <span className="text-muted">· {dateLong(r.created_at, locale)}</span>
+        <span className="text-muted">{[dateLong(r.created_at, locale),
+          isNote ? td("page.version", { n: meta.version_no }) : null,
+          meta.license && meta.license !== "all_rights" ? td("license.shown", { name: td(`license.${meta.license}` as "license.cc_by") }) : null,
+          meta.visibility === "me" ? td("page.private") : null,
+          meta.visibility === "link" && level < 4 ? td("page.viaLink") : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
+        {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink underline">· {td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
       </span>
       {r.description && <p className="m-0 whitespace-pre-line text-lg">{r.description}</p>}
-      {session && !meta.trashed_at && (
-        <ShareMenu type="resource" id={id} title={r.title} className={`${btn.secondary} self-start`}
-          external={meta.visibility === "public" ? { url: `${origin}/links/${id}`, text: r.title } : undefined}
-          access={level >= 4 && !editing && !suggesting ? (
-            <ShareAccess bare id={id} origin={r.origin} visibility={meta.visibility} editMode={meta.edit_mode} allowDownload={meta.allow_download} license={meta.license}
-              linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
-          ) : undefined} />
-      )}
-      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
-        {meta.visibility === "me" && <span>{td("page.private")}</span>}
-        {meta.visibility === "link" && level < 4 && <span>{td("page.viaLink")}</span>}
-        {meta.license && <span>{td("license.shown", { name: td(`license.${meta.license}` as "license.cc_by") })}</span>}
-        {isNote && <span>{td("page.version", { n: meta.version_no })}</span>}
-        {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink underline">{td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
+      <div className="flex flex-wrap items-center gap-2">
+        {session && !meta.trashed_at && (
+          <ShareMenu type="resource" id={id} title={r.title} className={btn.secondarySm}
+            external={meta.visibility === "public" ? { url: `${origin}/links/${id}`, text: r.title } : undefined}
+            access={level >= 4 && !editing && !suggesting ? (
+              <ShareAccess bare id={id} origin={r.origin} visibility={meta.visibility} editMode={meta.edit_mode} allowDownload={meta.allow_download} license={meta.license}
+                linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
+            ) : undefined} />
+        )}
+        {isNote && !editing && !suggesting && !meta.trashed_at && level >= 3 && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
+        {isNote && !editing && !suggesting && !meta.trashed_at && level === 2 && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
+        {meta.lock && !meta.lock.mine && <span className="text-sm font-bold text-red">{td("page.locked")}</span>}
+        {isNote && level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
+        <span className="ml-auto flex items-center gap-3">
+          <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={!!me} />
+          {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
+          {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} note={isNote} />}
+        </span>
       </div>
+      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
       {sp.suggested === "1" && <Notice tone="status">{td("page.suggestSent")}</Notice>}
 
       {isLink && (
@@ -190,13 +201,6 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       {isNote && !editing && !suggesting && (
         <article className="border border-line bg-surface p-4 md:p-6">
           <Markdown source={data.body} />
-          <p className="mb-0 mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-3 text-sm text-muted">
-            <span>{tk("updated", { date: dateLong(r.updated_at, locale) })}</span>
-            {level >= 3 && !meta.trashed_at && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
-            {level === 2 && !meta.trashed_at && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
-            {meta.lock && !meta.lock.mine && <span className="font-bold text-red">{td("page.locked")}</span>}
-            {level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
-          </p>
         </article>
       )}
       {(editing || suggesting) && (
@@ -204,14 +208,6 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       )}
 
       {data.canCopy && !meta.trashed_at && <CopyButton id={id} groups={data.myGroups} linkKey={key} />}
-
-      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-line pt-4">
-        <span className="flex items-center gap-3">
-          <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={!!me} />
-          {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
-          {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} note={isNote} />}
-        </span>
-      </div>
 
       {!editing && !suggesting && <Suggestions id={id} items={data.suggestions} />}
       {data.transfer && level >= 4 && <span className="flex items-center gap-2 text-sm">{td("access.transferPending", { name: data.transfer.to_name })} <CancelTransfer transferId={data.transfer.id} /></span>}

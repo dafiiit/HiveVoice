@@ -55,7 +55,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
     return () => clearTimeout(h);
   }, [name]);
   return (
-    <form className="flex max-w-[720px] flex-col gap-6" onSubmit={(e) => {
+    <form className="flex flex-col gap-6" onSubmit={(e) => {
       e.preventDefault();
       start(async () => {
         const res = await createGroup({ name, summary, description, kind, visibility, joinPolicy, regionId: region?.id ?? "", modTasks, modOfficial: false, tags, focus, template, adultsOnly, tools, invite: invite?.id });
@@ -66,7 +66,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold">{tp("title")}</span>
         <span className={field.hint}>{tp("text")}</span>
-        <div role="radiogroup" aria-label={tp("title")} className="grid gap-2 sm:grid-cols-2">
+        <div role="radiogroup" aria-label={tp("title")} className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
           {COMMUNITIES.map((c) => (
             <button key={c.key} type="button" role="radio" aria-checked={preset === c.key} onClick={() => apply(preset === c.key ? null : c)}
               className={card(preset === c.key)}>
@@ -75,6 +75,8 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
           ))}
         </div>
       </div>
+      <div className="grid gap-6 xl:grid-cols-2 xl:gap-x-12">
+      <div className="flex flex-col gap-6">
       <label className={field.label}>{t("name")}<input required minLength={3} value={name} onChange={(e) => setName(e.target.value)} className={field.input} /></label>
       {similar.length > 0 && (
         <Notice tone="status" className="text-sm font-normal">
@@ -84,6 +86,8 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
       )}
       <label className={field.label}>{t("summary")}<input value={summary} onChange={(e) => setSummary(e.target.value)} className={field.input} /></label>
       <label className={field.label}>{t("description")}<textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} className={field.textarea} /></label>
+      </div>
+      <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2"><span className="text-sm font-bold">{t("place")}</span><RegionPicker chain={chain} value={region} onChange={setRegion} /></div>
       <TagPicker label={t("tags")} value={tags} onChange={setTags} suggestions={ideas} />
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
@@ -98,6 +102,8 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
           ))}
         </div>
       </fieldset>
+      </div>
+      </div>
       {/* Everything the template set, to change only if needed. */}
       <details className="group border-t border-line pt-4">
         <summary className="flex cursor-pointer list-none flex-col gap-1 [&::-webkit-details-marker]:hidden">

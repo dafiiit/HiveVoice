@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 /**
  * The one dropdown of the app (filters, sorting, language, place). A native details element, so it opens
  * without JavaScript too; with JavaScript it closes on a click outside, on Escape and when a link inside is chosen.
+ * On phones the panel is a sheet under the top bar, between the screen edges (16 px) and above the bottom bar, scrolling inside if needed.
  * `size`: "sm" (36 px) next to other tool bar controls, "md" (44 px) in the top bar.
  * `open` / `onOpenChange` make it controlled (for menus that close themselves after an action).
  */
@@ -33,7 +34,7 @@ export function Popover({ label, badge, align = "left", size = "sm", ariaLabel, 
         <span aria-hidden="true" className="text-xs transition-transform group-open:rotate-180">▾</span>
       </summary>
       <div onClick={(e) => { if ((e.target as HTMLElement).closest("a")) { e.currentTarget.closest("details")?.removeAttribute("open"); onOpenChange?.(false); } }}
-        className={panelClassName ?? `absolute z-40 mt-1 flex w-[min(320px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-3 ${align === "right" ? "right-0" : "left-0"}`}>
+        className={panelClassName ?? `absolute z-40 mt-1 flex w-[min(320px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-3 max-sm:fixed max-sm:inset-x-4 max-sm:top-[4.5rem] max-sm:mt-0 max-sm:max-h-[calc(100dvh-9.5rem)] max-sm:w-auto max-sm:overflow-y-auto ${align === "right" ? "right-0" : "left-0"}`}>
         {children}
       </div>
     </details>

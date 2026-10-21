@@ -10,8 +10,8 @@ import { btn, chip, field } from "../ui/styles";
 
 const passkeys = process.env.NEXT_PUBLIC_PASSKEYS === "1";
 
-export function Settings({ language, easy, theme, places, interests, suggestions }: {
-  language: string; easy: boolean; theme: string; places: string; interests: string[]; suggestions: string[];
+export function Settings({ language, easy, theme, order, places, interests, suggestions }: {
+  language: string; easy: boolean; theme: string; order: "chrono" | "suggested"; places: string; interests: string[]; suggestions: string[];
 }) {
   const t = useTranslations("me.settings");
   const tc = useTranslations("common");
@@ -88,6 +88,11 @@ export function Settings({ language, easy, theme, places, interests, suggestions
         <div className="flex flex-wrap items-center gap-2">
           <span className="w-40 font-bold">{t("theme")}</span>
           {(["system", "light", "dark"] as const).map((m) => <button key={m} type="button" aria-pressed={theme === m} disabled={pending} onClick={() => pref({ theme: m })} className={chip(theme === m)}>{t(`themes.${m}`)}</button>)}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="w-40 font-bold">{t("order")}</span>
+          {(["chrono", "suggested"] as const).map((m) => <button key={m} type="button" aria-pressed={order === m} disabled={pending} onClick={() => pref({ order: m })} className={chip(order === m)}>{t(`orders.${m}`)}</button>)}
+          <span className="basis-full text-sm text-muted md:ml-[10.5rem] md:basis-auto">{t("orderHint")}</span>
         </div>
       </section>
 

@@ -66,6 +66,7 @@
       "map": "Map"
     },
     "sorts": {
+      "default": "Default",
       "relevant": "Relevant",
       "new": "New",
       "price": "Price, lowest first",

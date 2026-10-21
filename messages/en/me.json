@@ -104,6 +104,9 @@
     "easyHint": "Simpler texts where available.",
     "on": "On",
     "off": "Off",
+    "order": "Order of lists",
+    "orders": { "chrono": "Newest first", "suggested": "Suggested" },
+    "orderHint": "Applies to Friends, listings and groups: “Suggested” shows what fits you or waits for an answer first.",
     "theme": "Appearance",
     "themes": {
       "system": "Like device",

@@ -45,7 +45,7 @@ Grundlage für die Wellen 1–4: docs/personas.md (30 Personas, Feature-Codes F0
 ## GUI mobile
 
 ## GUI desktop and mobile
-- [ ] **Struktur Gemeinschaft · Freunde · Ich ausbauen** - Umbau steht (docs/struktur.md); offen: „Heute“-Übersicht unter Ich, Kalender als Werkzeug (F01), Rechtegruppen frei benennen, Gruppen-Seite als Spalte 3 neben der Liste in Freunde statt eigener Seite, Leichte-Sprache-Texte für die neuen Bereiche
+- [ ] **Struktur Gemeinschaft · Freunde · Ich ausbauen** - Umbau und Regeln stehen (docs/struktur.md); offen: „Heute“-Übersicht unter Ich, Kalender als Werkzeug (F01), Rechtegruppen frei benennen, Leichte-Sprache-Texte für die neuen Bereiche
 - [ ] **GUI cleanup, weitere Runden** - erste Runde erledigt (siehe Done). Offen: Formulare mit vielen Feldern (Anliegen anlegen, Gruppe gründen, Initiative) und die Einstellungen visuell durchgehen; Erklärtexte bündeln (z. B. eine Seite „So funktionieren Vorschläge“ statt Hinweisen an vielen Stellen)
 
 ## Waiting On

@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { EASY_COOKIE, LANG_COOKIE, THEME_COOKIE } from "@/i18n/config";
+import { EASY_COOKIE, LANG_COOKIE, ORDER_COOKIE, THEME_COOKIE } from "@/i18n/config";
 import { sql, errorCode } from "../db";
 import { run } from "../action";
 import { getSession } from "../session";
@@ -10,12 +10,13 @@ import { createSupabaseServer } from "../supabase/server";
 
 const YEAR = 60 * 60 * 24 * 365;
 
-/** Language, Leichte Sprache and theme work for guests too (cookies); for members they are also saved. */
-export async function updatePreferences(input: { language?: "de" | "en"; easy?: boolean; theme?: "system" | "light" | "dark" }) {
+/** Language, Leichte Sprache, theme and list order work for guests too (cookies); for members they are also saved. */
+export async function updatePreferences(input: { language?: "de" | "en"; easy?: boolean; theme?: "system" | "light" | "dark"; order?: "chrono" | "suggested" }) {
   const store = await cookies();
   if (input.language) store.set(LANG_COOKIE, input.language, { maxAge: YEAR, path: "/" });
   if (input.easy !== undefined) store.set(EASY_COOKIE, input.easy ? "1" : "0", { maxAge: YEAR, path: "/" });
   if (input.theme) store.set(THEME_COOKIE, input.theme, { maxAge: YEAR, path: "/" });
+  if (input.order) store.set(ORDER_COOKIE, input.order, { maxAge: YEAR, path: "/" });
   const session = await getSession();
   if (session) {
     await run(async (tx, s) => {
@@ -23,7 +24,7 @@ export async function updatePreferences(input: { language?: "de" | "en"; easy?: 
       await tx`update public.user_settings set
         language = coalesce(${input.language ?? null}, language),
         easy_language = coalesce(${input.easy ?? null}::boolean, easy_language),
-        theme = coalesce(${input.theme ?? null}, theme), updated_at = now()
+        theme = coalesce(${input.theme ?? null}, theme), feed_order = coalesce(${input.order ?? null}, feed_order), updated_at = now()
         where profile_id = ${s.profile.id}`;
       return null;
     });

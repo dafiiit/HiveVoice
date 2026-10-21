@@ -20,7 +20,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
  * Listings on a map, one square per place with the number of entries. Points are the centre of the
  * municipality, never an address. The map material comes from a third party, so it loads only after a click.
  */
-export function MarketMap({ points, placeHref }: { points: MapPoint[]; placeHref: string }) {
+export function MarketMap({ points, placeHref, fill = false }: { points: MapPoint[]; placeHref: string; fill?: boolean }) {
   const t = useTranslations("explore.market");
   const tm = useTranslations("map");
   const box = useRef<HTMLDivElement>(null);
@@ -57,12 +57,12 @@ export function MarketMap({ points, placeHref }: { points: MapPoint[]; placeHref
 
   if (!ok) {
     return (
-      <div className="flex min-h-[320px] flex-col items-start justify-center gap-3 border border-ink bg-surface p-6">
+      <div className={`flex min-h-[320px] flex-col items-start justify-center gap-3 bg-surface p-6 ${fill ? "h-full" : "border border-ink"}`}>
         <strong className="text-lg">{t("mapLabel")}</strong>
         <p className="m-0 max-w-[560px] text-sm">{tm("consent", { host: HOST })}</p>
         <button type="button" onClick={() => { setClicked(true); try { localStorage.setItem(CONSENT, "1"); } catch { /* fine */ } }} className={btn.primary}>{tm("load")}</button>
       </div>
     );
   }
-  return <div ref={box} role="region" aria-label={t("mapLabel")} className="h-[60vh] min-h-[360px] w-full border border-ink" />;
+  return <div ref={box} role="region" aria-label={t("mapLabel")} className={fill ? "h-full min-h-[60dvh] w-full md:min-h-0" : "h-[60vh] min-h-[360px] w-full border border-ink"} />;
 }

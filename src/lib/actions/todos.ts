@@ -14,10 +14,9 @@ export async function createTodoList(title: string) {
   return res;
 }
 
-export async function updateTodoList(id: string, patch: { title?: string; visibility?: "me" | "public" }) {
+export async function updateTodoList(id: string, patch: { title?: string }) {
   const res = await run(async (tx) => {
     if (patch.title !== undefined) await tx`update public.todo_lists set title = ${patch.title.trim().slice(0, 200)}, updated_at = now() where id = ${id}`;
-    if (patch.visibility) await tx`update public.todo_lists set visibility = ${patch.visibility}, updated_at = now() where id = ${id}`;
     return null;
   });
   if (res.ok) done(id);

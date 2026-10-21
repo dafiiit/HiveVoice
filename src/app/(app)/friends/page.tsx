@@ -4,9 +4,11 @@ import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadMessages } from "@/lib/messages";
 import { relTime } from "@/lib/format";
+import { feedOrder } from "@/lib/order";
 import type { Message } from "@/lib/actions/messages";
 import { Avatar } from "@/components/ui/Avatar";
-import { BackToList } from "@/components/shell/Split";
+import { BackToList, PANE_TITLES } from "@/components/shell/Split";
+import { AutoOpen } from "@/components/shell/AutoOpen";
 import { GroupView } from "@/app/(app)/groups/[slug]/page";
 import { ListingDetail } from "@/components/listings/ListingDetail";
 import { AreaIcon } from "@/components/ui/Logo";
@@ -15,8 +17,7 @@ import { ChatMenu } from "@/components/connect/ChatMenu";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { ListSearch } from "@/components/connect/ListSearch";
-import { Popover } from "@/components/ui/Popover";
-import { IconBack, IconCheck, IconPlus } from "@/components/ui/Icons";
+import { IconBack, IconPlus } from "@/components/ui/Icons";
 import { btn } from "@/components/ui/styles";
 import { Notice } from "@/components/ui/Page";
 
@@ -45,10 +46,9 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("connect");
-  const te = await getTranslations("explore");
   const ts = await getTranslations("safety");
   const locale = await getLocale();
-  const mode = sp.mode === "suggested" ? "suggested" : "chrono";
+  const mode = await feedOrder();
   const filter: Filter = (FILTERS as readonly string[]).includes(String(sp.f)) ? (sp.f as Filter) : "all";
   const sel = group ? `g:${group}` : typeof sp.c === "string" ? sp.c : "";
   const s = typeof sp.s === "string" ? sp.s.trim().slice(0, 80) : "";
@@ -188,9 +188,8 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
     listings: 0,
   };
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ c: typeof sp.c === "string" && !group ? sel : "", mode, f: filter, ...patch });
+    const p = new URLSearchParams({ c: typeof sp.c === "string" && !group ? sel : "", f: filter, ...patch });
     if (s && !("s" in patch)) p.set("s", s);
-    if (p.get("mode") === "chrono") p.delete("mode");
     if (p.get("f") === "all") p.delete("f");
     if (!p.get("c")) p.delete("c");
     return `/friends${p.size ? `?${p}` : ""}`;
@@ -199,6 +198,8 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
   const paneOpen = !!group || typeof sp.c === "string";
   // On phones one pane fills the screen; the arrow in its header goes back to the list.
   const back = <Link href={href({ c: "" })} aria-label={t("back")} className="inline-flex h-9 w-9 flex-none items-center justify-center text-ink md:hidden"><IconBack size={18} /></Link>;
+  const rowHref = (r: Row) => r.kind === "group" ? `/friends/g/${r.key.slice(2)}${(() => { const q = href({ c: "" }).split("?")[1]; return q ? `?${q}` : ""; })()}` : href({ c: r.key });
+  const first = shown.find((r) => r.kind !== "listing") ?? shown[0];
   const hasAnything = data.directs.length + data.groups.length + data.requests.length > 0;
 
   return (
@@ -223,24 +224,13 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
               ))}
             </div>
           )}
-          {/* Search on the left, order on the right. */}
-          <div className="flex flex-none items-center gap-2 border-b border-line px-3 py-2 md:px-4">
-            <ListSearch listId="chat-list" value={s} label={t("listSearch")}
-              keep={{ ...(mode !== "chrono" ? { mode } : {}), ...(filter !== "all" ? { f: filter } : {}) }} />
-            <Popover align="right" label={<>{te("sort")} <span className="font-normal">{t(`mode.${mode}`)}</span></>}>
-              <div className="flex flex-col" role="group" aria-label={t("order")}>
-                {(["chrono", "suggested"] as const).map((m) => (
-                  <Link key={m} href={href({ mode: m })} aria-current={mode === m ? "true" : undefined}
-                    className={`flex h-10 items-center justify-between border-b border-line text-ink no-underline last:border-b-0 ${mode === m ? "font-bold" : ""}`}>
-                    {t(`mode.${m}`)}{mode === m && <IconCheck size={12} />}
-                  </Link>
-                ))}
-              </div>
-            </Popover>
+          <div className="flex flex-none items-center border-b border-line px-3 py-2 md:px-4">
+            <ListSearch listId="chat-list" value={s} label={t("listSearch")} keep={filter !== "all" ? { f: filter } : {}} />
           </div>
+          {!paneOpen && !s && first && <AutoOpen href={rowHref(first)} />}
           {shown.map((r) => (
             // Two lines like the marketplace: name and time, then the latest message (or what it is about).
-            <Link key={r.key} href={r.kind === "group" ? `/friends/g/${r.key.slice(2)}${(() => { const q = href({ c: "" }).split("?")[1]; return q ? `?${q}` : ""; })()}` : href({ c: r.key })} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
+            <Link key={r.key} href={rowHref(r)} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
               className={`flex items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
               <Avatar name={r.name} seed={r.seed} path={r.path} size={40} group={r.groupAvatar ?? r.kind === "group"} />
               <span className="flex min-w-0 flex-1 flex-col">
@@ -273,7 +263,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
           {(!pane || pane.kind === "request") && <Link href={href({ c: "" })} className="mb-2 inline-flex items-center gap-1 text-sm text-ink md:hidden"><IconBack size={14} /> {t("back")}</Link>}
           {(pane?.kind === "group" || pane?.kind === "listing") && (
             // A group with its tabs and tools, or a listing, scrolls on its own next to the list.
-            <div className="-mx-3 -my-2 min-h-0 flex-1 overflow-y-auto md:-mx-6 md:-my-4">
+            <div className={`-mx-3 -my-2 min-h-0 flex-1 overflow-y-auto md:-mx-6 md:-my-4 ${PANE_TITLES}`}>
               <BackToList href={href({ c: "" })} label={t("back")} />
               {pane.kind === "group"
                 ? <GroupView slug={pane.slug} sp={sp} base={`/friends/g/${pane.slug}`} embedded first="talk" />

@@ -16,6 +16,7 @@ test("Anliegen: offers filter by category and its own fields, and the map asks b
   await page.goto("/explore?kind=market");
   await expect(page).toHaveURL(/\/community\/listings/);
   await expect(page.getByRole("tab", { name: "Angebote" })).toHaveAttribute("aria-selected", "true");
+  await page.locator("summary", { hasText: "Kategorie" }).click();
   await page.getByRole("link", { name: /^Wohnen/ }).click();
   await expect(page).toHaveURL(/cat=housing/);
   await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toBeVisible();

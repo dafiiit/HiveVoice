@@ -14,7 +14,7 @@ const ORDER: Scope[] = ["me", "people", "group", "link", "public"];
  * everyone. Editing can never be more open than reading. For offers, requests and tasks.
  */
 export function AccessPanel({ type, id, read, write, hasGroup, linkUrl, grants, path, bare = false }: {
-  type: "listing" | "task"; id: string; read: Scope; write: Scope; hasGroup: boolean; linkUrl: string | null; grants: AccessGrant[]; path: string;
+  type: "listing" | "task" | "list"; id: string; read: Scope; write: Scope; hasGroup: boolean; linkUrl: string | null; grants: AccessGrant[]; path: string;
   /** Inside the share window: no fold, no frame. */
   bare?: boolean;
 }) {

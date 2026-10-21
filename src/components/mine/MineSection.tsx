@@ -6,7 +6,7 @@ import { relTime } from "@/lib/format";
 import { BackToList, ListPane, Pick, Split, type ListRow } from "@/components/shell/Split";
 import { NewList } from "./TodoList";
 import Link from "next/link";
-import { IconLock, IconPlus } from "@/components/ui/Icons";
+import { IconPlus } from "@/components/ui/Icons";
 import { Popover } from "@/components/ui/Popover";
 
 export type MineKind = "all" | "notes" | "uploads" | "lists" | "projects" | "listings";
@@ -19,8 +19,9 @@ type Item = { kind: Exclude<MineKind, "all">; id: string; title: string; label: 
 /**
  * Ich: one section of my own things as a list in the middle and the opened one on the right.
  * `detail` is what is opened (or the start page of the section), `selected` its id for the highlight.
+ * `auto`: on wide screens the first item opens by itself when none is chosen.
  */
-export async function MineSection({ kind, selected, detail, open }: { kind: MineKind; selected?: string; detail?: ReactNode; open: boolean }) {
+export async function MineSection({ kind, selected, detail, open, auto = true }: { kind: MineKind; selected?: string; detail?: ReactNode; open: boolean; auto?: boolean }) {
   const path = kind === "all" ? "/me" : BASE[kind];
   const session = await requireSession(path);
   const me = session.profile.id;
@@ -31,7 +32,7 @@ export async function MineSection({ kind, selected, detail, open }: { kind: Mine
     docs: await tx<{ id: string; title: string; origin: string; visibility: string; updated_at: string }[]>`
       select id, title, origin, visibility, updated_at from public.resources where owner_id = ${me} and trashed_at is null order by updated_at desc limit 300`,
     lists: await tx<{ id: string; title: string; visibility: string; updated_at: string; total: number; done: number }[]>`
-      select l.id, l.title, l.visibility, l.updated_at,
+      select l.id, l.title, l.read_scope as visibility, l.updated_at,
         (select count(*)::int from public.todo_items i where i.list_id = l.id) as total,
         (select count(*)::int from public.todo_items i where i.list_id = l.id and i.done_at is not null) as done
       from public.todo_lists l where l.owner_id = ${me} order by l.updated_at desc`,
@@ -74,7 +75,8 @@ export async function MineSection({ kind, selected, detail, open }: { kind: Mine
       list={
         <ListPane id={`mine-${kind}`} title={title} create={create} searchLabel={t("search")} rows={rows}
           empty={t(kind === "all" ? "empty" : kind === "notes" ? "emptyNotes" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}
-          top={<p className="m-0 flex items-center gap-1.5 text-xs text-muted"><IconLock size={12} /> {t("lead")}</p>} />
+          autoOpen={!open && auto ? rows[0]?.href : undefined}
+          footer={kind === "notes" || kind === "uploads" ? <Link href={`${path}?more=1`} className="block border-b border-line px-4 py-3 text-sm text-ink underline">{t("more")}</Link> : undefined} />
       }
       detail={open ? <>{<BackToList href={path} label={title} />}{detail}</> : (detail ?? <Pick text={t("pick")} />)} />
   );

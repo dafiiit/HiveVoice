@@ -84,7 +84,7 @@ test.describe("chats with replies, files and polls", () => {
     try {
       await login(page);
       await page.goto("/community");
-      await page.getByPlaceholder(/an die Pinnwand/).fill(marker);
+      await page.getByPlaceholder(/^Neues in /).fill(marker);
       await page.getByRole("button", { name: "Umfrage erstellen" }).first().click();
       await page.getByLabel("Frage der Umfrage").fill("Welcher Tag?");
       await page.getByLabel("Antwort 1").fill("Montag");

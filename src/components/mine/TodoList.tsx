@@ -38,7 +38,8 @@ export function NewList({ label }: { label: string }) {
 type Item = { id: string; title: string; done: boolean };
 type Change = { type: "add"; item: Item } | { type: "set"; id: string; done: boolean } | { type: "remove"; id: string };
 
-export function TodoList({ id, title, visibility, items, editable }: { id: string; title: string; visibility: "me" | "public"; items: Item[]; editable: boolean }) {
+/** `editable`: may tick and add items; `owner`: may also rename, share and delete. `share` is the Teilen button (server-rendered). */
+export function TodoList({ id, title, items, editable, owner, share }: { id: string; title: string; items: Item[]; editable: boolean; owner: boolean; share?: React.ReactNode }) {
   const t = useTranslations("mine.list");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -76,13 +77,22 @@ export function TodoList({ id, title, visibility, items, editable }: { id: strin
       {renaming !== null ? (
         <form className="flex flex-wrap items-center gap-2" onSubmit={(e) => { e.preventDefault(); if (renaming.trim()) act(() => updateTodoList(id, { title: renaming })); setRenaming(null); }}>
           <input autoFocus value={renaming} onChange={(e) => setRenaming(e.target.value)} maxLength={200} aria-label={t("titleLabel")} className={`${field.input} max-w-md`} />
-          <button type="submit" className={btn.primary}>{t("save")}</button>
-          <button type="button" onClick={() => setRenaming(null)} className={btn.secondary}>{t("cancel")}</button>
+          <button type="submit" className={btn.primarySm}>{t("save")}</button>
+          <button type="button" onClick={() => setRenaming(null)} className={btn.secondarySm}>{t("cancel")}</button>
         </form>
       ) : (
-        <h1 className="display m-0 break-words">{title}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h1 className="m-0 min-w-0 break-words text-[28px] font-bold leading-tight">{title}</h1>
+          {owner && (
+            <div className="flex flex-wrap items-center gap-2">
+              {share}
+              <button type="button" disabled={pending} onClick={() => setRenaming(title)} className={btn.secondarySm}>{t("rename")}</button>
+              <ConfirmAction disabled={pending} size="sm" question={t("deleteConfirm")} label={t("delete")}
+                onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/me/lists"); })} />
+            </div>
+          )}
+        </div>
       )}
-      {editable && <p className="m-0 text-sm text-muted">{visibility === "me" ? t("private") : t("public")}</p>}
 
       {editable && (
         <form className="flex gap-2" onSubmit={(e) => {
@@ -110,16 +120,6 @@ export function TodoList({ id, title, visibility, items, editable }: { id: strin
       )}
       {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}
 
-      {editable && (
-        <div className="flex flex-wrap gap-2 border-t border-line pt-4">
-          <button type="button" disabled={pending} onClick={() => setRenaming(title)} className={btn.secondarySm}>{t("rename")}</button>
-          <button type="button" disabled={pending} onClick={() => act(() => updateTodoList(id, { visibility: visibility === "me" ? "public" : "me" }))} className={btn.secondarySm}>
-            {visibility === "me" ? t("makePublic") : t("makePrivate")}
-          </button>
-          <ConfirmAction disabled={pending} size="sm" question={t("deleteConfirm")} label={t("delete")}
-            onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/me/lists"); })} />
-        </div>
-      )}
     </div>
   );
 }

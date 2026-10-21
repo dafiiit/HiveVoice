@@ -7,6 +7,7 @@ export async function generateMetadata() {
 }
 
 /** Before one is opened: hand-overs, what others shared with me, the trash. */
-export default async function MineNotes() {
-  return <MineSection kind="notes" open={false} detail={<MyDocsSide kind="notes" />} />;
+export default async function MineNotes({ searchParams }: PageProps<"/me/notes">) {
+  const more = (await searchParams).more === "1";
+  return <MineSection kind="notes" open={false} auto={!more} detail={<MyDocsSide kind="notes" />} />;
 }

@@ -91,7 +91,7 @@ test.describe("signed in", () => {
     await login(page);
     await page.goto("/community/groups?kind=initiatives");
     await expect(page.locator("summary", { hasText: "Filter" })).toBeVisible();
-    await expect(page.locator("summary", { hasText: "Sortieren" })).toBeVisible();
+    await expect(page.locator("summary", { hasText: "Sortieren" }), "the order is a setting, not a menu").toHaveCount(0);
     await page.locator("summary", { hasText: "Filter" }).click();
     await page.getByRole("link", { name: "Gemeinde" }).click();
     await expect(page).toHaveURL(/level=municipality/);

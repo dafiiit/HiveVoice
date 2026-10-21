@@ -104,6 +104,9 @@
     "easyHint": "Einfachere Texte, wo vorhanden.",
     "on": "An",
     "off": "Aus",
+    "order": "Reihenfolge der Listen",
+    "orders": { "chrono": "Neueste zuerst", "suggested": "Vorgeschlagen" },
+    "orderHint": "Gilt für Freunde, Anliegen und Gruppen: „Vorgeschlagen“ zeigt zuerst, was zu dir passt oder auf eine Antwort wartet.",
     "theme": "Darstellung",
     "themes": {
       "system": "Wie Gerät",

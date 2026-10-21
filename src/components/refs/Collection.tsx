@@ -8,7 +8,7 @@ import { btn } from "../ui/styles";
 
 export type CollectionItem = { card: RefCard; note: string | null; byName: string | null; mine: boolean };
 
-const ORDER: RefType[] = ["group", "listing", "resource", "task", "initiative"];
+const ORDER: RefType[] = ["group", "listing", "resource", "task", "list", "initiative"];
 
 /** A group's collection, sorted by kind: subgroups first, then offers and requests, documents, tasks, initiatives. */
 export function Collection({ groupId, items, canRemoveAll }: { groupId: string; items: CollectionItem[]; canRemoveAll: boolean }) {

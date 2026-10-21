@@ -66,6 +66,7 @@
       "map": "Karte"
     },
     "sorts": {
+      "default": "Standard",
       "relevant": "Relevant",
       "new": "Neu",
       "price": "Preis aufsteigend",

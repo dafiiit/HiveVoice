@@ -19,7 +19,7 @@ export type SessionProfile = {
   home_region_id: string | null;
   home_region: { name: string; level: string } | null;
   is_admin: boolean;
-  settings: { language: string; easy_language: boolean; theme: string } | null;
+  settings: { language: string; easy_language: boolean; theme: string; feed_order?: string } | null;
   unread: number;
 };
 

@@ -51,7 +51,8 @@ test("the login page header uses the same behaviour", async ({ page }) => {
 });
 
 test("initiatives and groups show their photographs", async ({ page }) => {
-  await page.goto("/community/groups?kind=initiatives");
+  // Newest first (the default order) shows test data on top, so look for the demo initiative with a photograph.
+  await page.goto("/community/groups?kind=initiatives&q=Radspur");
   await page.locator("main a[href^='/community/groups/i/']").first().click();
   await expect.poll(async () => (await loaded(page, "main img[src*='/images/demo/']")).filter(Boolean).length).toBeGreaterThan(0);
   await page.goto("/groups/westpark-volleyball");
@@ -159,10 +160,10 @@ test.describe("on a phone", () => {
     await page.goto("/friends");
     const list = page.getByRole("region", { name: "Chats" });
     const search = list.getByRole("searchbox", { name: "Chats durchsuchen" });
-    const order = list.locator("summary", { hasText: "Chronologisch" });
-    const [sb, ob] = [(await search.boundingBox())!, (await order.boundingBox())!];
-    expect(sb.x, "search on the left").toBeLessThan(ob.x);
-    expect(Math.abs(sb.y - ob.y), "on one line").toBeLessThan(8);
+    // The order (newest first or suggested) is one setting in the settings, not a menu on every list.
+    await expect(list.locator("summary", { hasText: "Chronologisch" })).toHaveCount(0);
+    const sb = (await search.boundingBox())!;
+    expect(sb.width, "the search uses the whole width of the list").toBeGreaterThan(250);
 
     const rows = list.locator("a[data-search]");
     const heights = await rows.evaluateAll((els) => els.slice(0, 4).map((e) => Math.round(e.getBoundingClientRect().height)));
@@ -174,12 +175,6 @@ test.describe("on a phone", () => {
     await search.fill("");
     await expect(rows.first()).toBeVisible();
 
-    await order.click();
-    await list.getByRole("link", { name: "Vorgeschlagen" }).click();
-    await expect(page).toHaveURL(/mode=suggested/);
-    await expect(page).not.toHaveURL(/[?&]c=/);
-    await expect(list.locator("summary", { hasText: "Vorgeschlagen" })).toBeVisible();
-    await expect(list.getByRole("link", { name: "Chronologisch" }), "dropdown closes after choosing").toBeHidden();
 
   });
 

@@ -120,3 +120,15 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
    * Freunde: Alle, Chats, Gruppen (/friends/g/[slug] mit allen Tabs), Kontaktanfragen, Anliegen
    * Ich: Überblick, Anliegen (/me/listings, neu: /me/listings/new), Listen, Notizen, Uploads, Initiativen
 * Handy: unten die drei Bereiche, Unterpunkte als Tabs, Liste und Detail nacheinander
+
+## Regeln für alle Bereiche (2026-10-21, nach der ersten Durchsicht)
+Aus den Anmerkungen zum ersten Stand, verallgemeinert, damit dieselben Fehler nicht an anderer Stelle wiederkehren:
+* Rechte Spalte nie leer: auf dem Desktop öffnet sich in jeder Liste das erste Element von selbst (Handy: Liste bleibt). Ausnahmen: Pinnwand (läuft über die ganze Breite, ein Beitrag öffnet sich an ihrer Stelle) und Gemeinschaft → Anliegen (rechts die Karte)
+* Die Karte füllt die ganze rechte Fläche
+* Kein Text wird abgeschnitten: kurze Platzhalter, Suchfeld über die volle Breite der Spalte, nichts daneben
+* Eine Einstellung statt Menü pro Liste: „Reihenfolge der Listen“ (neueste zuerst / vorgeschlagen) steht in den Einstellungen und gilt für Freunde, Anliegen und Gruppen
+* Filter sparen Platz: Kategorien und weitere Filter sind Menüs, keine Chip-Reihen
+* Köpfe geöffneter Elemente sind kompakt: Titel 28 px, eine Zeile mit Autor, Datum, Version und Lizenz, eine Zeile mit allen Knöpfen in einer Höhe (36 px)
+* Keine Erklärtexte unter Listen
+* Formulare und Seiten ohne Spaltenlayout nutzen die ganze Breite (Gruppe gründen: Vorlagen in drei Spalten, Felder in zwei)
+* Rechte überall gleich: Teilen → Zugriff mit Lesen und Bearbeiten getrennt (nur ich, bestimmte Personen, Link, öffentlich). Gilt jetzt auch für Listen (`todo_lists.read_scope/write_scope`, `app.object_access('list', …)`); Listen lassen sich wie Anliegen als Karte weitergeben

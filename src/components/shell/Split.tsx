@@ -5,6 +5,10 @@ import { Avatar } from "../ui/Avatar";
 import { IconBack, IconPlus } from "../ui/Icons";
 import { btn } from "../ui/styles";
 import { ListSearch } from "../connect/ListSearch";
+import { AutoOpen } from "./AutoOpen";
+
+/** Titles inside an opened item are smaller than on a page of their own: the list next to it carries the weight. */
+export const PANE_TITLES = "[&_h1.display]:text-[28px] [&_h1.display]:leading-[1.1] [&_h1.display]:tracking-normal";
 
 export type ListRow = {
   key: string; href: string; title: string; sub?: string | null; meta?: string | null; tag?: string | null;
@@ -21,7 +25,7 @@ export function Split({ list, detail, open }: { list: ReactNode; detail: ReactNo
       <section className={`${open ? "max-md:hidden" : ""} flex w-full min-w-0 flex-col border-line bg-surface md:w-[340px] md:flex-none md:overflow-y-auto md:border-r lg:w-[380px]`}>
         {list}
       </section>
-      <section className={`${open ? "" : "max-md:hidden"} min-w-0 flex-1 md:overflow-y-auto`}>{detail}</section>
+      <section className={`${open ? "" : "max-md:hidden"} min-w-0 flex-1 md:overflow-y-auto ${PANE_TITLES}`}>{detail}</section>
     </div>
   );
 }
@@ -36,10 +40,12 @@ export function BackToList({ href, label }: { href: string; label: string }) {
 }
 
 /** The list column: name, the "+" for this section, a search that filters while typing, filters, rows. */
-export async function ListPane({ id, title, create, searchLabel, rows, empty, top, children }: {
+export async function ListPane({ id, title, create, searchLabel, rows, empty, top, children, autoOpen, footer }: {
   id: string; title: string; create?: { href: string; label: string } | ReactNode; searchLabel: string; rows: ListRow[]; empty: string;
   /** Filters or a short note under the search. */ top?: ReactNode;
   /** Instead of rows (a feed, for example). */ children?: ReactNode;
+  /** Wide screens: open this address when nothing is opened yet. */ autoOpen?: string;
+  /** After the rows (a link to the trash, for example). */ footer?: ReactNode;
 }) {
   const t = await getTranslations("connect");
   return (
@@ -54,6 +60,7 @@ export async function ListPane({ id, title, create, searchLabel, rows, empty, to
         <ListSearch listId={id} value="" keep={{}} label={searchLabel} action="" />
         {top}
       </div>
+      {autoOpen && <AutoOpen href={autoOpen} />}
       {children ?? (
         <>
           {rows.map((r) => (
@@ -69,6 +76,7 @@ export async function ListPane({ id, title, create, searchLabel, rows, empty, to
             </Link>
           ))}
           <p data-search-none hidden={rows.length > 0} className="m-0 px-4 py-6 text-sm text-muted">{rows.length ? t("listNone") : empty}</p>
+          {footer}
         </>
       )}
     </div>

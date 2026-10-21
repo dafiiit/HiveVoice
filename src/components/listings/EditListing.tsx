@@ -14,7 +14,7 @@ export function EditListing({ id, title, description, path }: { id: string; titl
   const [de, setDe] = useState(description ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
-  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondary}>{t("button")}</button>;
+  if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondarySm}>{t("button")}</button>;
   return (
     <div className="flex w-full max-w-[720px] flex-col gap-3 border border-ink bg-surface p-4">
       <label className={field.label}>{t("title")}<input value={ti} maxLength={200} onChange={(e) => setTi(e.target.value)} className={field.input} /></label>

@@ -24,7 +24,7 @@ export default async function NewGroup({ searchParams }: PageProps<"/new/group">
   }));
   const preset = typeof sp.preset === "string" ? sp.preset : invite ? "couple" : undefined;
   return (
-    <Page width="narrow">
+    <Page>
       <PageHeader title={t("title")} lead={t("lead")}>
         <Link href="/new/initiative" className="self-start text-sm text-ink underline">{tn("toInitiative")}</Link>
       </PageHeader>

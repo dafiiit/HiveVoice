@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { createSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
-import { EASY_COOKIE, LANG_COOKIE, THEME_COOKIE } from "@/i18n/config";
+import { EASY_COOKIE, LANG_COOKIE, ORDER_COOKIE, THEME_COOKIE } from "@/i18n/config";
 import { LAST_LOGIN_COOKIE } from "@/lib/supabase/options";
 
 // Finishes OAuth and email confirmation (PKCE code), creates the profile on
@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
     store.set(LANG_COOKIE, s.language, { maxAge: year, path: "/" });
     store.set(EASY_COOKIE, s.easy_language ? "1" : "0", { maxAge: year, path: "/" });
     store.set(THEME_COOKIE, s.theme, { maxAge: year, path: "/" });
+    store.set(ORDER_COOKIE, s.feed_order === "suggested" ? "suggested" : "chrono", { maxAge: year, path: "/" });
   }
   const dest = session.profile.onboarded ? (next === "/onboarding" ? "/friends" : next) : "/onboarding";
   return NextResponse.redirect(new URL(dest, url.origin));

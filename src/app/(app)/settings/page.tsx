@@ -206,7 +206,7 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
           </section>
         )}
         <PrivacySettings findable={d.privacy?.findable ?? "all"} contactFrom={d.privacy?.contact_from ?? "all"} minor={!!d.privacy?.is_minor} blocked={d.blocked} />
-        <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} places={d.places} interests={interests} suggestions={d.suggestions} />
+        <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} order={s?.feed_order === "suggested" ? "suggested" : "chrono"} places={d.places} interests={interests} suggestions={d.suggestions} />
         </>
       )}
     </Page>

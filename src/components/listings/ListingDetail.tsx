@@ -7,7 +7,7 @@ import { listingCardColumns, listingCardFrom, type ListingCard } from "@/lib/que
 import { dateLong } from "@/lib/format";
 import { Avatar } from "../ui/Avatar";
 import { Cover } from "../ui/Cover";
-import { tag } from "../ui/styles";
+import { btn, tag } from "../ui/styles";
 import { ReportButton } from "../ReportDialog";
 import { ContactButton } from "./ContactButton";
 import { AllyButton, ListingStatus } from "./MyListings";
@@ -99,10 +99,10 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
       <div className="flex flex-wrap items-center gap-2">
         {!own && l.status === "active" && (
           <ContactButton listingId={l.id} ownerName={l.group_name ?? l.owner_name} ownerSeed={l.owner_seed} ownerPath={l.group_name ? null : l.owner_path} title={l.title} price={priceLabel(l, tc, locale)}
-            label={t(kind === "offer" ? "ask" : "help")} signedIn={!!session} sent={data.sent} mine={data.mine} via={fit ? fit.id : null} />
+            label={t(kind === "offer" ? "ask" : "help")} signedIn={!!session} sent={data.sent} mine={data.mine} via={fit ? fit.id : null} className={btn.primarySm} />
         )}
         {kind === "need" && l.seeking_allies && session && !own && <AllyButton id={l.id} on={data.allied} count={l.ally_count} />}
-        <ShareBlock path={`/listings/${id}`} title={l.title} isPublic={l.read_scope === "public"} item={session ? { type: "listing", id: l.id } : null}
+        <ShareBlock path={`/listings/${id}`} title={l.title} isPublic={l.read_scope === "public"} item={session ? { type: "listing", id: l.id } : null} className={btn.secondarySm}
           access={data.access ? <AccessPanel bare type="listing" id={l.id} read={data.access.read_scope} write={data.access.write_scope} hasGroup={!!l.group_slug}
           linkUrl={data.access.link_token ? `${origin}/r/listing/${l.id}?k=${data.access.link_token}` : null} grants={data.grants} path={`/listings/${id}`} /> : undefined} />
         {(own || data.canEdit) && <EditListing id={l.id} title={l.title} description={l.description} path={`/listings/${id}`} />}

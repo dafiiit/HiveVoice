@@ -4,7 +4,8 @@
     "resource": "Document",
     "group": "Group",
     "task": "Task",
-    "initiative": "Initiative"
+    "initiative": "Initiative",
+    "list": "List"
   },
   "offer": "Offer",
   "need": "Request",

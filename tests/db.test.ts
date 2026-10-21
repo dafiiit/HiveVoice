@@ -1433,14 +1433,22 @@ describe("to-do lists", () => {
     const a = await person(tx, "Ada"), b = await person(tx, "Ben");
     const [{ id }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.todo_lists (title) values ('Einkauf') returning id`);
     await as(tx, a, () => tx`insert into public.todo_items (list_id, title) values (${id}, 'Brot')`);
-    const [own] = await as(tx, a, () => tx<{ visibility: string }[]>`select visibility from public.todo_lists where id = ${id}`);
-    expect(own.visibility).toBe("me");
+    const [own] = await as(tx, a, () => tx<{ read_scope: string }[]>`select read_scope from public.todo_lists where id = ${id}`);
+    expect(own.read_scope).toBe("me");
     expect(await as(tx, b, () => tx`select 1 from public.todo_lists where id = ${id}`)).toHaveLength(0);
     expect(await as(tx, b, () => tx`select 1 from public.todo_items where list_id = ${id}`)).toHaveLength(0);
 
-    await as(tx, a, () => tx`update public.todo_lists set visibility = 'public' where id = ${id}`);
+    await as(tx, a, () => tx`select app.set_object_access('list', ${id}, 'public', 'me')`);
     expect(await as(tx, b, () => tx`select 1 from public.todo_items where list_id = ${id}`)).toHaveLength(1);
     await fails(tx, (sp) => as(sp, b, () => sp`insert into public.todo_items (list_id, title) values (${id}, 'Fremd')`));
     expect(await as(tx, b, () => tx`update public.todo_items set done_at = now() where list_id = ${id} returning id`)).toHaveLength(0);
+
+    // single people may also write
+    await as(tx, a, () => tx`select app.set_object_access('list', ${id}, 'people', 'people')`);
+    expect(await as(tx, b, () => tx`select 1 from public.todo_items where list_id = ${id}`)).toHaveLength(0);
+    await as(tx, a, () => tx`select app.grant_object('list', ${id}, ${b}, true)`);
+    expect(await as(tx, b, () => tx`select 1 from public.todo_items where list_id = ${id}`)).toHaveLength(1);
+    await as(tx, b, () => tx`insert into public.todo_items (list_id, title) values (${id}, 'Milch')`);
+    await fails(tx, (sp) => as(sp, b, () => sp`select app.set_object_access('list', ${id}, 'public', 'public')`));
   }));
 });

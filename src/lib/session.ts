@@ -38,7 +38,8 @@ export const getSession = cache(async (): Promise<Session | null> => {
     [row] = await sql<{ p: SessionProfile | null }[]>`select app.session_profile(${claims.sub}) as p`;
   }
   // Someone added to or taken off ADMIN_EMAILS: bring the admin list up to date right away.
-  if (row.p && row.p.is_admin !== adminEmails().includes((claims.email ?? "").toLowerCase())) {
+  // A server without ADMIN_EMAILS (preview, local copy) does not touch the list, see syncAdmins.
+  if (row.p && adminEmails().length > 0 && row.p.is_admin !== adminEmails().includes((claims.email ?? "").toLowerCase())) {
     await sql`select app.sync_server_admins(${adminEmails()}::text[])`.catch(() => null);
     [row] = await sql<{ p: SessionProfile | null }[]>`select app.session_profile(${claims.sub}) as p`;
   }

@@ -5,8 +5,13 @@ import { adminEmails } from "./admin-emails";
 
 export { adminEmails };
 
-/** Brings public.server_admins in line with ADMIN_EMAILS (only confirmed addresses count). */
+/**
+ * Brings public.server_admins in line with ADMIN_EMAILS (only confirmed addresses count).
+ * A server without ADMIN_EMAILS (a preview deployment, a local copy) leaves the list alone:
+ * otherwise opening such a deployment would take the admins' rights away on the shared database.
+ */
 export async function syncAdmins() {
+  if (adminEmails().length === 0) return;
   await sql`select app.sync_server_admins(${adminEmails()}::text[])`;
 }
 

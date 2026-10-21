@@ -27,7 +27,7 @@ export async function generateMetadata() {
 export default async function Me({ searchParams }: PageProps<"/settings">) {
   const sp = await searchParams;
   // Notes and documents moved to "Meine Inhalte".
-  if (sp.tab === "docs" || sp.tab === "notes") redirect(`/me?f=${sp.tab}`);
+  if (sp.tab === "docs" || sp.tab === "notes") redirect("/me/notes");
   const session = await requireSession("/settings");
   const viewer = { authId: session.authId, profileId: session.profile.id };
   const me = session.profile.id;

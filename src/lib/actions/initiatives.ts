@@ -99,7 +99,7 @@ export async function cancelBallot(id: string, reason: string) {
 /** Only possible while nothing has happened yet: no support from others, no vote, no contributions. */
 export async function deleteInitiative(id: string) {
   const res = await run(async (tx) => { await tx`select app.delete_initiative(${id})`; return null; });
-  if (res.ok) redirect("/me?f=projects");
+  if (res.ok) redirect("/me/initiatives");
   return res;
 }
 

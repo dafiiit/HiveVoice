@@ -11,7 +11,7 @@ async function exec(statement: string) {
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
 
-test("Anliegen: offers filter by category and its own fields, and the map asks before it loads", async ({ page }) => {
+test("Anliegen: offers filter by category and its own fields, and the map asks before it loads", async ({ page }, info) => {
   // The old address leads to the offers in Gemeinschaft → Anliegen.
   await page.goto("/explore?kind=market");
   await expect(page).toHaveURL(/\/community\/listings/);
@@ -28,9 +28,11 @@ test("Anliegen: offers filter by category and its own fields, and the map asks b
   await expect(page.getByText("Schlafsofa im Wohnzimmer für Durchreisende")).toBeVisible();
   await page.getByRole("tab", { name: "Gesuche" }).click();
   await expect(page).toHaveURL(/tab=needs/);
-  await page.getByRole("radio", { name: "Karte" }).click();
-  await expect(page.getByRole("button", { name: "Karte laden" })).toBeVisible();
-  await expect(page.getByText(/tiles\.openfreemap\.org/)).toBeVisible();
+  // The map sits on the right until a listing is opened (on phones under the list).
+  if (info.project.name !== "mobile") {
+    await expect(page.getByRole("button", { name: "Karte laden" })).toBeVisible();
+    await expect(page.getByText(/tiles\.openfreemap\.org/)).toBeVisible();
+  }
 });
 
 test.describe("offer with something in return", () => {
@@ -43,7 +45,7 @@ test.describe("offer with something in return", () => {
       await login(page);
       await page.goto("/me/listings?as=offer");
       await expect(page.getByRole("radio", { name: "Ich biete" })).toBeChecked();
-      await page.locator("main input").first().fill(title);
+      await page.getByLabel(/^(Was bietest du an\?|Was brauchst du\?)$/).fill(title);
       // The title suggests the category, and its own fields appear.
       await expect(page.getByRole("radio", { name: /^Dinge/ })).toBeChecked();
       await page.getByRole("radio", { name: "Zu verschenken" }).click();

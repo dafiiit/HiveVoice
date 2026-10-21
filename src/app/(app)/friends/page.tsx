@@ -2,18 +2,18 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { loadPosts } from "@/lib/posts";
 import { loadMessages } from "@/lib/messages";
 import { relTime } from "@/lib/format";
 import type { Message } from "@/lib/actions/messages";
 import { Avatar } from "@/components/ui/Avatar";
+import { BackToList } from "@/components/shell/Split";
+import { GroupView } from "@/app/(app)/groups/[slug]/page";
+import { ListingDetail } from "@/components/listings/ListingDetail";
 import { AreaIcon } from "@/components/ui/Logo";
-import { Composer, PostList } from "@/components/PostList";
 import { Conversation } from "@/components/connect/Conversation";
 import { ChatMenu } from "@/components/connect/ChatMenu";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
-import { ChatScroll } from "@/components/ChatScroll";
 import { ListSearch } from "@/components/connect/ListSearch";
 import { Popover } from "@/components/ui/Popover";
 import { IconBack, IconCheck, IconPlus } from "@/components/ui/Icons";
@@ -33,7 +33,14 @@ const FILTER_KINDS: Record<Filter, Kind[]> = { all: ["group", "direct", "request
 type DirectRow = { id: string; title: string | null; other: string; other_seed: number; other_path: string | null; preview: string | null; at: string; unread: number };
 
 export default async function Connect({ searchParams }: PageProps<"/friends">) {
-  const sp = await searchParams;
+  return <FriendsView sp={await searchParams} />;
+}
+
+/**
+ * Freunde: chats, my groups, requests and the listings of people I know on the left, the opened one on the right.
+ * `group`: a group opened at /friends/g/[slug] (with its tabs and tools, not just the chat).
+ */
+export async function FriendsView({ sp, group }: { sp: Record<string, string | string[] | undefined>; group?: string }) {
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
@@ -43,7 +50,7 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
   const locale = await getLocale();
   const mode = sp.mode === "suggested" ? "suggested" : "chrono";
   const filter: Filter = (FILTERS as readonly string[]).includes(String(sp.f)) ? (sp.f as Filter) : "all";
-  const sel = typeof sp.c === "string" ? sp.c : "";
+  const sel = group ? `g:${group}` : typeof sp.c === "string" ? sp.c : "";
   const s = typeof sp.s === "string" ? sp.s.trim().slice(0, 80) : "";
 
   const data = await asViewer(viewer, async (tx) => {
@@ -108,14 +115,15 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
                    where a.profile_id = ${me} and b.profile_id = l.owner_id))
       order by l.created_at desc limit 50` : [];
     type Pane =
-      | { kind: "group"; group: { id: string; slug: string; name: string; member_count: number; can_post: boolean; can_moderate: boolean }; posts: Awaited<ReturnType<typeof loadPosts>> }
+      | { kind: "group"; slug: string }
+      | { kind: "listing"; id: string }
       | { kind: "direct"; id: string; other: string; other_id: string; other_seed: number; other_path: string | null; title: string | null; listing_id: string | null; listing_kind: string | null; messages: Message[]; other_read_at: string | null; muted: boolean; blocked: boolean; ttl_days: number | null; ttl_proposed_days: number | null; ttl_by_me: boolean; as_of: string }
       | { kind: "request"; request: RequestView };
     let pane: Pane | null = null;
     if (sel.startsWith("g:")) {
-      const [g] = await tx<{ id: string; slug: string; name: string; member_count: number; can_post: boolean; can_moderate: boolean }[]>`
-        select g.id, g.slug::text, g.name, g.member_count, app.has_group_permission(g.id, 'post') as can_post, app.is_group_moderator(g.id) as can_moderate from public.groups g where g.slug = ${sel.slice(2)}`;
-      if (g) pane = { kind: "group", group: g, posts: await loadPosts(tx, { groupId: g.id }, me, { sort: "chat", limit: 60 }) };
+      pane = { kind: "group", slug: sel.slice(2) };
+    } else if (sel.startsWith("l:") && /^[0-9a-f-]{36}$/.test(sel.slice(2))) {
+      pane = { kind: "listing", id: sel.slice(2) };
     } else if (sel.startsWith("d:") && me && /^[0-9a-f-]{36}$/.test(sel.slice(2))) {
       const id = sel.slice(2);
       const [c] = await tx<{ id: string; title: string | null; other: string; other_id: string; other_seed: number; other_path: string | null; listing_id: string | null; listing_kind: string | null; other_read_at: string | null; muted: boolean; blocked: boolean; ttl_days: number | null; ttl_proposed_days: number | null; ttl_by_me: boolean; as_of: string }[]>`
@@ -180,7 +188,7 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
     listings: 0,
   };
   const href = (patch: Record<string, string>) => {
-    const p = new URLSearchParams({ c: typeof sp.c === "string" ? sel : "", mode, f: filter, ...patch });
+    const p = new URLSearchParams({ c: typeof sp.c === "string" && !group ? sel : "", mode, f: filter, ...patch });
     if (s && !("s" in patch)) p.set("s", s);
     if (p.get("mode") === "chrono") p.delete("mode");
     if (p.get("f") === "all") p.delete("f");
@@ -188,7 +196,7 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
     return `/friends${p.size ? `?${p}` : ""}`;
   };
   const pane = data.pane;
-  const paneOpen = typeof sp.c === "string";
+  const paneOpen = !!group || typeof sp.c === "string";
   // On phones one pane fills the screen; the arrow in its header goes back to the list.
   const back = <Link href={href({ c: "" })} aria-label={t("back")} className="inline-flex h-9 w-9 flex-none items-center justify-center text-ink md:hidden"><IconBack size={18} /></Link>;
   const hasAnything = data.directs.length + data.groups.length + data.requests.length > 0;
@@ -200,11 +208,12 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
       <div className="flex min-h-0 flex-1 flex-col bg-surface md:flex-row">
         <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:w-[340px] md:flex-none md:border-r lg:w-[380px]`}>
           <div className="flex flex-none items-center justify-between gap-2 px-4 pb-1 pt-4">
-            <h1 className="m-0 text-[22px] font-bold leading-tight">{t("title")}</h1>
+            <h1 className="m-0 text-[22px] font-bold leading-tight">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
             {session && <Link href="/new/group" aria-label={t("newGroup")} title={t("newGroup")} className={btn.secondarySm}><IconPlus size={14} /> {t("newGroupShort")}</Link>}
           </div>
           {session && (
-            <div role="group" aria-label={t("filter.label")} className="flex flex-none gap-1.5 overflow-x-auto px-4 py-2">
+            // Phones only: on wide screens the sidebar holds these as sections.
+            <div role="group" aria-label={t("filter.label")} className="flex flex-none gap-1.5 overflow-x-auto px-4 py-2 md:hidden">
               {FILTERS.map((f) => (
                 <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f}
                   className={`inline-flex h-8 flex-none items-center gap-1 px-3 text-sm no-underline ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-chip text-ink"}`}>
@@ -231,7 +240,7 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
           </div>
           {shown.map((r) => (
             // Two lines like the marketplace: name and time, then the latest message (or what it is about).
-            <Link key={r.key} href={r.kind === "listing" ? `/listings/${r.key.slice(2)}` : href({ c: r.key })} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
+            <Link key={r.key} href={r.kind === "group" ? `/friends/g/${r.key.slice(2)}${(() => { const q = href({ c: "" }).split("?")[1]; return q ? `?${q}` : ""; })()}` : href({ c: r.key })} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
               className={`flex items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
               <Avatar name={r.name} seed={r.seed} path={r.path} size={40} group={r.groupAvatar ?? r.kind === "group"} />
               <span className="flex min-w-0 flex-1 flex-col">
@@ -262,17 +271,14 @@ export default async function Connect({ searchParams }: PageProps<"/friends">) {
         </section>
         <section aria-label={t("pane")} className={`${paneOpen ? "flex" : "hidden md:flex"} min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-paper px-3 py-2 md:px-6 md:py-4`}>
           {(!pane || pane.kind === "request") && <Link href={href({ c: "" })} className="mb-2 inline-flex items-center gap-1 text-sm text-ink md:hidden"><IconBack size={14} /> {t("back")}</Link>}
-          {pane?.kind === "group" && (
-            <>
-              <header className="flex flex-none items-center justify-between gap-2 border-b border-line pb-2 md:gap-3 md:pb-3">
-                <div className="flex min-w-0 items-center gap-1">{back}<Link href={`/groups/${pane.group.slug}`} className="flex min-w-0 flex-col text-ink no-underline"><strong className="truncate text-lg leading-tight">{pane.group.name}</strong><span className="text-sm text-muted">{t("groupSub", { n: pane.group.member_count })}</span></Link></div>
-                <Link href={`/groups/${pane.group.slug}`} className={btn.secondarySm}>{t("openGroup")}</Link>
-              </header>
-              <ChatScroll count={pane.posts.length} className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-                <PostList posts={pane.posts} path="/friends" canWrite={pane.group.can_post} viewerId={me ?? undefined} empty={t("groupEmpty")} canModerate={pane.group.can_moderate} />
-              </ChatScroll>
-              {pane.group.can_post && <div className="flex-none border-t border-line pt-3"><Composer ctx={{ groupId: pane.group.id }} path="/friends" placeholder={t("groupPlaceholder", { name: pane.group.name })} viewerName={session?.profile.display_name} viewerSeed={session?.profile.avatar_seed} viewerPath={session?.profile.avatar_path} /></div>}
-            </>
+          {(pane?.kind === "group" || pane?.kind === "listing") && (
+            // A group with its tabs and tools, or a listing, scrolls on its own next to the list.
+            <div className="-mx-3 -my-2 min-h-0 flex-1 overflow-y-auto md:-mx-6 md:-my-4">
+              <BackToList href={href({ c: "" })} label={t("back")} />
+              {pane.kind === "group"
+                ? <GroupView slug={pane.slug} sp={sp} base={`/friends/g/${pane.slug}`} embedded first="talk" />
+                : <ListingDetail id={pane.id} embedded />}
+            </div>
           )}
           {pane?.kind === "direct" && me && (
             <>

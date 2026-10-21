@@ -111,3 +111,12 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
 * Kalender, Dienstpläne, Abstimmungen als Werkzeug für Ich (Welle 1), Kasse, Timeline/Wirkung, Rechtegruppen frei benennen
 * Bilder und Texte als eigene Inhaltsart unter Ich, „Heute“-Übersicht
 * Wissen ist nicht mehr öffentlich durchsuchbar (Tab „Wissen“ entfällt); öffentliche Dokumente sind nur über Link, Gruppe oder Pinnwand zu finden
+
+## Layout ab 2026-10-21 (Desktop)
+* Kopfzeile: Logo · Suche · Mitteilungen · Avatar
+* Eine Seitenleiste: oben der Knopf zum Ein-/Ausklappen, darunter die Unterpunkte des Bereichs (Icon + Text), unten die drei Bereiche nebeneinander; eingeklappt nur Icons, die Bereiche rutschen untereinander (Zustand im Cookie `hv_sidebar`, unter 1024 px eingeklappt)
+* Jeder Unterpunkt: Liste in der Mitte (Name, ＋ passend zum Unterpunkt, Suche, Inhalt), das geöffnete Element rechts
+   * Gemeinschaft: Pinnwand (Beitrag mit Antworten rechts), Anliegen (Karte rechts), Gruppen (/community/groups/[slug], Initiativen /community/groups/i/[id]), Personen
+   * Freunde: Alle, Chats, Gruppen (/friends/g/[slug] mit allen Tabs), Kontaktanfragen, Anliegen
+   * Ich: Überblick, Anliegen (/me/listings, neu: /me/listings/new), Listen, Notizen, Uploads, Initiativen
+* Handy: unten die drei Bereiche, Unterpunkte als Tabs, Liste und Detail nacheinander

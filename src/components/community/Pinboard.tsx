@@ -91,7 +91,7 @@ export async function Pinboard({ sp }: { sp: Record<string, string | string[] | 
           viewerName={session.profile.display_name} viewerSeed={session.profile.avatar_seed} viewerPath={session.profile.avatar_path} />
       ) : !session && <p className="m-0 text-sm text-muted">{t("readOnly")} <Link href="/login?next=/community" className="font-bold text-ink underline">{t("signIn")}</Link></p>}
       <PostList posts={data.posts} path="/community" canWrite={!!session?.profile.verified} viewerId={me ?? undefined}
-        empty={filtered ? t("none") : t("empty")} />
+        empty={filtered ? t("none") : t("empty")} openBase={href({})} />
     </div>
   );
 }

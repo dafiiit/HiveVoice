@@ -1,6 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { previewLink, shareLink } from "@/lib/actions/links";
 import type { Inspection } from "@/lib/links/inspect";
@@ -18,6 +18,9 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
   const t = useTranslations("links");
   const tc = useTranslations("common");
   const router = useRouter();
+  // Inside Ich the document opens next to its list, elsewhere on its own page.
+  const here = usePathname();
+  const docHref = (id: string) => (here.startsWith("/me/") ? `/me/uploads/${id}` : `/links/${id}`);
   const [url, setUrl] = useState("");
   const [found, setFound] = useState<Good | null>(null);
   const [blocked, setBlocked] = useState<string | null>(null);
@@ -55,7 +58,7 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
       return setError(key ? t(key as "blocks.unsafe") : res.error === "duplicate" ? t("alreadyShared") : tc(`errors.${res.error}` as "errors.unknown"));
     }
     const group = groups.find((g) => g.id === groupId);
-    router.push(group ? `/groups/${group.slug}?tab=links` : `/links/${res.data}`);
+    router.push(group ? `/groups/${group.slug}?tab=links` : docHref(res.data));
   });
 
   return (

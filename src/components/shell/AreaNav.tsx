@@ -10,13 +10,14 @@ import { Suspense, type ReactNode } from "react";
 export type AreaItem = { href: string; label: string; badge?: number; match?: string[] };
 
 /**
- * The second column of an area, like the list next to the rail in Teams: the sections of
- * Gemeinschaft or Ich. On phones it becomes a row of tabs under the top bar.
+ * Phones: the sections of Gemeinschaft or Ich as a row of tabs under the top bar
+ * (on wide screens the sidebar shows them).
  */
 export function AreaFrame({ title, label, items, children }: { title: string; label: string; items: AreaItem[]; children: ReactNode }) {
   return (
-    <div className="flex min-h-full flex-col md:flex-row">
-      <nav aria-label={label} className="flex-none border-line bg-surface md:sticky md:top-[64px] md:h-[calc(100dvh-64px)] md:w-60 md:overflow-y-auto md:border-r">
+    <div className="flex min-h-full flex-col">
+      {/* Phones only: on wide screens the sidebar lists the sections. */}
+      <nav aria-label={label} className="flex-none border-line bg-surface md:hidden">
         {/* Not a heading: every page under it has its own h1. */}
         <p className="m-0 hidden px-5 pb-3 pt-6 text-[22px] font-bold leading-tight md:block">{title}</p>
         {/* The query part (?f=docs) is only known in the browser; the server marks the section by its path alone. */}

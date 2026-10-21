@@ -117,7 +117,7 @@ export function TodoList({ id, title, visibility, items, editable }: { id: strin
             {visibility === "me" ? t("makePublic") : t("makePrivate")}
           </button>
           <ConfirmAction disabled={pending} size="sm" question={t("deleteConfirm")} label={t("delete")}
-            onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/me?f=lists"); })} />
+            onConfirm={() => start(async () => { const res = await deleteTodoList(id); if (res.ok) router.push("/me/lists"); })} />
         </div>
       )}
     </div>

@@ -4,7 +4,9 @@ import { asViewer } from "@/lib/db";
 import type { Session } from "@/lib/session";
 import { Logo, LogoMark } from "../ui/Logo";
 import { IconInbox } from "../ui/Icons";
-import { BottomNav, Rail, type NavItem } from "./NavLinks";
+import { BottomNav, type NavItem } from "./NavLinks";
+import { Sidebar } from "./Sidebar";
+import { cookies } from "next/headers";
 import { btn } from "../ui/styles";
 import { LanguageMenu } from "../LanguageMenu";
 import { QuickSearch } from "./QuickSearch";
@@ -14,15 +16,16 @@ export async function Shell({ session, children }: { session: Session | null; ch
   const t = await getTranslations("nav");
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   // Freunde carries what waits for an answer: unread chats, requests to me, people asking to join my groups.
-  const waiting = session
-    ? await asViewer(viewer, async (tx) => Number((await tx`
-          select (
+  const badges = session
+    ? await asViewer(viewer, async (tx) => (await tx<{ chats: number; requests: number }[]>`
+          select
             (select count(*) from public.conversation_participants cp where cp.profile_id = ${session.profile.id}
-               and exists (select 1 from public.messages m where m.conversation_id = cp.conversation_id and m.sender_id <> ${session.profile.id} and m.created_at > cp.last_read_at))
-            + (select count(*) from public.contact_requests r where r.to_profile_id = ${session.profile.id} and r.status = 'pending')
-            + (select count(*) from public.group_join_requests j where j.status = 'pending' and j.profile_id <> ${session.profile.id} and app.has_group_permission(j.group_id, 'manage_members'))
-          )::int as n`)[0].n))
-    : 0;
+               and exists (select 1 from public.messages m where m.conversation_id = cp.conversation_id and m.sender_id <> ${session.profile.id} and m.created_at > cp.last_read_at))::int as chats,
+            ((select count(*) from public.contact_requests r where r.to_profile_id = ${session.profile.id} and r.status = 'pending')
+            + (select count(*) from public.group_join_requests j where j.status = 'pending' and j.profile_id <> ${session.profile.id} and app.has_group_permission(j.group_id, 'manage_members')))::int as requests`)[0])
+    : { chats: 0, requests: 0 };
+  const waiting = badges.chats + badges.requests;
+  const fold = (await cookies()).get("hv_sidebar")?.value;
 
   // Three areas by closeness, like the rail in Teams: Gemeinschaft (everyone), Freunde (people and groups I know), Ich (my own things).
   const items: NavItem[] = [
@@ -62,7 +65,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
         </div>
       </header>
       <div className="flex min-h-0 flex-1">
-        <Rail items={items} newLabel={t("new")} label={t("main")} />
+        <Sidebar folded={fold === "folded" ? true : fold === "open" ? false : null} signedIn={!!session} badges={badges} />
         <main id="main" className="min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
       </div>
       <BottomNav items={items} newLabel={t("new")} label={t("main")} />

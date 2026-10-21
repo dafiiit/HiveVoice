@@ -4,6 +4,7 @@ import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { TodoList } from "@/components/mine/TodoList";
 import { BackLink, Page } from "@/components/ui/Page";
+import { MineSection } from "@/components/mine/MineSection";
 
 type List = { id: string; title: string; visibility: "me" | "public"; owner_id: string; owner: string };
 
@@ -27,13 +28,19 @@ export async function generateMetadata({ params }: PageProps<"/me/lists/[id]">) 
 }
 
 export default async function ListPage({ params }: PageProps<"/me/lists/[id]">) {
-  const d = await load((await params).id);
+  const { id } = await params;
+  return <MineSection kind="lists" selected={id} open detail={<ListView id={id} embedded />} />;
+}
+
+/** One to-do list; `embedded`: next to the list of lists, without the back link. */
+export async function ListView({ id, embedded = false }: { id: string; embedded?: boolean }) {
+  const d = await load(id);
   if (!d) notFound();
   const t = await getTranslations("mine.list");
   return (
     <Page width="narrow">
       {d.mine
-        ? <BackLink href="/me?f=lists" label={t("back")} />
+        ? !embedded && <BackLink href="/me/lists" label={t("back")} />
         : <span className="text-sm text-muted">{t("readOnly", { name: d.list.owner })}</span>}
       <TodoList id={d.list.id} title={d.list.title} visibility={d.list.visibility} items={d.items} editable={d.mine} />
     </Page>

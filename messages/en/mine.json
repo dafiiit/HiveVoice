@@ -68,5 +68,10 @@
   "emptyUploads": "Nothing uploaded yet. Files, photos, PDFs and links end up here.",
   "newNoteLead": "In Markdown, with versions. Only for you until you share it.",
   "uploadTitle": "Upload",
-  "uploadLead": "A file (photo, PDF …) or a link. Only for you at first."
+  "uploadLead": "A file (photo, PDF …) or a link. Only for you at first.",
+  "search": "Search",
+  "pick": "Pick something on the left and it opens here.",
+  "newListing": "Listing",
+  "newProject": "Initiative",
+  "paused": "paused"
 }

@@ -1,28 +1,10 @@
-import { getTranslations } from "next-intl/server";
-import { asViewer } from "@/lib/db";
-import { requireSession } from "@/lib/session";
-import { popularTags } from "@/lib/queries";
-import { ShareKnowledge } from "@/components/links/ShareKnowledge";
-import { Page, PageHeader } from "@/components/ui/Page";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata() {
-  return { title: (await getTranslations("mine"))("uploadTitle") };
-}
-
+// Notes and uploads are made inside Ich; old links (also from groups: ?group=) keep working.
 export default async function NewLink({ searchParams }: PageProps<"/new/link">) {
   const sp = await searchParams;
-  const session = await requireSession("/new/link");
-  const tm = await getTranslations("mine");
-  const { groups, ideas } = await asViewer({ authId: session.authId, profileId: session.profile.id }, async (tx) => ({
-    groups: await tx<{ id: string; slug: string; name: string }[]>`
-      select g.id, g.slug::text, g.name from public.group_members m join public.groups g on g.id = m.group_id
-      where m.profile_id = ${session.profile.id} and g.archived_at is null and app.has_group_permission(g.id, 'post') order by g.name`,
-    ideas: await popularTags(tx),
-  }));
-  return (
-    <Page width="narrow">
-      <PageHeader title={sp.mode === "note" ? tm("newDocTitle") : tm("uploadTitle")} lead={sp.mode === "note" ? tm("newNoteLead") : tm("uploadLead")} />
-      <ShareKnowledge groups={groups} initialGroup={typeof sp.group === "string" ? sp.group : null} ideas={ideas} initialMode={sp.mode === "note" || sp.mode === "link" ? sp.mode : "file"} />
-    </Page>
-  );
+  const p = new URLSearchParams();
+  if (typeof sp.group === "string") p.set("group", sp.group);
+  if (sp.mode === "link") p.set("mode", "link");
+  redirect(`${sp.mode === "note" ? "/me/notes/new" : "/me/uploads/new"}${p.size ? `?${p}` : ""}`);
 }

@@ -20,15 +20,15 @@ test.describe("Ich: my own things", () => {
     await page.getByRole("link", { name: /^Ich/ }).filter({ visible: true }).first().click();
     await expect(page).toHaveURL(/\/me$/);
     await expect(page.getByRole("heading", { name: "Meine Inhalte" })).toBeVisible();
-    await page.getByRole("navigation", { name: "Meine Bereiche" }).getByRole("link", { name: "Notizen" }).click();
-    await expect(page).toHaveURL(/f=notes/);
+    await page.getByRole("link", { name: "Notizen" }).filter({ visible: true }).first().click();
+    await expect(page).toHaveURL(/\/me\/notes/);
   });
 
   test("a new list is private, items can be added, ticked and removed, and the list deleted", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "writes data");
     const name = `Liste ${Date.now()}`;
     await login(page);
-    await page.goto("/me");
+    await page.goto("/me/lists");
     await page.getByRole("button", { name: "Liste" }).click();
     await page.getByLabel("Name der Liste").fill(name);
     await page.getByRole("button", { name: "Anlegen" }).click();
@@ -44,12 +44,12 @@ test.describe("Ich: my own things", () => {
     await page.reload();
     await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeChecked();
 
-    await page.goto("/me?f=lists");
+    await page.goto("/me/lists");
     await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("Privat");
     await page.getByRole("link", { name: new RegExp(name) }).click();
     await page.getByRole("button", { name: "Liste löschen" }).click();
     await page.getByRole("button", { name: "Ja", exact: true }).click();
-    await expect(page).toHaveURL(/f=lists/);
+    await expect(page).toHaveURL(/\/me\/lists$/);
     await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveCount(0);
   });
 
@@ -63,7 +63,7 @@ test.describe("Ich: my own things", () => {
   test("old links to notes and documents in the settings lead here", async ({ page }) => {
     await login(page);
     await page.goto("/settings?tab=docs");
-    await expect(page).toHaveURL(/\/me\?f=docs/);
+    await expect(page).toHaveURL(/\/me\/notes/);
   });
 });
 

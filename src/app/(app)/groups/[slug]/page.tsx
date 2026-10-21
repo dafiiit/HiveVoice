@@ -50,7 +50,14 @@ export async function generateMetadata({ params }: PageProps<"/groups/[slug]">) 
 
 export default async function GroupPage({ params, searchParams }: PageProps<"/groups/[slug]">) {
   const { slug } = await params;
-  const sp = await searchParams;
+  return <GroupView slug={slug} sp={await searchParams} base={`/groups/${slug}`} />;
+}
+
+/**
+ * One group. `base`: the address its tabs build on (in Freunde /friends/g/…, in Gemeinschaft /community/groups/…);
+ * `embedded`: next to a list, side column below the content, no back link; `first`: the tab it opens with.
+ */
+export async function GroupView({ slug, sp, base, embedded = false, first: firstTab }: { slug: string; sp: Record<string, string | string[] | undefined>; base: string; embedded?: boolean; first?: "talk" }) {
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id;
@@ -104,7 +111,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
     }
     // Only the tools the admins switched on have a tab; chat, members and the about page are always there.
     const on = (k: (typeof TABS)[number]) => !(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool);
-    const first = g.tools.includes("goals") ? "goals" : "talk";
+    const first = firstTab ?? (g.tools.includes("goals") ? "goals" : "talk");
     const active = (TABS as readonly string[]).includes(String(sp.tab)) && on(sp.tab as (typeof TABS)[number]) ? (sp.tab as (typeof TABS)[number]) : first;
     const links = active === "links" ? await tx<ResourceRow[]>`select ${resourceColumns(tx, me ?? null)} from ${resourceFrom(tx)} where r.group_id = ${g.id} and r.hidden_at is null and r.trashed_at is null and r.visibility in ('public', 'group') order by r.score desc, r.created_at desc limit 100` : [];
     const posts = active === "talk" ? await loadPosts(tx, { groupId: g.id }, me ?? null, { sort: "chat", limit: 60 }) : [];
@@ -165,7 +172,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   if (!data) notFound();
   const { g, role, active } = data;
   const locked = g.visibility !== "public" && !role;
-  const path = `/groups/${slug}`;
+  const path = base;
   const voting = data.goals.filter((x) => x.status === "voting").length;
   const admins = data.members.filter((m) => m.role === "admin");
   const labels: Record<(typeof TABS)[number], string> = {
@@ -182,7 +189,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   const has = (k: (typeof TABS)[number]) => !(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool);
   const front = (["goals", "talk", "collection", "tasks", "team"] as const).filter((k) => (k !== "tasks" || g.mod_tasks) && has(k));
   const back = (["links", "needs", "about"] as const).filter(has);
-  const first = g.tools.includes("goals") ? "goals" : "talk";
+  const first = firstTab ?? (g.tools.includes("goals") ? "goals" : "talk");
   const tabHref = (k: (typeof TABS)[number]) => `${path}${k === first ? "" : `?tab=${k}`}`;
 
   const aside = (
@@ -223,8 +230,8 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
   );
 
   return (
-    <Page aside={aside}>
-        <BackLink href="/friends?f=groups" label={t("groups")} />
+    <Page aside={embedded ? undefined : aside}>
+        {!embedded && <BackLink href="/friends?f=groups" label={t("groups")} />}
         {g.cover_path && <Cover seed={g.cover_seed} src={g.cover_path} ratio="21 / 9" />}
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -246,7 +253,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
           <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
             lastAdmin={role === "admin" && admins.length === 1} />
           {session && <FollowButton type="group" id={g.id} following={data.following} size="md" />}
-          <ShareBlock path={path} title={g.name} isPublic={g.visibility === "public"} item={session ? { type: "group", id: g.id } : null} />
+          <ShareBlock path={`/groups/${slug}`} title={g.name} isPublic={g.visibility === "public"} item={session ? { type: "group", id: g.id } : null} />
         </div>
         {g.archived_at && <Notice tone="warning">{tr("danger.archived")}</Notice>}
         {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
@@ -352,6 +359,7 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
             </dl>
           </section>
         )}
+      {embedded && aside}
     </Page>
   );
 }

@@ -1,0 +1,72 @@
+import type { ReactNode } from "react";
+import { getLocale, getTranslations } from "next-intl/server";
+import { asViewer } from "@/lib/db";
+import { requireSession } from "@/lib/session";
+import { relTime } from "@/lib/format";
+import { BackToList, ListPane, Pick, Split, type ListRow } from "@/components/shell/Split";
+import { NewList } from "./TodoList";
+import { IconLock } from "@/components/ui/Icons";
+
+export type MineKind = "all" | "notes" | "uploads" | "lists" | "projects" | "listings";
+
+// Where each kind of my things lives inside Ich.
+const BASE: Record<Exclude<MineKind, "all">, string> = { notes: "/me/notes", uploads: "/me/uploads", lists: "/me/lists", projects: "/me/initiatives", listings: "/me/listings" };
+
+type Item = { kind: Exclude<MineKind, "all">; id: string; title: string; label: string; vis: string; at: string; extra?: string };
+
+/**
+ * Ich: one section of my own things as a list in the middle and the opened one on the right.
+ * `detail` is what is opened (or the start page of the section), `selected` its id for the highlight.
+ */
+export async function MineSection({ kind, selected, detail, open }: { kind: MineKind; selected?: string; detail?: ReactNode; open: boolean }) {
+  const path = kind === "all" ? "/me" : BASE[kind];
+  const session = await requireSession(path);
+  const me = session.profile.id;
+  const t = await getTranslations("mine");
+  const locale = await getLocale();
+
+  const d = await asViewer({ authId: session.authId, profileId: me }, async (tx) => ({
+    docs: await tx<{ id: string; title: string; origin: string; visibility: string; updated_at: string }[]>`
+      select id, title, origin, visibility, updated_at from public.resources where owner_id = ${me} and trashed_at is null order by updated_at desc limit 300`,
+    lists: await tx<{ id: string; title: string; visibility: string; updated_at: string; total: number; done: number }[]>`
+      select l.id, l.title, l.visibility, l.updated_at,
+        (select count(*)::int from public.todo_items i where i.list_id = l.id) as total,
+        (select count(*)::int from public.todo_items i where i.list_id = l.id and i.done_at is not null) as done
+      from public.todo_lists l where l.owner_id = ${me} order by l.updated_at desc`,
+    projects: await tx<{ id: string; title: string; updated_at: string }[]>`
+      select i.id, i.title, i.updated_at from public.initiative_authors a join public.initiatives i on i.id = a.initiative_id where a.profile_id = ${me} order by i.updated_at desc`,
+    listings: await tx<{ id: string; title: string; kind: string; read_scope: string; status: string; created_at: string }[]>`
+      select id, title, kind::text, read_scope, status::text, created_at from public.listings where owner_id = ${me} and status in ('active', 'paused') order by created_at desc limit 200`,
+  }));
+
+  const items: Item[] = [
+    ...d.docs.map((x): Item => ({ kind: x.origin === "note" ? "notes" : "uploads", id: x.id, title: x.title, label: t(`kind.${x.origin === "note" ? "note" : x.origin === "file" ? "file" : "link"}`), vis: x.visibility, at: x.updated_at })),
+    ...d.lists.map((x): Item => ({ kind: "lists", id: x.id, title: x.title, label: t("kind.list"), vis: x.visibility, at: x.updated_at, extra: x.total ? t("listCount", { done: x.done, total: x.total }) : undefined })),
+    ...d.projects.map((x): Item => ({ kind: "projects", id: x.id, title: x.title, label: t("kind.project"), vis: "public", at: x.updated_at })),
+    ...d.listings.map((x): Item => ({ kind: "listings", id: x.id, title: x.title, label: t(`kind.${x.kind === "need" ? "need" : "offer"}`), vis: x.read_scope, at: x.created_at, extra: x.status === "paused" ? t("paused") : undefined })),
+  ];
+  const shown = items.filter((x) => kind === "all" || x.kind === kind).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+  const rows: ListRow[] = shown.map((x) => ({
+    key: `${x.kind}:${x.id}`, href: `${BASE[x.kind]}/${x.id}`, title: x.title, active: x.id === selected,
+    sub: [kind === "all" ? x.label : null, x.extra, relTime(x.at, locale)].filter(Boolean).join(" · "),
+    tag: t(`vis.${x.vis}` as "vis.me"),
+  }));
+
+  const create = kind === "notes" ? { href: "/me/notes/new", label: t("newNote") }
+    : kind === "uploads" ? { href: "/me/uploads/new", label: t("newUpload") }
+    : kind === "listings" ? { href: "/me/listings/new", label: t("newListing") }
+    : kind === "projects" ? { href: "/new/initiative", label: t("newProject") }
+    : kind === "lists" ? <NewList label={t("newList")} />
+    : undefined;
+  const title = kind === "all" ? t("title") : t(`filters.${kind}`);
+
+  return (
+    <Split open={open}
+      list={
+        <ListPane id={`mine-${kind}`} title={title} create={create} searchLabel={t("search")} rows={rows}
+          empty={t(kind === "all" ? "empty" : kind === "notes" ? "emptyNotes" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}
+          top={<p className="m-0 flex items-center gap-1.5 text-xs text-muted"><IconLock size={12} /> {t("lead")}</p>} />
+      }
+      detail={open ? <>{<BackToList href={path} label={title} />}{detail}</> : (detail ?? <Pick text={t("pick")} />)} />
+  );
+}

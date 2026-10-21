@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { Avatar } from "../ui/Avatar";
+import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer, type Tx } from "@/lib/db";
 import type { Session } from "@/lib/session";
 import { listingCardColumns, listingCardFrom, myRegionIds, regionTree, type ListingCard } from "@/lib/queries";
@@ -10,6 +11,7 @@ import { btn, chip, field, segment, segments } from "../ui/styles";
 import { Toolbar } from "../ui/Page";
 import { SearchField } from "../ui/SearchField";
 import { ListingCardView } from "./ListingCardView";
+import { priceLabel } from "./price";
 import { MarketMap, type MapPoint } from "./MarketMap";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -22,17 +24,25 @@ const param = (f: FieldDef) => (f.type === "number" ? `min_${f.key}` : f.type ==
  * The marketplace in "Anliegen" (tabs Angebote and Gesuche): by category, with the category's own filters
  * (jobs by employment and workplace, flats by rooms and rent, things by condition ...), as a list or a map.
  */
-export async function MarketExplore({ sp, session, homeRegions, side, base: path }: { sp: SP; session: Session | null; homeRegions: string[]; side: "offer" | "need"; base: string }) {
+/**
+ * `layout`: "cards" (a grid), "rows" (the list column of Gemeinschaft → Anliegen, each row opens on the right)
+ * or "map" (only the map, for the right side before a listing is opened). `selected`: the opened listing.
+ */
+export async function MarketExplore({ sp, session, homeRegions, side, base: path, layout = "cards", selected }: {
+  sp: SP; session: Session | null; homeRegions: string[]; side: "offer" | "need"; base: string; layout?: "cards" | "rows" | "map"; selected?: string;
+}) {
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string).slice(0, 80) : "");
   const t = await getTranslations("explore");
   const tm = await getTranslations("explore.market");
   const tcat = await getTranslations("categories");
+  const tc = await getTranslations("common");
+  const locale = await getLocale();
   const cat = isCategory(str("cat")) ? str("cat") as (typeof CATEGORIES)[number] : null;
   const q = str("q").trim();
   const free = str("free") === "1";
   const max = Number(str("max")) > 0 ? Math.round(Number(str("max"))) : null;
   const sort = (SORTS as readonly string[]).includes(str("sort")) ? str("sort") : "relevant";
-  const view = str("view") === "map" ? "map" : "list";
+  const view = layout === "map" ? "map" : layout === "rows" ? "list" : str("view") === "map" ? "map" : "list";
   const mine = str("mine") === "1";
   const placeId = /^[0-9a-f-]{36}$/.test(str("place")) ? str("place") : "";
   const defs = cat ? CATEGORY_DEFS[cat].fields.filter((f) => f.filter) : [];
@@ -89,12 +99,21 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
     for (const [k, v] of [...p.entries()]) if (!v || (k === "sort" && v === "relevant") || (k === "view" && v === "list")) p.delete(k);
     return `${path}?${p}`;
   };
+  // A row keeps the filters when it opens the listing next to the list.
+  const keep = (() => { const p = new URLSearchParams(href({}).split("?")[1]); return p.size ? `?${p}` : ""; })();
   // Switching the category drops the fields of the old one.
   const catHref = (c: string) => href({ ...Object.fromEntries(Object.keys(attr).map((k) => [k, ""])), cat: c });
   const all = Object.values(data.counts).reduce((a, b) => a + b, 0);
   const active = defs.filter((f) => attr[param(f)]).length + (free ? 1 : 0) + (max ? 1 : 0) + (mine ? 1 : 0);
   const mapped = data.points.reduce((a, p) => a + p.n, 0);
   const hidden = Object.entries(base).filter(([k]) => k !== "q");
+
+  if (layout === "map") return (
+    <div className="flex flex-col gap-2 p-4 md:p-6">
+      <MarketMap points={data.points} placeHref={href({ view: "", place: "__PLACE__" })} />
+      <span className="text-sm text-muted">{tm("mapPrivacy")}{data.total > mapped ? ` ${tm("mapMissing", { n: data.total - mapped })}` : ""}</span>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -161,22 +180,37 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
             </div>
           </Popover>
         )}
-        <div role="radiogroup" aria-label={tm("view")} className={segments}>
+        {layout === "cards" && <div role="radiogroup" aria-label={tm("view")} className={segments}>
           {(["list", "map"] as const).map((v) => (
             <Link key={v} role="radio" aria-checked={view === v} href={href({ view: v })} className={segment(view === v)}>{tm(`views.${v}`)}</Link>
           ))}
-        </div>
+        </div>}
         {place && <Link href={href({ place: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: place.name })}>{t("inPlace", { name: place.name })} <span aria-hidden="true">✕</span></Link>}
         {q && <Link href={href({ q: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: q })}>{t("searchChip", { q })} <span aria-hidden="true">✕</span></Link>}
       </Toolbar>
 
-      {view === "list" && (data.cards.length === 0
+      {layout === "rows" && (data.cards.length === 0
+        ? <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>
+        : <div className="-mx-4 flex flex-col border-t border-line">
+            {data.cards.map((c) => (
+              <Link key={c.id} href={`/community/listings/${c.id}${keep}`} aria-current={c.id === selected ? "true" : undefined}
+                className={`flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline ${c.id === selected ? "bg-paper shadow-[inset_4px_0_0_var(--ink)]" : "hover:bg-paper"}`}>
+                <Avatar name={c.owner_name} seed={c.owner_seed} path={c.owner_path} size={36} />
+                <span className="flex min-w-0 flex-col">
+                  <strong className="truncate">{c.title}</strong>
+                  <span className="truncate text-sm text-muted">{[c.owner_name, priceLabel(c, tc, locale), c.region_name].filter(Boolean).join(" · ")}</span>
+                </span>
+              </Link>
+            ))}
+          </div>)}
+
+      {layout === "cards" && view === "list" && (data.cards.length === 0
         ? <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>
         : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {data.cards.map((c) => <ListingCardView key={c.id} c={c} signedIn={!!session} sent={data.sentTo.includes(c.id)} mine={data.own} />)}
           </div>)}
 
-      {view === "map" && (
+      {layout === "cards" && view === "map" && (
         <div className="flex flex-col gap-2">
           <MarketMap points={data.points} placeHref={href({ view: "", place: "__PLACE__" })} />
           <span className="text-sm text-muted">{tm("mapPrivacy")}{data.total > mapped ? ` ${tm("mapMissing", { n: data.total - mapped })}` : ""}</span>

@@ -143,7 +143,7 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
     } else if (kind === "group_removed" || kind === "group_delete_requested" || kind === "group_archived" || kind === "group_rule_changed") {
       href = kind === "group_removed" ? "/friends" : `/groups/${p.slug}`; label = t("labels.group");
     } else if (kind === "resource_transfer" || kind === "resource_transfer_answer") {
-      href = "/me?f=notes"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
+      href = "/me/notes"; label = t("labels.other"); if (kind === "resource_transfer") category = "requests";
     } else if (kind.startsWith("resource_")) {
       href = `/links/${p.resource_id}`; label = t("labels.other");
     } else if (kind === "invite_used" || kind === "invitee_violation") {

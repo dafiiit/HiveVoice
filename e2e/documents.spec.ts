@@ -26,7 +26,7 @@ test.describe("documents: who sees what", () => {
       await login(page);
       await page.goto("/settings?tab=docs");
       const href = await page.getByRole("link", { name: new RegExp(marker) }).first().getAttribute("href");
-      expect(href).toMatch(/^\/links\/[0-9a-f-]{36}$/);
+      expect(href).toMatch(/^\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       await page.goto(href!);
       await expect(page.getByText("Nur du siehst dieses Dokument.")).toBeVisible();
       // Who may read and edit lives in the share window, tab "Zugriff".
@@ -44,20 +44,24 @@ test.describe("documents: who sees what", () => {
       await gp.goto(link);
       await expect(gp.getByRole("heading", { name: marker, level: 1 })).toBeVisible();
       await expect(gp.getByText("Du siehst dieses Dokument über einen geteilten Link.")).toBeVisible();
-      const bare = await gp.request.get(new URL(href!, link).toString());
+      // Without the key the document's own address stays closed.
+      const bare = await gp.request.get(new URL(`/links/${href!.split("/").pop()}`, link).toString());
       expect(bare.status()).toBe(404);
 
       // Into the trash: closed for everybody else, restorable.
       await page.keyboard.press("Escape");
       await page.getByRole("button", { name: "In den Papierkorb" }).click();
       await page.getByRole("button", { name: "Ja", exact: true }).click();
-      await expect(page).toHaveURL(/\/me\?f=notes/, { timeout: 60_000 });
-      await page.goto("/me?f=notes");
-      await expect(page.getByText(marker)).toBeVisible();
+      await expect(page).toHaveURL(/\/me\/notes$/, { timeout: 60_000 });
+      await page.goto("/me/notes");
+      const trashed = page.locator("div", { has: page.getByRole("button", { name: "Wiederherstellen" }) }).filter({ hasText: marker }).last();
+      await expect(trashed).toBeVisible();
+      // The list of my notes in the middle no longer shows it.
+      await expect(page.locator("#mine-notes").getByRole("link", { name: new RegExp(marker) })).toHaveCount(0);
       await gp.reload();
       await expect(gp.getByRole("heading", { name: marker, level: 1 })).toHaveCount(0);
       // Other trashed items of earlier runs may sit in the trash too: restore this one only.
-      await page.getByText(marker).locator("xpath=ancestor::div[1]").getByRole("button", { name: "Wiederherstellen" }).click();
+      await trashed.getByRole("button", { name: "Wiederherstellen" }).click();
       await expect(page.getByRole("link", { name: new RegExp(marker) })).toBeVisible({ timeout: 60_000 });
       await guest.close();
     } finally {

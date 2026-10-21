@@ -36,7 +36,7 @@ test.describe("knowledge: notes, files and images", () => {
       // Documents start private; this one is shared with everybody.
       await page.getByLabel("Wer darf das sehen?").selectOption("public");
       await page.getByRole("button", { name: "Notiz veröffentlichen" }).click();
-      await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
+      await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       const article = page.locator("article.border");
       await expect(article.getByRole("img", { name: "Diagramm" }).locator("svg")).toBeVisible({ timeout: 20_000 });
       await expect(article.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
@@ -45,11 +45,11 @@ test.describe("knowledge: notes, files and images", () => {
       await article.getByRole("link", { name: "Bearbeiten" }).click();
       await page.getByLabel("Inhalt in Markdown").fill("# Neu gefasst\n\nGeändert.");
       await page.getByRole("button", { name: "Speichern" }).click();
-      await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
+      await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       await expect(page.locator("article.border").getByRole("heading", { name: "Neu gefasst" })).toBeVisible();
 
       // It is listed under Ich → Notizen.
-      await page.goto("/me?f=notes");
+      await page.goto("/me/notes");
       await expect(page.getByText(marker).first()).toBeVisible();
     } finally {
       await exec(`delete from public.resources where title = '${marker}'`);
@@ -76,7 +76,7 @@ test.describe("knowledge: notes, files and images", () => {
       await expect(page.getByText("skizze.jpg").first()).toBeVisible();
       await page.getByLabel("Titel", { exact: true }).fill(photoTitle);
       await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
-      await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
+      await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       const img = page.locator("main img[src^='/api/files/']");
       await expect(img).toBeVisible();
       await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth > 0)).toBe(true);
@@ -91,7 +91,7 @@ test.describe("knowledge: notes, files and images", () => {
       await expect(page.getByText("bericht.pdf").first()).toBeVisible();
       await page.getByLabel("Titel", { exact: true }).fill(pdfTitle);
       await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
-      await expect(page).toHaveURL(/\/links\/[0-9a-f-]{36}$/);
+      await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       const open = page.getByRole("link", { name: "Datei öffnen" });
       await expect(open).toBeVisible();
       const pdf = await page.request.get((await open.getAttribute("href"))!, { maxRedirects: 0 });

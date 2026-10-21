@@ -65,7 +65,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   );
 }
 
-function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostView; path: string; canWrite: boolean; viewerId?: string; compact?: boolean; canModerate?: boolean }) {
+function Post({ p, path, canWrite, viewerId, compact, canModerate, openBase, startOpen = false }: { p: PostView; path: string; canWrite: boolean; viewerId?: string; compact?: boolean; canModerate?: boolean; openBase?: string; startOpen?: boolean }) {
   const t = useTranslations("posts");
   const tc = useTranslations("common");
   const ts = useTranslations("safety");
@@ -73,7 +73,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
   const [vote, setVote] = useOptimistic(p.my_vote);
   const [, start] = useTransition();
   const [pulse, ping] = usePulse();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(startOpen);
   const score = p.score - p.my_vote + vote;
   const cast = (v: 1 | -1) => {
     if (!canWrite) return;
@@ -105,7 +105,9 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
           <Link href={`/profile/${p.author_id}`} className="font-bold text-ink no-underline">{p.author_name}</Link>
           {verified ? <span className="inline-flex" title={tc("verified")} aria-label={tc("verified")}><IconCheck size={12} /></span> : <span className="text-muted">{tc("anonymous")}</span>}
           {p.author_region && <span className="text-muted">{p.author_region}</span>}
-          <span className="text-muted">{relTime(p.created_at, locale)}</span>
+          {openBase && !compact
+            ? <Link href={`${openBase}${openBase.includes("?") ? "&" : "?"}post=${p.id}`} className="text-muted underline-offset-2 hover:underline">{relTime(p.created_at, locale)}</Link>
+            : <span className="text-muted">{relTime(p.created_at, locale)}</span>}
           {p.is_pinned && <span className="font-bold">{t("pinned")}</span>}
           {p.locked && <span className="text-muted">· {ts("post.locked")}</span>}
         </div>
@@ -129,10 +131,15 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
               className={`${press} ${vote === -1 ? "text-ink" : "text-muted"}`}>
               <Pop arrow={-1} pulse={pulse}><IconDown /></Pop>
             </button>
-            <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
-              className="inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 text-muted">
-              <IconReply /> {tc("replies", { n: p.replies.length })}
-            </button>
+            {openBase
+              // On the pinboard the replies open next to the feed.
+              ? <Link href={`${openBase}${openBase.includes("?") ? "&" : "?"}post=${p.id}`} className="inline-flex h-9 items-center gap-1.5 text-muted no-underline">
+                  <IconReply /> {tc("replies", { n: p.replies.length })}
+                </Link>
+              : <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
+                  className="inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 text-muted">
+                  <IconReply /> {tc("replies", { n: p.replies.length })}
+                </button>}
             {canModerate && <Moderation post={p} path={path} />}
             {viewerId === p.author_id ? (
               <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} className={btn.linkMuted}>{tc("delete")}</button>
@@ -150,11 +157,12 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate }: { p: PostVi
   );
 }
 
-export function PostList({ posts, path, canWrite, viewerId, empty, canModerate }: { posts: PostView[]; path: string; canWrite: boolean; viewerId?: string; empty?: string; canModerate?: boolean }) {
+/** `openBase`: the time of each post opens it on its own (the pinboard shows it next to the feed). */
+export function PostList({ posts, path, canWrite, viewerId, empty, canModerate, openBase, repliesOpen }: { posts: PostView[]; path: string; canWrite: boolean; viewerId?: string; empty?: string; canModerate?: boolean; openBase?: string; repliesOpen?: boolean }) {
   if (!posts.length) return <p className="m-0 py-6 text-muted">{empty}</p>;
   return (
     <div className="flex flex-col divide-y divide-line">
-      {posts.map((p) => <Post key={p.id} p={p} path={path} canWrite={canWrite} viewerId={viewerId} canModerate={canModerate} />)}
+      {posts.map((p) => <Post key={p.id} p={p} path={path} canWrite={canWrite} viewerId={viewerId} canModerate={canModerate} openBase={openBase} startOpen={repliesOpen} />)}
     </div>
   );
 }

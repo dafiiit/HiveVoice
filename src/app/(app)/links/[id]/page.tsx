@@ -37,8 +37,11 @@ type Meta = {
 };
 
 export default async function LinkPage({ params, searchParams }: PageProps<"/links/[id]">) {
-  const { id } = await params;
-  const sp = await searchParams;
+  return <LinkView id={(await params).id} sp={await searchParams} base={`/links/${(await params).id}`} />;
+}
+
+/** One document or upload. `base`: its address (inside Ich it is /me/notes/…); `embedded`: shown next to a list, without the back link. */
+export async function LinkView({ id, sp, base, embedded = false }: { id: string; sp: Record<string, string | string[] | undefined>; base: string; embedded?: boolean }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const key = typeof sp.k === "string" && /^[0-9a-f]{32}$/.test(sp.k) ? sp.k : null;
   const session = await getSession();
@@ -99,7 +102,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
   const linkUrl = meta.visibility === "link" && meta.link_token ? `${origin}/links/${id}?k=${meta.link_token}` : null;
   return (
     <Page width="narrow">
-      <BackLink href={isNote ? "/me?f=notes" : "/me?f=uploads"} label={tm(isNote ? "filters.notes" : "filters.uploads")} />
+      {!embedded && <BackLink href={isNote ? "/me/notes" : "/me/uploads"} label={tm(isNote ? "filters.notes" : "filters.uploads")} />}
       {meta.trashed_at && level >= 4 && <RestoreResource id={id} />}
       {isLink && <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />}
       <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -172,8 +175,8 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
           <Markdown source={data.body} />
           <p className="mb-0 mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-line pt-3 text-sm text-muted">
             <span>{tk("updated", { date: dateLong(r.updated_at, locale) })}</span>
-            {level >= 3 && !meta.trashed_at && <Link href={`/links/${r.id}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
-            {level === 2 && !meta.trashed_at && <Link href={`/links/${r.id}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
+            {level >= 3 && !meta.trashed_at && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
+            {level === 2 && !meta.trashed_at && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
             {meta.lock && !meta.lock.mine && <span className="font-bold text-red">{td("page.locked")}</span>}
             {level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
           </p>

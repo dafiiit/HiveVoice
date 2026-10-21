@@ -45,7 +45,7 @@ test.describe("signed in", () => {
   test("the group form is reachable from Freunde", async ({ page }) => {
     await login(page);
     await page.goto("/friends");
-    await page.getByRole("link", { name: "Gruppe gründen" }).first().click();
+    await page.getByRole("link", { name: "Gruppe gründen" }).filter({ visible: true }).first().click();
     await expect(page).toHaveURL(/\/new\/group/);
   });
 
@@ -60,12 +60,18 @@ test.describe("signed in", () => {
     await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(before);
   });
 
-  test("Freunde: the list filters stay compact, the pinboard filters by place and topic", async ({ page }) => {
+  test("Freunde: the list filters stay compact, the pinboard filters by place and topic", async ({ page }, info) => {
     await login(page);
     await page.goto("/friends");
-    const filters = page.getByRole("group", { name: "Anzeigen" });
-    await expect(filters.getByRole("link")).toHaveCount(5);
-    expect((await filters.boundingBox())!.height).toBeLessThan(60);
+    // Wide screens: the five filters are sections in the sidebar; phones: a compact row of chips.
+    if (info.project.name === "mobile") {
+      const filters = page.getByRole("group", { name: "Anzeigen" });
+      await expect(filters.getByRole("link")).toHaveCount(5);
+      expect((await filters.boundingBox())!.height).toBeLessThan(60);
+    } else {
+      const side = page.getByRole("navigation", { name: "Bereiche" }).first();
+      for (const name of ["Alles", "Chats", "Gruppen", "Kontaktanfragen", "Anliegen"]) await expect(side.getByRole("link", { name: new RegExp(`^${name}`) })).toBeVisible();
+    }
     await page.goto("/community?q=kein-treffer-xyz");
     await expect(page.getByText("Nichts gefunden.")).toBeVisible();
     await page.getByRole("group", { name: "Ort" }).getByRole("link", { name: /^Land/ }).click();
@@ -95,7 +101,7 @@ test.describe("signed in", () => {
   test("responsible people are people with a tag", async ({ page }) => {
     await login(page);
     await page.goto("/community/people?q=zust%C3%A4ndig");
-    await expect(page.getByRole("link", { name: /^Zuständig: / }).first()).toBeVisible();
+    await expect(page.getByText(/Zuständig: /).first()).toBeVisible();
   });
 
   test("Mitteilungen show who and what, with a way to clear them", async ({ page }) => {
@@ -109,7 +115,7 @@ test.describe("signed in", () => {
   test("a postal code finds the place in the offer form", async ({ page }) => {
     await login(page);
     await page.goto("/me/listings?as=offer");
-    await page.locator("main input").first().fill("Test");
+    await page.getByLabel(/^(Was bietest du an\?|Was brauchst du\?)$/).fill("Test");
     await page.getByRole("combobox", { name: "Ort" }).fill("80336");
     await expect(page.getByRole("combobox", { name: "Ort" })).toHaveValue("80336 München");
     await expect(page.getByText(/Erkannt: München/)).toBeVisible();
@@ -156,7 +162,7 @@ test.describe("signed in", () => {
     await expect(next).toBeEnabled();
     await expect(prev).toBeEnabled();
     if (info.project.name === "desktop") {
-      const field = await page.locator("main input").first().boundingBox();
+      const field = await page.getByLabel(/^(Was bietest du an\?|Was brauchst du\?)$/).boundingBox();
       const button = await page.getByRole("button", { name: "Angebot erstellen" }).boundingBox();
       expect(Math.round(field!.height)).toBe(Math.round(button!.height));
     }
@@ -218,14 +224,14 @@ test.describe("signed in", () => {
     const title = `E2E Testlink ${Date.now()} (wird gleich gelöscht)`;
     await page.getByLabel("Titel", { exact: true }).fill(title);
     await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
-    await page.waitForURL(/\/links\/[0-9a-f-]{36}/);
+    await page.waitForURL(/\/(links|me\/uploads)\/[0-9a-f-]{36}/);
     await expect(page.getByRole("heading", { name: /E2E Testlink/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /Link öffnen/ })).toHaveAttribute("rel", /noopener/);
     await page.getByRole("button", { name: "Nützlich", exact: true }).click();
     await expect(page.getByRole("group", { name: "Bewertung" }).getByText("1", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "In den Papierkorb" }).click();
     await page.getByRole("button", { name: "Ja", exact: true }).click();
-    await page.waitForURL(/\/me\?f=uploads/);
+    await page.waitForURL(/\/me\/uploads$/);
   });
 
   test("Neu has six equal tiles with the words of the buttons; group and initiative have their own forms", async ({ page }) => {

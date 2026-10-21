@@ -52,7 +52,8 @@ test("the login page header uses the same behaviour", async ({ page }) => {
 
 test("initiatives and groups show their photographs", async ({ page }) => {
   await page.goto("/community/groups?kind=initiatives");
-  await expect.poll(async () => (await loaded(page, "article img[src*='/images/demo/']")).filter(Boolean).length).toBeGreaterThan(2);
+  await page.locator("main a[href^='/community/groups/i/']").first().click();
+  await expect.poll(async () => (await loaded(page, "main img[src*='/images/demo/']")).filter(Boolean).length).toBeGreaterThan(0);
   await page.goto("/groups/westpark-volleyball");
   await expect.poll(async () => (await loaded(page, "img[src$='/demo/volleyball.jpg']")).some(Boolean)).toBe(true);
 });
@@ -130,7 +131,7 @@ test.describe("on a phone", () => {
     await expect(page).toHaveURL(/\/community\/listings/);
     for (const name of ["Angebote", "Gesuche"]) await expect(page.getByRole("tab", { name: new RegExp(`^${name}`) })).toBeVisible();
     await page.goto("/friends?f=listings");
-    await expect(page.getByRole("link", { name: "Anliegen", exact: true }).first()).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("heading", { name: "Anliegen", level: 1 })).toBeVisible();
   });
 
   test("Freunde puts the chats first and fills the screen without page scroll", async ({ page }, info) => {
@@ -184,7 +185,7 @@ test.describe("on a phone", () => {
 
   test("the main areas start with their content, not with an explanation", async ({ page }) => {
     await login(page);
-    await page.goto("/me/listings");
+    await page.goto("/me/listings/new");
     await expect(page.getByRole("radio", { name: "Ich biete" })).toBeVisible();
     await expect(page.getByText(/Wir bringen beides zusammen/)).toHaveCount(0);
     await expect(page.getByText("Bieten und suchen an einem Ort.", { exact: true })).toHaveCount(0);

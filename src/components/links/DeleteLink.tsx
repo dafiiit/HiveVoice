@@ -12,6 +12,6 @@ export function DeleteLink({ id, groupSlug, note }: { id: string; groupSlug: str
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <ConfirmAction disabled={pending} look={`${btn.linkMuted} text-sm`} question={t("trashConfirm", { days: 30 })} onConfirm={() => start(async () => { await deleteResource(id); router.push(groupSlug ? `/groups/${groupSlug}?tab=links` : (note ? "/me?f=notes" : "/me?f=uploads")); })} label={t("trash")} />
+    <ConfirmAction disabled={pending} look={`${btn.linkMuted} text-sm`} question={t("trashConfirm", { days: 30 })} onConfirm={() => start(async () => { await deleteResource(id); router.push(groupSlug ? `/groups/${groupSlug}?tab=links` : (note ? "/me/notes" : "/me/uploads")); router.refresh(); })} label={t("trash")} />
   );
 }

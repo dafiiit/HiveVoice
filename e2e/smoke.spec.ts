@@ -9,7 +9,7 @@ test("welcome page shows the hero and live initiatives", async ({ page }) => {
 test("guests can explore and read an initiative", async ({ page }) => {
   await page.goto("/community/groups?kind=initiatives");
   await expect(page.getByRole("heading", { name: "Gruppen" })).toBeVisible();
-  const first = page.locator("article a[href^='/initiatives/']").filter({ hasText: /\w/ }).first();
+  const first = page.locator("main a[href^='/community/groups/i/']").first();
   await first.click();
   await expect(page.getByRole("tablist", { name: /Bereiche der Initiative/ })).toBeVisible();
   await page.getByRole("tab", { name: /Argumente/ }).click();

@@ -23,7 +23,7 @@ import { BackLink, Notice, Page, Section } from "@/components/ui/Page";
 
 type Match = ListingCard & { score: number; reasons: string[]; sent: boolean };
 
-export async function ListingDetail({ id, linkToken = null }: { id: string; linkToken?: string | null }) {
+export async function ListingDetail({ id, linkToken = null, embedded = false }: { id: string; linkToken?: string | null; embedded?: boolean }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
@@ -76,7 +76,7 @@ export async function ListingDetail({ id, linkToken = null }: { id: string; link
   );
   return (
     <Page width="narrow">
-      <BackLink href={kind === "offer" ? "/community/listings?tab=offers" : "/community/listings?tab=needs"} label={tm("filters.listings")} />
+      {!embedded && <BackLink href={kind === "offer" ? "/community/listings?tab=offers" : "/community/listings?tab=needs"} label={tm("filters.listings")} />}
       {l.images.length > 0
         ? (
           <div className="flex flex-col gap-2">

@@ -24,7 +24,9 @@
     "readOnly": "Lesen geht ohne Konto, schreiben mit.",
     "signIn": "Anmelden",
     "none": "Nichts gefunden. Wähle einen größeren Ort oder ein anderes Thema.",
-    "empty": "Noch nichts an der Pinnwand. Schreib den ersten Beitrag."
+    "empty": "Noch nichts an der Pinnwand. Schreib den ersten Beitrag.",
+    "pick": "Öffne bei einem Beitrag die Antworten, dann siehst du ihn hier mit allen Antworten und kannst mitreden.",
+    "gone": "Diesen Beitrag gibt es nicht mehr."
   },
   "groups": {
     "lead": "Gruppen und Initiativen, denen du beitreten kannst. Eine Initiative ist eine Gruppe mit einem Ziel."

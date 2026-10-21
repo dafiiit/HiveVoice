@@ -84,5 +84,6 @@
   },
   "searchPeople": "Name or tag, e.g. responsible",
   "searchGroups": "Search groups or initiatives",
-  "responsibleTag": "Responsible: {title}"
+  "responsibleTag": "Responsible: {title}",
+  "supporters": "{n} supporters"
 }

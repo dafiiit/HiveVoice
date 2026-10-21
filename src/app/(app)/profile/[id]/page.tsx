@@ -20,7 +20,11 @@ import { priceLabel } from "@/components/listings/price";
 type Profile = { id: string; display_name: string; display_mode: string; avatar_seed: number; avatar_path: string | null; headline: string | null; bio: string | null; helped_count: number; region: string | null; onboarded_at: string | null };
 
 export default async function ProfilePage({ params }: PageProps<"/profile/[id]">) {
-  const { id } = await params;
+  return <ProfileView id={(await params).id} />;
+}
+
+/** One person's profile; `embedded`: next to the list of people, side column below, no back link. */
+export async function ProfileView({ id, embedded = false }: { id: string; embedded?: boolean }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
@@ -86,8 +90,8 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
     </>
   );
   return (
-    <Page aside={aside}>
-        <BackLink href="/community/people" label={te("kinds.people")} />
+    <Page aside={embedded ? undefined : aside}>
+        {!embedded && <BackLink href="/community/people" label={te("kinds.people")} />}
         <section className="flex flex-wrap items-start gap-6">
           <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={120} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -146,6 +150,7 @@ export default async function ProfilePage({ params }: PageProps<"/profile/[id]">
             {d.posts.map((x) => <div key={x.id} className="flex flex-col gap-1 border-b border-line py-3"><span className="text-sm text-muted">{relTime(x.created_at, locale)}</span><span>{x.body}</span></div>)}
           </Section>
         )}
+      {embedded && aside}
     </Page>
   );
 }

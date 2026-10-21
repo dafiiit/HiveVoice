@@ -37,14 +37,16 @@ export type PostView = {
   locked: boolean;
 };
 
-type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[]; underRegionId?: string; search?: string };
+type Scope = { groupId?: string; initiativeId?: string; regionIds?: string[]; underRegionId?: string; search?: string; postId?: string };
 
 const escapeLike = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
 
 /** Top-level posts of a group, an initiative thread or a regional marketplace, with replies. */
 export async function loadPosts(tx: Tx, scope: Scope, viewerId: string | null, opts: { sort?: "new" | "top" | "chat"; limit?: number } = {}) {
   const words = (scope.search ?? "").split(/\s+/).filter(Boolean).slice(0, 5).map((w) => `%${escapeLike(w)}%`);
-  const where = scope.groupId
+  const where = scope.postId
+    ? tx`p.id = ${scope.postId}`
+    : scope.groupId
     ? tx`p.group_id = ${scope.groupId}`
     : scope.initiativeId
       ? tx`p.initiative_id = ${scope.initiativeId}`

@@ -54,5 +54,7 @@
     "principles": "Principles",
     "signOut": "Sign out",
     "admin": "Admin view"
-  }
+  },
+  "fold": "Fold the sidebar",
+  "unfold": "Unfold the sidebar"
 }

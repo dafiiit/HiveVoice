@@ -4,13 +4,11 @@ import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { initiativeCardColumns, initiativeCardFrom, myRegionIds, regionTree, type InitiativeCard as Card } from "@/lib/queries";
 import { getPlace } from "@/lib/place";
-import { InitiativeCard } from "@/components/InitiativeCard";
 import { Avatar } from "@/components/ui/Avatar";
 import { IconCheck, IconPlus } from "@/components/ui/Icons";
-import { chip, tag } from "@/components/ui/styles";
+import { chip } from "@/components/ui/styles";
 import { Toolbar, Notice } from "@/components/ui/Page";
 import { SearchField } from "@/components/ui/SearchField";
-import { FollowButton } from "@/components/FollowButton";
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 
@@ -25,7 +23,7 @@ type Person = { id: string; display_name: string; avatar_seed: number; avatar_pa
  * Gemeinschaft → Gruppen (with Initiativen as a second view) and Gemeinschaft → Personen.
  * Responsible people are people with a "Zuständig" tag: searching for "zuständig" or the field finds them.
  */
-export async function Directory({ sp, area }: { sp: Record<string, string | string[] | undefined>; area: "groups" | "people" }) {
+export async function Directory({ sp, area, selected }: { sp: Record<string, string | string[] | undefined>; area: "groups" | "people"; selected?: string }) {
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const kind: Kind = area === "people" ? "people" : str("kind") === "initiatives" ? "initiatives" : "groups";
   const level = (LEVELS as readonly string[]).includes(str("level")) ? str("level") : "all";
@@ -118,6 +116,14 @@ export async function Directory({ sp, area }: { sp: Record<string, string | stri
   };
   const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? 0;
 
+  const keep = (() => { const p = new URLSearchParams(href({}).split("?")[1] ?? ""); return p.size ? `?${p}` : ""; })();
+  const row = (to: string, key: string, title: string, sub: string, avatar: { name: string; seed?: number; path?: string | null; group?: boolean }) => (
+    <Link key={key} href={`${to}${keep}`} aria-current={key === selected ? "true" : undefined}
+      className={`flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline ${key === selected ? "bg-paper shadow-[inset_4px_0_0_var(--ink)]" : "hover:bg-paper"}`}>
+      <Avatar name={avatar.name} seed={avatar.seed} path={avatar.path} size={40} group={avatar.group} />
+      <span className="flex min-w-0 flex-col"><strong className="truncate">{title}</strong><span className="truncate text-sm text-muted">{sub}</span></span>
+    </Link>
+  );
   const create = kind === "initiatives" ? { href: "/new/initiative", label: t("create.initiatives") }
     : kind === "groups" ? { href: "/new/group", label: t("create.groups") } : null;
   return (
@@ -175,62 +181,13 @@ export async function Directory({ sp, area }: { sp: Record<string, string | stri
 
       {count === 0 && <Notice tone="hint" className="border-t border-line pt-6 text-base">{t("nothing")}</Notice>}
 
-      {data.initiatives && (
-        <div className="grid gap-x-5 gap-y-10 md:grid-cols-2 xl:grid-cols-3">
-          {data.initiatives.map((it) => <InitiativeCard key={it.id} it={it} />)}
-        </div>
-      )}
-
-      {data.groups && (
-        <div className="flex flex-col border-t border-line">
-          {data.groups.map((g) => (
-            <div key={g.id} className="flex flex-wrap items-center gap-4 border-b border-line py-4">
-              <Link href={`/groups/${g.slug}`} className="flex min-w-[240px] flex-1 items-center gap-3 text-ink no-underline">
-                <Avatar name={g.name} size={56} group />
-                <span className="flex min-w-0 flex-col">
-                  <strong className="text-lg">{g.name}</strong>
-                  <span className="text-sm text-muted">{t("groupMeta", { n: g.member_count, place: g.region_name ?? "–" })} · {t(`join.${g.join_policy}`)}</span>
-                  {g.summary && <span className="text-sm">{g.summary}</span>}
-                </span>
-              </Link>
-              <div className="flex flex-wrap gap-1.5">{g.tags.slice(0, 4).map((x) => <span key={x} className={tag}>#{x}</span>)}</div>
-              {g.is_member && <span className="text-sm font-bold">{t("member")}</span>}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {data.people && (
-        <div className="flex flex-col border-t border-line">
-          {data.people.map((p) => (
-            <div key={p.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-3 border-b border-line py-4">
-              <Link href={`/profile/${p.id}`} className="flex min-w-0 items-center gap-3 text-ink no-underline">
-                <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={56} />
-                <span className="flex min-w-0 flex-col">
-                  <strong className="truncate text-lg">{p.display_name}</strong>
-                  <span className="truncate text-sm text-muted">{[p.headline, p.region_name].filter(Boolean).join(" · ")}</span>
-                </span>
-              </Link>
-              <span className="justify-self-end">{session && <FollowButton type="profile" id={p.id} following={p.following} />}</span>
-              {p.resp.length > 0 && (
-                <div className="col-span-2 flex flex-wrap items-center gap-1.5">
-                  {p.resp.slice(0, 3).map((r) => <Link key={r.id} href={`/responsible?id=${r.id}`} className="bg-ink px-1.5 py-0.5 text-xs font-bold text-on-ink no-underline">{t("responsibleTag", { title: r.title })}</Link>)}
-                </div>
-              )}
-              {(p.offers.length > 0 || p.needs.length > 0) && (
-                <div className="col-span-2 flex flex-wrap items-center gap-1.5 md:col-span-1 md:col-start-1">
-                  {p.offers.length > 0 && <span className="text-[13px] text-muted">{t("offers")}</span>}
-                  {p.offers.slice(0, 3).map((x) => <span key={`o${x}`} className={tag}>#{x}</span>)}
-                  {p.needs.length > 0 && <span className={`text-[13px] text-muted ${p.offers.length ? "ml-2" : ""}`}>{t("needs")}</span>}
-                  {p.needs.slice(0, 2).map((x) => <span key={`n${x}`} className={tag}>#{x}</span>)}
-                </div>
-              )}
-            </div>
-          ))}
-          <span className="pt-3 text-sm text-muted">{t("followPrivate")}</span>
-        </div>
-      )}
-
+      {/* Each row opens next to the list and keeps the filters. */}
+      <div className="-mx-4 flex flex-col">
+        {(data.initiatives ?? []).map((it) => row(`/community/groups/i/${it.id}`, it.id, it.title, [it.region_name, t("supporters", { n: it.support_count })].filter(Boolean).join(" · "), { name: it.title, group: true }))}
+        {(data.groups ?? []).map((g) => row(`/community/groups/${g.slug}`, g.slug, g.name, `${t("groupMeta", { n: g.member_count, place: g.region_name ?? "–" })}`, { name: g.name, group: true }))}
+        {(data.people ?? []).map((p) => row(`/community/people/${p.id}`, p.id, p.display_name,
+          [p.resp.length ? t("responsibleTag", { title: p.resp[0].title }) : null, p.headline, p.region_name].filter(Boolean).join(" · "), { name: p.display_name, seed: p.avatar_seed, path: p.avatar_path }))}
+      </div>
     </>
   );
 }

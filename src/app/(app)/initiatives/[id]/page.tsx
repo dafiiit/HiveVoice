@@ -43,8 +43,11 @@ export async function generateMetadata({ params }: PageProps<"/initiatives/[id]"
 }
 
 export default async function InitiativePage({ params, searchParams }: PageProps<"/initiatives/[id]">) {
-  const { id } = await params;
-  const sp = await searchParams;
+  return <InitiativeView id={(await params).id} sp={await searchParams} base={`/initiatives/${(await params).id}`} />;
+}
+
+/** One initiative. `base`: its address; `embedded`: next to a list, side column below the content, no back link. */
+export async function InitiativeView({ id, sp, base, embedded = false }: { id: string; sp: Record<string, string | string[] | undefined>; base: string; embedded?: boolean }) {
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const active = (TABS as readonly string[]).includes(String(sp.tab)) ? (sp.tab as (typeof TABS)[number]) : "about";
   const easy = sp.easy === "1";
@@ -55,7 +58,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
   const tl = await getTranslations("levels");
   const tr = await getTranslations("inirights");
   const locale = await getLocale();
-  const path = `/initiatives/${id}`;
+  const path = base;
 
   // Close due ballots lazily; the scheduler does the same every five minutes.
   await sql`select app.tick()`;
@@ -195,8 +198,8 @@ export default async function InitiativePage({ params, searchParams }: PageProps
   );
 
   return (
-    <Page aside={aside}>
-        <BackLink href="/community/groups?kind=initiatives" label={t("explore")} />
+    <Page aside={embedded ? undefined : aside}>
+        {!embedded && <BackLink href="/community/groups?kind=initiatives" label={t("explore")} />}
         <Cover seed={ini.cover_seed} src={ini.cover_path} ratio="21 / 9" />
         <div className="flex flex-wrap items-center gap-1.5">
           <span className={tag}>{ini.region_name} · {tl(ini.region_level as "municipality")}</span>
@@ -348,6 +351,7 @@ export default async function InitiativePage({ params, searchParams }: PageProps
             })}
           </section>
         )}
+      {embedded && aside}
     </Page>
   );
 }

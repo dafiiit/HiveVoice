@@ -1,6 +1,6 @@
 "use client";
 import { useDeferredValue, useEffect, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lockResource, releaseResource, saveNote, suggestChange } from "@/lib/actions/links";
 import { Markdown } from "../Markdown";
@@ -23,6 +23,9 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
   const tl = useTranslations("links");
   const tc = useTranslations("common");
   const router = useRouter();
+  // Inside Ich the document opens next to its list, elsewhere on its own page.
+  const here = usePathname();
+  const docHref = (id: string) => (here.startsWith("/me/") ? `/me/notes/${id}` : `/links/${id}`);
   const editing = !!initial.id;
   const [title, setTitle] = useState(initial.title);
   const [description, setDescription] = useState(initial.description);
@@ -78,14 +81,14 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
     if (suggesting) {
       const sent = await suggestChange(initial.id!, { title, description, body, note: changeNote });
       if (!sent.ok) return setError(t.has(`errors.${sent.error}`) ? t(`errors.${sent.error}` as "errors.invalid") : tc(`errors.${sent.error}` as "errors.unknown"));
-      router.push(`/links/${initial.id}?suggested=1`);
+      router.push(`${docHref(initial.id ?? "")}?suggested=1`);
       router.refresh();
       return;
     }
     const visibility = !editing ? access.visibility : undefined;
     const res = await saveNote({ id: initial.id, title, description, body, tags, groupId: groupId || null, note: changeNote, visibility, license: !editing && access.visibility === "public" ? access.license : undefined });
     if (!res.ok) return setError(t.has(`errors.${res.error}`) ? t(`errors.${res.error}` as "errors.invalid") : tc(`errors.${res.error}` as "errors.unknown"));
-    router.push(`/links/${res.data}`);
+    router.push(docHref(res.data));
     router.refresh();
   });
 
@@ -147,7 +150,7 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         <button type="button" disabled={pending || title.trim().length < 3 || !body.trim() || (suggesting && changeNote.trim().length < 5) || (!!lockedBy && !suggesting)} onClick={save} className={btn.primary}>
           {pending ? t("saving") : suggesting ? td("suggestSend") : editing ? t("save") : t("publishNote")}
         </button>
-        {editing && <button type="button" onClick={() => router.push(`/links/${initial.id}`)} className={btn.secondary}>{t("cancel")}</button>}
+        {editing && <button type="button" onClick={() => router.push(docHref(initial.id ?? ""))} className={btn.secondary}>{t("cancel")}</button>}
       </div>
     </div>
   );

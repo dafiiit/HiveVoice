@@ -68,5 +68,10 @@
   "emptyUploads": "Noch nichts hochgeladen. Dateien, Fotos, PDFs und Links landen hier.",
   "newNoteLead": "In Markdown, mit Versionen. Erst nur für dich, teilen kannst du später.",
   "uploadTitle": "Hochladen",
-  "uploadLead": "Eine Datei (Foto, PDF …) oder einen Link. Erst nur für dich."
+  "uploadLead": "Eine Datei (Foto, PDF …) oder einen Link. Erst nur für dich.",
+  "search": "Durchsuchen",
+  "pick": "Wähle links etwas aus, dann öffnet es sich hier.",
+  "newListing": "Anliegen",
+  "newProject": "Initiative",
+  "paused": "pausiert"
 }

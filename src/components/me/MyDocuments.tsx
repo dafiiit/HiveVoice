@@ -13,9 +13,10 @@ export type SharedRow = { id: string; title: string; level: string; owner: strin
 export type IncomingTransfer = { id: string; title: string; by: string };
 
 /** Everything one wrote or shared, what others shared with one, hand-overs, and the trash. */
-export function MyDocuments({ docs, shared, incoming, trashDays, usage, title, empty }: {
+export function MyDocuments({ docs, shared, incoming, trashDays, usage, title, empty, hideMine = false }: {
   docs: DocRow[]; shared: SharedRow[]; incoming: IncomingTransfer[]; trashDays: number;
   /** Storage used, shown with the uploads. */ usage: { used: string; limit: string } | null; title?: string; empty?: string;
+  /** Inside Ich the list in the middle already shows them: only shared, hand-overs and trash here. */ hideMine?: boolean;
 }) {
   const t = useTranslations("docrights");
   const tc = useTranslations("common");
@@ -40,7 +41,7 @@ export function MyDocuments({ docs, shared, incoming, trashDays, usage, title, e
           </span>
         </div>
       ))}
-      <section className="flex flex-col">
+      {!hideMine && <section className="flex flex-col">
         <h2 className="m-0 border-b-2 border-ink pb-2 text-lg font-bold">{title ?? t("docs.mine")}</h2>
         {live.length === 0 && <p className="mt-3 text-muted">{empty ?? t("docs.empty")}</p>}
         {live.map((d) => (
@@ -49,7 +50,7 @@ export function MyDocuments({ docs, shared, incoming, trashDays, usage, title, e
             <span className="text-sm text-muted">{t(`visibility.${d.visibility}` as "visibility.me")}{d.license ? ` · ${t(`license.${d.license}` as "license.cc_by")}` : ""}{d.origin === "note" ? ` · ${t("docs.version", { n: d.version_no })}` : ""} · {relTime(d.updated_at, locale)}</span>
           </Link>
         ))}
-      </section>
+      </section>}
       {shared.length > 0 && (
         <section className="flex flex-col">
           <h2 className="m-0 border-b-2 border-ink pb-2 text-lg font-bold">{t("docs.shared")}</h2>

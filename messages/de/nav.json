@@ -54,5 +54,7 @@
     "principles": "Grundsätze",
     "signOut": "Abmelden",
     "admin": "Verwaltung (Admin)"
-  }
+  },
+  "fold": "Seitenleiste einklappen",
+  "unfold": "Seitenleiste ausklappen"
 }

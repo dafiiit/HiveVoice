@@ -76,7 +76,7 @@ test.describe("offline", () => {
     try {
       await login(page);
       await page.goto("/friends?f=chats");
-      await page.getByRole("link", { name: /Felix Wolf/ }).first().click();
+      await page.getByRole("link", { name: /Mia Schuster/ }).first().click();
       await expect(page.getByRole("log")).toBeVisible();
       const url = page.url();
       // The first visit installs the service worker; the next load is controlled by it and keeps the page.

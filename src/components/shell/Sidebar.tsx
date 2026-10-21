@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
 import { AreaIcon } from "../ui/Logo";
-import { IconBoard, IconChat, IconFlag, IconHands, IconHome, IconList, IconMail, IconNote, IconSidebar, IconUpload, IconUser, IconUsers } from "../ui/Icons";
+import { IconBoard, IconChat, IconFlag, IconHands, IconHome, IconList, IconMail, IconNote, IconSidebar, IconUpload, IconUser, IconUsers, IconInbox } from "../ui/Icons";
 import { AREAS, areaOf, type Area } from "./areas";
 
 const watchWidth = (cb: () => void) => { window.addEventListener("resize", cb); return () => window.removeEventListener("resize", cb); };
@@ -48,7 +48,7 @@ function Bar({ folded, signedIn, badges, query, onToggle }: {
   const path = usePathname();
   // Pages outside the three areas (Neu, settings) keep the area one came from.
   const here = areaOf(path);
-  const [last, setLast] = useState<Area>(here ?? "friends");
+  const [last, setLast] = useState<Area>(here ?? (signedIn ? "friends" : "community"));
   if (here && here !== last) setLast(here);
   const area = here ?? last;
 
@@ -73,6 +73,9 @@ function Bar({ folded, signedIn, badges, query, onToggle }: {
       { href: "/me/notes", label: tm("notes"), icon: IconNote },
       { href: "/me/uploads", label: tm("uploads"), icon: IconUpload },
       { href: "/me/initiatives", label: tm("projects"), icon: IconFlag },
+      // Account pages belong to Ich too, so the sidebar always says where one is.
+      { href: "/notifications", label: t("notifications"), icon: IconInbox },
+      { href: "/settings", label: t("settings"), icon: IconUser },
     ],
   };
   const list = sections[area];

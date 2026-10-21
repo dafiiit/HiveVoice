@@ -11,6 +11,8 @@ import { btn } from "../ui/styles";
 import { LanguageMenu } from "../LanguageMenu";
 import { QuickSearch } from "./QuickSearch";
 import { AccountMenu } from "./AccountMenu";
+import { ActiveInView } from "./ActiveInView";
+import { Suspense } from "react";
 
 export async function Shell({ session, children }: { session: Session | null; children: React.ReactNode }) {
   const t = await getTranslations("nav");
@@ -66,9 +68,9 @@ export async function Shell({ session, children }: { session: Session | null; ch
       </header>
       <div className="flex min-h-0 flex-1">
         <Sidebar folded={fold === "folded" ? true : fold === "open" ? false : null} signedIn={!!session} badges={badges} />
-        <main id="main" className="min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
+        <main id="main" className="pane-titles min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">{children}<Suspense><ActiveInView /></Suspense></main>
       </div>
-      <BottomNav items={items} newLabel={t("new")} label={t("main")} />
+      <BottomNav items={items} newLabel={t("new")} label={t("main")} signedIn={!!session} />
     </div>
   );
 }

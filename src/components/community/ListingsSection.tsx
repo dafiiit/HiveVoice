@@ -31,11 +31,11 @@ export async function ListingsSection({ sp, id }: { sp: SP; id?: string }) {
     <Split open={!!id || mapOpen}
       list={
         <div className="flex flex-col gap-3 px-4 pt-4">
-          <div className="flex items-center justify-between gap-2">
-            <h1 className="m-0 text-[22px] font-bold leading-tight">{t("communityTitle")}</h1>
+          <div className="flex items-center justify-end gap-2 md:justify-between">
+            <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{t("communityTitle")}</h1>
             <span className="flex items-center gap-2">
             <Link href={mapHref} className={`${btn.secondarySm} md:hidden`}>{t("map")}</Link>
-            <Link href={session ? "/me/listings/new" : "/login?next=/me/listings/new"} className={btn.primarySm} title={t("create")}><IconPlus size={14} /> <span className="max-lg:sr-only">{t("create")}</span></Link>
+            <Link href={session ? "/me/listings/new" : "/login?next=/me/listings/new"} className={btn.primarySm} title={t("create")}><IconPlus size={14} /> {t("create")}</Link>
             </span>
           </div>
           <div role="tablist" aria-label={t("view")} className="flex border-b border-line">

@@ -14,7 +14,7 @@ test.describe("motion", () => {
     test.skip(info.project.name !== "desktop", "writes data, and both projects would race on the same post");
     await login(page);
     await page.goto("/community");
-    const post = page.locator("article", { hasText: "Hanna Vogt" }).first();
+    const post = page.locator("article", { hasText: "Mia Schuster" }).first();
     const up = post.getByRole("button", { name: "Daumen hoch" });
     const count = post.locator(".roll > span").first();
     await expect(up).toBeVisible();
@@ -49,7 +49,7 @@ test.describe("motion", () => {
     try {
       await login(page);
       await page.goto("/friends?f=chats");
-      await page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first().click();
+      await page.getByRole("link", { name: /Mia Schuster/ }).first().click();
       const log = page.getByRole("log");
       await expect(log).toBeVisible();
       await expect(log.locator(".bubble-in")).toHaveCount(0);

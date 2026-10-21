@@ -70,13 +70,13 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
   });
 
   return (
-    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_340px]">
+    <div className="grid grid-cols-1 gap-10 @4xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-8">
         <ol aria-label={t("steps")} className="m-0 grid list-none gap-1 p-0" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
           {steps.map((s, i) => (
             <li key={s} aria-current={i === step ? "step" : undefined} className="flex flex-col gap-2">
               <div className="flex h-1.5 flex-col justify-center"><div className={i === step ? "h-1.5 bg-red" : i < step ? "h-1.5 bg-ink" : "h-px bg-ink"} /></div>
-              <span className={`text-[13px] text-muted ${i === step ? "font-bold" : ""}`}>{t(`stepNames.${s}`)}</span>
+              <span className={`text-[13px] text-muted ${i === step ? "font-bold max-sm:whitespace-nowrap" : "max-sm:invisible"}`}>{t(`stepNames.${s}`)}</span>
             </li>
           ))}
         </ol>
@@ -176,7 +176,7 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
           <article className="flex flex-col gap-2 border border-line bg-surface p-4">
             <Cover seed={2} ratio="16 / 9" />
             <span className="text-sm font-bold">{region?.name ?? "–"}</span>
-            <strong className="text-xl leading-tight">{title || t("titlePlaceholder")}</strong>
+            <strong className={`text-xl leading-tight ${title ? "" : "text-muted"}`}>{title || t("previewTitle")}</strong>
             {summary && <span className="text-sm">{summary}</span>}
             {(addressee || addresseeText) && <span className="text-sm">{t("to", { who: addressee?.label ?? addresseeText })}</span>}
           </article>

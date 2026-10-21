@@ -83,13 +83,19 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
       : tx`(l.region_id = any(${regions}::uuid[])) desc, l.created_at desc`;
     const cards = view === "list" ? await tx<ListingCard[]>`
       select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where ${where(tx)} ${me ? tx`and l.owner_id <> ${me}` : tx``} order by ${order} limit 60` : [];
+    // One square per postal code (its centre, never an address); listings without one sit at the centre of their place.
     const points = view === "map" ? await tx<MapPoint[]>`
-      select r.id, r.name, r.lat, r.lon, count(*)::int as n,
+      select r.id, case when pp.code is not null then pp.code || ' ' || r.name else r.name end as name,
+             coalesce(pp.lat, r.lat) as lat, coalesce(pp.lon, r.lon) as lon, count(*)::int as n,
              (array_agg(json_build_object('id', l.id, 'title', l.title, 'kind', l.kind) order by l.created_at desc))[1:6] as items
-      from ${listingCardFrom(tx)} where ${where(tx)} and r.lat is not null group by r.id, r.name, r.lat, r.lon` : [];
-    const [{ total }] = await tx<{ total: number }[]>`select count(*)::int as total from ${listingCardFrom(tx)} where ${where(tx)}`;
+      from ${listingCardFrom(tx)} left join public.postal_points pp on pp.code = l.postal_code
+      where ${where(tx)} and coalesce(pp.lat, r.lat) is not null
+      group by r.id, r.name, pp.code, pp.lat, pp.lon, r.lat, r.lon` : [];
+    // Counted exactly like the list: same side, the viewer's own listings left out (they live under Ich).
+    const notMine = me ? tx`and l.owner_id <> ${me}` : tx``;
+    const [{ total }] = await tx<{ total: number }[]>`select count(*)::int as total from ${listingCardFrom(tx)} where ${where(tx)} ${notMine}`;
     const counts = await tx<{ category: string; n: number }[]>`
-      select l.category, count(*)::int as n from public.listings l where l.kind = ${side} and l.status = 'active' group by l.category`;
+      select l.category, count(*)::int as n from public.listings l where l.kind = ${side} and l.status = 'active' ${notMine} group by l.category`;
     const sentTo = me ? (await tx<{ listing_id: string }[]>`select listing_id from public.contact_requests where from_profile_id = ${me} and status in ('pending', 'accepted')`).map((r) => r.listing_id) : [];
     const own = me ? await tx<{ id: string; title: string }[]>`
       select id, title from public.listings where owner_id = ${me} and kind <> ${side} and status = 'active' order by created_at desc limit 20` : [];
@@ -206,7 +212,7 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
 
       {layout === "cards" && view === "list" && (data.cards.length === 0
         ? <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>
-        : <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        : <div className="grid gap-4 @2xl:grid-cols-2 @5xl:grid-cols-3">
             {data.cards.map((c) => <ListingCardView key={c.id} c={c} signedIn={!!session} sent={data.sentTo.includes(c.id)} mine={data.own} />)}
           </div>)}
 

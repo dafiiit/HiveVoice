@@ -18,7 +18,7 @@ type Level = (typeof LEVELS)[number];
  * Gemeinschaft → Pinnwand: one stream for everyone on the platform, filtered by hand to a place
  * (neighbourhood, town, state, country) and a tag. The automatic filter "passt zu mir" comes later (TASKS.md).
  */
-export async function Pinboard({ sp }: { sp: Record<string, string | string[] | undefined> }) {
+export async function Pinboard({ sp, openId }: { sp: Record<string, string | string[] | undefined>; openId?: string | null }) {
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
@@ -37,7 +37,10 @@ export async function Pinboard({ sp }: { sp: Record<string, string | string[] | 
 
   const data = await asViewer(viewer, async (tx) => {
     const search = [tagParam ? `#${tagParam}` : "", q].filter(Boolean).join(" ");
-    const posts = area?.region ? await loadPosts(tx, { underRegionId: area.region.id, search }, me, { sort: "new" }) : [];
+    const feed = area?.region ? await loadPosts(tx, { underRegionId: area.region.id, search }, me, { sort: "new" }) : [];
+    // A post opened from a notification or a link: open in the feed; if it is not in this view, on top of it.
+    const extra = openId && /^[0-9a-f-]{36}$/.test(openId) && !feed.some((p) => p.id === openId) ? await loadPosts(tx, { postId: openId }, me) : [];
+    const posts = [...extra, ...feed];
     const tags = area?.region ? await marketTags(tx, area.region.id, 10) : [];
     return { posts, tags };
   });
@@ -49,49 +52,53 @@ export async function Pinboard({ sp }: { sp: Record<string, string | string[] | 
   };
   const filtered = !!(tagParam || q || (area && area.level !== "municipality"));
 
+  // One line per filter: the label in a fixed column, then the choices, all 36 px high.
+  const row = "grid grid-cols-[3.5rem_minmax(0,1fr)] items-start gap-x-3 [&>span]:pt-2";
   return (
     <div className="flex flex-col gap-4">
       <AutoRefresh seconds={30} />
       {!area ? (
         <div className="flex flex-wrap items-center gap-3">
           <p className="m-0 text-muted">{t("noPlace")}</p>
-          <PlaceMenu signedIn={!!session} place={null} />
+          <PlaceMenu signedIn={!!session} place={null} size="sm" />
         </div>
       ) : (
-        <div className="flex flex-col gap-3 border-b border-line pb-4">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex flex-col gap-2">
+          <div className={row}>
             <span className="text-[13px] font-bold">{t("where")}</span>
-            <div role="group" aria-label={t("where")} className="flex gap-1.5 max-md:-mx-4 max-md:w-[calc(100%+2rem)] max-md:overflow-x-auto max-md:px-4 md:flex-wrap">
+            <div role="group" aria-label={t("where")} className="flex min-w-0 flex-wrap items-center gap-1.5">
               {steps.map((s) => (
                 <Link key={s.level} href={href({ r: s.level })} aria-pressed={area.level === s.level} className={`${chip(area.level === s.level)} flex-none`}>
                   {t(`levels.${s.level}`)}<span className="font-normal">&nbsp;· {s.region!.name}</span>
                 </Link>
               ))}
+              <PlaceMenu size="sm" className="flex-none" signedIn={!!session} place={place ? { id: place.id, name: place.name, level: place.level, chain: place.chain } : null} />
             </div>
-            <PlaceMenu signedIn={!!session} place={place ? { id: place.id, name: place.name, level: place.level, chain: place.chain } : null} />
           </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className={row}>
             <span className="text-[13px] font-bold">{t("tag")}</span>
-            <div role="group" aria-label={t("tag")} className="flex min-w-0 flex-wrap gap-1.5">
-              <Link href={href({ tag: "" })} aria-pressed={!tagParam} className={chip(!tagParam)}>{t("allTags")}</Link>
+            <div role="group" aria-label={t("tag")} className="flex min-w-0 flex-wrap items-center gap-1.5">
+              <Link href={href({ tag: "" })} aria-pressed={!tagParam} className={`${chip(!tagParam)} flex-none`}>{t("allTags")}</Link>
               {Array.from(new Set([...(tagParam ? [tagParam] : []), ...data.tags])).map((x) => (
-                <Link key={x} href={href({ tag: tagParam === x ? "" : x })} aria-pressed={tagParam === x} className={chip(tagParam === x)}>#{x}</Link>
+                <Link key={x} href={href({ tag: tagParam === x ? "" : x })} aria-pressed={tagParam === x} className={`${chip(tagParam === x)} flex-none`}>#{x}</Link>
               ))}
             </div>
-            <form action="/community" role="search" className="flex min-w-[200px] flex-1 gap-2">
-              {area.level !== "municipality" && <input type="hidden" name="r" value={area.level} />}
-              {tagParam && <input type="hidden" name="tag" value={tagParam} />}
-              <SearchField className="flex-1" name="q" defaultValue={q} label={t("search")} placeholder={t("search")} />
-            </form>
           </div>
         </div>
       )}
+      {/* Search and writing are the two fields of the board: same height (44 px), same width. */}
+      {area && (
+        <form action="/community" role="search" className="flex">
+          {area.level !== "municipality" && <input type="hidden" name="r" value={area.level} />}
+          {tagParam && <input type="hidden" name="tag" value={tagParam} />}
+          <SearchField box="md" className="flex-1" name="q" defaultValue={q} label={t("search")} placeholder={t("search")} />
+        </form>
+      )}
       {session && home ? (
-        <Composer ctx={{ regionId: home.id }} path="/community" placeholder={t("placeholder", { place: home.name })}
-          viewerName={session.profile.display_name} viewerSeed={session.profile.avatar_seed} viewerPath={session.profile.avatar_path} />
+        <Composer ctx={{ regionId: home.id }} path="/community" placeholder={t("placeholder", { place: area?.region?.name ?? home.name })} />
       ) : !session && <p className="m-0 text-sm text-muted">{t("readOnly")} <Link href="/login?next=/community" className="font-bold text-ink underline">{t("signIn")}</Link></p>}
       <PostList posts={data.posts} path="/community" canWrite={!!session?.profile.verified} viewerId={me ?? undefined}
-        empty={filtered ? t("none") : t("empty")} openBase={href({})} />
+        empty={filtered ? t("none") : session ? t("empty") : t("emptyGuest")} openId={openId} />
     </div>
   );
 }

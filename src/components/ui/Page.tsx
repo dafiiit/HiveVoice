@@ -10,15 +10,18 @@ const frame = "px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-10";
  * With an `aside`, the content gets a column on the right on wide screens.
  */
 export function Page({ width = "wide", aside, children, className = "" }: { width?: "narrow" | "wide"; aside?: ReactNode; children: ReactNode; className?: string }) {
+  // Every page is a container: grids inside follow the room the page has (a pane next to a list is narrower than the screen).
   if (aside) {
     return (
-      <div className={`grid gap-5 md:gap-10 xl:grid-cols-[minmax(0,1fr)_320px] ${frame} ${className}`}>
-        <div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${width === "narrow" ? "max-w-[720px]" : ""}`}>{children}</div>
-        <aside className="flex min-w-0 flex-col gap-6">{aside}</aside>
+      <div className="@container">
+        <div className={`grid gap-5 md:gap-10 @5xl:grid-cols-[minmax(0,1fr)_320px] ${frame} ${className}`}>
+          <div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${width === "narrow" ? "max-w-[720px]" : ""}`}>{children}</div>
+          <aside className="flex min-w-0 flex-col gap-6">{aside}</aside>
+        </div>
       </div>
     );
   }
-  return <div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${frame} ${width === "narrow" ? "max-w-[720px]" : ""} ${className}`}>{children}</div>;
+  return <div className="@container"><div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${frame} ${width === "narrow" ? "max-w-[720px]" : ""} ${className}`}>{children}</div></div>;
 }
 
 /** "← Area" above a detail page: one link back to the area the thing belongs to. */

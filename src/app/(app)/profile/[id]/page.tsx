@@ -95,8 +95,8 @@ export async function ProfileView({ id, embedded = false }: { id: string; embedd
   return (
     <Page aside={embedded ? undefined : aside}>
         {!embedded && <BackLink href="/community/people" label={te("kinds.people")} />}
-        <section className="flex flex-wrap items-start gap-6">
-          <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={120} />
+        <section className="flex items-start gap-4">
+          <Avatar name={p.display_name} seed={p.avatar_seed} path={p.avatar_path} size={72} />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <h1 className="display m-0 flex items-center gap-3">{p.display_name}{p.display_mode === "real" && <span aria-label={tc("verified")}><IconCheck size={28} /></span>}</h1>
             {p.display_mode === "alias" && <span className="text-sm text-muted">{t("alias")}</span>}

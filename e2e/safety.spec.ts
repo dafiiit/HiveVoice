@@ -9,9 +9,9 @@ async function exec(statement: string) {
   const sql = postgres(migrator!, { max: 1, ssl: migrator!.includes("localhost") ? false : "require" });
   try { await sql`select private.exec(${statement})`; } finally { await sql.end(); }
 }
-async function openFelix(page: Page) {
+async function openMia(page: Page) {
   await page.goto("/friends?f=chats");
-  await page.getByRole("link", { name: /Felix Wolf/ }).first().click();
+  await page.getByRole("link", { name: /Mia Schuster/ }).first().click();
   await expect(page.getByRole("log")).toBeVisible();
 }
 
@@ -24,7 +24,7 @@ test.describe("safety", () => {
     const marker = `Bearbeitungstest ${Date.now()}`;
     try {
       await login(page);
-      await openFelix(page);
+      await openMia(page);
       await page.getByLabel("Nachricht schreiben").fill(marker);
       await page.getByRole("button", { name: "Senden", exact: true }).click();
       const log = page.getByRole("log");
@@ -51,7 +51,7 @@ test.describe("safety", () => {
     test.skip(info.project.name !== "desktop", "writes data");
     try {
       await login(page);
-      await openFelix(page);
+      await openMia(page);
       await page.getByText("Mehr", { exact: true }).click();
       const menu = page.getByRole("group", { name: "Mehr" });
       // A run that stopped half way may have left the chat muted.
@@ -63,7 +63,7 @@ test.describe("safety", () => {
       await expect(menu.getByText(/Du hast 7 Tage vorgeschlagen/)).toBeVisible();
       await menu.getByRole("button", { name: "Aus", exact: true }).click();
       await menu.getByRole("button", { name: /blockieren$/ }).click();
-      await expect(page.getByText(/Du hast Felix blockiert/)).toBeVisible();
+      await expect(page.getByText(/Du hast Mia blockiert/)).toBeVisible();
     } finally {
       // Put everything back, whatever happened.
       await page.goto("/settings?tab=settings");

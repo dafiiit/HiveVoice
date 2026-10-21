@@ -56,5 +56,7 @@
     "admin": "Admin view"
   },
   "fold": "Fold the sidebar",
-  "unfold": "Unfold the sidebar"
+  "unfold": "Unfold the sidebar",
+  "notifications": "Notifications",
+  "settings": "Settings"
 }

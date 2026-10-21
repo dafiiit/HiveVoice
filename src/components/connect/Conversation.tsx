@@ -258,8 +258,12 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
                     {mine && !m.sending && !m.deleted_at && now - ms(m.created_at) < 15 * 60000 && editing?.id !== m.id && (
                       <button type="button" onClick={() => setEditing({ id: m.id, text: m.body })} className={`${btn.linkMuted} text-xs`}>{ts("edit")}</button>
                     )}
-                    {!m.sending && !m.deleted_at && deleting !== m.id && (
+                    {/* Own messages can be deleted (for me or for everyone); someone else's can only be hidden for me. */}
+                    {mine && !m.sending && !m.deleted_at && deleting !== m.id && (
                       <button type="button" onClick={() => setDeleting(m.id)} className={`${btn.linkMuted} text-xs`}>{ts("delete")}</button>
+                    )}
+                    {!mine && !m.sending && !m.deleted_at && (
+                      <button type="button" onClick={() => void remove(m.id, false)} className={`${btn.linkMuted} text-xs`}>{ts("hide")}</button>
                     )}
                     {deleting === m.id && (
                       <span className="flex items-center gap-2">

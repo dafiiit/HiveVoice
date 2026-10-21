@@ -104,20 +104,26 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
 
   return (
     <Page>
-      <section className="flex flex-wrap items-start gap-6">
-        <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={160} />
-        <div className="flex min-w-[260px] flex-1 basis-[260px] flex-col gap-2">
-          <h1 className="display m-0 flex flex-wrap items-center gap-x-3 break-words">{session.profile.display_name}{session.profile.verified && <span className="flex-none" aria-label={t("verified")} title={t("verified")}><IconCheck size={28} /></span>}</h1>
-          <span>{t("stats", { groups: d.p.group_count, helped: d.p.helped_count })}</span>
-          <span className="text-muted">{d.places}</span>
+      {/* A compact head: picture, name, one line; the tabs right under it. Photo and name are changed in the profile tab. */}
+      {active === "profile" && <section className="flex items-center gap-4">
+        <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={56} />
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <h1 className="display m-0 flex flex-wrap items-center gap-x-2 break-words">{session.profile.display_name}{session.profile.verified && <span className="flex-none" aria-label={t("verified")} title={t("verified")}><IconCheck size={20} /></span>}</h1>
+          <span className="text-sm text-muted">{[t("stats", { groups: d.p.group_count, helped: d.p.helped_count }), d.places].filter(Boolean).join(" · ")}</span>
+        </div>
+      </section>}
+      {active !== "profile" && <h1 className="display m-0">{t(`tabs.${active}`)}</h1>}
+      <Tabs label={t("sections")} items={TABS.map((k) => ({ href: `/settings${k === "profile" ? "" : `?tab=${k}`}`, label: t(`tabs.${k}`), on: active === k }))} />
+      {active === "profile" && (
+        <section className="flex flex-col gap-3">
+          <AvatarUpload name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={96} />
           <DisplayToggle mode={d.p.display_mode} realName={session.profile.real_name ?? ""} alias={d.p.alias ?? ""} headline={d.p.headline ?? ""} bio={d.p.bio ?? ""} />
           <span className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
             <Link href={`/profile/${me}`} className="text-ink underline">{t("publicProfile")}</Link>
             <Link href="/rights" className="text-ink underline">{tr("title")}</Link>
           </span>
-        </div>
-      </section>
-      <Tabs label={t("sections")} items={TABS.map((k) => ({ href: `/settings${k === "profile" ? "" : `?tab=${k}`}`, label: t(`tabs.${k}`), on: active === k }))} />
+        </section>
+      )}
 
       {active === "profile" && (
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">

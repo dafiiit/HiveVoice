@@ -10,7 +10,6 @@ import { IconCheck } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { ImagePicker } from "../ImageUpload";
 import { PlaceInput } from "../PlaceInput";
-import { Carousel } from "../ui/Carousel";
 import { ShareKnowledge } from "../links/ShareKnowledge";
 import { imageUrl } from "@/lib/images";
 import { btn, chip, field, segment, segments } from "../ui/styles";
@@ -105,7 +104,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
   const edOpen = open || title.trim().length > 0;
 
   return (
-    <section aria-label={t(give ? "newOffer" : "newNeed")} className="flex flex-col gap-4 border border-line bg-surface p-5">
+    <section aria-label={t(give ? "newOffer" : "newNeed")} className="@container flex flex-col gap-4 border border-line bg-surface p-5">
       {/* One switch: offering or looking. Documents and links are part of the toolbox (Ich → Dokumente). */}
       <div role="radiogroup" aria-label={t("kindLabel")} className={`${segments} flex-wrap`}>
         {(["offer", "need"] as const).map((k) => {
@@ -131,30 +130,30 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
           <Link href={`/listings/${done.id}#passt`} className="text-ink underline">{t("show")}</Link>
         </p>
       )}
-      <div className="flex flex-col gap-3 md:flex-row">
+      <div className="flex flex-col gap-3 @lg:flex-row">
         <input value={title} onChange={(e) => { setTitle(e.target.value); setDone(null); }} aria-label={t(give ? "titleOffer" : "titleNeed")}
-          placeholder={t(give ? "placeholderOffer" : "placeholderNeed")} className={`${field.input} md:flex-1`} />
+          placeholder={t(give ? "placeholderOffer" : "placeholderNeed")} className={`${field.input} @lg:flex-1`} />
         {!edOpen && <button type="button" onClick={() => setOpen(true)} className={btn.primary}>{t(give ? "startOffer" : "startNeed")}</button>}
       </div>
       {!edOpen && ideas[kind].length > 0 && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] text-muted">{tt("ideas")}</span>
-          <Carousel items={ideas[kind]} keyOf={(i) => i} loop label={tt("ideas")}
-            render={(i, hidden) => (
-              <button type="button" tabIndex={hidden ? -1 : 0} aria-hidden={hidden || undefined} onClick={() => { setTitle(i); setOpen(true); }}
-                className={`${chip(false)} whitespace-nowrap`}>{i}</button>
-            )} />
+          <div role="group" aria-label={tt("ideas")} className="flex flex-wrap gap-1.5">
+            {ideas[kind].slice(0, 10).map((i) => (
+              <button key={i} type="button" onClick={() => { setTitle(i); setOpen(true); }} className={`${chip(false)} whitespace-nowrap`}>{i}</button>
+            ))}
+          </div>
         </div>
       )}
       {edOpen && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid grid-cols-1 gap-6 @4xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex flex-col gap-4">
             <CategoryPicker value={cat} guess={guess} onChange={(c) => { setCategory(c); setCatTouched(true); }} />
             <AttrFields category={cat} value={attrs} onChange={setAttrs} />
             <label className={field.label}>{t("description")}
               <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t(give ? "descOffer" : "descNeed")} className={field.textarea} />
             </label>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
               <PlaceInput label={t("location")} value={location} onChange={setLocation} onPlace={(p) => setPlaceId(p?.id ?? null)} hint={t("locationHint")} />
               <label className={field.label}>{t("schedule")}<input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder={t("schedulePlaceholder")} className={field.input} /></label>
               <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={() => setRecurring(!recurring)} className="h-5 w-5 accent-[var(--ink)]" />{t("recurring")}</label>

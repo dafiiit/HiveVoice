@@ -208,7 +208,7 @@ export async function InitiativeView({ id, sp, base, embedded = false }: { id: s
   return (
     <Page aside={embedded ? undefined : aside}>
         {!embedded && <BackLink href="/community/groups?kind=initiatives" label={t("explore")} />}
-        <Cover seed={ini.cover_seed} src={ini.cover_path} ratio="21 / 9" />
+        <Cover seed={ini.cover_seed} src={ini.cover_path} ratio={embedded ? "5 / 1" : "21 / 9"} />
         <div className="flex flex-wrap items-center gap-1.5">
           <span className={tag}>{ini.region_name} · {tl(ini.region_level as "municipality")}</span>
           {data.tags.map((x) => <Link key={x.slug} href={`/community/groups?kind=initiatives&q=${x.slug}`} className={`${tag} text-ink no-underline`}>#{x.slug}</Link>)}

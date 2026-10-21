@@ -1,3 +1,6 @@
+// Dates are shown in the time of the people using the app (the server runs in UTC).
+const TZ = process.env.NEXT_PUBLIC_TIME_ZONE || "Europe/Berlin";
+
 export function relTime(date: Date | string, locale: string, now = new Date()) {
   const d = typeof date === "string" ? new Date(date) : date;
   const diff = (d.getTime() - now.getTime()) / 1000;
@@ -7,15 +10,15 @@ export function relTime(date: Date | string, locale: string, now = new Date()) {
   if (abs < 3600) return rtf.format(Math.round(diff / 60), "minute");
   if (abs < 86400) return rtf.format(Math.round(diff / 3600), "hour");
   if (abs < 86400 * 7) return rtf.format(Math.round(diff / 86400), "day");
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: d.getFullYear() === now.getFullYear() ? undefined : "numeric" }).format(d);
+  return new Intl.DateTimeFormat(locale, { timeZone: TZ, day: "numeric", month: "short", year: d.getFullYear() === now.getFullYear() ? undefined : "numeric" }).format(d);
 }
 
 export function dateLong(date: Date | string, locale: string) {
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", year: "numeric" }).format(new Date(date));
+  return new Intl.DateTimeFormat(locale, { timeZone: TZ, day: "numeric", month: "long", year: "numeric" }).format(new Date(date));
 }
 
 export function dateTime(date: Date | string, locale: string) {
-  return new Intl.DateTimeFormat(locale, { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(date));
+  return new Intl.DateTimeFormat(locale, { timeZone: TZ, day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" }).format(new Date(date));
 }
 
 export function num(n: number, locale: string) {

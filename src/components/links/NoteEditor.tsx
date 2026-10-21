@@ -105,7 +105,7 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         ))}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 @4xl:grid-cols-2">
         <div className={`flex min-w-0 flex-col gap-2 ${view === "write" ? "" : "max-lg:hidden"}`}>
           <div role="toolbar" aria-label={t("toolbar")} className="flex flex-wrap gap-1">
             <Tool label={t("heading")} onClick={() => line("## ")} />

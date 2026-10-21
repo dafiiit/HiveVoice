@@ -2,7 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { addDomain, purgeDemo, removeDomain, setDemoChats, setRegistrationMode, setVerificationMode } from "@/lib/actions/admin";
+import { addDomain, purgeDemo, removeDomain, setDemoVisible, setRegistrationMode, setVerificationMode } from "@/lib/actions/admin";
 import { mintInviteCodes } from "@/lib/actions/growth";
 import { btn, chip, field } from "../ui/styles";
 import { ConfirmAction } from "../ui/Action";
@@ -30,7 +30,7 @@ export function AdminPanel({ o }: { o: Overview }) {
   const regMode = String(o.settings.registration_mode ?? "open");
   const [minted, setMinted] = useState<string[]>([]);
   const tg = useTranslations("growth.admin");
-  const demoChats = o.settings.demo_chats === true;
+  const demoVisible = o.settings.demo_visible !== false;
   const stats: [string, number][] = [["profiles", o.profiles], ["demo_profiles", o.demo_profiles], ["groups", o.groups], ["initiatives", o.initiatives],
     ["listings", o.listings], ["open_ballots", o.open_ballots], ["open_cases", o.open_cases], ["regions", o.regions]];
   return (
@@ -89,10 +89,10 @@ export function AdminPanel({ o }: { o: Overview }) {
         <h2 className="m-0 text-2xl font-bold">{t("demo")}</h2>
         <p className="m-0 max-w-[720px]">{t("demoText", { n: o.demo_profiles })}</p>
         <div className="flex flex-wrap items-center gap-2">
-          <strong>{t("demoChats")}</strong>
-          <button type="button" role="switch" aria-checked={demoChats} disabled={pending} onClick={() => act(() => setDemoChats(!demoChats))} className={chip(demoChats)}>{demoChats ? t("on") : t("off")}</button>
+          <strong>{t("demoVisible")}</strong>
+          <button type="button" role="switch" aria-checked={demoVisible} disabled={pending} onClick={() => act(() => setDemoVisible(!demoVisible))} className={chip(demoVisible)}>{demoVisible ? t("on") : t("off")}</button>
         </div>
-        <p className="m-0 max-w-[720px] text-sm text-muted">{t("demoChatsText")}</p>
+        <p className="m-0 max-w-[720px] text-sm text-muted">{t("demoVisibleText")}</p>
         <ConfirmAction disabled={pending || o.demo_profiles === 0} variant="red" className="self-start" question={t("demoConfirm")} onConfirm={() => act(() => purgeDemo(), t("demoRemoved"))} label={t("demoRemove")} />
       </section>
     </div>

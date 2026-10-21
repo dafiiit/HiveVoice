@@ -116,7 +116,10 @@
     "next": "Scroll forward",
     "add": "Add hashtag",
     "remove": "Remove {tag}",
-    "none": "Nothing chosen yet."
+    "none": "Nothing chosen yet.",
+    "more": "More ideas ({n})",
+    "fewer": "Fewer",
+    "own": "Own tag"
   },
   "lang": {
     "label": "Choose language",

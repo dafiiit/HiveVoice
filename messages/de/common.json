@@ -116,7 +116,10 @@
     "next": "Weiter blättern",
     "add": "Hashtag hinzufügen",
     "remove": "{tag} entfernen",
-    "none": "Noch nichts gewählt."
+    "none": "Noch nichts gewählt.",
+    "more": "Mehr Ideen ({n})",
+    "fewer": "Weniger",
+    "own": "Eigenes Stichwort"
   },
   "lang": {
     "label": "Sprache wählen",

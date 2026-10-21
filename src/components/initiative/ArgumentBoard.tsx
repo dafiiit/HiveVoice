@@ -169,7 +169,7 @@ export function ArgumentBoard({ initiativeId, args, canWrite, viewerId }: { init
         </label>
         <span className="max-w-[520px] text-sm text-muted">{t("bridgeExplained")}</span>
       </div>
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-8 @2xl:grid-cols-2">
         {cols.map((c) => (
           <section key={c.k} aria-label={t(c.k)} className={`${side === c.k ? "flex" : "hidden"} flex-col gap-4 md:flex`}>
             <h2 className="m-0 flex items-center gap-3 text-2xl font-bold">

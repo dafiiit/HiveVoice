@@ -132,3 +132,13 @@ Aus den Anmerkungen zum ersten Stand, verallgemeinert, damit dieselben Fehler ni
 * Keine Erklärtexte unter Listen
 * Formulare und Seiten ohne Spaltenlayout nutzen die ganze Breite (Gruppe gründen: Vorlagen in drei Spalten, Felder in zwei)
 * Rechte überall gleich: Teilen → Zugriff mit Lesen und Bearbeiten getrennt (nur ich, bestimmte Personen, Link, öffentlich). Gilt jetzt auch für Listen (`todo_lists.read_scope/write_scope`, `app.object_access('list', …)`); Listen lassen sich wie Anliegen als Karte weitergeben
+
+## Zweite Durchsicht (2026-10-22)
+* Pinnwand: Antworten klappen unter dem Beitrag auf (wie ein Thread), keine eigene Seite; `?post=` öffnet einen Beitrag im Feed
+* Menüs: schweben über allem (auch über Spalten, die scrollen, und über der Karte), immer nur eines offen; auf dem Handy ein Blatt von unten über der unteren Leiste
+* Raster richten sich nach der Breite ihrer Spalte (Container-Abfragen), nicht nach dem Bildschirm
+* Freunde: „+“ passt zum Abschnitt (Chat, Gruppe, Kontakt, Anliegen); ein Chat zu zweit bekommt unter „Werkzeuge“ dieselben Werkzeuge wie eine Gruppe (Aufgaben, Dokumente …) als Reiter neben „Chat“ und bleibt in der Liste ein Chat (`groups.conversation_id`, `app.chat_tools`)
+* Ich → Überblick öffnet Elemente in der Übersicht (`/me?o=art:id`), statt in den Abschnitt zu springen; Mitteilungen und Einstellungen stehen in der Leiste unter Ich
+* Karte: jedes Anliegen am Mittelpunkt seiner Postleitzahl (aus dem Ort, z. B. „81369 München“; Daten: GeoNames, CC BY 4.0), sonst am Mittelpunkt des Ortes
+* Beispielinhalte: von jeder Art genau eins, jedes Konto trifft jedes genau einmal (`app.ensure_demo` beim ersten Besuch); in der Verwaltung für alle aus- und wieder einschaltbar, ohne zu löschen (`demo_visible`, restriktive Regeln auf allen Tabellen)
+* Screenshots aller Ansichten: `npm run screens` (tools/screens), Grundlage für Durchsichten

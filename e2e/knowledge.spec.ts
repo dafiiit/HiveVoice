@@ -42,7 +42,7 @@ test.describe("knowledge: notes, files and images", () => {
       await expect(article.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
 
       // Edit it.
-      await article.getByRole("link", { name: "Bearbeiten" }).click();
+      await page.getByRole("link", { name: "Bearbeiten", exact: true }).click();
       await page.getByLabel("Inhalt in Markdown").fill("# Neu gefasst\n\nGeändert.");
       await page.getByRole("button", { name: "Speichern" }).click();
       await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);

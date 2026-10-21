@@ -10,7 +10,7 @@ export type NavItem = { area: Area; href: string; label: string; badge?: number 
 const isActive = (path: string, area: Area) => areaOf(path) === area;
 
 /** Phones: the same three areas at the bottom, "Neu" in the middle. 4rem above the system gesture area. */
-export function BottomNav({ items, newLabel, label }: { items: NavItem[]; newLabel: string; label: string }) {
+export function BottomNav({ items, newLabel, label, signedIn = true }: { items: NavItem[]; newLabel: string; label: string; signedIn?: boolean }) {
   const path = usePathname();
   const cell = (it: NavItem) => {
     const on = isActive(path, it.area);
@@ -30,10 +30,11 @@ export function BottomNav({ items, newLabel, label }: { items: NavItem[]; newLab
     <nav aria-label={label} className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(4rem+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
       {cell(a)}
       {cell(b)}
-      <Link href="/new" aria-label={newLabel} className="flex flex-col items-center justify-center gap-1 bg-ink text-[11px] font-bold leading-none text-on-ink no-underline">
+      {/* Guests cannot make anything yet: no "Neu" for them. */}
+      {signedIn && <Link href="/new" aria-label={newLabel} className="flex flex-col items-center justify-center gap-1 bg-ink text-[11px] font-bold leading-none text-on-ink no-underline">
         <IconPlus size={22} />
         {newLabel}
-      </Link>
+      </Link>}
       {rest.map(cell)}
     </nav>
   );

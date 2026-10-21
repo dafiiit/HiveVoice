@@ -66,7 +66,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold">{tp("title")}</span>
         <span className={field.hint}>{tp("text")}</span>
-        <div role="radiogroup" aria-label={tp("title")} className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        <div role="radiogroup" aria-label={tp("title")} className="grid gap-2 @xl:grid-cols-2 @4xl:grid-cols-3">
           {COMMUNITIES.map((c) => (
             <button key={c.key} type="button" role="radio" aria-checked={preset === c.key} onClick={() => apply(preset === c.key ? null : c)}
               className={card(preset === c.key)}>
@@ -75,7 +75,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
           ))}
         </div>
       </div>
-      <div className="grid gap-6 xl:grid-cols-2 xl:gap-x-12">
+      <div className="grid gap-6 @4xl:grid-cols-2 @4xl:gap-x-12">
       <div className="flex flex-col gap-6">
       <label className={field.label}>{t("name")}<input required minLength={3} value={name} onChange={(e) => setName(e.target.value)} className={field.input} /></label>
       {similar.length > 0 && (
@@ -93,7 +93,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
         <legend className="mb-1 text-sm font-bold">{tt("title")}</legend>
         <span className={field.hint}>{tt("formText")}</span>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-2 @xl:grid-cols-2">
           {GROUP_TOOLS.map((k) => (
             <label key={k} className="flex cursor-pointer items-start gap-2">
               <input type="checkbox" checked={tools.includes(k)} onChange={() => setTools(tools.includes(k) ? tools.filter((x) => x !== k) : [...tools, k])} className="mt-0.5 h-5 w-5 flex-none accent-[var(--ink)]" />
@@ -113,7 +113,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
         <div className="mt-4 flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             <span className="text-sm font-bold">{tr("template.title")}</span>
-            <div role="radiogroup" aria-label={tr("template.title")} className="grid gap-2 md:grid-cols-3">
+            <div role="radiogroup" aria-label={tr("template.title")} className="grid gap-2 @2xl:grid-cols-3">
               {(["project", "club", "initiative"] as const).map((k) => (
                 <button key={k} type="button" role="radio" aria-checked={template === k} onClick={() => { setTemplate(k); setKind(k); }} className={card(template === k)}>
                   <strong>{tr(`template.${k}.name`)}</strong><span className="text-sm">{tr(`template.${k}.text`)}</span>

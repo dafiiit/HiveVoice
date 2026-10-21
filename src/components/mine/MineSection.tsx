@@ -7,6 +7,7 @@ import { BackToList, ListPane, Pick, Split, type ListRow } from "@/components/sh
 import { NewList } from "./TodoList";
 import Link from "next/link";
 import { IconPlus } from "@/components/ui/Icons";
+import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 
 export type MineKind = "all" | "notes" | "uploads" | "lists" | "projects" | "listings";
@@ -36,8 +37,12 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
         (select count(*)::int from public.todo_items i where i.list_id = l.id) as total,
         (select count(*)::int from public.todo_items i where i.list_id = l.id and i.done_at is not null) as done
       from public.todo_lists l where l.owner_id = ${me} order by l.updated_at desc`,
+    // Initiatives I started or support.
     projects: await tx<{ id: string; title: string; updated_at: string }[]>`
-      select i.id, i.title, i.updated_at from public.initiative_authors a join public.initiatives i on i.id = a.initiative_id where a.profile_id = ${me} order by i.updated_at desc`,
+      select i.id, i.title, i.updated_at from public.initiatives i
+      where exists (select 1 from public.initiative_authors a where a.initiative_id = i.id and a.profile_id = ${me})
+         or exists (select 1 from public.initiative_supports s where s.initiative_id = i.id and s.profile_id = ${me})
+      order by i.updated_at desc`,
     listings: await tx<{ id: string; title: string; kind: string; read_scope: string; status: string; created_at: string }[]>`
       select id, title, kind::text, read_scope, status::text, created_at from public.listings where owner_id = ${me} and status in ('active', 'paused') order by created_at desc limit 200`,
   }));
@@ -50,7 +55,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
   ];
   const shown = items.filter((x) => kind === "all" || x.kind === kind).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
   const rows: ListRow[] = shown.map((x) => ({
-    key: `${x.kind}:${x.id}`, href: `${BASE[x.kind]}/${x.id}`, title: x.title, active: x.id === selected,
+    key: `${x.kind}:${x.id}`, href: kind === "all" ? `/me?o=${x.kind}:${x.id}` : `${BASE[x.kind]}/${x.id}`, title: x.title, active: x.id === selected,
     sub: [kind === "all" ? x.label : null, x.extra, relTime(x.at, locale)].filter(Boolean).join(" · "),
     tag: t(`vis.${x.vis}` as "vis.me"),
   }));
@@ -78,6 +83,10 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
           autoOpen={!open && auto ? rows[0]?.href : undefined}
           footer={kind === "notes" || kind === "uploads" ? <Link href={`${path}?more=1`} className="block border-b border-line px-4 py-3 text-sm text-ink underline">{t("more")}</Link> : undefined} />
       }
-      detail={open ? <>{<BackToList href={path} label={title} />}{detail}</> : (detail ?? <Pick text={t("pick")} />)} />
+      detail={open ? <>{<BackToList href={path} label={title} />}{detail}</>
+        // Nothing there yet: say so on the right and offer the first step, instead of "choose on the left".
+        : rows.length === 0 && kind !== "all" && create && typeof create === "object" && "href" in create
+          ? <Pick text={t(kind === "notes" ? "emptyNotes" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}><Link href={create.href} className={btn.primary}>{create.label}</Link></Pick>
+          : (detail ?? <Pick text={t(rows.length ? "pick" : "empty")} />)} />
   );
 }

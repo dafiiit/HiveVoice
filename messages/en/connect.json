@@ -108,6 +108,24 @@
   "newGroupShort": "Group",
   "listingOffer": "{name} offers",
   "listingNeed": "{name} is looking",
-  "toolsWith": "Make a group",
-  "toolsWithText": "A group with {name}: tasks, documents and more for two"
+  "create": {
+    "people": "Find people",
+    "group": "Start a group",
+    "contacts": "Find contacts",
+    "listing": "Create a listing",
+    "chat": "Chat",
+    "groupShort": "Group",
+    "contact": "Contact",
+    "listingShort": "Listing"
+  },
+  "chatTools": "Tools",
+  "chatToolsText": "Tasks, documents, goals … right in this chat. Switching off hides them; nothing is deleted.",
+  "chatTab": "Chat",
+  "searchIn": {
+    "all": "Search",
+    "chats": "Search chats",
+    "groups": "Search groups",
+    "requests": "Search requests",
+    "listings": "Search listings"
+  }
 }

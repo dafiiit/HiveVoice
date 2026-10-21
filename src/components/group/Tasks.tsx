@@ -29,7 +29,7 @@ export function Tasks({ slug, groupId, tasks, canEdit, viewerId, signedIn }: { s
           <button type="submit" disabled={pending} className={btn.primary}>+</button>
         </form>
       )}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 @2xl:grid-cols-3">
         {COLS.map((c) => {
           const items = tasks.filter((x) => x.status === c);
           return (

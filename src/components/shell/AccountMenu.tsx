@@ -21,12 +21,13 @@ export function AccountMenu({ id, name, seed, path, admin }: { id: string; name:
   }, []);
   const item = "flex h-11 items-center border-b border-line px-4 text-ink no-underline hover:bg-chip";
   return (
-    <details ref={ref} className="relative">
-      <summary aria-label={t("open", { name })} className="inline-flex h-11 w-11 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-        <Avatar name={name} seed={seed} path={path} size={44} />
+    <details ref={ref} id="account-menu" className="relative" onToggle={(e) => { const me = e.currentTarget; if (me.open) document.querySelectorAll<HTMLDetailsElement>("details[open]").forEach((d) => { if (d !== me) d.open = false; }); }}>
+      {/* Same box as the bell next to it: 44 px with a 1 px frame, the picture inside. */}
+      <summary aria-label={t("open", { name })} className="flex h-11 w-11 cursor-pointer list-none items-center justify-center overflow-hidden border border-line-strong bg-surface [&::-webkit-details-marker]:hidden">
+        <Avatar name={name} seed={seed} path={path} size={42} />
       </summary>
       <div onClick={(e) => { if ((e.target as HTMLElement).closest("a")) ref.current?.removeAttribute("open"); }}
-        className="absolute right-0 z-40 mt-1 flex w-[min(280px,calc(100vw-2rem))] flex-col border border-ink bg-surface">
+        className="absolute right-0 z-40 mt-1 flex w-[min(280px,calc(100vw-2rem))] flex-col border border-ink bg-surface max-sm:fixed max-sm:inset-x-0 max-sm:bottom-[calc(4rem+env(safe-area-inset-bottom))] max-sm:top-auto max-sm:z-[70] max-sm:w-auto max-sm:border-x-0 max-sm:border-b-0">
         <div className="flex items-center gap-3 border-b border-line px-4 py-3">
           <Avatar name={name} seed={seed} path={path} size={40} />
           <span className="flex min-w-0 flex-col"><strong className="truncate">{name}</strong><span className="text-sm text-muted">{t("account")}</span></span>

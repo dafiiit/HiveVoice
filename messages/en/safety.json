@@ -53,7 +53,8 @@
     "delete": "Delete",
     "deleteForMe": "For me",
     "deleteForAll": "For everyone",
-    "editLabel": "Edit message"
+    "editLabel": "Edit message",
+    "hide": "Hide"
   },
   "profile": {
     "block": "Block",

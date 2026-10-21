@@ -17,18 +17,19 @@ test("Anliegen: offers filter by category and its own fields, and the map asks b
   await expect(page).toHaveURL(/\/community\/listings/);
   await expect(page.getByRole("tab", { name: "Angebote" })).toHaveAttribute("aria-selected", "true");
   await page.locator("summary", { hasText: "Kategorie" }).click();
-  await page.getByRole("link", { name: /^Wohnen/ }).click();
-  await expect(page).toHaveURL(/cat=housing/);
-  await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toBeVisible();
-  await expect(page.getByText(/520\s€\/Monat/)).toBeVisible();
-  await page.getByText("Filter").click();
-  await page.getByLabel("Art").selectOption({ label: "Schlafplatz" });
+  // The example offer: one drill to borrow, in "Dinge".
+  await page.getByRole("link", { name: /^Dinge/ }).click();
+  await expect(page).toHaveURL(/cat=item/);
+  await expect(page.getByText("Bohrmaschine zum Ausleihen").first()).toBeVisible();
+  await page.locator("summary", { hasText: "Filter" }).click();
+  await page.getByLabel("Nur kostenlos").check();
   await page.getByRole("button", { name: "Anwenden" }).click();
-  await expect(page).toHaveURL(/a_deal=stay/);
-  await expect(page.getByText("WG-Zimmer in Sendling ab Dezember")).toHaveCount(0);
-  await expect(page.getByText("Schlafsofa im Wohnzimmer für Durchreisende")).toBeVisible();
+  await expect(page).toHaveURL(/free=1/);
+  await expect(page.getByText("Bohrmaschine zum Ausleihen").first()).toBeVisible();
   await page.getByRole("tab", { name: "Gesuche" }).click();
   await expect(page).toHaveURL(/tab=needs/);
+  await page.goto("/community/listings?tab=needs");
+  await expect(page.getByText("Hilfe beim Umzug am Samstag").first()).toBeVisible();
   // The map sits on the right until a listing is opened (on phones under the list).
   if (info.project.name !== "mobile") {
     await expect(page.getByRole("button", { name: "Karte laden" })).toBeVisible();

@@ -6,7 +6,7 @@ import { initiativeCardColumns, initiativeCardFrom, myRegionIds, regionTree, typ
 import { getPlace } from "@/lib/place";
 import { Avatar } from "@/components/ui/Avatar";
 import { IconCheck, IconPlus } from "@/components/ui/Icons";
-import { chip } from "@/components/ui/styles";
+import { chip, tab } from "@/components/ui/styles";
 import { Toolbar, Notice } from "@/components/ui/Page";
 import { SearchField } from "@/components/ui/SearchField";
 import { btn } from "@/components/ui/styles";
@@ -24,7 +24,7 @@ type Person = { id: string; display_name: string; avatar_seed: number; avatar_pa
  * Gemeinschaft → Gruppen (with Initiativen as a second view) and Gemeinschaft → Personen.
  * Responsible people are people with a "Zuständig" tag: searching for "zuständig" or the field finds them.
  */
-export async function Directory({ sp, area, selected }: { sp: Record<string, string | string[] | undefined>; area: "groups" | "people"; selected?: string }) {
+export async function Directory({ sp, area, selected, title }: { sp: Record<string, string | string[] | undefined>; area: "groups" | "people"; selected?: string; title: string }) {
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
   const kind: Kind = area === "people" ? "people" : str("kind") === "initiatives" ? "initiatives" : "groups";
   const level = (LEVELS as readonly string[]).includes(str("level")) ? str("level") : "all";
@@ -125,22 +125,26 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
     </Link>
   );
   const first = data.initiatives?.[0] ? `/community/groups/i/${data.initiatives[0].id}` : data.groups?.[0] ? `/community/groups/${data.groups[0].slug}` : data.people?.[0] ? `/community/people/${data.people[0].id}` : null;
-  const create = kind === "initiatives" ? { href: "/new/initiative", label: t("create.initiatives") }
-    : kind === "groups" ? { href: "/new/group", label: t("create.groups") } : null;
+  const create = kind === "initiatives" ? { href: "/new/initiative", label: t("create.initiatives"), short: t("kinds.initiative") }
+    : kind === "groups" ? { href: "/new/group", label: t("create.groups"), short: t("kinds.group") } : null;
   return (
     <>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{title}</h1>
+        {create && <Link href={session ? create.href : `/login?next=${create.href}`} title={create.label} className={`${btn.primarySm} ml-auto`}><IconPlus size={14} /> {create.short}</Link>}
+      </div>
       {area === "groups" && (
-        // An initiative is a group with a goal: one tab, two views.
-        <div role="group" aria-label={t("what")} className="flex flex-wrap gap-1.5">
+        // An initiative is a group with a goal: one section, two views, as tabs like Angebote / Gesuche.
+        <div role="tablist" aria-label={t("what")} className="flex border-b border-line">
           {(["groups", "initiatives"] as const).map((k) => (
-            <Link key={k} href={href({ kind: k, level: "all", sort: "relevant" })} aria-pressed={kind === k} className={chip(kind === k)}>{t(`kinds.${k}`)}</Link>
+            <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
           ))}
         </div>
       )}
       <Toolbar count={t(`count.${kind}`, { n: count })}>
         <form action={`/community/${area}`} className="flex min-w-[200px] flex-1 gap-2" role="search">
           {kind === "initiatives" && <input type="hidden" name="kind" value="initiatives" />}
-          <SearchField className="flex-1" name="q" defaultValue={q} label={t(area === "people" ? "searchPeople" : "searchGroups")} placeholder={t(area === "people" ? "searchPeople" : "searchGroups")} />
+          <SearchField className="flex-1" name="q" defaultValue={q} label={t(area === "people" ? "searchPeople" : kind === "initiatives" ? "searchInitiatives" : "searchGroups")} placeholder={t(area === "people" ? "searchPeople" : kind === "initiatives" ? "searchInitiatives" : "searchGroups")} />
         </form>
         {(kind === "initiatives" || session) && (
           <Popover align="right" label={t("filter")} badge={(level !== "all" ? 1 : 0) + (mine ? 1 : 0)}>
@@ -165,7 +169,6 @@ export async function Directory({ sp, area, selected }: { sp: Record<string, str
         {level !== "all" && kind === "initiatives" && <Link href={href({ level: "all" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: tl(level as "all") })}>{tl(level as "all")} <span aria-hidden="true">✕</span></Link>}
         {filterPlace && <Link href={href({ place: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: filterPlace.name })}>{t("inPlace", { name: filterPlace.name })} <span aria-hidden="true">✕</span></Link>}
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
-        {create && <Link href={session ? create.href : `/login?next=${create.href}`} className={btn.primarySm}><IconPlus size={14} /> {create.label}</Link>}
       </Toolbar>
 
       {count === 0 && <Notice tone="hint" className="border-t border-line pt-6 text-base">{t("nothing")}</Notice>}

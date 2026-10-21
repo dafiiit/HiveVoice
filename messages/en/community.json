@@ -19,14 +19,15 @@
     },
     "tag": "Topic",
     "allTags": "All",
-    "search": "Search the pinboard",
+    "search": "Search the pinboard …",
     "placeholder": "News in {place} …",
     "readOnly": "Anyone can read, writing needs an account.",
     "signIn": "Sign in",
     "none": "Nothing found. Choose a larger place or another topic.",
     "empty": "Nothing on the pinboard yet. Write the first post.",
     "pick": "Open the replies of a post and it shows here with all its replies.",
-    "gone": "This post is gone."
+    "gone": "This post is gone.",
+    "emptyGuest": "Nothing here yet."
   },
   "groups": {
     "lead": "Groups and initiatives you can join. An initiative is a group with a goal."

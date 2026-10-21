@@ -116,6 +116,10 @@ select {
   letter-spacing: -0.035em;
 }
 
+/* Inside an opened item next to a list (Split, Freunde) the title is smaller: the list carries the weight.
+   Plain CSS on purpose: .display is not in a layer, so a utility class could not override it. */
+.pane-titles h1.display { font-size: 28px; line-height: 1.1; letter-spacing: -0.015em; }
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }

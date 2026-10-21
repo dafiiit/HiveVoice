@@ -80,7 +80,7 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
       {l.images.length > 0
         ? (
           <div className="flex flex-col gap-2">
-            <Cover src={l.images[0]} ratio="16 / 9" label={l.title} />
+            <Cover src={l.images[0]} ratio={embedded ? "3 / 1" : "16 / 9"} label={l.title} />
             {l.images.length > 1 && (
               <div className="grid grid-cols-3 gap-2">
                 {l.images.slice(1).map((p) => <Cover key={p} src={p} ratio="4 / 3" />)}
@@ -88,7 +88,7 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
             )}
           </div>
         )
-        : l.cover_seed != null && <Cover seed={l.cover_seed} ratio="21 / 9" />}
+        : l.cover_seed != null && <Cover seed={l.cover_seed} ratio={embedded ? "5 / 1" : "21 / 9"} />}
       <div className="flex flex-col gap-3">
         <span className="inline-flex self-start bg-chip px-2 py-0.5 text-[13px] font-bold">{tm(`kind.${kind}`)} · {tcat(`names.${l.category}` as "names.help")}</span>
         <h1 className="display m-0 break-words">{l.title}</h1>
@@ -140,7 +140,7 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
           <p className="m-0 max-w-[680px] text-sm text-muted">{t("matchesHow")}</p>
           {data.matches.length === 0
             ? <Notice tone="hint" className="text-base">{t("matchesNone")}</Notice>
-            : <div className="grid gap-4 md:grid-cols-2">
+            : <div className="grid gap-4 @2xl:grid-cols-2">
                 {data.matches.map((m) => <ListingCardView key={m.id} c={m} signedIn={!!session} reasons={m.reasons} sent={m.sent} mine={[{ id: l.id, title: l.title }]} via={l.id} />)}
               </div>}
         </Section>

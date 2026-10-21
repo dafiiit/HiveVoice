@@ -211,7 +211,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
 
       {!editing && !suggesting && <Suggestions id={id} items={data.suggestions} />}
       {data.transfer && level >= 4 && <span className="flex items-center gap-2 text-sm">{td("access.transferPending", { name: data.transfer.to_name })} <CancelTransfer transferId={data.transfer.id} /></span>}
-      {isNote && level >= 3 && !editing && !suggesting && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
+      {isNote && level >= 3 && !editing && !suggesting && meta.version_no > 1 && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
       <Comments id={id} items={data.comments} canComment={level >= 2 && !!me} me={me} canModerate={level >= 4} />
     </Page>
   );

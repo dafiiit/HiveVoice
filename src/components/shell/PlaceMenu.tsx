@@ -16,7 +16,7 @@ type Step = { id: string; name: string; level: string };
  * The place everything "near me" is measured from. Click for what it does and to change it:
  * members save it to their profile, guests only keep it in this browser.
  */
-export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & { chain: Step[] }) | null; signedIn: boolean; className?: string }) {
+export function PlaceMenu({ place, signedIn, className = "", size = "md" }: { place: (Step & { chain: Step[] }) | null; signedIn: boolean; className?: string; size?: "sm" | "md" }) {
   const t = useTranslations("nav.place");
   const tl = useTranslations("levels");
   const router = useRouter();
@@ -50,10 +50,9 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
   };
 
   return (
-    <Popover size="md" open={open} onOpenChange={setOpen} className={className}
+    <Popover size={size} open={open} onOpenChange={setOpen} className={className}
       ariaLabel={place ? `${t(signedIn ? "yours" : "chosen")}: ${place.name}` : t("choose")}
-      label={<><IconPin size={16} /><span className="min-w-0 max-w-[160px] truncate md:max-w-[200px]">{place?.name ?? t("choose")}</span></>}
-      panelClassName="absolute left-0 top-full z-40 mt-1 flex w-[min(340px,calc(100vw-2rem))] flex-col gap-3 border border-ink bg-surface p-4">
+      label={<><IconPin size={16} /><span className="min-w-0 max-w-[160px] truncate md:max-w-[200px]">{place?.name ?? t("choose")}</span></>}>
       {open && (
         <>
           {place && !editing && (
@@ -67,7 +66,8 @@ export function PlaceMenu({ place, signedIn, className = "" }: { place: (Step & 
                 <div className="flex flex-col gap-1">
                   <span className="text-xs text-muted">{t("partOf")}</span>
                   <ul className="m-0 flex list-none flex-col p-0 text-sm">
-                    {place.chain.filter((s) => s.id !== place.id).map((s) => (
+                    {/* A city that is its own district (München) is listed once. */}
+                    {place.chain.filter((s, i, all) => s.id !== place.id && all.findIndex((x) => x.name === s.name) === i).map((s) => (
                       <li key={s.id} className="flex justify-between gap-3 border-b border-line py-1 last:border-b-0"><span>{s.name}</span><span className="text-muted">{tl(s.level as "all")}</span></li>
                     ))}
                   </ul>

@@ -24,7 +24,7 @@ export function Collection({ groupId, items, canRemoveAll }: { groupId: string; 
         return (
           <div key={type} className="flex flex-col gap-2">
             <h2 className="m-0 text-lg font-bold">{type === "group" ? t("collection.subgroups") : t(`types.${type}`)} · {list.length}</h2>
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 @2xl:grid-cols-2">
               {list.map((i) => (
                 <div key={i.card.id} className="flex flex-col gap-1">
                   <RefCardView card={i.card} />

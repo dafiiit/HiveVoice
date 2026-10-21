@@ -10,7 +10,9 @@
     "groups": "Gruppen",
     "people": "Menschen",
     "responsible": "Zuständige",
-    "links": "Wissen"
+    "links": "Wissen",
+    "group": "Gruppe",
+    "initiative": "Initiative"
   },
   "level": "Ebene",
   "sort": "Sortieren:",
@@ -53,7 +55,7 @@
     },
     "sideLabel": "Angebote oder Gesuche",
     "search": "Suchbegriff",
-    "searchPlaceholder": "z. B. Fahrrad, WG, Nachhilfe",
+    "searchPlaceholder": "Anliegen durchsuchen …",
     "freeOnly": "Nur kostenlos",
     "maxPrice": "Höchstens (€)",
     "minLabel": "mindestens {label}",
@@ -77,14 +79,15 @@
     "mapLabel": "Karte der Einträge",
     "mapAt": "{n, plural, one {1 Eintrag} other {# Einträge}} in {place}",
     "mapAll": "Alle in {place} zeigen",
-    "mapPrivacy": "Einträge erscheinen nur am Mittelpunkt ihres Ortes, nie an einer Adresse."
+    "mapPrivacy": "Einträge erscheinen am Mittelpunkt ihrer Postleitzahl (sonst ihres Ortes), nie an einer Adresse. Postleitzahlen: GeoNames, CC BY 4.0."
   },
   "create": {
     "initiatives": "Initiative starten",
     "groups": "Gruppe gründen"
   },
-  "searchPeople": "Name oder Tag, z. B. zuständig",
-  "searchGroups": "Gruppe oder Initiative suchen",
+  "searchPeople": "Personen durchsuchen …",
+  "searchGroups": "Gruppen durchsuchen …",
   "responsibleTag": "Zuständig: {title}",
-  "supporters": "{n} unterstützen"
+  "supporters": "{n, plural, one {1 Unterstützung} other {# Unterstützungen}}",
+  "searchInitiatives": "Initiativen durchsuchen …"
 }

@@ -10,7 +10,9 @@
     "groups": "Groups",
     "people": "People",
     "responsible": "Responsible",
-    "links": "Knowledge"
+    "links": "Knowledge",
+    "group": "Group",
+    "initiative": "Initiative"
   },
   "level": "Level",
   "sort": "Sort:",
@@ -53,7 +55,7 @@
     },
     "sideLabel": "Offers or requests",
     "search": "Search term",
-    "searchPlaceholder": "e.g. bike, flat share, tutoring",
+    "searchPlaceholder": "Search listings …",
     "freeOnly": "Free only",
     "maxPrice": "At most (€)",
     "minLabel": "at least {label}",
@@ -77,14 +79,15 @@
     "mapLabel": "Map of listings",
     "mapAt": "{n, plural, one {1 listing} other {# listings}} in {place}",
     "mapAll": "Show all in {place}",
-    "mapPrivacy": "Listings only appear at the centre of their place, never at an address."
+    "mapPrivacy": "Listings appear at the centre of their postal code (otherwise their place), never at an address. Postal codes: GeoNames, CC BY 4.0."
   },
   "create": {
     "initiatives": "Start an initiative",
     "groups": "Found a group"
   },
-  "searchPeople": "Name or tag, e.g. responsible",
-  "searchGroups": "Search groups or initiatives",
+  "searchPeople": "Search people …",
+  "searchGroups": "Search groups …",
   "responsibleTag": "Responsible: {title}",
-  "supporters": "{n} supporters"
+  "supporters": "{n, plural, one {1 supporter} other {# supporters}}",
+  "searchInitiatives": "Search initiatives …"
 }

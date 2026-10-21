@@ -31,9 +31,10 @@ test.describe("signed in", () => {
   test("Freunde lists chats and everything I sent or must answer", async ({ page }) => {
     await login(page);
     await page.goto("/friends");
-    await expect(page.getByRole("link", { name: "Gruppe gründen" }).filter({ visible: true }).first()).toBeVisible();
-    await page.getByRole("link", { name: /^Chats/ }).click();
-    const chat = page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first();
+    // The example chat with Mia; the "+" fits the section.
+    await expect(page.getByRole("link", { name: "Chat", exact: true }).filter({ visible: true }).first()).toBeVisible();
+    await page.goto("/friends?f=chats");
+    const chat = page.getByRole("region", { name: "Chats" }).getByRole("link", { name: /Mia Schuster/ }).first();
     await expect(chat).toBeVisible();
     await chat.click();
     await expect(page.getByRole("log")).toBeVisible();
@@ -45,19 +46,23 @@ test.describe("signed in", () => {
   test("the group form is reachable from Freunde", async ({ page }) => {
     await login(page);
     await page.goto("/friends");
-    await page.getByRole("link", { name: "Gruppe gründen" }).filter({ visible: true }).first().click();
+    await page.goto("/friends?f=groups");
+    await page.getByRole("link", { name: "Gruppe", exact: true }).filter({ visible: true }).first().click();
     await expect(page).toHaveURL(/\/new\/group/);
   });
 
-  test("tag ideas run in a carousel", async ({ page }) => {
+  test("tag ideas wrap in rows, none cut off, more on demand", async ({ page }) => {
     await login(page);
     await page.goto("/settings");
-    const next = page.getByRole("button", { name: "Weiter blättern" }).first();
-    await expect(next).toBeVisible();
-    const track = page.getByRole("group", { name: /Ich biete · Ideen/ });
-    const before = await track.evaluate((el) => el.scrollLeft);
-    await next.click({ timeout: 8000 });
-    await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(before);
+    const ideas = page.getByRole("group", { name: /Ich biete · Ideen/ });
+    await expect(ideas).toBeVisible();
+    const box = (await ideas.boundingBox())!;
+    for (const b of await ideas.getByRole("button").all()) {
+      const r = (await b.boundingBox())!;
+      expect(r.x + r.width, "no idea runs over the edge").toBeLessThanOrEqual(box.x + box.width + 1);
+    }
+    const more = ideas.getByRole("button", { name: /Mehr Ideen/ });
+    if (await more.count()) { const n = await ideas.getByRole("button").count(); await more.click(); await expect.poll(() => ideas.getByRole("button").count()).toBeGreaterThan(n); }
   });
 
   test("Freunde: the list filters stay compact, the pinboard filters by place and topic", async ({ page }, info) => {
@@ -81,7 +86,8 @@ test.describe("signed in", () => {
   test("requests: all three actions look like buttons", async ({ page }) => {
     await login(page);
     await page.goto("/friends?f=requests");
-    await page.getByRole("region", { name: "Chats" }).getByRole("link").filter({ hasText: "angefragt:" }).first().click();
+    // The example request from Jonas.
+    await page.getByRole("region", { name: "Chats" }).getByRole("link", { name: /Jonas Brandl/ }).first().click();
     const profile = page.getByRole("link", { name: "Profil ansehen" });
     await expect(profile).toBeVisible();
     expect(await profile.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe("1px");
@@ -93,9 +99,9 @@ test.describe("signed in", () => {
     await expect(page.locator("summary", { hasText: "Filter" })).toBeVisible();
     await expect(page.locator("summary", { hasText: "Sortieren" }), "the order is a setting, not a menu").toHaveCount(0);
     await page.locator("summary", { hasText: "Filter" }).click();
-    await page.getByRole("link", { name: "Gemeinde" }).click();
+    await page.getByRole("link", { name: "Stadt", exact: true }).click();
     await expect(page).toHaveURL(/level=municipality/);
-    await expect(page.getByRole("link", { name: /Gemeinde entfernen/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Stadt entfernen/ })).toBeVisible();
   });
 
   test("responsible people are people with a tag", async ({ page }) => {
@@ -124,8 +130,8 @@ test.describe("signed in", () => {
   test("people without a photo get a letter, not a shape", async ({ page }) => {
     await login(page);
     await page.goto("/friends");
-    const avatar = page.getByRole("region", { name: "Chats" }).getByRole("img", { name: "Felix Wolf" }).first();
-    await expect(avatar).toHaveText("F");
+    const avatar = page.getByRole("region", { name: "Chats" }).getByRole("img", { name: "Mia Schuster" }).first();
+    await expect(avatar).toHaveText("M");
   });
 
   test("the search at the top offers direct hits, including places", async ({ page }) => {
@@ -152,15 +158,10 @@ test.describe("signed in", () => {
     await expect(page.getByText(/bestimmt, welche Pinnwand/)).toBeVisible();
   });
 
-  test("idea suggestions loop and the field is as tall as its button", async ({ page }, info) => {
+  test("idea suggestions wrap and the field is as tall as its button", async ({ page }, info) => {
     await login(page);
     await page.goto("/me/listings?as=offer");
-    const prev = page.getByRole("button", { name: "Zurück blättern" }).first();
-    const next = page.getByRole("button", { name: "Weiter blättern" }).first();
-    await expect(prev).toBeEnabled();
-    for (let i = 0; i < 12; i++) { await next.click(); await page.waitForTimeout(120); }
-    await expect(next).toBeEnabled();
-    await expect(prev).toBeEnabled();
+    await expect(page.getByRole("group", { name: /Ideen/ }).first().getByRole("button").first()).toBeVisible();
     if (info.project.name === "desktop") {
       const field = await page.getByLabel(/^(Was bietest du an\?|Was brauchst du\?)$/).boundingBox();
       const button = await page.getByRole("button", { name: "Angebot erstellen" }).boundingBox();
@@ -190,15 +191,6 @@ test.describe("signed in", () => {
     await login(page);
     await page.goto("/community/groups?q=Radspur");
     await expect(page.getByRole("combobox").first()).toHaveValue("Radspur");
-  });
-
-  test("the hashtag carousel loops in both directions too", async ({ page }) => {
-    await login(page);
-    await page.goto("/settings");
-    const prev = page.getByRole("button", { name: "Zurück blättern" }).first();
-    await expect(prev).toBeEnabled();
-    await prev.click();
-    await expect(prev).toBeEnabled();
   });
 
   test("a link is checked, previewed, shared, voted on and removed again", async ({ page }, info) => {
@@ -266,19 +258,9 @@ test.describe("signed in", () => {
     test.skip(info.project.name !== "desktop", "measured at desktop width");
     await login(page);
     await page.goto("/settings");
-    const widths = await page.evaluate(() => {
-      const col = document.querySelector("main button")!.parentElement!;
-      const kids = Array.from(col.children).map((c) => Math.round(c.getBoundingClientRect().width)).filter((w) => w > 10);
-      return kids;
-    });
-    expect(new Set(widths).size).toBe(1);
-    const chips = await page.evaluate(() => {
-      const track = document.querySelector('[role="group"][tabindex="0"]')!;
-      const cols = new Map<number, number[]>();
-      Array.from(track.children).slice(0, 12).forEach((c) => { const r = c.getBoundingClientRect(); cols.set(Math.round(r.x), [...(cols.get(Math.round(r.x)) ?? []), Math.round(r.width)]); });
-      return [...cols.values()].filter((w) => w.length === 2).every(([a, b]) => a === b);
-    });
-    expect(chips).toBe(true);
+    // Idea chips all have one height.
+    const heights = await page.getByRole("group", { name: /Ich biete · Ideen/ }).getByRole("button").evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().height)));
+    expect(new Set(heights).size).toBe(1);
     const bar = await page.evaluate(() => Array.from(document.querySelectorAll("header a[aria-label]:not([aria-label='HiveVoice']), header form[role=search], header summary")).filter((e) => e.getBoundingClientRect().height > 0).map((e) => `${Math.round(e.getBoundingClientRect().y)}/${Math.round(e.getBoundingClientRect().height)}`));
     expect(new Set(bar).size, JSON.stringify(bar)).toBe(1);
   });
@@ -288,7 +270,7 @@ test.describe("signed in", () => {
     await page.goto("/settings");
     test.skip(await page.getByRole("button", { name: "Foto entfernen" }).isVisible(), "this account already has a photo; leave it alone");
     await page.locator('input[type="file"]').first().setInputFiles({ name: "me.png", mimeType: "image/png", buffer: PNG });
-    const avatar = page.locator('main img[width="160"]');
+    const avatar = page.locator('main img[width="96"]');
     await expect(avatar).toBeVisible({ timeout: 20_000 });
     const src = await avatar.getAttribute("src");
     expect(src).toMatch(/\/storage\/v1\/object\/public\/images\/[0-9a-f-]{36}\/[0-9a-f]+\.jpg$/);

@@ -55,8 +55,9 @@ test("initiatives and groups show their photographs", async ({ page }) => {
   await page.goto("/community/groups?kind=initiatives&q=Radspur");
   await page.locator("main a[href^='/community/groups/i/']").first().click();
   await expect.poll(async () => (await loaded(page, "main img[src*='/images/demo/']")).filter(Boolean).length).toBeGreaterThan(0);
-  await page.goto("/groups/westpark-volleyball");
-  await expect.poll(async () => (await loaded(page, "img[src$='/demo/volleyball.jpg']")).some(Boolean)).toBe(true);
+  await page.goto("/community/groups?q=Repair");
+  await page.locator("main a[href^='/community/groups/']").first().click();
+  await expect.poll(async () => (await loaded(page, "img[src$='/demo/repair-cafe.jpg']")).some(Boolean)).toBe(true);
 });
 
 test.describe("the layout like Teams", () => {
@@ -115,11 +116,12 @@ test.describe("on a phone", () => {
     await page.goto("/friends");
     const nav = page.getByRole("navigation", { name: "Bereiche" }).last();
     for (const label of ["Gemeinschaft", "Freunde", "Neu", "Ich"]) {
-      const item = nav.getByRole("link", { name: new RegExp(`^${label}`) });
+      // A badge (e.g. the example contact request) comes before the name.
+      const item = nav.getByRole("link", { name: new RegExp(`(^|\\d\\s*)${label}$`) });
       await expect(item).toBeVisible();
       await expect(item.locator("svg")).toHaveCount(1);
     }
-    await expect(nav.getByRole("link", { name: /^Freunde/ })).toHaveAttribute("aria-current", "page");
+    await expect(nav.getByRole("link", { name: /Freunde$/ })).toHaveAttribute("aria-current", "page");
   });
 
   test("Anliegen in all three areas, old links lead there", async ({ page }) => {
@@ -141,12 +143,12 @@ test.describe("on a phone", () => {
     await page.goto("/friends");
     const list = page.getByRole("region", { name: "Chats" });
     await expect(list.getByRole("link").first()).toBeVisible();
-    const first = (await list.getByRole("link").nth(5).boundingBox())!;
-    expect(first.y, "several conversations are visible without scrolling").toBeLessThan(500);
+    const first = (await list.getByRole("link").first().boundingBox())!;
+    expect(first.y, "the conversations start right under the tabs").toBeLessThan(300);
     expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
 
     await page.goto("/friends?f=chats");
-    await page.getByRole("link", { name: /Lea Hofmann|Felix Wolf|Ali Rahimi/ }).first().click();
+    await page.getByRole("link", { name: /Mia Schuster/ }).first().click();
     const field = page.getByLabel("Nachricht schreiben");
     await expect(field).toBeInViewport();
     expect(await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)).toBeLessThanOrEqual(1);
@@ -159,7 +161,7 @@ test.describe("on a phone", () => {
     await login(page);
     await page.goto("/friends");
     const list = page.getByRole("region", { name: "Chats" });
-    const search = list.getByRole("searchbox", { name: "Chats durchsuchen" });
+    const search = list.getByRole("searchbox", { name: "Durchsuchen" });
     // The order (newest first or suggested) is one setting in the settings, not a menu on every list.
     await expect(list.locator("summary", { hasText: "Chronologisch" })).toHaveCount(0);
     const sb = (await search.boundingBox())!;

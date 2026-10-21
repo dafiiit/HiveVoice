@@ -8,7 +8,7 @@ import { ListSearch } from "../connect/ListSearch";
 import { AutoOpen } from "./AutoOpen";
 
 /** Titles inside an opened item are smaller than on a page of their own: the list next to it carries the weight. */
-export const PANE_TITLES = "[&_h1.display]:text-[28px] [&_h1.display]:leading-[1.1] [&_h1.display]:tracking-normal";
+export const PANE_TITLES = "pane-titles";
 
 export type ListRow = {
   key: string; href: string; title: string; sub?: string | null; meta?: string | null; tag?: string | null;
@@ -51,10 +51,10 @@ export async function ListPane({ id, title, create, searchLabel, rows, empty, to
   return (
     <div id={id} className="flex flex-col">
       <div className="sticky top-0 z-10 flex flex-col gap-2 border-b border-line bg-surface px-4 pb-3 pt-4">
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight">{title}</h1>
+        <div className="flex items-center justify-end gap-2 md:justify-between">
+          <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only">{title}</h1>
           {create && typeof create === "object" && "href" in create
-            ? <Link href={create.href} aria-label={create.label} title={create.label} className={btn.primarySm}><IconPlus size={14} /> <span className="max-lg:sr-only">{create.label}</span></Link>
+            ? <Link href={create.href} aria-label={create.label} title={create.label} className={btn.primarySm}><IconPlus size={14} /> {create.label}</Link>
             : create}
         </div>
         <ListSearch listId={id} value="" keep={{}} label={searchLabel} action="" />

@@ -53,7 +53,8 @@
     "delete": "Löschen",
     "deleteForMe": "Für mich",
     "deleteForAll": "Für alle",
-    "editLabel": "Nachricht bearbeiten"
+    "editLabel": "Nachricht bearbeiten",
+    "hide": "Ausblenden"
   },
   "profile": {
     "block": "Blockieren",

@@ -13,8 +13,7 @@ export async function DirectorySection({ area, sp, selected, detail }: { area: "
     <Split open={!!detail}
       list={
         <div className="flex flex-col gap-3 px-4 pt-4">
-          <h1 className="m-0 text-[22px] font-bold leading-tight">{t(`nav.${area}`)}</h1>
-          <Directory sp={sp} area={area} selected={selected} />
+          <Directory sp={sp} area={area} selected={selected} title={t(`nav.${area}`)} />
         </div>
       }
       detail={detail

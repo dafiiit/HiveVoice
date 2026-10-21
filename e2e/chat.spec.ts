@@ -30,7 +30,7 @@ test.describe("chats with replies, files and polls", () => {
     try {
       await login(page);
       await page.goto("/friends?f=chats");
-      await page.getByRole("link", { name: /Felix Wolf/ }).first().click();
+      await page.getByRole("link", { name: /Mia Schuster/ }).first().click();
       const log = page.getByRole("log");
       await expect(log).toBeVisible();
 

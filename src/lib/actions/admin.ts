@@ -60,8 +60,9 @@ export async function logDisclosure(reference: string, authority: string, scope:
   return res;
 }
 
-export async function setDemoChats(on: boolean) {
-  return guard(() => sql`select app.admin_set_setting('demo_chats', ${sql.json(on)})`);
+/** Shows or hides all example content for everyone; nothing is deleted. */
+export async function setDemoVisible(on: boolean) {
+  return guard(() => sql`select app.admin_set_setting('demo_visible', ${sql.json(on)})`);
 }
 
 export async function purgeDemo() {

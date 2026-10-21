@@ -19,14 +19,15 @@
     },
     "tag": "Thema",
     "allTags": "Alle",
-    "search": "Auf der Pinnwand suchen",
+    "search": "Pinnwand durchsuchen …",
     "placeholder": "Neues in {place} …",
     "readOnly": "Lesen geht ohne Konto, schreiben mit.",
     "signIn": "Anmelden",
     "none": "Nichts gefunden. Wähle einen größeren Ort oder ein anderes Thema.",
     "empty": "Noch nichts an der Pinnwand. Schreib den ersten Beitrag.",
     "pick": "Öffne bei einem Beitrag die Antworten, dann siehst du ihn hier mit allen Antworten und kannst mitreden.",
-    "gone": "Diesen Beitrag gibt es nicht mehr."
+    "gone": "Diesen Beitrag gibt es nicht mehr.",
+    "emptyGuest": "Hier steht noch nichts."
   },
   "groups": {
     "lead": "Gruppen und Initiativen, denen du beitreten kannst. Eine Initiative ist eine Gruppe mit einem Ziel."

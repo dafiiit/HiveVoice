@@ -10,7 +10,7 @@ export function CategoryPicker({ value, onChange, guess }: { value: Category; on
   return (
     <div className="flex flex-col gap-2">
       <span className="text-sm font-bold">{t("label")}</span>
-      <div role="radiogroup" aria-label={t("label")} className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div role="radiogroup" aria-label={t("label")} className="grid grid-cols-1 gap-2 @sm:grid-cols-2 @2xl:grid-cols-3">
         {CATEGORIES.map((c) => {
           const on = value === c;
           return (
@@ -40,7 +40,7 @@ export function AttrFields({ category, value, onChange }: { category: Category; 
   if (!defs.length) return null;
   const set = (k: string, v: unknown) => onChange({ ...value, [k]: v });
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
       {defs.map((f) => {
         const label = t(`${category}.${f.key}`);
         const v = value[f.key];

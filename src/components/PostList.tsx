@@ -48,9 +48,10 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   return (
     <form onSubmit={submit} className="flex flex-col gap-2">
       <div className="flex items-start gap-3">
-        {viewerName && !reply && <Avatar name={viewerName} seed={viewerSeed} path={viewerPath} size={36} />}
+        {viewerName && !reply && <Avatar name={viewerName} seed={viewerSeed} path={viewerPath} size={44} />}
+        {/* One line it is exactly as high as a search field (44 px); it grows while writing. */}
         <textarea value={body} onChange={(e) => setBody(e.target.value)} onFocus={() => setActive(true)} rows={reply ? 2 : body.length > 80 ? 3 : 1} aria-label={placeholder}
-          placeholder={placeholder} className={`${field.textarea} ${reply ? "min-h-[4.5rem]" : "min-h-11"} min-w-0 flex-1 resize-y border-line py-2.5`} />
+          placeholder={placeholder} className={`${field.textarea} ${reply ? "min-h-[4.5rem] py-2.5" : "h-11 min-h-11 py-[9px] leading-6 [&:not(:placeholder-shown)]:h-auto"} min-w-0 flex-1 resize-y border-line-strong`} />
       </div>
       <ExtrasPreview x={x} />
       {(reply || active || !!body || x.has) && (
@@ -65,7 +66,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   );
 }
 
-function Post({ p, path, canWrite, viewerId, compact, canModerate, openBase, startOpen = false }: { p: PostView; path: string; canWrite: boolean; viewerId?: string; compact?: boolean; canModerate?: boolean; openBase?: string; startOpen?: boolean }) {
+function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = false }: { p: PostView; path: string; canWrite: boolean; viewerId?: string; compact?: boolean; canModerate?: boolean; startOpen?: boolean }) {
   const t = useTranslations("posts");
   const tc = useTranslations("common");
   const ts = useTranslations("safety");
@@ -96,18 +97,20 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, openBase, sta
     );
   }
   return (
-    <article className="flex gap-3 py-4">
-      <Link href={`/profile/${p.author_id}`} aria-hidden="true" tabIndex={-1} className="flex-none">
-        <Avatar name={p.author_name} seed={p.author_seed} path={p.author_path} size={compact ? 28 : 36} />
-      </Link>
+    <article id={compact ? undefined : `post-${p.id}`} className="flex gap-3 py-4">
+      {/* Like a thread: once the replies are open, a line runs down from the picture to them. */}
+      <div className="flex flex-none flex-col items-center">
+        <Link href={`/profile/${p.author_id}`} aria-hidden="true" tabIndex={-1} className="flex-none">
+          <Avatar name={p.author_name} seed={p.author_seed} path={p.author_path} size={compact ? 28 : 36} />
+        </Link>
+        {open && !compact && <span aria-hidden="true" className="mt-2 w-0.5 flex-1 bg-line" />}
+      </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <div className="flex flex-wrap items-baseline gap-x-2 text-sm">
           <Link href={`/profile/${p.author_id}`} className="font-bold text-ink no-underline">{p.author_name}</Link>
           {verified ? <span className="inline-flex" title={tc("verified")} aria-label={tc("verified")}><IconCheck size={12} /></span> : <span className="text-muted">{tc("anonymous")}</span>}
           {p.author_region && <span className="text-muted">{p.author_region}</span>}
-          {openBase && !compact
-            ? <Link href={`${openBase}${openBase.includes("?") ? "&" : "?"}post=${p.id}`} className="text-muted underline-offset-2 hover:underline">{relTime(p.created_at, locale)}</Link>
-            : <span className="text-muted">{relTime(p.created_at, locale)}</span>}
+          <span className="text-muted">{relTime(p.created_at, locale)}</span>
           {p.is_pinned && <span className="font-bold">{t("pinned")}</span>}
           {p.locked && <span className="text-muted">· {ts("post.locked")}</span>}
         </div>
@@ -131,15 +134,10 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, openBase, sta
               className={`${press} ${vote === -1 ? "text-ink" : "text-muted"}`}>
               <Pop arrow={-1} pulse={pulse}><IconDown /></Pop>
             </button>
-            {openBase
-              // On the pinboard the replies open next to the feed.
-              ? <Link href={`${openBase}${openBase.includes("?") ? "&" : "?"}post=${p.id}`} className="inline-flex h-9 items-center gap-1.5 text-muted no-underline">
-                  <IconReply /> {tc("replies", { n: p.replies.length })}
-                </Link>
-              : <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
-                  className="inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 text-muted">
-                  <IconReply /> {tc("replies", { n: p.replies.length })}
-                </button>}
+            <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
+              className={`inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 ${open ? "text-ink" : "text-muted"}`}>
+              <IconReply /> {tc("replies", { n: p.replies.length })}
+            </button>
             {canModerate && <Moderation post={p} path={path} />}
             {viewerId === p.author_id ? (
               <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} className={btn.linkMuted}>{tc("delete")}</button>
@@ -147,7 +145,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, openBase, sta
           </div>
         )}
         {open && (
-          <div className="mt-1 flex flex-col border-l-2 border-line pl-4">
+          <div className="flex flex-col">
             {p.replies.map((r) => <Post key={r.id} p={r} path={path} canWrite={canWrite} viewerId={viewerId} compact canModerate={canModerate} />)}
             {canWrite && (!p.locked || canModerate) && <Composer ctx={{ parentId: p.id }} path={path} placeholder={t("replyTo", { name: p.author_name })} />}
           </div>
@@ -157,12 +155,12 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, openBase, sta
   );
 }
 
-/** `openBase`: the time of each post opens it on its own (the pinboard shows it next to the feed). */
-export function PostList({ posts, path, canWrite, viewerId, empty, canModerate, openBase, repliesOpen }: { posts: PostView[]; path: string; canWrite: boolean; viewerId?: string; empty?: string; canModerate?: boolean; openBase?: string; repliesOpen?: boolean }) {
+/** Replies fold open under each post. `openId`: this post starts open (from a notification); `repliesOpen`: all do. */
+export function PostList({ posts, path, canWrite, viewerId, empty, canModerate, openId, repliesOpen }: { posts: PostView[]; path: string; canWrite: boolean; viewerId?: string; empty?: string; canModerate?: boolean; openId?: string | null; repliesOpen?: boolean }) {
   if (!posts.length) return <p className="m-0 py-6 text-muted">{empty}</p>;
   return (
     <div className="flex flex-col divide-y divide-line">
-      {posts.map((p) => <Post key={p.id} p={p} path={path} canWrite={canWrite} viewerId={viewerId} canModerate={canModerate} openBase={openBase} startOpen={repliesOpen} />)}
+      {posts.map((p) => <Post key={p.id} p={p} path={path} canWrite={canWrite} viewerId={viewerId} canModerate={canModerate} startOpen={repliesOpen || p.id === openId} />)}
     </div>
   );
 }

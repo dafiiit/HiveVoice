@@ -108,6 +108,24 @@
   "newGroupShort": "Gruppe",
   "listingOffer": "{name} bietet",
   "listingNeed": "{name} sucht",
-  "toolsWith": "Gruppe daraus",
-  "toolsWithText": "Eine Gruppe mit {name}: Aufgaben, Dokumente und mehr zu zweit"
+  "create": {
+    "people": "Personen finden",
+    "group": "Gruppe gründen",
+    "contacts": "Kontakte finden",
+    "listing": "Anliegen erstellen",
+    "chat": "Chat",
+    "groupShort": "Gruppe",
+    "contact": "Kontakt",
+    "listingShort": "Anliegen"
+  },
+  "chatTools": "Werkzeuge",
+  "chatToolsText": "Aufgaben, Dokumente, Ziele … direkt in diesem Chat. Ausschalten blendet sie aus, gelöscht wird nichts.",
+  "chatTab": "Chat",
+  "searchIn": {
+    "all": "Durchsuchen",
+    "chats": "Chats durchsuchen",
+    "groups": "Gruppen durchsuchen",
+    "requests": "Anfragen durchsuchen",
+    "listings": "Anliegen durchsuchen"
+  }
 }

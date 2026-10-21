@@ -14,11 +14,13 @@ import { ListingDetail } from "@/components/listings/ListingDetail";
 import { AreaIcon } from "@/components/ui/Logo";
 import { Conversation } from "@/components/connect/Conversation";
 import { ChatMenu } from "@/components/connect/ChatMenu";
+import { ChatTools } from "@/components/connect/ChatTools";
+import { GROUP_TOOLS, type GroupTool } from "@/lib/group-tools";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { ListSearch } from "@/components/connect/ListSearch";
 import { IconBack, IconPlus } from "@/components/ui/Icons";
-import { btn } from "@/components/ui/styles";
+import { btn, tab } from "@/components/ui/styles";
 import { Notice } from "@/components/ui/Page";
 
 export async function generateMetadata() {
@@ -47,21 +49,22 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
   const me = session?.profile.id ?? null;
   const t = await getTranslations("connect");
   const ts = await getTranslations("safety");
+  const tg = await getTranslations("group");
   const locale = await getLocale();
   const mode = await feedOrder();
   const filter: Filter = (FILTERS as readonly string[]).includes(String(sp.f)) ? (sp.f as Filter) : "all";
   const sel = group ? `g:${group}` : typeof sp.c === "string" ? sp.c : "";
   const s = typeof sp.s === "string" ? sp.s.trim().slice(0, 80) : "";
+  // A tool of the opened chat (?t=tasks …), shown instead of the messages.
+  const tool = typeof sp.t === "string" && (GROUP_TOOLS as readonly string[]).includes(sp.t) ? (sp.t as GroupTool) : null;
 
   const data = await asViewer(viewer, async (tx) => {
-    // Test phase: demo profiles send a few chats and requests so this page is not empty.
-    if (me) await tx`select app.ensure_demo_chats()`;
     const groups = me ? await tx<{ id: string; slug: string; name: string; member_count: number; preview: string | null; author: string | null; at: string | null }[]>`
       select g.id, g.slug::text, g.name, g.member_count,
         (select p.body from public.posts p where p.group_id = g.id and p.parent_id is null and p.hidden_at is null order by p.created_at desc limit 1) as preview,
         (select a.display_name from public.posts p join public.profiles a on a.id = p.author_id where p.group_id = g.id and p.parent_id is null order by p.created_at desc limit 1) as author,
         (select max(p.created_at) from public.posts p where p.group_id = g.id) as at
-      from public.group_members m join public.groups g on g.id = m.group_id where m.profile_id = ${me} order by at desc nulls last` : [];
+      from public.group_members m join public.groups g on g.id = m.group_id where m.profile_id = ${me} and g.conversation_id is null order by at desc nulls last` : [];
     const directs = me ? await tx<DirectRow[]>`
       select c.id, c.title, op.display_name as other, op.avatar_seed as other_seed, op.avatar_path as other_path, c.last_message_at as at,
         (select m.body from public.messages m where m.conversation_id = c.id order by m.created_at desc limit 1) as preview,
@@ -117,7 +120,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
     type Pane =
       | { kind: "group"; slug: string }
       | { kind: "listing"; id: string }
-      | { kind: "direct"; id: string; other: string; other_id: string; other_seed: number; other_path: string | null; title: string | null; listing_id: string | null; listing_kind: string | null; messages: Message[]; other_read_at: string | null; muted: boolean; blocked: boolean; ttl_days: number | null; ttl_proposed_days: number | null; ttl_by_me: boolean; as_of: string }
+      | { kind: "direct"; id: string; other: string; other_id: string; other_seed: number; other_path: string | null; title: string | null; listing_id: string | null; listing_kind: string | null; messages: Message[]; other_read_at: string | null; muted: boolean; blocked: boolean; ttl_days: number | null; ttl_proposed_days: number | null; ttl_by_me: boolean; as_of: string; tools: { slug: string; tools: GroupTool[] } | null }
       | { kind: "request"; request: RequestView };
     let pane: Pane | null = null;
     if (sel.startsWith("g:")) {
@@ -143,7 +146,8 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
         const messages = await loadMessages(tx, id);
         await tx`update public.conversation_participants set last_read_at = now() where conversation_id = ${id} and profile_id = ${me}`;
         await tx`update public.notifications set read_at = now() where profile_id = ${me} and kind = 'message' and read_at is null and payload ->> 'conversation_id' = ${id}`;
-        pane = { kind: "direct", ...c, messages };
+        const [tg] = await tx<{ slug: string; tools: GroupTool[] }[]>`select slug::text, tools from public.groups where conversation_id = ${id}`;
+        pane = { kind: "direct", ...c, messages, tools: tg ?? null };
       }
     } else if ((sel.startsWith("c:") || sel.startsWith("j:")) && me) {
       const request = requests.find((r) => r.id === sel.slice(2) && r.type === (sel.startsWith("c:") ? "contact" : "join"));
@@ -208,9 +212,20 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
       {!session && <Notice tone="status" className="m-3 text-sm font-normal md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/friends" className="font-bold text-ink underline">{t("signIn")}</Link></Notice>}
       <div className="flex min-h-0 flex-1 flex-col bg-surface md:flex-row">
         <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:w-[340px] md:flex-none md:border-r lg:w-[380px]`}>
-          <div className="flex flex-none items-center justify-between gap-2 px-4 pb-1 pt-4">
-            <h1 className="m-0 text-[22px] font-bold leading-tight">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
-            {session && <Link href="/new/group" aria-label={t("newGroup")} title={t("newGroup")} className={btn.secondarySm}><IconPlus size={14} /> {t("newGroupShort")}</Link>}
+          <div className="flex flex-none items-center justify-end gap-2 px-4 pb-1 pt-4 md:justify-between">
+            <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
+            {session && (() => {
+              // The "+" fits the section: people to chat with, a group, new contacts on the pinboard, an own listing.
+              const make: Record<Filter, { href: string; label: string; short: string }> = {
+                all: { href: "/community/people", label: t("create.people"), short: t("create.chat") },
+                chats: { href: "/community/people", label: t("create.people"), short: t("create.chat") },
+                groups: { href: "/new/group", label: t("create.group"), short: t("create.groupShort") },
+                requests: { href: "/community", label: t("create.contacts"), short: t("create.contact") },
+                listings: { href: "/me/listings/new", label: t("create.listing"), short: t("create.listingShort") },
+              };
+              const c = make[filter];
+              return <Link href={c.href} title={c.label} className={btn.primarySm}><IconPlus size={14} /> {c.short}</Link>;
+            })()}
           </div>
           {session && (
             // Phones only: on wide screens the sidebar holds these as sections.
@@ -225,13 +240,13 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
             </div>
           )}
           <div className="flex flex-none items-center border-b border-line px-3 py-2 md:px-4">
-            <ListSearch listId="chat-list" value={s} label={t("listSearch")} keep={filter !== "all" ? { f: filter } : {}} />
+            <ListSearch listId="chat-list" value={s} label={t(`searchIn.${filter}`)} keep={filter !== "all" ? { f: filter } : {}} />
           </div>
           {!paneOpen && !s && first && <AutoOpen href={rowHref(first)} />}
           {shown.map((r) => (
             // Two lines like the marketplace: name and time, then the latest message (or what it is about).
             <Link key={r.key} href={rowHref(r)} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
-              className={`flex items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
+              className={`flex min-h-[60px] items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:min-h-[68px] md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
               <Avatar name={r.name} seed={r.seed} path={r.path} size={40} group={r.groupAvatar ?? r.kind === "group"} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="flex items-baseline justify-between gap-2"><strong className="truncate">{r.name}</strong>{r.at && <span className="flex-none text-xs text-muted">{relTime(r.at, locale)}</span>}</span>
@@ -283,12 +298,26 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
                       : t("about", { title: pane.title })}</span>
                     : <span className="text-sm text-muted">{t("private", { title: "" }).replace(/ · $/, "")}</span>}
                 </div>
-                <Link href={`/new/group?with=${pane.other_id}`} className={`${btn.secondarySm} max-sm:hidden`} title={t("toolsWithText", { name: pane.other.split(" ")[0] })}>{t("toolsWith")}</Link>
+                <ChatTools conversationId={pane.id} tools={pane.tools?.tools ?? []} />
                 <ChatMenu conversationId={pane.id} otherId={pane.other_id} otherName={pane.other.split(" ")[0]} muted={pane.muted} blocked={pane.blocked}
                   ttl={{ days: pane.ttl_days, proposedDays: pane.ttl_proposed_days, proposedByMe: pane.ttl_by_me }} />
               </header>
               {pane.blocked && <Notice tone="status" className="flex-none text-sm font-normal">{ts("chat.blockedNote", { name: pane.other.split(" ")[0] })}</Notice>}
-              <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} verified={!!session?.profile.verified} asOf={pane.as_of} />
+              {/* With tools switched on, the chat gets tabs: "Chat" first, then each tool (the chat's own small group). */}
+              {pane.tools && pane.tools.tools.length > 0 && (
+                <div role="tablist" aria-label={t("chatTools")} className="flex flex-none overflow-x-auto border-b border-line">
+                  {[null, ...GROUP_TOOLS.filter((k) => pane.tools!.tools.includes(k))].map((k) => (
+                    <Link key={k ?? "chat"} role="tab" aria-selected={(tool ?? null) === k} href={`${href({ c: `d:${pane.id}` })}${k ? `&t=${k}` : ""}`} className={tab((tool ?? null) === k)}>
+                      {k ? tg(`tools.items.${k}.name`) : t("chatTab")}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              {tool && pane.tools ? (
+                <div className={`-mx-3 -mb-2 min-h-0 flex-1 overflow-y-auto md:-mx-6 md:-mb-4 ${PANE_TITLES}`}>
+                  <GroupView slug={pane.tools.slug} sp={{ tab: tool }} base={`/groups/${pane.tools.slug}`} bare />
+                </div>
+              ) : <Conversation key={pane.id} id={pane.id} initial={pane.messages} viewerId={me} otherName={pane.other.split(" ")[0]} otherReadAt={pane.other_read_at} verified={!!session?.profile.verified} asOf={pane.as_of} />}
             </>
           )}
           {pane?.kind === "request" && <div className="min-h-0 flex-1 overflow-y-auto"><RequestPane key={pane.request.id} r={pane.request} /></div>}

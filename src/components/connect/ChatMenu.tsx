@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { blockProfile, hideChat, muteChat, proposeTtl } from "@/lib/actions/safety";
@@ -23,7 +22,6 @@ export function ChatMenu({ conversationId, otherId, otherName, muted, blocked, t
   return (
     <Popover label={<span>{t("more")}</span>} align="right">
       <div className="flex flex-col" role="group" aria-label={t("more")}>
-        <Link href={`/new/group?with=${otherId}`} className={`${item} no-underline`}>{t("groupWith", { name: otherName })}</Link>
         <button type="button" disabled={pending} className={item} onClick={() => run(() => muteChat(conversationId, !muted))}>
           {muted ? t("unmute") : t("mute")}
         </button>

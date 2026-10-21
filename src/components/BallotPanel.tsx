@@ -93,7 +93,7 @@ export function BallotPanel({ ballot, voted, segment, turnout, signedIn, canVote
 
         {open && canVote && (!voted || changing) && !sheet && (
           <>
-            <div role="radiogroup" aria-label={t("options")} className="grid gap-2 md:grid-cols-3">
+            <div role="radiogroup" aria-label={t("options")} className="grid gap-2 @2xl:grid-cols-3">
               {OPTIONS.map((o) => (
                 <button key={o.k} type="button" role="radio" aria-checked={choice === o.k} onClick={() => setChoice(o.k)}
                   className={`flex flex-col items-start gap-3 p-4 text-left ${choice === o.k ? "bg-ink text-on-ink" : "border border-line bg-surface text-ink"}`}>
@@ -113,7 +113,7 @@ export function BallotPanel({ ballot, voted, segment, turnout, signedIn, canVote
         {open && sheet && (
           <div role="dialog" aria-label={t("before")} className="flex flex-col gap-4 border-2 border-ink bg-surface p-5">
             <h3 className="m-0 text-xl font-bold">{t("before")}</h3>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 @2xl:grid-cols-2">
               <div className="flex flex-col gap-2"><strong>+ {t("strongestPro")}</strong>{pro.map((p) => <span key={p} className="text-sm">{p}</span>)}</div>
               <div className="flex flex-col gap-2"><strong>− {t("strongestContra")}</strong>{contra.map((p) => <span key={p} className="text-sm">{p}</span>)}</div>
             </div>

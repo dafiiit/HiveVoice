@@ -1452,3 +1452,29 @@ describe("to-do lists", () => {
     await fails(tx, (sp) => as(sp, b, () => sp`select app.set_object_access('list', ${id}, 'public', 'public')`));
   }));
 });
+
+describe("examples", () => {
+  it("are made once per account and can be hidden for everyone without deleting anything", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada");
+    await as(tx, a, () => tx`select app.ensure_demo()`);
+    await as(tx, a, () => tx`select app.ensure_demo()`);
+    const mine = () => as(tx, a, () => tx<{ chats: number; groups: number; requests: number; listings: number; lists: number; notes: number }[]>`
+      select (select count(*)::int from public.conversation_participants where profile_id = ${a}) as chats,
+             (select count(*)::int from public.group_members where profile_id = ${a}) as groups,
+             (select count(*)::int from public.contact_requests where to_profile_id = ${a}) as requests,
+             (select count(*)::int from public.listings where owner_id = ${a}) as listings,
+             (select count(*)::int from public.todo_lists where owner_id = ${a}) as lists,
+             (select count(*)::int from public.resources where owner_id = ${a}) as notes`);
+    expect((await mine())[0]).toEqual({ chats: 1, groups: 1, requests: 1, listings: 2, lists: 1, notes: 1 });
+    // The own examples are private: somebody else sees neither the offer nor the group.
+    const b = await person(tx, "Ben");
+    expect(await as(tx, b, () => tx`select 1 from public.listings where owner_id = ${a}`)).toHaveLength(0);
+
+    await tx`select app.admin_set_setting('demo_visible', 'false'::jsonb)`;
+    expect((await mine())[0]).toEqual({ chats: 0, groups: 0, requests: 0, listings: 0, lists: 0, notes: 0 });
+    expect(await as(tx, a, () => tx`select 1 from public.profiles where is_demo`)).toHaveLength(0);
+    expect(await as(tx, null, () => tx`select 1 from public.initiatives where demo`)).toHaveLength(0);
+    await tx`select app.admin_set_setting('demo_visible', 'true'::jsonb)`;
+    expect((await mine())[0].chats).toBe(1);
+  }));
+});

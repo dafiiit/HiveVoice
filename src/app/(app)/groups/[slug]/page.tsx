@@ -31,7 +31,7 @@ import { ShareBlock } from "@/components/ShareBlock";
 import { Collection, type CollectionItem } from "@/components/refs/Collection";
 import { loadRefCards, type RefCard } from "@/lib/refs";
 import { BackLink, Notice, Page, Section, Tabs } from "@/components/ui/Page";
-import { dateLong } from "@/lib/format";
+import { dateLong, dateTime } from "@/lib/format";
 
 const TABS = ["goals", "talk", "links", "collection", "needs", "tasks", "team", "about"] as const;
 
@@ -67,8 +67,9 @@ export default async function GroupPage({ params, searchParams }: PageProps<"/gr
 /**
  * One group. `base`: the address its tabs build on (in Freunde /friends/g/…, in Gemeinschaft /community/groups/…);
  * `embedded`: next to a list, side column below the content, no back link; `first`: the tab it opens with.
+ * `bare`: only the content of the chosen tab (`sp.tab`), for the tools of a private chat, whose tabs sit in the chat.
  */
-export async function GroupView({ slug, sp, base, embedded = false, first: firstTab }: { slug: string; sp: Record<string, string | string[] | undefined>; base: string; embedded?: boolean; first?: "talk" }) {
+export async function GroupView({ slug, sp, base, embedded = false, first: firstTab, bare = false }: { slug: string; sp: Record<string, string | string[] | undefined>; base: string; embedded?: boolean; first?: "talk"; bare?: boolean }) {
   const session = await getSession();
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id;
@@ -240,43 +241,8 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
     </>
   );
 
-  return (
-    <Page aside={embedded ? undefined : aside}>
-        {!embedded && <BackLink href="/friends?f=groups" label={t("groups")} />}
-        {g.cover_path && <Cover seed={g.cover_seed} src={g.cover_path} ratio="21 / 9" />}
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className={tag}>{t(`kinds.${g.kind}`)}</span>
-            {g.region_name && <span className={tag}>{g.region_name}</span>}
-            <span className={tag}>{t(`policy.${g.join_policy}`)}</span>
-            {g.visibility !== "public" && <span className={tag}>{tr(`vis.${g.visibility}` as "vis.members")}</span>}
-            {g.adults_only && <span className={tag}>{tr("adultsOnly")}</span>}
-            {data.tags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}
-          </div>
-          <h1 className="display m-0 break-words">{g.name}</h1>
-          {g.summary && <p className="m-0 max-w-[720px] text-base md:text-xl">{g.summary}</p>}
-          <span className="flex flex-wrap items-center gap-2 text-sm">
-            {admins.slice(0, 3).map((a) => <Avatar key={a.id} name={a.name} seed={a.seed} size={28} />)}
-            {t("memberCount", { n: g.member_count })}
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
-            lastAdmin={role === "admin" && admins.length === 1} />
-          {session && <FollowButton type="group" id={g.id} following={data.following} size="md" />}
-          <ShareBlock path={`/groups/${slug}`} title={g.name} isPublic={g.visibility === "public"} item={session ? { type: "group", id: g.id } : null} />
-        </div>
-        {g.archived_at && <Notice tone="warning">{tr("danger.archived")}</Notice>}
-        {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
-
-        {locked && <Notice tone="status" className="font-normal">{data.invite && g.visibility === "secret" ? tr("lockedSecret") : tr("lockedTitle")}</Notice>}
-        {!locked && <Tabs label={t("sections")} moreLabel={tc("more")}
-          items={front.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))}
-          more={back.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))} />}
-        {!locked && role === "admin" && g.tools.length < GROUP_TOOLS.length && active !== "about" && (
-          <Link href={`${path}?tab=about#tools`} className="self-start text-sm text-ink underline">{t("tools.add")}</Link>
-        )}
-
+  const content = (
+    <>
         {!locked && active === "goals" && (
           <Goals slug={slug} groupId={g.id} goals={data.goals} members={data.members.map((m) => ({ id: m.id, name: m.name }))}
             canPropose={data.can_propose} canEdit={role === "admin" || role === "maintainer"} canVote={data.can_vote} isMember={!!role && role !== "guest"} signedIn={!!session} />
@@ -300,7 +266,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
                 : <span className="text-sm text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</span>}
             </div>
             {data.links.length === 0 && <Notice tone="hint" className="text-base">{tl("empty")}</Notice>}
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 @2xl:grid-cols-2">
               {data.links.map((r) => <LinkCard key={r.id} r={r} me={me ?? null} canVote={!!session?.profile.verified} />)}
             </div>
           </section>
@@ -350,7 +316,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
                   {data.team?.audit.map((a) => (
                     <span key={a.id} className="flex flex-wrap justify-between gap-2 border-b border-line py-1.5 text-sm">
                       <span>{tr.has(`log.actions.${a.action}`) ? tr(`log.actions.${a.action}` as "log.actions.set_role") : a.action}{a.actor ? ` · ${a.actor}` : ""}</span>
-                      <span className="text-muted">{new Date(a.at).toLocaleString(locale)}</span>
+                      <span className="text-muted">{dateTime(a.at, locale)}</span>
                     </span>
                   ))}
                 </Section>
@@ -370,6 +336,47 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
             </dl>
           </section>
         )}
+    </>
+  );
+  if (bare) return <div className="@container"><div className="flex flex-col gap-5 px-4 py-4 md:px-6">{content}</div></div>;
+  return (
+    <Page aside={embedded ? undefined : aside}>
+        {!embedded && <BackLink href="/friends?f=groups" label={t("groups")} />}
+        {g.cover_path && <Cover seed={g.cover_seed} src={g.cover_path} ratio={embedded ? "5 / 1" : "21 / 9"} />}
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className={tag}>{t(`kinds.${g.kind}`)}</span>
+            {g.region_name && <span className={tag}>{g.region_name}</span>}
+            <span className={tag}>{t(`policy.${g.join_policy}`)}</span>
+            {g.visibility !== "public" && <span className={tag}>{tr(`vis.${g.visibility}` as "vis.members")}</span>}
+            {g.adults_only && <span className={tag}>{tr("adultsOnly")}</span>}
+            {data.tags.map((x) => <span key={x.slug} className={tag}>#{x.slug}</span>)}
+          </div>
+          <h1 className="display m-0 break-words">{g.name}</h1>
+          {g.summary && <p className="m-0 max-w-[720px] text-base md:text-xl">{g.summary}</p>}
+          <span className="flex flex-wrap items-center gap-2 text-sm">
+            {admins.slice(0, 3).map((a) => <Avatar key={a.id} name={a.name} seed={a.seed} size={28} />)}
+            {t("memberCount", { n: g.member_count })}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <JoinPanel slug={slug} id={g.id} policy={g.join_policy} role={role} requested={data.requested} signedIn={!!session}
+            lastAdmin={role === "admin" && admins.length === 1} />
+          {session && <FollowButton type="group" id={g.id} following={data.following} size="md" />}
+          <ShareBlock path={`/groups/${slug}`} title={g.name} isPublic={g.visibility === "public"} item={session ? { type: "group", id: g.id } : null} />
+        </div>
+        {g.archived_at && <Notice tone="warning">{tr("danger.archived")}</Notice>}
+        {data.invite && <InviteBanner requestId={data.invite.id} by={data.invite.by ?? "?"} slug={slug} />}
+
+        {locked && <Notice tone="status" className="font-normal">{data.invite && g.visibility === "secret" ? tr("lockedSecret") : tr("lockedTitle")}</Notice>}
+        {!locked && <Tabs label={t("sections")} moreLabel={tc("more")}
+          items={front.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))}
+          more={back.map((k) => ({ href: tabHref(k), label: labels[k], on: active === k }))} />}
+        {!locked && role === "admin" && g.tools.length < GROUP_TOOLS.length && active !== "about" && (
+          <Link href={`${path}?tab=about#tools`} className="self-start text-sm text-ink underline">{t("tools.add")}</Link>
+        )}
+
+{content}
       {embedded && aside}
     </Page>
   );

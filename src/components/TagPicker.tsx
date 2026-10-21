@@ -2,12 +2,11 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { tagSlug } from "@/lib/slug";
-import { Carousel } from "./ui/Carousel";
 import { chip, field } from "./ui/styles";
 
 /**
- * Pick hashtags. Chosen tags sit on top and can be removed; ideas run in a
- * two-row carousel (swipe, scroll or use the arrows) so many more fit in little space.
+ * Pick hashtags. Chosen tags sit on top and can be removed; ideas wrap in rows (never cut off),
+ * twelve at first and the rest behind "Mehr Ideen".
  */
 export function TagPicker({ label, value, onChange, suggestions, placeholder, max = 20 }: {
   label: string;
@@ -19,6 +18,7 @@ export function TagPicker({ label, value, onChange, suggestions, placeholder, ma
 }) {
   const t = useTranslations("common.tags");
   const [draft, setDraft] = useState("");
+  const [all, setAll] = useState(false);
   const add = (raw: string) => {
     const s = tagSlug(raw);
     if (s.length >= 2 && !value.includes(s) && value.length < max) onChange([...value, s]);
@@ -40,16 +40,20 @@ export function TagPicker({ label, value, onChange, suggestions, placeholder, ma
       {ideas.length > 0 && (
         <div className="flex flex-col gap-1.5">
           <span className="text-[13px] text-muted">{t("ideas")}</span>
-          <Carousel items={ideas} keyOf={(s) => s} rows={2} loop label={`${label} · ${t("ideas")}`}
-            render={(s, hidden) => (
-              <button type="button" tabIndex={hidden ? -1 : 0} disabled={value.length >= max} onClick={() => add(s)} className={`${chip(false)} whitespace-nowrap disabled:opacity-45`}>#{s}</button>
-            )} />
+          <div role="group" aria-label={`${label} · ${t("ideas")}`} className="flex flex-wrap gap-1.5">
+            {(all ? ideas : ideas.slice(0, 12)).map((s) => (
+              <button key={s} type="button" disabled={value.length >= max} onClick={() => add(s)} className={`${chip(false)} whitespace-nowrap disabled:opacity-45`}>#{s}</button>
+            ))}
+            {ideas.length > 12 && (
+              <button type="button" onClick={() => setAll(!all)} className={`${chip(false)} bg-transparent underline`}>{all ? t("fewer") : t("more", { n: ideas.length - 12 })}</button>
+            )}
+          </div>
         </div>
       )}
       <div className="flex max-w-[420px] gap-2">
-        <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={placeholder} aria-label={label}
+        <input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder={placeholder ?? t("own")} aria-label={label}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(draft); setDraft(""); } }} className={field.input} />
-        <button type="button" aria-label={t("add")} onClick={() => { add(draft); setDraft(""); }} className="h-11 flex-none border border-ink bg-transparent px-4 font-bold text-ink">+</button>
+        <button type="button" aria-label={t("add")} onClick={() => { add(draft); setDraft(""); }} className="h-11 w-11 flex-none border border-ink bg-transparent font-bold text-ink">+</button>
       </div>
     </fieldset>
   );

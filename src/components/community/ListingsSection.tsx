@@ -20,16 +20,23 @@ export async function ListingsSection({ sp, id }: { sp: SP; id?: string }) {
   const keep = new URLSearchParams(Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]);
   const tabHref = (k: "offers" | "needs") => { const p = new URLSearchParams(keep); p.set("tab", k); p.delete("cat"); return `/community/listings?${p}`; };
   const homeRegions = place?.chain.map((r) => r.id) ?? [];
+  // Phones see the map only when asked for it (on wide screens it fills the right side anyway).
+  const mapOpen = !id && sp.view === "map";
+  const listHref = (() => { const p = new URLSearchParams(keep); p.delete("view"); return `/community/listings${p.size ? `?${p}` : ""}`; })();
+  const mapHref = (() => { const p = new URLSearchParams(keep); p.set("view", "map"); return `/community/listings?${p}`; })();
   let detail: ReactNode;
   if (id) detail = <><BackToList href={`/community/listings${keep.size ? `?${keep}` : ""}`} label={t("communityTitle")} /><ListingDetail id={id} embedded /></>;
-  else detail = <MarketExplore sp={sp} session={session} side={side} homeRegions={homeRegions} base="/community/listings" layout="map" />;
+  else detail = <>{mapOpen && <BackToList href={listHref} label={t("communityTitle")} />}<MarketExplore sp={sp} session={session} side={side} homeRegions={homeRegions} base="/community/listings" layout="map" /></>;
   return (
-    <Split open={!!id}
+    <Split open={!!id || mapOpen}
       list={
         <div className="flex flex-col gap-3 px-4 pt-4">
           <div className="flex items-center justify-between gap-2">
             <h1 className="m-0 text-[22px] font-bold leading-tight">{t("communityTitle")}</h1>
+            <span className="flex items-center gap-2">
+            <Link href={mapHref} className={`${btn.secondarySm} md:hidden`}>{t("map")}</Link>
             <Link href={session ? "/me/listings/new" : "/login?next=/me/listings/new"} className={btn.primarySm} title={t("create")}><IconPlus size={14} /> <span className="max-lg:sr-only">{t("create")}</span></Link>
+            </span>
           </div>
           <div role="tablist" aria-label={t("view")} className="flex border-b border-line">
             {(["offers", "needs"] as const).map((k) => (

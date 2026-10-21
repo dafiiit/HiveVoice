@@ -27,9 +27,9 @@ test.describe("groups: ownership, invitations, rules", () => {
       await page.getByRole("button", { name: "Gruppe gründen", exact: true }).click();
       // Public groups ask for the real name; an account that went anonymous cannot found one (the mode changes once a month only).
       const needsName = page.getByText("Dafür brauchst du deinen Klarnamen");
-      await Promise.race([page.waitForURL(/\/groups\/[a-z0-9-]+$/, { timeout: 30_000 }), needsName.waitFor({ timeout: 30_000 })]).catch(() => undefined);
+      await Promise.race([page.waitForURL(/\/(groups|friends\/g)\/[a-z0-9-]+$/, { timeout: 30_000 }), needsName.waitFor({ timeout: 30_000 })]).catch(() => undefined);
       test.skip(await needsName.isVisible(), "the test account appears under a pseudonym right now");
-      await expect(page).toHaveURL(/\/groups\/[a-z0-9-]+$/, { timeout: 30_000 });
+      await expect(page).toHaveURL(/\/(groups|friends\/g)\/[a-z0-9-]+$/, { timeout: 30_000 });
       const groupUrl = page.url();
 
       await page.goto(`${groupUrl}?tab=team`);
@@ -38,7 +38,7 @@ test.describe("groups: ownership, invitations, rules", () => {
       // An invitation link, seen by a guest.
       await page.getByRole("button", { name: "Link erstellen" }).click();
       const link = await page.getByLabel("Einladungslink").inputValue();
-      expect(link).toMatch(/\/einladung\/[0-9a-f]{32}$/);
+      expect(link).toMatch(/\/invite\/[0-9a-f]{32}$/);
       // Let the list refresh finish before a second browser asks for the same server (the dev server stalls on three parallel renders).
       await expect(page.getByRole("button", { name: "Widerrufen" }).first()).toBeVisible({ timeout: 60_000 });
       const guest = await browser.newContext();

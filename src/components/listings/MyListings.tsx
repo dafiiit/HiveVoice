@@ -1,5 +1,6 @@
 "use client";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { setListingStatus, toggleAlly } from "@/lib/actions/listings";
@@ -38,4 +39,19 @@ export function MyListings({ items }: { items: MyListing[] }) {
 export function AllyButton({ id, on, count }: { id: string; on: boolean; count: number }) {
   const t = useTranslations("market");
   return <ToggleButton on={on} size="sm" quietOn onToggle={(next) => toggleAlly(id, next)} labels={{ on: t("meTooOn", { n: count }), off: t("meToo", { n: count }) }} />;
+}
+
+/** On the own listing: pause it (it stays, nobody finds it), take it up again, or close it for good. */
+export function ListingStatus({ id, kind, status }: { id: string; kind: "offer" | "need"; status: string }) {
+  const t = useTranslations("market.mine");
+  const router = useRouter();
+  const [pending, start] = useTransition();
+  const set = (next: "active" | "paused" | "closed") => start(async () => { await setListingStatus(id, next, kind); router.refresh(); });
+  if (status === "closed") return null;
+  return (
+    <span className="flex items-center gap-3">
+      <button type="button" disabled={pending} onClick={() => set(status === "paused" ? "active" : "paused")} className={btn.secondarySm}>{status === "paused" ? t("resume") : t("pause")}</button>
+      <button type="button" disabled={pending} onClick={() => set("closed")} className={`${btn.linkMuted} text-sm`}>{t("close")}</button>
+    </span>
+  );
 }

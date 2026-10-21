@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer, sql } from "@/lib/db";
 import { getSession } from "@/lib/session";
@@ -42,8 +42,16 @@ export async function generateMetadata({ params }: PageProps<"/initiatives/[id]"
   return row ? { title: row.title, description: row.summary ?? undefined } : {};
 }
 
+const qs = (sp: Record<string, string | string[] | undefined>) => {
+  const p = new URLSearchParams(Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]);
+  return p.size ? `?${p}` : "";
+};
+
+/** An initiative opens in Gemeinschaft → Gruppen, next to the list. */
 export default async function InitiativePage({ params, searchParams }: PageProps<"/initiatives/[id]">) {
-  return <InitiativeView id={(await params).id} sp={await searchParams} base={`/initiatives/${(await params).id}`} />;
+  const { id } = await params;
+  if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
+  redirect(`/community/groups/i/${id}${qs(await searchParams)}`);
 }
 
 /** One initiative. `base`: its address; `embedded`: next to a list, side column below the content, no back link. */

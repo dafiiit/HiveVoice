@@ -1,6 +1,6 @@
 import { ChatScroll } from "@/components/ChatScroll";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer, sql } from "@/lib/db";
 import { getSession } from "@/lib/session";
@@ -48,9 +48,20 @@ export async function generateMetadata({ params }: PageProps<"/groups/[slug]">) 
   return g ? { title: g.name, description: g.summary ?? undefined } : {};
 }
 
+const qs = (sp: Record<string, string | string[] | undefined>) => {
+  const p = new URLSearchParams(Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]);
+  return p.size ? `?${p}` : "";
+};
+
+/** A group opens in its area: my groups in Freunde, the others in Gemeinschaft, each next to its list. */
 export default async function GroupPage({ params, searchParams }: PageProps<"/groups/[slug]">) {
   const { slug } = await params;
-  return <GroupView slug={slug} sp={await searchParams} base={`/groups/${slug}`} />;
+  const sp = await searchParams;
+  const session = await getSession();
+  const [g] = await asViewer(session ? { authId: session.authId, profileId: session.profile.id } : null, (tx) =>
+    tx<{ member: boolean }[]>`select app.group_role(g.id) is not null as member from public.groups g where g.slug = ${slug}`);
+  if (!g) notFound();
+  redirect(`${g.member ? "/friends/g" : "/community/groups"}/${slug}${qs(sp)}`);
 }
 
 /**

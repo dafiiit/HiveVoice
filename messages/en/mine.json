@@ -73,5 +73,6 @@
   "pick": "Pick something on the left and it opens here.",
   "newListing": "Listing",
   "newProject": "Initiative",
-  "paused": "paused"
+  "paused": "paused",
+  "new": "New"
 }

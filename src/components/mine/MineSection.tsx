@@ -5,7 +5,9 @@ import { requireSession } from "@/lib/session";
 import { relTime } from "@/lib/format";
 import { BackToList, ListPane, Pick, Split, type ListRow } from "@/components/shell/Split";
 import { NewList } from "./TodoList";
-import { IconLock } from "@/components/ui/Icons";
+import Link from "next/link";
+import { IconLock, IconPlus } from "@/components/ui/Icons";
+import { Popover } from "@/components/ui/Popover";
 
 export type MineKind = "all" | "notes" | "uploads" | "lists" | "projects" | "listings";
 
@@ -57,7 +59,14 @@ export async function MineSection({ kind, selected, detail, open }: { kind: Mine
     : kind === "listings" ? { href: "/me/listings/new", label: t("newListing") }
     : kind === "projects" ? { href: "/new/initiative", label: t("newProject") }
     : kind === "lists" ? <NewList label={t("newList")} />
-    : undefined;
+    // The overview: one "+" for everything that can be made here.
+    : <Popover align="right" label={<><IconPlus size={14} /> {t("new")}</>}>
+        <div className="flex flex-col" role="group" aria-label={t("new")}>
+          {([["/me/notes/new", t("newNote")], ["/me/uploads/new", t("newUpload")], ["/me/lists", t("newList")], ["/me/listings/new", t("newListing")], ["/new/initiative", t("newProject")]] as const).map(([href, label]) => (
+            <Link key={href} href={href} className="flex h-10 items-center border-b border-line text-ink no-underline last:border-b-0">{label}</Link>
+          ))}
+        </div>
+      </Popover>;
   const title = kind === "all" ? t("title") : t(`filters.${kind}`);
 
   return (

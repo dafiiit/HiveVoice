@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { BackLink, Notice, Page, Section } from "@/components/ui/Page";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
@@ -19,8 +19,11 @@ import { priceLabel } from "@/components/listings/price";
 
 type Profile = { id: string; display_name: string; display_mode: string; avatar_seed: number; avatar_path: string | null; headline: string | null; bio: string | null; helped_count: number; region: string | null; onboarded_at: string | null };
 
+/** A profile opens in Gemeinschaft → Personen, next to the list. */
 export default async function ProfilePage({ params }: PageProps<"/profile/[id]">) {
-  return <ProfileView id={(await params).id} />;
+  const { id } = await params;
+  if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
+  redirect(`/community/people/${id}`);
 }
 
 /** One person's profile; `embedded`: next to the list of people, side column below, no back link. */

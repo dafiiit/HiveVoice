@@ -92,7 +92,7 @@ test.describe("safety", () => {
 
 test("a guest sees a profile in short: no bio, no region, a hint to sign in", async ({ page }) => {
   await page.goto("/community/people");
-  const first = page.locator("main a[href^='/profile/']").first();
+  const first = page.locator("main a[href^='/community/people/']").first();
   if (!(await first.count())) test.skip(true, "no profile is findable by a guest in this database");
   await first.click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

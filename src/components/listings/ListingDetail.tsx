@@ -10,7 +10,7 @@ import { Cover } from "../ui/Cover";
 import { tag } from "../ui/styles";
 import { ReportButton } from "../ReportDialog";
 import { ContactButton } from "./ContactButton";
-import { AllyButton } from "./MyListings";
+import { AllyButton, ListingStatus } from "./MyListings";
 import { priceLabel } from "./price";
 import { ShareBlock } from "../ShareBlock";
 import { EditListing } from "./EditListing";
@@ -106,6 +106,7 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
           access={data.access ? <AccessPanel bare type="listing" id={l.id} read={data.access.read_scope} write={data.access.write_scope} hasGroup={!!l.group_slug}
           linkUrl={data.access.link_token ? `${origin}/r/listing/${l.id}?k=${data.access.link_token}` : null} grants={data.grants} path={`/listings/${id}`} /> : undefined} />
         {(own || data.canEdit) && <EditListing id={l.id} title={l.title} description={l.description} path={`/listings/${id}`} />}
+        {own && <ListingStatus id={l.id} kind={kind} status={l.status} />}
         {!own && session && <span className="ml-auto"><ReportButton type="listing" id={l.id} /></span>}
       </div>
       <dl className="m-0 grid grid-cols-[minmax(110px,140px)_1fr] gap-x-4 gap-y-2 border-t border-line pt-4">

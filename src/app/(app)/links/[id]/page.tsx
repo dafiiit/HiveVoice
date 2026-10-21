@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getOrigin } from "@/lib/origin";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
@@ -36,8 +36,25 @@ type Meta = {
   trashed_at: string | null; copied_from: string | null; copied_title: string | null; level: number; lock: { holder: string; mine: boolean } | null;
 };
 
+const qs = (sp: Record<string, string | string[] | undefined>) => {
+  const p = new URLSearchParams(Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]);
+  return p.size ? `?${p}` : "";
+};
+
+/**
+ * My own documents open in Ich next to their list; documents of others (or opened with a link key) stay on this page,
+ * which is also the address shared with others.
+ */
 export default async function LinkPage({ params, searchParams }: PageProps<"/links/[id]">) {
-  return <LinkView id={(await params).id} sp={await searchParams} base={`/links/${(await params).id}`} />;
+  const { id } = await params;
+  const sp = await searchParams;
+  const session = await getSession();
+  if (session && typeof sp.k !== "string" && /^[0-9a-f-]{36}$/.test(id)) {
+    const [r] = await asViewer({ authId: session.authId, profileId: session.profile.id }, (tx) =>
+      tx<{ origin: string }[]>`select origin from public.resources where id = ${id} and owner_id = ${session.profile.id}`);
+    if (r) redirect(`/me/${r.origin === "note" ? "notes" : "uploads"}/${id}${qs(sp)}`);
+  }
+  return <LinkView id={id} sp={sp} base={`/links/${id}`} />;
 }
 
 /** One document or upload. `base`: its address (inside Ich it is /me/notes/…); `embedded`: shown next to a list, without the back link. */

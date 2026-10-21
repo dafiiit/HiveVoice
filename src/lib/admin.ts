@@ -27,7 +27,10 @@ export async function adminState() {
   const session = await getSession();
   if (!session) return { allowed: false as const, reason: "login" as const };
   await syncAdmins();
-  const [{ admin }] = await sql<{ admin: boolean }[]>`select exists (select 1 from public.server_admins where profile_id = ${session.profile.id}) as admin`;
+  // The server role cannot read public.server_admins directly (row level security shows it no rows), so the flag
+  // comes from app.session_profile, the same source as the "Verwaltung" entry in the account menu.
+  const [row] = await sql<{ admin: boolean }[]>`select coalesce((app.session_profile(${session.authId}) ->> 'is_admin')::boolean, false) as admin`;
+  const admin = !!row?.admin;
   if (!admin) return { allowed: false as const, reason: adminEmails().length ? ("forbidden" as const) : ("unconfigured" as const) };
   if (adminNeedsMfa() && session.aal !== "aal2") return { allowed: false as const, reason: "mfa" as const, session };
   return { allowed: true as const, session };

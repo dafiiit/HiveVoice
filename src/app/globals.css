@@ -222,4 +222,7 @@ select {
 .md th { background: var(--chip); }
 .md .md-diagram { background: var(--surface); border: 1px solid var(--line); padding: 1em; overflow-x: auto; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .md .md-diagram svg { max-width: 100%; height: auto; }
+.md .md-image { display: block; max-width: 100%; height: auto; margin: 0 0 1em; border: 1px solid var(--line); }
+.md .md-math-display { margin: 0 0 1em; overflow-x: auto; overflow-y: hidden; }
+.md .md-math code { background: none; padding: 0; }
 .md .md-diagram-error { background: var(--red-soft); color: var(--ink); border-left: 4px solid var(--red); font-size: 0.9rem; white-space: pre-wrap; }

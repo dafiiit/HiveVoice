@@ -11,7 +11,7 @@
   "markdownLoaded": "The Markdown file is now a note in the editor. You can edit it before you share it.",
   "noteTitle": "Title",
   "noteBody": "Content in Markdown",
-  "notePlaceholder": "# Heading\n\nText with **bold**, _italic_ and a list:\n\n- first point\n- second point\n\nDiagrams work with Mermaid.",
+  "notePlaceholder": "# Heading\n\nText with **bold**, _italic_ and a list:\n\n- first item\n- second item\n\nFormulas like $a^2 + b^2 = c^2$, diagrams with Mermaid. You can also drag or paste images in.",
   "write": "Write",
   "preview": "Preview",
   "previewEmpty": "The preview appears as soon as you write something.",
@@ -46,5 +46,10 @@
     "invalid": "This could not be saved. Check title and content.",
     "rate_limited": "You have shared a lot today. Try again tomorrow.",
     "forbidden": "You are not allowed to do this."
-  }
+  },
+  "formula": "Formula",
+  "imageUploading": "Uploading image …",
+  "imageError": "The image could not be uploaded.",
+  "showPreview": "Show preview",
+  "showSplit": "Text and preview side by side"
 }

@@ -113,7 +113,7 @@ export function Comments({ id, items, canComment, me, canModerate }: { id: strin
         </article>
       ))}
       {canComment && (
-        <form className="flex max-w-[640px] flex-col gap-2" onSubmit={(e) => {
+        <form className="flex flex-col gap-2" onSubmit={(e) => {
           e.preventDefault();
           start(async () => {
             const res = await commentOn(id, body);

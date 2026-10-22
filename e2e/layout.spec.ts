@@ -180,6 +180,27 @@ test.describe("on a phone", () => {
 
   });
 
+  test("the line between list and opened item can be dragged; narrow, the search becomes a magnifier", async ({ page }, info) => {
+    test.skip(info.project.name === "mobile", "the list sits next to the item on wide screens only");
+    await page.setViewportSize({ width: 1600, height: 1000 });
+    await login(page);
+    await page.goto("/me/notes/new");
+    const column = page.locator("#mine-notes").locator("..");
+    const line = page.getByRole("separator", { name: "Breite der Liste" });
+    const box = (await line.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + 300);
+    await page.mouse.down();
+    await page.mouse.move(box.x - 500, box.y + 300, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(() => column.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBe(200);
+    const search = column.getByRole("searchbox");
+    expect((await search.boundingBox())?.width ?? 0, "only the magnifier is left").toBeLessThan(5);
+    await page.reload();
+    expect(await column.evaluate((el) => Math.round(el.getBoundingClientRect().width)), "the width is kept").toBe(200);
+    await line.dblclick();
+    await expect.poll(() => column.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBe(380);
+  });
+
   test("the main areas start with their content, not with an explanation", async ({ page }) => {
     await login(page);
     await page.goto("/me/listings/new");

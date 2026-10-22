@@ -19,6 +19,8 @@ import { GROUP_TOOLS, type GroupTool } from "@/lib/group-tools";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { ListSearch } from "@/components/connect/ListSearch";
+import { ListResizer } from "@/components/shell/ListResizer";
+import { LIST_COLUMN } from "@/components/shell/listWidth";
 import { IconBack, IconPlus } from "@/components/ui/Icons";
 import { btn, tab } from "@/components/ui/styles";
 import { Notice } from "@/components/ui/Page";
@@ -211,9 +213,9 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
       <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} />
       {!session && <Notice tone="status" className="m-3 text-sm font-normal md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/friends" className="font-bold text-ink underline">{t("signIn")}</Link></Notice>}
       <div className="flex min-h-0 flex-1 flex-col bg-surface md:flex-row">
-        <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:w-[340px] md:flex-none md:border-r lg:w-[380px]`}>
-          <div className="flex flex-none items-center justify-end gap-2 px-4 pb-1 pt-4 md:justify-between">
-            <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
+        <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:flex-none md:border-r ${LIST_COLUMN}`}>
+          <div className="flex flex-none flex-wrap items-center justify-end gap-2 px-4 pb-1 pt-4 md:justify-between">
+            <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only @max-[17rem]:basis-full">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
             {session && (() => {
               // The "+" fits the section: people to chat with, a group, new contacts on the pinboard, an own listing.
               const make: Record<Filter, { href: string; label: string; short: string }> = {
@@ -254,7 +256,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
                   : <span className="truncate text-sm text-muted">{r.sub}</span>}
               </span>
               {r.unread > 0 && <span className="inline-flex h-5 min-w-5 items-center justify-center self-center bg-ink px-1 text-xs font-bold text-on-ink" aria-label={t("unread", { n: r.unread })}>{r.unread}</span>}
-              {r.tag && <span className={`self-center whitespace-nowrap px-1.5 py-0.5 text-xs font-bold ${r.tag === t("req.newTag") ? "bg-red text-on-red" : "border border-line-strong"}`}>{r.tag}</span>}
+              {r.tag && <span className={`self-center whitespace-nowrap @max-[17rem]:hidden px-1.5 py-0.5 text-xs font-bold ${r.tag === t("req.newTag") ? "bg-red text-on-red" : "border border-line-strong"}`}>{r.tag}</span>}
             </Link>
           ))}
           <p data-search-none hidden={!(s && shown.length === 0)} className="m-0 px-4 py-6 text-sm text-muted">{t("listNone")}</p>
@@ -274,6 +276,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
             </>
           )}
         </section>
+        <ListResizer />
         <section aria-label={t("pane")} className={`${paneOpen ? "flex" : "hidden md:flex"} min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-paper px-3 py-2 md:px-6 md:py-4`}>
           {(!pane || pane.kind === "request") && <Link href={href({ c: "" })} className="mb-2 inline-flex items-center gap-1 text-sm text-ink md:hidden"><IconBack size={14} /> {t("back")}</Link>}
           {(pane?.kind === "group" || pane?.kind === "listing") && (

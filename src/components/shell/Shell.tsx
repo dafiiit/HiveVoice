@@ -12,7 +12,8 @@ import { LanguageMenu } from "../LanguageMenu";
 import { QuickSearch } from "./QuickSearch";
 import { AccountMenu } from "./AccountMenu";
 import { ActiveInView } from "./ActiveInView";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
+import { LIST_COOKIE, listWidth } from "./listWidth";
 
 export async function Shell({ session, children }: { session: Session | null; children: React.ReactNode }) {
   const t = await getTranslations("nav");
@@ -27,7 +28,10 @@ export async function Shell({ session, children }: { session: Session | null; ch
             + (select count(*) from public.group_join_requests j where j.status = 'pending' and j.profile_id <> ${session.profile.id} and app.has_group_permission(j.group_id, 'manage_members')))::int as requests`)[0])
     : { chats: 0, requests: 0 };
   const waiting = badges.chats + badges.requests;
-  const fold = (await cookies()).get("hv_sidebar")?.value;
+  const jar = await cookies();
+  const fold = jar.get("hv_sidebar")?.value;
+  // The width of the list in the middle, as the person dragged it (ListResizer).
+  const listW = listWidth(jar.get(LIST_COOKIE)?.value);
 
   // Three areas by closeness, like the rail in Teams: Gemeinschaft (everyone), Freunde (people and groups I know), Ich (my own things).
   const items: NavItem[] = [
@@ -37,7 +41,7 @@ export async function Shell({ session, children }: { session: Session | null; ch
   ];
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div data-shell className="flex min-h-dvh flex-col" style={listW ? ({ "--list-w": `${listW}px` } as CSSProperties) : undefined}>
       <header className="sticky top-0 z-30 flex h-16 flex-none items-center gap-3 border-b border-line bg-paper px-3 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,600px)_minmax(0,1fr)] md:px-5">
         <Link href={session ? "/friends" : "/"} className="flex flex-none items-center text-ink no-underline" aria-label="HiveVoice">
           <span className="md:hidden"><LogoMark size={34} /></span>

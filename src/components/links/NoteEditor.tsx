@@ -3,7 +3,9 @@ import { useDeferredValue, useEffect, useRef, useState, useTransition } from "re
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lockResource, releaseResource, saveNote, suggestChange } from "@/lib/actions/links";
+import { uploadImage } from "@/lib/upload";
 import { Markdown } from "../Markdown";
+import { IconColumns, IconEye, IconImage } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
 import { AccessPicker, type Access } from "./AccessPicker";
@@ -15,8 +17,14 @@ export type NoteDraft = { id?: string; title: string; description: string; body:
 const MAX = 100_000;
 const MERMAID = "```mermaid\nflowchart LR\n  A[Idee] --> B[Gruppe]\n  B --> C{Abstimmung}\n  C -->|Ja| D[Umsetzung]\n```\n";
 const TABLE = "| Spalte A | Spalte B |\n| --- | --- |\n| Wert | Wert |\n";
+const FORMULA = "E = mc^2";
+type View = "write" | "preview" | "split";
+const VIEW_KEY = "hv_note_view";
 
-/** Write a Markdown note with a live preview (side by side on wide screens, as two tabs on phones). Used to create and to change notes. */
+/**
+ * Write a Markdown note. Only the text by default; the eye shows the preview instead, the columns show both side by side
+ * (wide panes only, the choice is remembered). Formulas in LaTeX ($…$), photos are uploaded and inserted. Used to create and to change notes.
+ */
 export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit" }: { initial: NoteDraft; groups: Group[]; initialGroup: string | null; ideas: string[]; mode?: "edit" | "suggest" }) {
   const t = useTranslations("knowledge");
   const td = useTranslations("docrights.page");
@@ -32,7 +40,8 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
   const [body, setBody] = useState(initial.body);
   const [tags, setTags] = useState<string[]>(initial.tags);
   const [groupId, setGroupId] = useState(groups.find((g) => g.slug === initialGroup)?.id ?? "");
-  const [view, setView] = useState<"write" | "preview">("write");
+  const [view, setView] = useState<View>("write");
+  const [uploading, setUploading] = useState(0);
   const [changeNote, setChangeNote] = useState("");
   const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "me", license: "cc_by_sa" });
   const [lockedBy, setLockedBy] = useState<string | null>(null);
@@ -42,6 +51,19 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
   const area = useRef<HTMLTextAreaElement>(null);
   const preview = useDeferredValue(body);
   const selectedGroup = groups.find((g) => g.id === groupId);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(VIEW_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- the remembered choice exists only in the browser
+      if (saved === "split") setView("split");
+    } catch { /* no storage */ }
+  }, []);
+  const choose = (v: View) => {
+    const next = view === v ? "write" : v;
+    setView(next);
+    try { localStorage.setItem(VIEW_KEY, next === "split" ? "split" : "write"); } catch { /* no storage */ }
+  };
 
   // Editing a shared note: nobody else writes at the same time (a lock for five minutes, renewed while the page is open).
   useEffect(() => {
@@ -68,6 +90,27 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
     setBody(next);
     requestAnimationFrame(() => { el.focus(); el.setSelectionRange(a + before.length, a + before.length + picked.length); });
   };
+  /** Uploads photos (shrunk in the browser) and puts them where the cursor is, as `![name](img:path)`. */
+  const addImages = async (files: File[]) => {
+    const images = files.filter((f) => f.type.startsWith("image/"));
+    if (!images.length) return;
+    setError(null);
+    for (const file of images) {
+      setUploading((n) => n + 1);
+      const res = await uploadImage(file, 1600);
+      setUploading((n) => n - 1);
+      if (!res.ok) { setError(t("imageError")); continue; }
+      const alt = file.name.replace(/\.[^.]+$/, "").replace(/[[\]]/g, "").slice(0, 80) || t("image");
+      const el = area.current;
+      const at = el ? el.selectionEnd : body.length;
+      setBody((b) => {
+        const text = `${b.slice(0, at) && !b.slice(0, at).endsWith("\n") ? "\n" : ""}![${alt}](img:${res.path})\n`;
+        return (b.slice(0, at) + text + b.slice(at)).slice(0, MAX);
+      });
+    }
+  };
+  const picker = useRef<HTMLInputElement>(null);
+
   const line = (prefix: string) => {
     const el = area.current;
     if (!el) return;
@@ -98,15 +141,8 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={field.input} />
       </label>
 
-      <div role="tablist" aria-label={t("write")} className="flex border-b border-line lg:hidden">
-        {(["write", "preview"] as const).map((v) => (
-          <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
-            className={`inline-flex h-11 flex-1 items-center justify-center border-0 border-b-4 bg-transparent text-ink ${view === v ? "border-ink font-bold" : "border-transparent"}`}>{t(v)}</button>
-        ))}
-      </div>
-
-      <div className="grid gap-4 @4xl:grid-cols-2">
-        <div className={`flex min-w-0 flex-col gap-2 ${view === "write" ? "" : "max-lg:hidden"}`}>
+      <div className={`grid gap-4 ${view === "split" ? "@4xl:grid-cols-2" : ""}`}>
+        <div className={`flex min-w-0 flex-col gap-2 ${view === "preview" ? "hidden" : ""}`}>
           <div role="toolbar" aria-label={t("toolbar")} className="flex flex-wrap gap-1">
             <Tool label={t("heading")} onClick={() => line("## ")} />
             <Tool label={t("bold")} onClick={() => wrap("**", "**", t("bold"))} />
@@ -116,14 +152,30 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
             <Tool label={t("code")} onClick={() => wrap("`", "`", "code")} />
             <Tool label={t("table")} onClick={() => wrap("\n", "", TABLE.trimEnd())} />
             <Tool label={t("diagram")} onClick={() => wrap("\n", "", MERMAID.trimEnd())} />
+            <Tool label={t("formula")} onClick={() => wrap("$$\n", "\n$$", FORMULA)} />
+            <button type="button" onClick={() => picker.current?.click()} disabled={uploading > 0}
+              className="inline-flex h-9 items-center gap-1.5 border border-line bg-surface px-2.5 text-sm text-ink disabled:opacity-60">
+              <IconImage size={16} /> {uploading > 0 ? t("imageUploading") : t("image")}
+            </button>
+            <input ref={picker} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages([...(e.target.files ?? [])]); e.target.value = ""; }} />
+            <ViewButtons view={view} choose={choose} t={t} className={view === "split" ? "@4xl:hidden" : ""} />
           </div>
           <textarea ref={area} value={body} onChange={(e) => setBody(e.target.value)} maxLength={MAX} spellCheck aria-label={t("noteBody")} placeholder={t("notePlaceholder")}
+            onPaste={(e) => { const files = [...e.clipboardData.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
+            onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }}
+            onDrop={(e) => { const files = [...e.dataTransfer.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
             className={`${field.textarea} min-h-[320px] font-mono text-sm lg:min-h-[480px]`} />
           <span className="text-xs text-muted">{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>
         </div>
-        <section aria-label={t("preview")} className={`min-w-0 border border-line bg-surface p-4 ${view === "preview" ? "" : "max-lg:hidden"}`}>
-          {preview.trim() ? <Markdown source={preview} /> : <p className="m-0 text-muted">{t("previewEmpty")}</p>}
-        </section>
+        <div className={`flex min-w-0 flex-col gap-2 ${view === "write" ? "hidden" : view === "split" ? "@max-4xl:hidden" : ""}`}>
+          <div className="flex min-h-9 items-center justify-end gap-1">
+            {view === "preview" && <span className="mr-auto text-sm font-bold">{t("preview")}</span>}
+            <ViewButtons view={view} choose={choose} t={t} />
+          </div>
+          <section aria-label={t("preview")} className="min-h-[320px] min-w-0 flex-1 border border-line bg-surface p-4 lg:min-h-[480px]">
+            {preview.trim() ? <Markdown source={preview} /> : <p className="m-0 text-muted">{t("previewEmpty")}</p>}
+          </section>
+        </div>
       </div>
 
       <label className={field.label}>{tl("descriptionLabel")}
@@ -153,6 +205,17 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         {editing && <button type="button" onClick={() => router.push(docHref(initial.id ?? ""))} className={btn.secondary}>{t("cancel")}</button>}
       </div>
     </div>
+  );
+}
+
+/** Top right of the editor: the eye shows the preview instead of the text, the columns show both (only where there is room). */
+function ViewButtons({ view, choose, t, className = "" }: { view: View; choose: (v: View) => void; t: (key: "showPreview" | "showSplit") => string; className?: string }) {
+  const cls = (on: boolean) => `inline-flex h-9 w-9 items-center justify-center border ${on ? "border-ink bg-ink text-on-ink" : "border-line bg-surface text-ink"}`;
+  return (
+    <span className={`ml-auto flex gap-1 ${className}`}>
+      <button type="button" aria-pressed={view === "preview"} aria-label={t("showPreview")} title={t("showPreview")} onClick={() => choose("preview")} className={cls(view === "preview")}><IconEye size={18} /></button>
+      <button type="button" aria-pressed={view === "split"} aria-label={t("showSplit")} title={t("showSplit")} onClick={() => choose("split")} className={`${cls(view === "split")} @max-4xl:hidden`}><IconColumns size={18} /></button>
+    </span>
   );
 }
 

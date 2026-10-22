@@ -28,8 +28,13 @@ test.describe("knowledge: notes, files and images", () => {
       await login(page);
       await page.goto("/new/link?mode=note");
       await page.getByLabel("Titel", { exact: true }).fill(marker);
-      await page.getByLabel("Inhalt in Markdown").fill("# Hauptteil\n\nText mit **fett** und einer Liste:\n\n- eins\n- zwei\n\n```mermaid\nflowchart LR\n  A[Idee] --> B[Gruppe]\n```\n");
+      await page.getByLabel("Inhalt in Markdown").fill("# Hauptteil\n\nText mit **fett** und einer Liste:\n\n- eins\n- zwei\n\n```mermaid\nflowchart LR\n  A[Idee] --> B[Gruppe]\n```\n\nFormel $a^2+b^2=c^2$\n");
+      // Only the text at first; the eye shows the preview instead (side by side needs a wide pane).
       const preview = page.getByRole("region", { name: "Vorschau" });
+      await expect(preview).toBeHidden();
+      await page.getByRole("button", { name: "Vorschau zeigen" }).first().click();
+      await expect(page.getByLabel("Inhalt in Markdown")).toBeHidden();
+      await expect(preview.locator(".katex").first()).toBeVisible({ timeout: 20_000 });
       await expect(preview.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
       await expect(preview.getByText("fett")).toBeVisible();
       await expect(preview.getByRole("img", { name: "Diagramm" }).locator("svg")).toBeVisible({ timeout: 20_000 });

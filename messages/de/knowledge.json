@@ -11,7 +11,7 @@
   "markdownLoaded": "Die Markdown-Datei steht jetzt als Notiz im Editor. Du kannst sie bearbeiten, bevor du sie teilst.",
   "noteTitle": "Titel",
   "noteBody": "Inhalt in Markdown",
-  "notePlaceholder": "# Überschrift\n\nText mit **fett**, _kursiv_ und einer Liste:\n\n- erster Punkt\n- zweiter Punkt\n\nDiagramme gehen mit Mermaid.",
+  "notePlaceholder": "# Überschrift\n\nText mit **fett**, _kursiv_ und einer Liste:\n\n- erster Punkt\n- zweiter Punkt\n\nFormeln wie $a^2 + b^2 = c^2$, Diagramme mit Mermaid. Bilder kannst du auch hineinziehen oder einfügen.",
   "write": "Schreiben",
   "preview": "Vorschau",
   "previewEmpty": "Hier erscheint die Vorschau, sobald du etwas schreibst.",
@@ -46,5 +46,10 @@
     "invalid": "Das ließ sich so nicht speichern. Prüfe Titel und Inhalt.",
     "rate_limited": "Du hast heute schon viel geteilt. Versuch es morgen wieder.",
     "forbidden": "Dafür fehlt dir die Berechtigung."
-  }
+  },
+  "formula": "Formel",
+  "imageUploading": "Bild wird hochgeladen …",
+  "imageError": "Das Bild konnte nicht hochgeladen werden.",
+  "showPreview": "Vorschau zeigen",
+  "showSplit": "Text und Vorschau nebeneinander"
 }

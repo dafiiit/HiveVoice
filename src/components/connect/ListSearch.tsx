@@ -7,8 +7,9 @@ import { searchBox, searchInput } from "../ui/styles";
  * Search field above the conversation list. Filters the rows while typing
  * (rows carry `data-search`, `data-search-none` shows when nothing is left);
  * without JavaScript it is a GET form with `s`.
+ * `collapsible`: in a narrow list (container below 17rem) only the magnifier shows until one clicks it or something is typed.
  */
-export function ListSearch({ listId, value, keep, label, action = "/friends" }: { listId: string; value: string; keep: Record<string, string>; label: string; action?: string }) {
+export function ListSearch({ listId, value, keep, label, action = "/friends", collapsible = false }: { listId: string; value: string; keep: Record<string, string>; label: string; action?: string; collapsible?: boolean }) {
   const input = useRef<HTMLInputElement>(null);
   const filter = (q: string) => {
     const list = document.getElementById(listId);
@@ -25,13 +26,13 @@ export function ListSearch({ listId, value, keep, label, action = "/friends" }: 
   };
   useEffect(() => { if (input.current?.value) filter(input.current.value); });
   return (
-    <form method="get" action={action} role="search" className="flex min-w-0 flex-1" onSubmit={(e) => { e.preventDefault(); input.current?.blur(); }}>
+    <form method="get" action={action} role="search" className={`flex min-w-0 flex-1 ${collapsible ? "basis-full @max-[17rem]:flex-none @max-[17rem]:basis-auto @max-[17rem]:has-[input:focus]:basis-full @max-[17rem]:has-[input:not(:placeholder-shown)]:basis-full" : ""}`} onSubmit={(e) => { e.preventDefault(); input.current?.blur(); }}>
       {Object.entries(keep).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
       <label className={`${searchBox("sm")} flex-1`}>
         <IconSearch size={16} />
         <span className="sr-only">{label}</span>
         <input ref={input} type="search" name="s" defaultValue={value} placeholder={`${label} …`} autoComplete="off" enterKeyHint="search"
-          onInput={(e) => filter(e.currentTarget.value)} className={`${searchInput} md:text-sm`} />
+          onInput={(e) => filter(e.currentTarget.value)} className={`${searchInput} md:text-sm ${collapsible ? "@max-[17rem]:[&:placeholder-shown:not(:focus)]:w-0 @max-[17rem]:[&:placeholder-shown:not(:focus)]:flex-none" : ""}`} />
       </label>
     </form>
   );

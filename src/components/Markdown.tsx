@@ -1,33 +1,47 @@
 "use client";
 import { Children, isValidElement, useEffect, useId, useState, type ReactNode } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import { useTranslations } from "next-intl";
+import { imageUrl } from "@/lib/images";
+import "katex/dist/katex.min.css";
+
+// Photos uploaded into a note are written as `img:<auth user id>/<file>.jpg`, so the text does not depend on where images are served from.
+const OWN_IMAGE = /^img:([0-9a-f-]{36}\/[0-9a-f]{32}\.jpg)$/;
+const urlTransform = (url: string) => (OWN_IMAGE.test(url) ? url : defaultUrlTransform(url));
 
 /**
- * Markdown as formatted text: headings, lists, tables, task lists, code and Mermaid diagrams.
- * Raw HTML is not rendered, links open in a new tab, and remote images are shown as links (they would tell
- * the other site who is reading).
+ * Markdown as formatted text: headings, lists, tables, task lists, code, formulas (LaTeX between $ or $$) and Mermaid diagrams.
+ * Raw HTML is not rendered, links open in a new tab. Photos uploaded here are shown; remote images are shown as links
+ * (they would tell the other site who is reading).
  */
 export function Markdown({ source }: { source: string }) {
   const t = useTranslations("knowledge");
   return (
     <div className="md">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        urlTransform={urlTransform}
         components={{
           a: ({ href, children }) => <a href={href} target={href?.startsWith("#") ? undefined : "_blank"} rel="noopener noreferrer nofollow ugc">{children}</a>,
-          img: ({ src, alt }) => <a href={typeof src === "string" ? src : undefined} target="_blank" rel="noopener noreferrer nofollow ugc">{t("externalImage", { alt: alt || t("image") })}</a>,
+          img: ({ src, alt }) => {
+            const own = typeof src === "string" ? OWN_IMAGE.exec(src)?.[1] : undefined;
+            // eslint-disable-next-line @next/next/no-img-element -- photos from our own store, already shrunk on upload
+            if (own) return <img src={imageUrl(own) ?? undefined} alt={alt ?? ""} loading="lazy" className="md-image" />;
+            return <a href={typeof src === "string" ? src : undefined} target="_blank" rel="noopener noreferrer nofollow ugc">{t("externalImage", { alt: alt || t("image") })}</a>;
+          },
           table: ({ children }) => <div className="md-table"><table>{children}</table></div>,
           pre: ({ children }) => {
             const only = Children.toArray(children)[0];
             // The code element's own class tells whether this block is a diagram (then it must not sit inside <pre>).
-            const diagram = isValidElement(only) && /language-mermaid/.test((only.props as { className?: string }).className ?? "");
+            const diagram = isValidElement(only) && /language-(mermaid|math)/.test((only.props as { className?: string }).className ?? "");
             return diagram ? <>{children}</> : <pre>{children}</pre>;
           },
           code: ({ className, children }) => {
             const language = /language-([\w-]+)/.exec(className ?? "")?.[1];
             if (language === "mermaid") return <Mermaid code={String(children).replace(/\n$/, "")} />;
+            if (language === "math") return <Formula code={String(children)} display={/math-display/.test(className ?? "")} />;
             return <code className={className}>{children as ReactNode}</code>;
           },
         }}
@@ -36,6 +50,21 @@ export function Markdown({ source }: { source: string }) {
       </ReactMarkdown>
     </div>
   );
+}
+
+/** A formula set with KaTeX (loaded only when a text has one). Untrusted input: no \\href, \\url or HTML commands. */
+function Formula({ code, display }: { code: string; display: boolean }) {
+  const [html, setHtml] = useState<{ code: string; html: string } | null>(null);
+  useEffect(() => {
+    let live = true;
+    void import("katex").then(({ default: katex }) => {
+      if (live) setHtml({ code, html: katex.renderToString(code, { displayMode: display, throwOnError: false, trust: false, strict: "ignore", maxExpand: 500 }) });
+    });
+    return () => { live = false; };
+  }, [code, display]);
+  const Tag = display ? "div" : "span";
+  if (!html) return <Tag className={display ? "md-math md-math-display" : "md-math"}><code>{code}</code></Tag>;
+  return <Tag className={display ? "md-math md-math-display" : "md-math"} dangerouslySetInnerHTML={{ __html: html.html }} />;
 }
 
 const isDark = () => {

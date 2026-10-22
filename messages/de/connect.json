@@ -127,5 +127,7 @@
     "groups": "Gruppen durchsuchen",
     "requests": "Anfragen durchsuchen",
     "listings": "Anliegen durchsuchen"
-  }
+  },
+  "listWidth": "Breite der Liste",
+  "listWidthHint": "Ziehen, um die Liste breiter oder schmaler zu machen. Doppelklick: Standardbreite."
 }

@@ -10,7 +10,8 @@
     "notes": "Notizen",
     "projects": "Initiativen",
     "listings": "Anliegen",
-    "uploads": "Uploads"
+    "uploads": "Uploads",
+    "diagrams": "Diagramme"
   },
   "filterLabel": "Inhalte filtern",
   "kind": {
@@ -21,7 +22,8 @@
     "note": "Notiz",
     "project": "Initiative",
     "offer": "Angebot",
-    "need": "Gesuch"
+    "need": "Gesuch",
+    "diagram": "Diagramm"
   },
   "vis": {
     "me": "Privat",
@@ -75,5 +77,8 @@
   "newProject": "Initiative",
   "paused": "pausiert",
   "more": "Geteilt mit mir, Übergaben, Papierkorb",
-  "new": "Neu"
+  "new": "Neu",
+  "newDiagram": "Diagramm",
+  "myDiagrams": "Meine Diagramme",
+  "emptyDiagrams": "Noch kein Diagramm. Zeichne Abläufe, Pläne und Skizzen mit draw.io, mit Versionen, und teile sie, wenn du willst."
 }

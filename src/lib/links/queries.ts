@@ -3,7 +3,7 @@ import type { Tx } from "../db";
 import type { Note, Trust } from "./safety";
 
 export type ResourceRow = {
-  id: string; url: string | null; origin: "link" | "file" | "note"; excerpt: string | null; updated_at: string;
+  id: string; url: string | null; origin: "link" | "file" | "note" | "diagram"; excerpt: string | null; updated_at: string;
   file_id: string | null; file_name: string | null; file_mime: string | null; file_size: number | null;
   host: string; provider: string; kind: string; title: string; description: string | null;
   preview: { title?: string | null; description?: string | null; image?: string | null; site?: string | null; mime?: string | null; bytes?: number | null; filename?: string | null };
@@ -14,7 +14,7 @@ export type ResourceRow = {
 };
 
 export const resourceColumns = (tx: Tx, me: string | null) => tx`
-  r.id, r.url, r.origin, left(r.body_md, 1200) as excerpt, r.updated_at, f.id as file_id, f.name as file_name, f.mime as file_mime, f.size_bytes as file_size,
+  r.id, r.url, r.origin, case when r.origin = 'note' then left(r.body_md, 1200) end as excerpt, r.updated_at, f.id as file_id, f.name as file_name, f.mime as file_mime, f.size_bytes as file_size,
   r.host, r.provider, r.kind, r.title, r.description, r.preview, r.safety, r.safety_notes as notes, r.score, r.created_at,
   r.group_id, g.slug::text as group_slug, g.name as group_name,
   o.id as owner_id, o.display_name as owner_name, o.avatar_seed as owner_seed, o.avatar_path as owner_path,

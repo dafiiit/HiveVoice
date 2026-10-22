@@ -27,6 +27,7 @@ Konzerne und ohne zentralen Betreiber laufen kann. Stand: Oktober 2026.
 | **Cloudflare Turnstile** | Bot-Schutz bei Login und Registrierung | proprietär, kostenlos | 0 € | ja: abschaltbar, hCaptcha/ALTCHA möglich |
 | **Google** (OAuth, Fotos-Picker, Safe Browsing) | Google-Login, „Aus Google Fotos“, Link-Prüfung | proprietär | kostenlos mit Kontingent | ja: alles optional |
 | **OpenFreeMap** | Kartenkacheln | offen (OSM), gehostet von Dritten | 0 € | ja: `NEXT_PUBLIC_MAP_STYLE_URL` |
+| **draw.io** (diagrams.net) | Diagramm-Editor in Ich → Diagramme | offen (Apache 2.0), gehostet von JGraph | 0 € | ja: `NEXT_PUBLIC_DRAWIO_URL` (Docker-Image `jgraph/drawio`) |
 | **Wikidata, OpenPLZ** | Gemeinden, PLZ, Koordinaten | offene Daten (CC0 / ODbL) | 0 € | ja: einmaliger Import, liegt danach in der eigenen DB |
 | **GitHub** | Code, Issues, Auslöser für Deploys | proprietär | 0 € | ja: Git ist dezentral |
 | **npm-Pakete** | Next.js, React, postgres.js, MapLibre, zod … | offen | 0 € | ja, aber Next.js wird vor allem von Vercel entwickelt |
@@ -47,6 +48,7 @@ Konzerne und ohne zentralen Betreiber laufen kann. Stand: Oktober 2026.
 | Google Fotos | normaler Datei-Upload (gibt es); optional Nextcloud-/WebDAV-Import | – | – |
 | Safe Browsing | eigene Sperrlisten (z. B. URLhaus, Phishing.Database) | klein | bei Bedarf |
 | OpenFreeMap | eigene PMTiles-Datei für Deutschland (~1 GB) im eigenen Speicher, MapLibre-Stil zeigt darauf | klein | sobald Karten viel genutzt werden |
+| draw.io | eigener draw.io-Server (Docker `jgraph/drawio`, statische Dateien), `NEXT_PUBLIC_DRAWIO_URL` zeigt darauf | klein | sobald Diagramme viel genutzt werden |
 | GitHub | Codeberg/Forgejo als Spiegel, Releases als Container-Images in einer offenen Registry | klein | jederzeit |
 | Next.js | bleibt (offen, MIT); Risiko beobachten. Die Fachlogik in SQL macht einen späteren Wechsel des Frontends möglich | – | – |
 

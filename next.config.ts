@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Standalone output lets the app run in a plain Docker container for self-hosting.
   output: "standalone",
+  // A draw.io diagram is saved through a server action and may be up to 2 MB (the default limit is 1 MB).
+  experimental: { serverActions: { bodySizeLimit: "4mb" } },
   // Addresses that moved; old links (and query parameters such as the secret link key ?k=) keep working.
   redirects: async () => {
     const q = (key: string, value?: string) => [{ type: "query" as const, key, ...(value ? { value } : {}) }];

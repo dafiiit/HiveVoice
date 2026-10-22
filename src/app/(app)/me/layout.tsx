@@ -10,6 +10,7 @@ export default async function MeLayout({ children }: LayoutProps<"/me">) {
       { href: "/me/listings", label: t("filters.listings"), match: ["/me/listings*"] },
       { href: "/me/lists", label: t("filters.lists"), match: ["/me/lists*"] },
       { href: "/me/notes", label: t("filters.notes"), match: ["/me/notes*"] },
+      { href: "/me/diagrams", label: t("filters.diagrams"), match: ["/me/diagrams*"] },
       { href: "/me/uploads", label: t("filters.uploads"), match: ["/me/uploads*"] },
       { href: "/me/initiatives", label: t("filters.projects"), match: ["/me/initiatives*"] },
     ]}>{children}</AreaFrame>

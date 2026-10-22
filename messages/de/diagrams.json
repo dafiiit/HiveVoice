@@ -1,0 +1,18 @@
+{
+  "newTitle": "Neues Diagramm",
+  "editorTitle": "draw.io-Editor",
+  "titleLabel": "Name des Diagramms",
+  "titlePlaceholder": "z. B. Ablauf Straßenfest",
+  "save": "Speichern",
+  "saving": "Speichert …",
+  "close": "Schließen",
+  "saved": "Gespeichert, neue Version angelegt.",
+  "unsaved": "Ungespeicherte Änderungen.",
+  "hint": "Erst nur für dich. Jedes Speichern legt eine Version an.",
+  "titleRequired": "Gib dem Diagramm einen Namen (mindestens 3 Zeichen).",
+  "saveError": "Speichern hat nicht geklappt. Versuch es noch einmal.",
+  "tooLarge": "Das Diagramm ist zu groß (höchstens 2 MB). Verkleinere eingefügte Bilder.",
+  "leaveQuestion": "Ungespeicherte Änderungen verwerfen?",
+  "discard": "Verwerfen",
+  "keepEditing": "Weiter zeichnen"
+}

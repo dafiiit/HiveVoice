@@ -47,7 +47,7 @@ export function MyDocuments({ docs, shared, incoming, trashDays, usage, title, e
         {live.map((d) => (
           <Link key={d.id} href={`/links/${d.id}`} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line py-3 text-ink no-underline">
             <strong>{d.title}</strong>
-            <span className="text-sm text-muted">{t(`visibility.${d.visibility}` as "visibility.me")}{d.license ? ` · ${t(`license.${d.license}` as "license.cc_by")}` : ""}{d.origin === "note" ? ` · ${t("docs.version", { n: d.version_no })}` : ""} · {relTime(d.updated_at, locale)}</span>
+            <span className="text-sm text-muted">{t(`visibility.${d.visibility}` as "visibility.me")}{d.license ? ` · ${t(`license.${d.license}` as "license.cc_by")}` : ""}{d.origin === "note" || d.origin === "diagram" ? ` · ${t("docs.version", { n: d.version_no })}` : ""} · {relTime(d.updated_at, locale)}</span>
           </Link>
         ))}
       </section>}

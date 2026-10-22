@@ -35,7 +35,8 @@
     "map": "Map",
     "dataset": "Data",
     "page": "Web page",
-    "note": "Note"
+    "note": "Note",
+    "diagram": "Diagram"
   },
   "kindShort": {
     "document": "DOC",
@@ -52,7 +53,8 @@
     "map": "MAP",
     "dataset": "DATA",
     "page": "PAGE",
-    "note": "NOTE"
+    "note": "NOTE",
+    "diagram": "DIAGRAM"
   },
   "providers": {
     "drive": "Google Drive",
@@ -75,7 +77,8 @@
     "official": "Official body",
     "web": "Web page",
     "upload": "Uploaded",
-    "note": "Note in HiveVoice"
+    "note": "Note in HiveVoice",
+    "drawio": "draw.io"
   },
   "trust": {
     "trusted": "Known service",

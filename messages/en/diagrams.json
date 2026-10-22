@@ -1,0 +1,18 @@
+{
+  "newTitle": "New diagram",
+  "editorTitle": "draw.io editor",
+  "titleLabel": "Name of the diagram",
+  "titlePlaceholder": "e.g. Street party plan",
+  "save": "Save",
+  "saving": "Saving …",
+  "close": "Close",
+  "saved": "Saved, new version created.",
+  "unsaved": "Unsaved changes.",
+  "hint": "Only for you at first. Every save creates a version.",
+  "titleRequired": "Give the diagram a name (at least 3 characters).",
+  "saveError": "Saving did not work. Please try again.",
+  "tooLarge": "The diagram is too large (2 MB at most). Make inserted images smaller.",
+  "leaveQuestion": "Discard unsaved changes?",
+  "discard": "Discard",
+  "keepEditing": "Keep drawing"
+}

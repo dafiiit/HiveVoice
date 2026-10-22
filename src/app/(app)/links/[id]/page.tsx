@@ -11,6 +11,7 @@ import { popularTags } from "@/lib/queries";
 import { formatSize, isImage } from "@/lib/files";
 import { Markdown } from "@/components/Markdown";
 import { NoteEditor } from "@/components/links/NoteEditor";
+import { DiagramEditor } from "@/components/links/DiagramEditor";
 import { Avatar } from "@/components/ui/Avatar";
 import { btn, tag } from "@/components/ui/styles";
 import { ReportButton } from "@/components/ReportDialog";
@@ -36,6 +37,9 @@ type Meta = {
   trashed_at: string | null; copied_from: string | null; copied_title: string | null; level: number; lock: { holder: string; mine: boolean } | null;
 };
 
+// Where my own documents of each kind live inside Ich.
+const SECTION: Record<string, string> = { note: "/me/notes", diagram: "/me/diagrams", link: "/me/uploads", file: "/me/uploads" };
+
 const qs = (sp: Record<string, string | string[] | undefined>) => {
   const p = new URLSearchParams(Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]);
   return p.size ? `?${p}` : "";
@@ -52,7 +56,7 @@ export default async function LinkPage({ params, searchParams }: PageProps<"/lin
   if (session && typeof sp.k !== "string" && /^[0-9a-f-]{36}$/.test(id)) {
     const [r] = await asViewer({ authId: session.authId, profileId: session.profile.id }, (tx) =>
       tx<{ origin: string }[]>`select origin from public.resources where id = ${id} and owner_id = ${session.profile.id}`);
-    if (r) redirect(`/me/${r.origin === "note" ? "notes" : "uploads"}/${id}${qs(sp)}`);
+    if (r) redirect(`${SECTION[r.origin]}/${id}${qs(sp)}`);
   }
   return <LinkView id={id} sp={sp} base={`/links/${id}`} />;
 }
@@ -75,7 +79,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       select r2.visibility, r2.edit_mode, r2.allow_download, r2.license, r2.link_token, r2.version_no, r2.trashed_at, r2.copied_from, orig.title as copied_title,
              app.resource_level(r2.id) as level, app.resource_lock_status(r2.id) as lock
       from public.resources r2 left join public.resources orig on orig.id = r2.copied_from where r2.id = ${id}`;
-    const body = r.origin === "note" ? (await tx<{ body_md: string | null }[]>`select body_md from public.resources where id = ${id}`)[0]?.body_md ?? "" : "";
+    const body = r.origin === "note" || r.origin === "diagram" ? (await tx<{ body_md: string | null }[]>`select body_md from public.resources where id = ${id}`)[0]?.body_md ?? "" : "";
     const level = meta.level;
     const ideas = r.origin === "note" && level >= 3 && sp.edit === "1" ? await popularTags(tx) : [];
     const grants = level >= 4 ? await tx<GrantRow[]>`
@@ -85,7 +89,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
     const myGroups = me && (level >= 4 || level >= 1) ? await tx<{ id: string; name: string }[]>`
       select g.id, g.name from public.group_members m join public.groups g on g.id = m.group_id
       where m.profile_id = ${me} and m.role <> 'guest' and g.archived_at is null order by g.name limit 40` : [];
-    const versions = r.origin === "note" && level >= 3 ? await tx<VersionRow[]>`
+    const versions = (r.origin === "note" || r.origin === "diagram") && level >= 3 ? await tx<VersionRow[]>`
       select v.version_no, v.note, p.display_name as editor, v.created_at from public.resource_versions v left join public.profiles p on p.id = v.editor_id
       where v.resource_id = ${id} order by v.version_no desc limit 30` : [];
     const [approve] = me ? await tx<{ ok: boolean }[]>`select app.can_approve_resource(${id}) as ok` : [{ ok: false }];
@@ -107,8 +111,8 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   const provider = t.has(`providers.${r.provider}`) ? t(`providers.${r.provider}` as "providers.web") : r.provider;
   const host = r.host.replace(/^www\./, "");
   const careful = r.safety === "caution";
-  const isLink = r.origin === "link", isNote = r.origin === "note", isFile = r.origin === "file";
-  const editing = isNote && sp.edit === "1" && level >= 3;
+  const isLink = r.origin === "link", isNote = r.origin === "note", isFile = r.origin === "file", isDiagram = r.origin === "diagram";
+  const editing = (isNote || isDiagram) && sp.edit === "1" && level >= 3 && !meta.trashed_at;
   const suggesting = isNote && sp.suggest === "1" && level >= 2;
   const photo = isFile && r.file_id && r.file_mime && isImage(r.file_mime);
   const viewable = !!photo || r.file_mime === "application/pdf";
@@ -117,9 +121,13 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   const fileUrl = (extra = "") => `/api/files/${r.file_id}${[extra, kq].filter(Boolean).length ? `?${[extra, kq].filter(Boolean).join("&")}` : ""}`;
   const origin = await getOrigin();
   const linkUrl = meta.visibility === "link" && meta.link_token ? `${origin}/links/${id}?k=${meta.link_token}` : null;
+  // Drawing takes the whole pane: draw.io and a bar with name, save and close.
+  if (isDiagram && editing) return <DiagramEditor id={id} title={r.title} svg={data.body} base={base.replace(/\/[^/]+$/, "")} />;
+  const picture = isDiagram ? `data:image/svg+xml;base64,${Buffer.from(data.body).toString("base64")}` : null;
+  const home = SECTION[r.origin] ?? "/me/uploads";
   return (
     <Page width="narrow">
-      {!embedded && <BackLink href={isNote ? "/me/notes" : "/me/uploads"} label={tm(isNote ? "filters.notes" : "filters.uploads")} />}
+      {!embedded && <BackLink href={home} label={tm(isNote ? "filters.notes" : isDiagram ? "filters.diagrams" : "filters.uploads")} />}
       {meta.trashed_at && level >= 4 && <RestoreResource id={id} />}
       {isLink && <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />}
       {!isNote && (
@@ -134,7 +142,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
         <Link href={`/profile/${r.owner_id}`} className="font-bold text-ink no-underline">{r.owner_name}</Link>
         {r.group_name && <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink underline">{t("inGroupName", { name: r.group_name })}</Link>}
         <span className="text-muted">{[dateLong(r.created_at, locale),
-          isNote ? td("page.version", { n: meta.version_no }) : null,
+          isNote || isDiagram ? td("page.version", { n: meta.version_no }) : null,
           meta.license && meta.license !== "all_rights" ? td("license.shown", { name: td(`license.${meta.license}` as "license.cc_by") }) : null,
           meta.visibility === "me" ? td("page.private") : null,
           meta.visibility === "link" && level < 4 ? td("page.viaLink") : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
@@ -150,14 +158,14 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
                 linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
             ) : undefined} />
         )}
-        {isNote && !editing && !suggesting && !meta.trashed_at && level >= 3 && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
+        {(isNote || isDiagram) && !editing && !suggesting && !meta.trashed_at && level >= 3 && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
         {isNote && !editing && !suggesting && !meta.trashed_at && level === 2 && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
         {meta.lock && !meta.lock.mine && <span className="text-sm font-bold text-red">{td("page.locked")}</span>}
         {isNote && level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
         <span className="ml-auto flex items-center gap-3">
           <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={!!me} />
           {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
-          {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} note={isNote} />}
+          {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} home={home} />}
         </span>
       </div>
       {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
@@ -203,6 +211,16 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           <Markdown source={data.body} />
         </article>
       )}
+      {picture && (
+        <section aria-label={tm("kind.diagram")} className="flex flex-col gap-3">
+          <div className="border border-line bg-white p-3">
+            {/* eslint-disable-next-line @next/next/no-img-element -- an SVG as <img>: scripts inside never run */}
+            <img src={picture} alt={r.title} className="mx-auto block max-h-[70dvh] max-w-full" />
+          </div>
+          {canDownload && <a href={picture} download={`${r.title.replace(/[\\/:*?"<>|]+/g, " ").trim() || "diagram"}.drawio.svg`} className={`${btn.secondarySm} self-start`}>{tk("downloadFile")}</a>}
+          {!canDownload && <span className="text-sm font-bold">{td("page.noDownload")}</span>}
+        </section>
+      )}
       {(editing || suggesting) && (
         <NoteEditor mode={editing ? "edit" : "suggest"} initial={{ id: r.id, title: r.title, description: r.description ?? "", body: data.body, tags: r.tags }} groups={[]} initialGroup={null} ideas={data.ideas} />
       )}
@@ -211,7 +229,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
 
       {!editing && !suggesting && <Suggestions id={id} items={data.suggestions} />}
       {data.transfer && level >= 4 && <span className="flex items-center gap-2 text-sm">{td("access.transferPending", { name: data.transfer.to_name })} <CancelTransfer transferId={data.transfer.id} /></span>}
-      {isNote && level >= 3 && !editing && !suggesting && meta.version_no > 1 && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
+      {(isNote || isDiagram) && level >= 3 && !editing && !suggesting && meta.version_no > 1 && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
       <Comments id={id} items={data.comments} canComment={level >= 2 && !!me} me={me} canModerate={level >= 4} />
     </Page>
   );

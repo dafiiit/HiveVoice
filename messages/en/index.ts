@@ -7,6 +7,7 @@ import ns_categories from "./categories.json";
 import ns_common from "./common.json";
 import ns_community from "./community.json";
 import ns_connect from "./connect.json";
+import ns_diagrams from "./diagrams.json";
 import ns_docrights from "./docrights.json";
 import ns_errorPage from "./errorPage.json";
 import ns_explore from "./explore.json";
@@ -57,6 +58,7 @@ const messages = {
   "common": ns_common,
   "community": ns_community,
   "connect": ns_connect,
+  "diagrams": ns_diagrams,
   "docrights": ns_docrights,
   "errorPage": ns_errorPage,
   "explore": ns_explore,

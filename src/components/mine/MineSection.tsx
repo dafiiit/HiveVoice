@@ -10,10 +10,10 @@ import { IconPlus } from "@/components/ui/Icons";
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 
-export type MineKind = "all" | "notes" | "uploads" | "lists" | "projects" | "listings";
+export type MineKind = "all" | "notes" | "diagrams" | "uploads" | "lists" | "projects" | "listings";
 
 // Where each kind of my things lives inside Ich.
-const BASE: Record<Exclude<MineKind, "all">, string> = { notes: "/me/notes", uploads: "/me/uploads", lists: "/me/lists", projects: "/me/initiatives", listings: "/me/listings" };
+const BASE: Record<Exclude<MineKind, "all">, string> = { notes: "/me/notes", diagrams: "/me/diagrams", uploads: "/me/uploads", lists: "/me/lists", projects: "/me/initiatives", listings: "/me/listings" };
 
 type Item = { kind: Exclude<MineKind, "all">; id: string; title: string; label: string; vis: string; at: string; extra?: string };
 
@@ -48,7 +48,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
   }));
 
   const items: Item[] = [
-    ...d.docs.map((x): Item => ({ kind: x.origin === "note" ? "notes" : "uploads", id: x.id, title: x.title, label: t(`kind.${x.origin === "note" ? "note" : x.origin === "file" ? "file" : "link"}`), vis: x.visibility, at: x.updated_at })),
+    ...d.docs.map((x): Item => ({ kind: x.origin === "note" ? "notes" : x.origin === "diagram" ? "diagrams" : "uploads", id: x.id, title: x.title, label: t(`kind.${x.origin === "note" || x.origin === "file" || x.origin === "diagram" ? x.origin : "link"}`), vis: x.visibility, at: x.updated_at })),
     ...d.lists.map((x): Item => ({ kind: "lists", id: x.id, title: x.title, label: t("kind.list"), vis: x.visibility, at: x.updated_at, extra: x.total ? t("listCount", { done: x.done, total: x.total }) : undefined })),
     ...d.projects.map((x): Item => ({ kind: "projects", id: x.id, title: x.title, label: t("kind.project"), vis: "public", at: x.updated_at })),
     ...d.listings.map((x): Item => ({ kind: "listings", id: x.id, title: x.title, label: t(`kind.${x.kind === "need" ? "need" : "offer"}`), vis: x.read_scope, at: x.created_at, extra: x.status === "paused" ? t("paused") : undefined })),
@@ -61,6 +61,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
   }));
 
   const create = kind === "notes" ? { href: "/me/notes/new", label: t("newNote") }
+    : kind === "diagrams" ? { href: "/me/diagrams/new", label: t("newDiagram") }
     : kind === "uploads" ? { href: "/me/uploads/new", label: t("newUpload") }
     : kind === "listings" ? { href: "/me/listings/new", label: t("newListing") }
     : kind === "projects" ? { href: "/new/initiative", label: t("newProject") }
@@ -68,7 +69,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
     // The overview: one "+" for everything that can be made here.
     : <Popover align="right" label={<><IconPlus size={14} /> {t("new")}</>}>
         <div className="flex flex-col" role="group" aria-label={t("new")}>
-          {([["/me/notes/new", t("newNote")], ["/me/uploads/new", t("newUpload")], ["/me/lists", t("newList")], ["/me/listings/new", t("newListing")], ["/new/initiative", t("newProject")]] as const).map(([href, label]) => (
+          {([["/me/notes/new", t("newNote")], ["/me/diagrams/new", t("newDiagram")], ["/me/uploads/new", t("newUpload")], ["/me/lists", t("newList")], ["/me/listings/new", t("newListing")], ["/new/initiative", t("newProject")]] as const).map(([href, label]) => (
             <Link key={href} href={href} className="flex h-10 items-center border-b border-line text-ink no-underline last:border-b-0">{label}</Link>
           ))}
         </div>
@@ -79,14 +80,14 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
     <Split open={open}
       list={
         <ListPane id={`mine-${kind}`} title={title} create={create} searchLabel={t("search")} rows={rows}
-          empty={t(kind === "all" ? "empty" : kind === "notes" ? "emptyNotes" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}
+          empty={t(kind === "all" ? "empty" : kind === "notes" ? "emptyNotes" : kind === "diagrams" ? "emptyDiagrams" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}
           autoOpen={!open && auto ? rows[0]?.href : undefined}
-          footer={kind === "notes" || kind === "uploads" ? <Link href={`${path}?more=1`} className="block border-b border-line px-4 py-3 text-sm text-ink underline">{t("more")}</Link> : undefined} />
+          footer={kind === "notes" || kind === "diagrams" || kind === "uploads" ? <Link href={`${path}?more=1`} className="block border-b border-line px-4 py-3 text-sm text-ink underline">{t("more")}</Link> : undefined} />
       }
       detail={open ? <>{<BackToList href={path} label={title} />}{detail}</>
         // Nothing there yet: say so on the right and offer the first step, instead of "choose on the left".
         : rows.length === 0 && kind !== "all" && create && typeof create === "object" && "href" in create
-          ? <Pick text={t(kind === "notes" ? "emptyNotes" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}><Link href={create.href} className={btn.primary}>{create.label}</Link></Pick>
+          ? <Pick text={t(kind === "notes" ? "emptyNotes" : kind === "diagrams" ? "emptyDiagrams" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}><Link href={create.href} className={btn.primary}>{create.label}</Link></Pick>
           : (detail ?? <Pick text={t(rows.length ? "pick" : "empty")} />)} />
   );
 }

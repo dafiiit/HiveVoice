@@ -35,7 +35,8 @@
     "map": "Karte",
     "dataset": "Daten",
     "page": "Webseite",
-    "note": "Notiz"
+    "note": "Notiz",
+    "diagram": "Diagramm"
   },
   "kindShort": {
     "document": "DOC",
@@ -52,7 +53,8 @@
     "map": "KARTE",
     "dataset": "DATEN",
     "page": "SEITE",
-    "note": "NOTIZ"
+    "note": "NOTIZ",
+    "diagram": "DIAGRAMM"
   },
   "providers": {
     "drive": "Google Drive",
@@ -75,7 +77,8 @@
     "official": "Offizielle Stelle",
     "web": "Webseite",
     "upload": "Hochgeladen",
-    "note": "Notiz in HiveVoice"
+    "note": "Notiz in HiveVoice",
+    "drawio": "draw.io"
   },
   "trust": {
     "trusted": "Bekannter Dienst",

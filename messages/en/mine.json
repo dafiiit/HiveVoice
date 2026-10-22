@@ -10,7 +10,8 @@
     "notes": "Notes",
     "projects": "Initiatives",
     "listings": "Offers and requests",
-    "uploads": "Uploads"
+    "uploads": "Uploads",
+    "diagrams": "Diagrams"
   },
   "filterLabel": "Filter content",
   "kind": {
@@ -21,7 +22,8 @@
     "note": "Note",
     "project": "Initiative",
     "offer": "Offer",
-    "need": "Request"
+    "need": "Request",
+    "diagram": "Diagram"
   },
   "vis": {
     "me": "Private",
@@ -75,5 +77,8 @@
   "newProject": "Initiative",
   "paused": "paused",
   "more": "Shared with me, hand-overs, trash",
-  "new": "New"
+  "new": "New",
+  "newDiagram": "Diagram",
+  "myDiagrams": "My diagrams",
+  "emptyDiagrams": "No diagram yet. Draw flows, plans and sketches with draw.io, with versions, and share them when you like."
 }

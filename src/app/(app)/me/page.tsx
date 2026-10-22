@@ -11,7 +11,7 @@ export async function generateMetadata() {
 }
 
 // Old links: /me/notes and the like lead to the sections.
-const OLD: Record<string, string> = { notes: "/me/notes", docs: "/me/notes", uploads: "/me/uploads", lists: "/me/lists", projects: "/me/initiatives", listings: "/me/listings" };
+const OLD: Record<string, string> = { notes: "/me/notes", diagrams: "/me/diagrams", docs: "/me/notes", uploads: "/me/uploads", lists: "/me/lists", projects: "/me/initiatives", listings: "/me/listings" };
 const UUID = /^[0-9a-f-]{36}$/;
 
 /**
@@ -24,7 +24,7 @@ export default async function Mine({ searchParams }: PageProps<"/me">) {
   const [kind, id] = typeof sp.o === "string" ? sp.o.split(":") : [];
   if (!id || !UUID.test(id)) return <MineSection kind="all" open={false} />;
   const detail =
-    kind === "notes" || kind === "uploads" ? <LinkView id={id} sp={sp} base={`/me/${kind}/${id}`} embedded />
+    kind === "notes" || kind === "diagrams" || kind === "uploads" ? <LinkView id={id} sp={sp} base={`/me/${kind}/${id}`} embedded />
     : kind === "lists" ? <ListView id={id} embedded />
     : kind === "listings" ? <ListingDetail id={id} embedded />
     : kind === "projects" ? <InitiativeView id={id} sp={sp} base={`/me/initiatives/${id}`} embedded />

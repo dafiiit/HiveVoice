@@ -119,6 +119,17 @@ export async function saveNote(input: NoteInput) {
   return res;
 }
 
+/** A draw.io diagram (the SVG with the drawing inside): new, or a new version of one I may edit. */
+export async function saveDiagram(input: { id?: string; title: string; svg: string }) {
+  const res = await run(async (tx) => {
+    const [{ id }] = await tx<{ id: string }[]>`select app.save_diagram(${tx.json({ id: input.id ?? "", title: input.title, svg: input.svg })}) as id`;
+    return id;
+  });
+  revalidatePath("/me", "layout");
+  if (res.ok) revalidatePath(`/links/${res.data}`);
+  return res;
+}
+
 const touch = (id: string) => { revalidatePath(`/links/${id}`); revalidatePath("/settings");
  revalidatePath("/me"); revalidatePath("/community", "layout"); };
 

@@ -40,6 +40,10 @@ test.describe("diagrams (draw.io) @writes", () => {
       const picture = page.getByRole("img", { name: marker });
       await expect(picture).toBeVisible();
       expect(await picture.getAttribute("src")).toMatch(/^data:image\/svg\+xml;base64,/);
+      // Always draw.io's light look: on a device in dark mode the picture used to turn dark (black shapes, white lines).
+      const saved = await (await page.request.get(`/api/diagrams/${page.url().split("/").pop()}`)).text();
+      expect(saved).toContain("color-scheme: light;");
+      expect(saved).not.toContain("color-scheme: light dark");
       await expect(page.getByRole("link", { name: marker })).toBeVisible();
 
       // Into a note: the snippet from the diagram page shows the picture there, and its link leads into draw.io and back.

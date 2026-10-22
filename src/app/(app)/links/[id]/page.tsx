@@ -25,6 +25,7 @@ import { RestoreResource } from "@/components/links/RestoreResource";
 import { WhyNot } from "@/components/WhyNot";
 import { BackLink, Notice, Page } from "@/components/ui/Page";
 import { CopyField } from "@/components/ui/Copy";
+import { lightSvg } from "@/lib/drawio";
 
 export async function generateMetadata({ params }: PageProps<"/links/[id]">) {
   const { id } = await params;
@@ -125,7 +126,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   const linkUrl = meta.visibility === "link" && meta.link_token ? `${origin}/links/${id}?k=${meta.link_token}` : null;
   // Drawing takes the whole pane: draw.io and a bar with name, save and close.
   if (isDiagram && editing) return <DiagramEditor id={id} title={r.title} svg={data.body} base={base.replace(/\/[^/]+$/, "")} back={typeof sp.back === "string" && /^\/(?!\/)/.test(sp.back) ? sp.back : undefined} />;
-  const picture = isDiagram ? `data:image/svg+xml;base64,${Buffer.from(data.body).toString("base64")}` : null;
+  const picture = isDiagram ? `data:image/svg+xml;base64,${Buffer.from(lightSvg(data.body)).toString("base64")}` : null;
   const home = SECTION[r.origin] ?? "/me/uploads";
   return (
     <Page width="narrow">

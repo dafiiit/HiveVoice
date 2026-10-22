@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { lockResource, releaseResource, saveDiagram } from "@/lib/actions/links";
 import { btn, field } from "../ui/styles";
 import { Notice } from "@/components/ui/Page";
-import { drawingOf } from "@/lib/drawio";
+import { drawingOf, lightSvg } from "@/lib/drawio";
 
 // draw.io runs in a frame and talks to the page by messages (embed mode, JSON protocol). It can run on our own server
 // (the jgraph/drawio Docker image); without NEXT_PUBLIC_DRAWIO_URL the public embed address is used.
@@ -31,6 +31,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
 }) {
   const t = useTranslations("diagrams");
   const td = useTranslations("docrights.page");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
   const frame = useRef<HTMLIFrameElement>(null);
@@ -70,12 +71,16 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
       // Ctrl+S inside draw.io: the same as our button.
       else if (msg.event === "save") post({ action: "export", format: "xmlsvg", spinKey: "saving" });
       else if (msg.event === "export" && msg.data) {
-        const out = svgOf(msg.data);
+        const out = lightSvg(svgOf(msg.data));
         if (out.length > MAX) { setError(t("tooLarge")); return; }
         const { docId: current, title: name } = state.current;
         start(async () => {
           const res = await saveDiagram({ id: current, title: name, svg: out });
-          if (!res.ok) { setError(res.error === "title_required" ? t("titleRequired") : res.error === "locked" ? td("locked") : t("saveError")); return; }
+          if (!res.ok) {
+            setError(res.error === "title_required" ? t("titleRequired") : res.error === "locked" ? td("locked")
+              : tc.has(`errors.${res.error}`) ? tc(`errors.${res.error}` as "errors.unknown") : t("saveError"));
+            return;
+          }
           setError(null); setDirty(false); setSaved(true);
           if (!current) {
             setDocId(res.data);

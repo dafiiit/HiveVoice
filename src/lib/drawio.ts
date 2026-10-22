@@ -1,5 +1,13 @@
-// Reading what draw.io saved (in the browser). A saved diagram is an SVG whose `content` attribute holds the drawing
+// Reading what draw.io saved (lightSvg also on the server, the rest in the browser). A saved diagram is an SVG whose `content` attribute holds the drawing
 // (an mxfile); each page is either plain XML or compressed (deflate, base64, URI-encoded).
+
+/**
+ * draw.io writes its colours as `light-dark(…)` and marks the picture `color-scheme: light dark`, so on a device in dark
+ * mode the saved picture turned dark (black shapes, white lines on the white ground). Diagrams always look as in the editor.
+ */
+export function lightSvg(svg: string): string {
+  return svg.replace(/^(\s*(?:<\?xml[^>]*>\s*)?(?:<!DOCTYPE[^>]*>\s*)?<svg\b[^>]*?)color-scheme:\s*light\s+dark/, "$1color-scheme: light");
+}
 
 /** The drawing inside a saved SVG, to open it in draw.io again. */
 export function drawingOf(svg: string): string {

@@ -35,3 +35,10 @@ export const IconUpload = ({ size = 20, className }: P) => <svg {...base(size)} 
 export const IconDownload = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M12 4v12M7 11l5 5 5-5" /><path d="M4 15v5h16v-5" /></svg>;
 export const IconFlag = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 21V4" /><path d="M5 4h13l-3 4.5 3 4.5H5" /></svg>;
 export const IconMail = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="3" y="5" width="18" height="14" /><path d="M3 6l9 7 9-7" /></svg>;
+// The picture editor.
+export const IconPen = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M4 20l1-5L16 4l4 4L9 19z" /><path d="M13 7l4 4" /></svg>;
+export const IconRect = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="4" y="5" width="16" height="14" /></svg>;
+export const IconEllipse = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><ellipse cx="12" cy="12" rx="8.5" ry="7" /></svg>;
+export const IconArrow = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 19L19 5M10 5h9v9" /></svg>;
+export const IconText = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 7V4h14v3M12 4v16M9 20h6" /></svg>;
+export const IconUndo = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M9 14L4 9l5-5" /><path d="M4 9h11a5 5 0 0 1 0 10h-4" /></svg>;

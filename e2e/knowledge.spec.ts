@@ -104,4 +104,84 @@ test.describe("knowledge: notes, files and images", () => {
       for (const path of stored) await removeStored(path);
     }
   });
+
+  test("a photo can be drawn on before it is shared: rectangle and text, saved as a new file", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "writes data, and both projects would race");
+    const stored = new Set<string>();
+    page.on("request", (r) => {
+      const m = r.method() === "POST" && r.url().match(/\/storage\/v1\/object\/files\/(.+)$/);
+      if (m) stored.add(decodeURIComponent(m[1]));
+    });
+    try {
+      await login(page);
+      await page.goto("/new/link");
+      await page.getByRole("radio", { name: "Datei" }).click();
+      // A light grey photo, large enough to draw on.
+      const grey = Buffer.from(await page.evaluate(() => {
+        const c = document.createElement("canvas");
+        c.width = 600; c.height = 400;
+        const ctx = c.getContext("2d")!;
+        ctx.fillStyle = "#dddddd"; ctx.fillRect(0, 0, 600, 400);
+        return c.toDataURL("image/png").split(",")[1];
+      }), "base64");
+      await page.locator("input[type=file]").setInputFiles({ name: "plan.png", mimeType: "image/png", buffer: grey });
+      await expect(page.getByText("plan.jpg").first()).toBeVisible();
+      const before = await page.getByRole("region", { name: "Hochgeladene Datei" }).locator("img").getAttribute("src");
+
+      await page.getByRole("button", { name: "Bearbeiten" }).click();
+      const editor = page.getByRole("dialog", { name: "Bild bearbeiten" });
+      const save = editor.getByRole("button", { name: "Speichern" });
+      await expect(save).toBeDisabled();
+      const canvas = editor.locator("canvas");
+      await expect(canvas).toBeVisible();
+      const box = (await canvas.boundingBox())!;
+
+      // A red rectangle (the default colour).
+      await editor.getByRole("button", { name: "Rechteck" }).click();
+      await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.7, { steps: 5 });
+      await page.mouse.up();
+      // Undo and redo it by drawing again keeps one mark.
+      await editor.getByRole("button", { name: "Rückgängig" }).click();
+      await expect(save).toBeDisabled();
+      await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.7, { steps: 5 });
+      await page.mouse.up();
+
+      // Text in blue.
+      await editor.getByRole("button", { name: "Farbe" }).click();
+      await editor.getByRole("button", { name: "Blau" }).click();
+      await editor.getByRole("button", { name: "Text", exact: true }).click();
+      await canvas.click({ position: { x: box.width * 0.7, y: box.height * 0.85 } });
+      await editor.getByRole("textbox", { name: "Text" }).fill("Hier");
+      await save.click();
+      await expect(editor).toBeHidden();
+
+      // The preview now shows the drawing: red on the rectangle's edge, grey inside it.
+      const img = page.getByRole("region", { name: "Hochgeladene Datei" }).locator("img");
+      await expect(img).not.toHaveAttribute("src", before!);
+      const pixel = (fx: number, fy: number) => img.evaluate(async (el, [x, y]) => {
+        const i = el as HTMLImageElement;
+        await i.decode();
+        const c = document.createElement("canvas");
+        c.width = i.naturalWidth; c.height = i.naturalHeight;
+        const ctx = c.getContext("2d")!;
+        ctx.drawImage(i, 0, 0);
+        return Array.from(ctx.getImageData(Math.round(x * c.width), Math.round(y * c.height), 1, 1).data.slice(0, 3));
+      }, [fx, fy]);
+      const [r, g, b] = await pixel(0.2, 0.45);
+      expect(r).toBeGreaterThan(180);
+      expect(g).toBeLessThan(80);
+      expect(b).toBeLessThan(80);
+      const [ir, ig] = await pixel(0.4, 0.45);
+      expect(Math.abs(ir - ig)).toBeLessThan(20);
+      // Edited before uploading twice: the photo went up again as a new file.
+      expect(stored.size).toBe(2);
+      await expect(page.getByText("plan.jpg").first()).toBeVisible();
+    } finally {
+      for (const path of stored) await removeStored(path);
+    }
+  });
 });

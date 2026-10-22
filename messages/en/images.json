@@ -29,5 +29,43 @@
     "failed": "Google Photos did not answer. Please try again.",
     "denied": "Access to Google Photos was not allowed.",
     "timeout": "The selection took too long. Please start again."
+  },
+  "edit": "Edit",
+  "editPhoto": "Edit photo {n}",
+  "editFile": "Edit {name}",
+  "editor": {
+    "title": "Edit picture",
+    "pen": "Pen",
+    "shapes": "Choose shape",
+    "rect": "Rectangle",
+    "ellipse": "Circle",
+    "arrow": "Arrow",
+    "text": "Text",
+    "textPlaceholder": "Text",
+    "color": "Colour",
+    "width": "Line width",
+    "widths": {
+      "thin": "Thin",
+      "medium": "Medium",
+      "thick": "Thick"
+    },
+    "colors": {
+      "red": "Red",
+      "black": "Black",
+      "white": "White",
+      "yellow": "Yellow",
+      "blue": "Blue",
+      "green": "Green"
+    },
+    "undo": "Undo",
+    "save": "Save",
+    "saving": "Saving …",
+    "close": "Close",
+    "discard": "Discard changes?",
+    "discardYes": "Discard",
+    "keep": "Keep editing",
+    "loading": "Loading picture …",
+    "loadFailed": "The picture could not be loaded.",
+    "saveFailed": "The picture could not be saved. Please try again."
   }
 }

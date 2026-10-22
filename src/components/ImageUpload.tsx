@@ -6,6 +6,8 @@ import { uploadImage } from "@/lib/upload";
 import { imageUrl } from "@/lib/images";
 import { setAvatar } from "@/lib/actions/images";
 import { Avatar } from "./ui/Avatar";
+import { ImageEditor } from "./ImageEditor";
+import { IconPen } from "./ui/Icons";
 import { GooglePhotosButton } from "./GooglePhotosButton";
 import { btn } from "./ui/styles";
 
@@ -18,6 +20,16 @@ export function ImagePicker({ value, onChange, max = 4 }: { value: string[]; onC
   const [busy, setBusy] = useState(false);
   const [over, setOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+
+  // The edited photo is stored as a new file and takes the place of the old one.
+  const saveEdit = async (old: string, jpeg: Blob) => {
+    const res = await uploadImage(new File([jpeg], "edited.jpg", { type: "image/jpeg" }));
+    if (!res.ok) return t(`errors.${res.error}`);
+    onChange(value.map((p) => (p === old ? res.path : p)));
+    setEditing(null);
+    return null;
+  };
 
   const add = async (files: FileList | null) => {
     if (!files?.length) return;
@@ -50,6 +62,8 @@ export function ImagePicker({ value, onChange, max = 4 }: { value: string[]; onC
               {i === 0 && <span className="absolute bottom-0 left-0 bg-ink px-1.5 py-0.5 text-[11px] font-bold text-on-ink">{t("cover")}</span>}
               <button type="button" onClick={() => onChange(value.filter((x) => x !== p))} aria-label={t("remove", { n: i + 1 })}
                 className="absolute right-0 top-0 inline-flex h-7 w-7 items-center justify-center border-0 bg-surface text-ink">✕</button>
+              <button type="button" onClick={() => setEditing(p)} aria-label={t("editPhoto", { n: i + 1 })} title={t("edit")}
+                className="absolute bottom-0 right-0 inline-flex h-7 w-7 items-center justify-center border-0 bg-surface p-0 text-ink"><IconPen size={16} /></button>
             </div>
           ))}
         </div>
@@ -67,6 +81,7 @@ export function ImagePicker({ value, onChange, max = 4 }: { value: string[]; onC
       )}
       <input ref={input} type="file" accept="image/*" multiple={max > 1} className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => add(e.target.files)} />
       {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}
+      {editing && <ImageEditor src={imageUrl(editing)!} onSave={(jpeg) => saveEdit(editing, jpeg)} onClose={() => setEditing(null)} />}
     </div>
   );
 }

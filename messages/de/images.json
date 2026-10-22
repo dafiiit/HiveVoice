@@ -29,5 +29,43 @@
     "failed": "Google Fotos hat nicht geantwortet. Bitte versuche es noch einmal.",
     "denied": "Der Zugriff auf Google Fotos wurde nicht erlaubt.",
     "timeout": "Die Auswahl hat zu lange gedauert. Bitte starte noch einmal."
+  },
+  "edit": "Bearbeiten",
+  "editPhoto": "Foto {n} bearbeiten",
+  "editFile": "{name} bearbeiten",
+  "editor": {
+    "title": "Bild bearbeiten",
+    "pen": "Stift",
+    "shapes": "Form wählen",
+    "rect": "Rechteck",
+    "ellipse": "Kreis",
+    "arrow": "Pfeil",
+    "text": "Text",
+    "textPlaceholder": "Text",
+    "color": "Farbe",
+    "width": "Strichstärke",
+    "widths": {
+      "thin": "Dünn",
+      "medium": "Mittel",
+      "thick": "Dick"
+    },
+    "colors": {
+      "red": "Rot",
+      "black": "Schwarz",
+      "white": "Weiß",
+      "yellow": "Gelb",
+      "blue": "Blau",
+      "green": "Grün"
+    },
+    "undo": "Rückgängig",
+    "save": "Speichern",
+    "saving": "Speichert …",
+    "close": "Schließen",
+    "discard": "Änderungen verwerfen?",
+    "discardYes": "Verwerfen",
+    "keep": "Weiter bearbeiten",
+    "loading": "Bild wird geladen …",
+    "loadFailed": "Das Bild konnte nicht geladen werden.",
+    "saveFailed": "Das Bild konnte nicht gespeichert werden. Bitte versuche es noch einmal."
   }
 }

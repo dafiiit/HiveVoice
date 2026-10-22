@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { uploadAttachment } from "@/lib/upload";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { FILE_ACCEPT, FILE_BUCKET, MAX_FILES, formatSize, pollReady, type PollDraft, type UploadedFile } from "@/lib/files";
-import { IconAttach, IconClose, IconFile, IconPlus, IconPoll } from "./ui/Icons";
+import { IconAttach, IconClose, IconFile, IconPen, IconPlus, IconPoll } from "./ui/Icons";
+import { ImageEditor } from "./ImageEditor";
 import { btn, field } from "./ui/styles";
 
 const EMPTY_POLL: PollDraft = { question: "", options: ["", ""], multiple: false };
@@ -16,6 +17,8 @@ export function useExtras() {
   const [uploading, setUploading] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [poll, setPoll] = useState<PollDraft | null>(null);
+  // Photos shown and edited from the copy on this device, by stored path.
+  const [previews, setPreviews] = useState<Record<string, string>>({});
 
   const add = async (list: FileList | File[] | null) => {
     const picked = Array.from(list ?? []);
@@ -27,20 +30,34 @@ export function useExtras() {
       setUploading((n) => n + 1);
       const res = await uploadAttachment(file);
       setUploading((n) => n - 1);
-      if (res.ok) setFiles((f) => [...f, res.file]);
-      else setError(t(`errors.${res.error}`));
+      if (res.ok) {
+        setFiles((f) => [...f, res.file]);
+        if (res.file.mime === "image/jpeg") setPreviews((p) => ({ ...p, [res.file.path]: URL.createObjectURL(file) }));
+      } else setError(t(`errors.${res.error}`));
     }
   };
+  const forget = (path: string) => setPreviews(({ [path]: url, ...rest }) => { if (url) URL.revokeObjectURL(url); return rest; });
   const remove = (path: string) => {
     setFiles((f) => f.filter((x) => x.path !== path));
+    forget(path);
     // Not sent yet, so the stored copy can go (the database refuses to delete files that belong to something).
     void createSupabaseBrowser().storage.from(FILE_BUCKET).remove([path]);
   };
-  const clear = () => { setFiles([]); setPoll(null); setError(null); };
+  /** Stores an edited photo as a new file in the place of the old one. Returns an error text or null. */
+  const replace = async (old: UploadedFile, jpeg: Blob) => {
+    const res = await uploadAttachment(new File([jpeg], old.name, { type: "image/jpeg" }));
+    if (!res.ok) return t(`errors.${res.error}`);
+    setFiles((f) => f.map((x) => (x.path === old.path ? res.file : x)));
+    forget(old.path);
+    setPreviews((p) => ({ ...p, [res.file.path]: URL.createObjectURL(jpeg) }));
+    void createSupabaseBrowser().storage.from(FILE_BUCKET).remove([old.path]);
+    return null;
+  };
+  const clear = () => { setFiles([]); setPoll(null); setError(null); setPreviews((p) => { Object.values(p).forEach(URL.revokeObjectURL); return {}; }); };
   /** Puts back what was about to be sent when sending failed. */
   const restore = (f: UploadedFile[], p: PollDraft | null) => { setFiles(f); setPoll(p); };
   return {
-    files, uploading, error, poll, setPoll, add, remove, clear, restore,
+    files, uploading, error, poll, setPoll, previews, add, remove, replace, clear, restore,
     /** Something besides text is attached and ready. */
     has: files.length > 0 || pollReady(poll),
     /** A poll draft that is not finished yet, or an upload still running: sending must wait. */
@@ -72,6 +89,8 @@ export function ExtrasButtons({ x, polls = true, size = "md" }: { x: Extras; pol
 /** Chosen files and the poll form, shown above the text field. */
 export function ExtrasPreview({ x }: { x: Extras }) {
   const t = useTranslations("extras");
+  const ti = useTranslations("images");
+  const [editing, setEditing] = useState<UploadedFile | null>(null);
   const set = (p: Partial<PollDraft>) => x.setPoll((cur) => (cur ? { ...cur, ...p } : cur));
   return (
     <div className="flex max-h-[42dvh] min-w-0 flex-col gap-2 overflow-y-auto empty:hidden">
@@ -79,9 +98,15 @@ export function ExtrasPreview({ x }: { x: Extras }) {
         <ul className="m-0 flex list-none flex-wrap gap-1.5 p-0">
           {x.files.map((f) => (
             <li key={f.path} className="flex max-w-full items-center gap-2 border border-line bg-surface py-1 pl-2.5 pr-1 text-sm">
-              <IconFile size={16} className="flex-none" />
+              {x.previews[f.path]
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={x.previews[f.path]} alt="" className="h-8 w-8 flex-none object-cover" />
+                : <IconFile size={16} className="flex-none" />}
               <span className="min-w-0 truncate">{f.name}</span>
               <span className="flex-none text-xs text-muted">{formatSize(f.size)}</span>
+              {x.previews[f.path] && (
+                <button type="button" aria-label={ti("editFile", { name: f.name })} title={ti("edit")} onClick={() => setEditing(f)} className="inline-flex h-8 w-8 flex-none items-center justify-center border-0 bg-transparent p-0 text-ink"><IconPen size={16} /></button>
+              )}
               <button type="button" aria-label={t("removeFile", { name: f.name })} onClick={() => x.remove(f.path)} className="inline-flex h-8 w-8 flex-none items-center justify-center border-0 bg-transparent p-0 text-ink"><IconClose size={14} /></button>
             </li>
           ))}
@@ -89,6 +114,10 @@ export function ExtrasPreview({ x }: { x: Extras }) {
         </ul>
       )}
       {x.error && <p role="alert" className="m-0 text-sm font-bold">{x.error}</p>}
+      {editing && x.previews[editing.path] && (
+        <ImageEditor src={x.previews[editing.path]} onClose={() => setEditing(null)}
+          onSave={async (jpeg) => { const err = await x.replace(editing, jpeg); if (!err) setEditing(null); return err; }} />
+      )}
       {x.poll && (
         <fieldset className="m-0 flex min-w-0 flex-col gap-2 border border-ink bg-surface p-3">
           <input value={x.poll.question} maxLength={200} onChange={(e) => set({ question: e.target.value })} aria-label={t("pollQuestion")} placeholder={t("pollQuestion")} className={`${field.input} font-bold`} />

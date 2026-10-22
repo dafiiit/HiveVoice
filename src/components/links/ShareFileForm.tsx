@@ -4,9 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { shareFile } from "@/lib/actions/links";
 import { uploadAttachment } from "@/lib/upload";
-import { FILE_ACCEPT, formatSize, isImage, mimeOf, type UploadedFile } from "@/lib/files";
+import { FILE_ACCEPT, FILE_BUCKET, formatSize, isImage, mimeOf, type UploadedFile } from "@/lib/files";
 import { TagPicker } from "../TagPicker";
-import { IconFile } from "../ui/Icons";
+import { IconFile, IconPen } from "../ui/Icons";
+import { ImageEditor } from "../ImageEditor";
+import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { btn, field } from "../ui/styles";
 import { AccessPicker, type Access } from "./AccessPicker";
 import { Notice } from "@/components/ui/Page";
@@ -18,6 +20,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const t = useTranslations("knowledge");
   const tl = useTranslations("links");
   const te = useTranslations("extras");
+  const ti = useTranslations("images");
   const tc = useTranslations("common");
   const router = useRouter();
   // Inside Ich the document opens next to its list, elsewhere on its own page.
@@ -33,6 +36,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const [groupId, setGroupId] = useState(groups.find((g) => g.slug === initialGroup)?.id ?? "");
   const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "me", license: "all_rights" });
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
   const [pending, start] = useTransition();
 
   const pick = async (picked: File | undefined) => {
@@ -50,6 +54,19 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
     setLocal(isImage(res.file.mime) ? URL.createObjectURL(picked) : null);
     setFile(res.file);
     setTitle((cur) => cur || res.file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " "));
+  };
+
+  // The edited photo replaces the uploaded one, which is not shared yet and can go.
+  const saveEdit = async (jpeg: Blob) => {
+    if (!file) return null;
+    const res = await uploadAttachment(new File([jpeg], file.name, { type: "image/jpeg" }));
+    if (!res.ok) return te(`errors.${res.error}`);
+    void createSupabaseBrowser().storage.from(FILE_BUCKET).remove([file.path]);
+    if (local) URL.revokeObjectURL(local);
+    setLocal(URL.createObjectURL(jpeg));
+    setFile(res.file);
+    setEditing(false);
+    return null;
   };
 
   const share = () => start(async () => {
@@ -79,8 +96,12 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
               // eslint-disable-next-line @next/next/no-img-element
               ? <img src={local} alt="" className="h-20 w-20 flex-none object-cover" />
               : <IconFile size={40} className="flex-none" />}
-            <span className="flex min-w-0 flex-col"><strong className="truncate">{file.name}</strong><span className="text-sm text-muted">{formatSize(file.size)}</span></span>
+            <span className="flex min-w-0 flex-1 flex-col"><strong className="truncate">{file.name}</strong><span className="text-sm text-muted">{formatSize(file.size)}</span></span>
+            {local && file.mime === "image/jpeg" && (
+              <button type="button" onClick={() => setEditing(true)} className={`${btn.secondarySm} flex-none`}><IconPen size={16} /> {ti("edit")}</button>
+            )}
           </section>
+          {editing && local && <ImageEditor src={local} onSave={saveEdit} onClose={() => setEditing(false)} />}
           <label className={field.label}>{tl("titleLabel")}
             <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={field.input} />
           </label>

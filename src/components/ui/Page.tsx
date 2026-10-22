@@ -4,9 +4,11 @@ import { IconBack } from "./Icons";
 import { sectionRule, sectionTitle, tab } from "./styles";
 
 const frame = "px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-10";
+// Next to a list (Split) the pane is already the limit: there "narrow" fills it (globals.css, .page-narrow).
+const narrow = "page-narrow max-w-[720px]";
 
 /**
- * The frame of every page. Two widths only: "narrow" (720 px) for text and forms, "wide" for lists and grids.
+ * The frame of every page. Two widths only: "narrow" (720 px, the whole pane next to a list) for text and forms, "wide" for lists and grids.
  * With an `aside`, the content gets a column on the right on wide screens.
  */
 export function Page({ width = "wide", aside, children, className = "" }: { width?: "narrow" | "wide"; aside?: ReactNode; children: ReactNode; className?: string }) {
@@ -15,13 +17,13 @@ export function Page({ width = "wide", aside, children, className = "" }: { widt
     return (
       <div className="@container">
         <div className={`grid gap-5 md:gap-10 @5xl:grid-cols-[minmax(0,1fr)_320px] ${frame} ${className}`}>
-          <div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${width === "narrow" ? "max-w-[720px]" : ""}`}>{children}</div>
+          <div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${width === "narrow" ? narrow : ""}`}>{children}</div>
           <aside className="flex min-w-0 flex-col gap-6">{aside}</aside>
         </div>
       </div>
     );
   }
-  return <div className="@container"><div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${frame} ${width === "narrow" ? "max-w-[720px]" : ""} ${className}`}>{children}</div></div>;
+  return <div className="@container"><div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${frame} ${width === "narrow" ? narrow : ""} ${className}`}>{children}</div></div>;
 }
 
 /** "← Area" above a detail page: one link back to the area the thing belongs to. */

@@ -1,0 +1,15 @@
+{
+  "title": "Programm-Updates",
+  "text": "Die Inhalte sind immer aktuell. Nur das Desktop-Programm selbst bekommt ab und zu eine neue Version.",
+  "version": "Installiert: HiveVoice {version}",
+  "check": "Nach Updates suchen",
+  "checking": "Suche …",
+  "current": "Du hast die neueste Version.",
+  "available": "HiveVoice {version} ist da.",
+  "install": "Jetzt installieren",
+  "installing": "Wird installiert …",
+  "later": "Später",
+  "restart": "HiveVoice startet danach neu.",
+  "download": "Zur Download-Seite",
+  "error": "Das hat nicht geklappt. Bist du online?"
+}

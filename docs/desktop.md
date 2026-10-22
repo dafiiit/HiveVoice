@@ -14,7 +14,7 @@ wenn sich die Hülle ändert (Fenster, Symbol, Tauri-Version).
 
 - Offline sorgt der vorhandene Service Worker (`public/sw.js`) dafür, dass Geöffnetes lesbar bleibt, genau wie im Browser.
   Beim allerersten Start braucht das Programm Netz.
-- Die Seite bekommt keinen Zugriff auf Tauri-Funktionen (`capabilities/default.json` ist leer), sie läuft wie im Browser.
+- Die Seite bekommt keinen Zugriff auf Tauri-Funktionen außer den zwei Update-Befehlen (`capabilities/updates.json`), sonst läuft sie wie im Browser.
 - Symbole: `npm run icons` in `desktop/` erzeugt sie aus `src/app/icon.svg` (braucht `rsvg-convert`).
 - Andere Adresse (eigene Instanz, siehe docs/selbsthosting.md): `url` und `frontendDist` in `desktop/src-tauri/tauri.conf.json` ändern.
 - Offen: Google blockiert die Anmeldung in eingebetteten Webansichten teils („disallowed_useragent“). Anmelden mit
@@ -40,6 +40,31 @@ Für alle Systeme baut der Workflow `.github/workflows/desktop.yml` auf GitHub:
   (nur Zahlen, wegen MSI) wird zur Programmversion, die Dateien hängen danach am Release „HiveVoice v0.2.0“,
   und `/releases/latest` zeigt darauf.
 - **Nur testen:** unter Actions → Desktop → „Run workflow“. Dann entsteht kein Release; die Dateien liegen 90 Tage am Lauf.
+
+## Updates
+
+Die Inhalte sind immer aktuell, weil die Seite vom Server kommt. Ein Update braucht nur die Hülle selbst.
+Das Programm aktualisiert sich ohne neuen Download:
+
+- **Beim Start** sucht es nach 5 Sekunden still nach einer neuen Version und fragt nur, wenn eine da ist.
+- **Mac:** HiveVoice-Menü → „Nach Updates suchen …“.
+- **Alle Systeme:** Einstellungen → Einstellungen → „Programm-Updates“ (`src/components/me/AppUpdates.tsx`).
+  Der Abschnitt erscheint nur im Programm, nicht im Browser.
+- Ja heißt: herunterladen, installieren, neu starten. Unter Windows läuft der Installer mit Fortschrittsanzeige (`passive`).
+- Linux: nur das AppImage ersetzt sich selbst; beim `.deb` verweist die App auf die Download-Seite.
+- Programme von v0.1.0 haben den Updater noch nicht und müssen einmal neu geladen werden.
+
+So funktioniert es: Jedes Release enthält `latest.json` mit Version, Dateien und Signaturen. Das Programm fragt
+`https://github.com/dafiiit/HiveVoice/releases/latest/download/latest.json` ab und installiert nur, was mit dem
+Schlüssel signiert ist, dessen öffentlicher Teil in `tauri.conf.json` (`plugins.updater.pubkey`) steht.
+Das ist eine eigene, kostenlose Signatur, unabhängig von Apple und Windows.
+
+- Privater Schlüssel: `~/.tauri/hivevoice.key` auf dem Rechner, auf dem er erzeugt wurde (ohne Passwort).
+  **Sicher aufbewahren** (z. B. Passwortmanager): Geht er verloren, können bestehende Installationen keine
+  Updates mehr annehmen und müssen neu geladen werden.
+- Auf GitHub als Secret `TAURI_SIGNING_PRIVATE_KEY` (Inhalt der Datei), `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` leer lassen.
+  Ohne das Secret schlägt der Build fehl, weil `createUpdaterArtifacts` an ist.
+- Neue Version ausliefern: Tag pushen wie unter „Bauen“, z. B. `v0.2.0`. Die Version muss höher sein als die installierte.
 
 ## Signieren
 

@@ -1,0 +1,15 @@
+{
+  "title": "Program updates",
+  "text": "Content is always up to date. Only the desktop program itself gets a new version now and then.",
+  "version": "Installed: HiveVoice {version}",
+  "check": "Check for updates",
+  "checking": "Checking …",
+  "current": "You have the newest version.",
+  "available": "HiveVoice {version} is available.",
+  "install": "Install now",
+  "installing": "Installing …",
+  "later": "Later",
+  "restart": "HiveVoice restarts afterwards.",
+  "download": "Go to the download page",
+  "error": "That did not work. Are you online?"
+}

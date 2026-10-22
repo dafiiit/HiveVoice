@@ -17,6 +17,7 @@ import { Appeal } from "@/components/me/Appeal";
 import { Settings } from "@/components/me/Settings";
 import { PrivacySettings } from "@/components/me/PrivacySettings";
 import { ViewSwitch } from "@/components/admin/ViewSwitch";
+import { AppUpdates } from "@/components/me/AppUpdates";
 
 const TABS = ["profile", "reports", "resp", "settings"] as const;
 
@@ -212,6 +213,7 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
           </section>
         )}
         <PrivacySettings findable={d.privacy?.findable ?? "all"} contactFrom={d.privacy?.contact_from ?? "all"} minor={!!d.privacy?.is_minor} blocked={d.blocked} />
+        <AppUpdates />
         <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} order={s?.feed_order === "suggested" ? "suggested" : "chrono"} places={d.places} interests={interests} suggestions={d.suggestions} />
         </>
       )}

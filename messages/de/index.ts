@@ -45,6 +45,7 @@ import ns_resprights from "./resprights.json";
 import ns_rights from "./rights.json";
 import ns_safety from "./safety.json";
 import ns_social from "./social.json";
+import ns_updates from "./updates.json";
 import ns_welcome from "./welcome.json";
 
 const messages = {
@@ -94,6 +95,7 @@ const messages = {
   "rights": ns_rights,
   "safety": ns_safety,
   "social": ns_social,
+  "updates": ns_updates,
   "welcome": ns_welcome,
 };
 export default messages;

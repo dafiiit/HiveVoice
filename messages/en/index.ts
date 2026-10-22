@@ -18,6 +18,7 @@ import ns_images from "./images.json";
 import ns_info from "./info.json";
 import ns_inirights from "./inirights.json";
 import ns_initiative from "./initiative.json";
+import ns_install from "./install.json";
 import ns_jury from "./jury.json";
 import ns_knowledge from "./knowledge.json";
 import ns_legal from "./legal.json";
@@ -66,6 +67,7 @@ const messages = {
   "info": ns_info,
   "inirights": ns_inirights,
   "initiative": ns_initiative,
+  "install": ns_install,
   "jury": ns_jury,
   "knowledge": ns_knowledge,
   "legal": ns_legal,

@@ -1,0 +1,27 @@
+{
+  "title": "Als App installieren",
+  "lead": "HiveVoice läuft auf jedem Gerät als App: eigenes Symbol, eigenes Fenster, kein App-Store. Updates kommen von selbst.",
+  "button": "HiveVoice installieren",
+  "installed": "HiveVoice ist auf diesem Gerät installiert.",
+  "thisDevice": "Dieses Gerät",
+  "offline": "Auch ohne Netz: Was du geöffnet hast, bleibt lesbar, Chats inklusive. Nachrichten warten auf dem Gerät und gehen raus, sobald du wieder online bist.",
+  "system": {
+    "iphone": "iPhone",
+    "ipad": "iPad",
+    "android": "Android",
+    "windows": "Windows",
+    "mac": "Mac",
+    "linux": "Linux"
+  },
+  "steps": {
+    "iphone": "In Safari auf Teilen tippen, dann „Zum Home-Bildschirm“ und „Hinzufügen“.",
+    "ipad": "In Safari auf Teilen tippen, dann „Zum Home-Bildschirm“ und „Hinzufügen“.",
+    "android": "In Chrome auf „Installieren“ tippen oder im Menü ⋮ „App installieren“ wählen.",
+    "windows": "In Edge oder Chrome auf „Installieren“ klicken. Danach im Startmenü und in der Taskleiste.",
+    "mac": "In Safari „Ablage“ → „Zum Dock hinzufügen“, in Chrome oder Edge auf „Installieren“ klicken.",
+    "linux": "In Chrome, Chromium oder Edge auf „Installieren“ klicken. Danach bei deinen Programmen.",
+    "macSafari": "Im Menü „Ablage“ → „Zum Dock hinzufügen“ wählen. Danach im Dock und im Launchpad.",
+    "chrome": "Auf „Installieren“ klicken oder rechts in der Adressleiste auf das Installieren-Symbol.",
+    "firefox": "Firefox installiert keine Web-Apps. Öffne diese Seite in Chrome, Edge oder Safari und installiere sie dort."
+  }
+}

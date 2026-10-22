@@ -10,6 +10,7 @@ import { SmartHeader } from "@/components/shell/SmartHeader";
 import { Lead } from "@/components/ui/Lead";
 import { btn } from "@/components/ui/styles";
 import { LanguageMenu } from "@/components/LanguageMenu";
+import { InstallApp } from "@/components/InstallApp";
 
 type Pair = { need: string; offer: string };
 
@@ -126,6 +127,8 @@ export default async function Welcome() {
           </div>
         ))}
       </section>
+
+      <InstallApp />
 
       <footer className="flex flex-wrap gap-x-6 gap-y-2 px-4 pb-6 pt-4 text-sm sm:px-6 md:px-10 md:pb-10 md:pt-6">
         <strong>HiveVoice</strong>

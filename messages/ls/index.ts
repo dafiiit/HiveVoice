@@ -6,6 +6,7 @@ import ns_common from "./common.json";
 import ns_explore from "./explore.json";
 import ns_growth from "./growth.json";
 import ns_initiative from "./initiative.json";
+import ns_install from "./install.json";
 import ns_market from "./market.json";
 import ns_me from "./me.json";
 import ns_modrights from "./modrights.json";
@@ -24,6 +25,7 @@ const messages = {
   "explore": ns_explore,
   "growth": ns_growth,
   "initiative": ns_initiative,
+  "install": ns_install,
   "market": ns_market,
   "me": ns_me,
   "modrights": ns_modrights,

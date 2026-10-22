@@ -11,6 +11,7 @@
     "lead": "What people around you are talking about. Choose the place and topic yourself.",
     "noPlace": "Choose a place to see its pinboard.",
     "where": "Place",
+    "reach": "Reach",
     "levels": {
       "borough": "Neighbourhood",
       "municipality": "Town",

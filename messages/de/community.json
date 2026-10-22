@@ -11,6 +11,7 @@
     "lead": "Was Menschen in deiner Gegend gerade bewegt. Stell Ort und Thema selbst ein.",
     "noPlace": "Wähle einen Ort, dann siehst du die Pinnwand dort.",
     "where": "Ort",
+    "reach": "Reichweite",
     "levels": {
       "borough": "Nachbarschaft",
       "municipality": "Stadt",

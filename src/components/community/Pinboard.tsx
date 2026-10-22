@@ -8,7 +8,7 @@ import { Composer, PostList } from "@/components/PostList";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { PlaceMenu } from "@/components/shell/PlaceMenu";
 import { SearchField } from "@/components/ui/SearchField";
-import { chip } from "@/components/ui/styles";
+import { chip, segment, segments } from "@/components/ui/styles";
 
 // From near to far. "Nachbarschaft" is the borough, where a town has them.
 const LEVELS = ["borough", "municipality", "state", "country"] as const;
@@ -52,8 +52,7 @@ export async function Pinboard({ sp, openId }: { sp: Record<string, string | str
   };
   const filtered = !!(tagParam || q || (area && area.level !== "municipality"));
 
-  // One line per filter: the label in a fixed column, then the choices, all 36 px high.
-  const row = "grid grid-cols-[3.5rem_minmax(0,1fr)] items-start gap-x-3 [&>span]:pt-2";
+  const topics = Array.from(new Set([...(tagParam ? [tagParam] : []), ...data.tags]));
   return (
     <div className="flex flex-col gap-4">
       <AutoRefresh seconds={30} />
@@ -63,27 +62,28 @@ export async function Pinboard({ sp, openId }: { sp: Record<string, string | str
           <PlaceMenu signedIn={!!session} place={null} size="sm" />
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
-          <div className={row}>
-            <span className="text-[13px] font-bold">{t("where")}</span>
-            <div role="group" aria-label={t("where")} className="flex min-w-0 flex-wrap items-center gap-1.5">
+        <div className="flex flex-col gap-3">
+          {/* The reach as one switch (near to far), the own place at the far end of the same line. The names of the places are in the tooltips and in the writing field below. */}
+          <div role="group" aria-label={t("where")} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <nav aria-label={t("reach")} className={`${segments} max-w-full overflow-x-auto max-md:[&>*]:px-2`}>
               {steps.map((s) => (
-                <Link key={s.level} href={href({ r: s.level })} aria-pressed={area.level === s.level} className={`${chip(area.level === s.level)} flex-none`}>
-                  {t(`levels.${s.level}`)}<span className="font-normal">&nbsp;· {s.region!.name}</span>
+                <Link key={s.level} href={href({ r: s.level })} title={s.region!.name} aria-current={area.level === s.level ? "true" : undefined} className={`${segment(area.level === s.level)} flex-none`}>
+                  {t(`levels.${s.level}`)}
                 </Link>
               ))}
-              <PlaceMenu size="sm" className="flex-none" signedIn={!!session} place={place ? { id: place.id, name: place.name, level: place.level, chain: place.chain } : null} />
-            </div>
+            </nav>
+            <PlaceMenu size="sm" className="flex-none" signedIn={!!session} place={place ? { id: place.id, name: place.name, level: place.level, chain: place.chain } : null} />
           </div>
-          <div className={row}>
-            <span className="text-[13px] font-bold">{t("tag")}</span>
+          {/* Topics only when there are some: a lone "Alle" would filter nothing. */}
+          {topics.length > 0 && (
             <div role="group" aria-label={t("tag")} className="flex min-w-0 flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-[13px] font-bold">{t("tag")}</span>
               <Link href={href({ tag: "" })} aria-pressed={!tagParam} className={`${chip(!tagParam)} flex-none`}>{t("allTags")}</Link>
-              {Array.from(new Set([...(tagParam ? [tagParam] : []), ...data.tags])).map((x) => (
+              {topics.map((x) => (
                 <Link key={x} href={href({ tag: tagParam === x ? "" : x })} aria-pressed={tagParam === x} className={`${chip(tagParam === x)} flex-none`}>#{x}</Link>
               ))}
             </div>
-          </div>
+          )}
         </div>
       )}
       {/* Search and writing are the two fields of the board: same height (44 px), same width. */}

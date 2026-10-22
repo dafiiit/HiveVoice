@@ -5,18 +5,12 @@ import { useLocale, useTranslations } from "next-intl";
 import { lockResource, releaseResource, saveDiagram } from "@/lib/actions/links";
 import { btn, field } from "../ui/styles";
 import { Notice } from "@/components/ui/Page";
+import { drawingOf } from "@/lib/drawio";
 
 // draw.io runs in a frame and talks to the page by messages (embed mode, JSON protocol). It can run on our own server
 // (the jgraph/drawio Docker image); without NEXT_PUBLIC_DRAWIO_URL the public embed address is used.
 const DRAWIO = (process.env.NEXT_PUBLIC_DRAWIO_URL || "https://embed.diagrams.net").replace(/\/$/, "");
 const MAX = 2_000_000;
-
-/** The drawing inside a saved SVG (draw.io keeps it in the `content` attribute). */
-function drawingOf(svg: string): string {
-  if (!svg) return "";
-  const root = new DOMParser().parseFromString(svg, "image/svg+xml").documentElement;
-  return root.getAttribute("content") ?? "";
-}
 
 /** draw.io hands the export over as a data URI. */
 function svgOf(dataUri: string): string {
@@ -29,8 +23,12 @@ function svgOf(dataUri: string): string {
  * Draw a diagram with draw.io, filling the pane. Saving exports the SVG with the drawing inside: it shows as a picture
  * everywhere and opens here again. Each save is a new version. While open, nobody else edits it (a lock, like notes).
  * `back`: where "Schließen" leads (the note the diagram was opened from); otherwise to the diagram itself.
+ * Over a note (`onSaved`, `onClose`): starts from a Mermaid block, reports the new diagram and closes back into the note.
  */
-export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id?: string; title: string; svg: string; base: string; back?: string }) {
+export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermaid, onSaved, onClose }: {
+  id?: string; title: string; svg: string; base: string; back?: string;
+  mermaid?: string; onSaved?: (id: string, title: string) => void; onClose?: () => void;
+}) {
   const t = useTranslations("diagrams");
   const td = useTranslations("docrights.page");
   const locale = useLocale();
@@ -38,7 +36,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id
   const frame = useRef<HTMLIFrameElement>(null);
   const [docId, setDocId] = useState(id);
   const [title, setTitle] = useState(initialTitle);
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirty] = useState(!!mermaid);
   const [leaving, setLeaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [lockedBy, setLockedBy] = useState(false);
@@ -64,7 +62,10 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id
       if (e.origin !== new URL(DRAWIO).origin || e.source !== frame.current?.contentWindow || typeof e.data !== "string") return;
       let msg: { event?: string; data?: string };
       try { msg = JSON.parse(e.data); } catch { return; }
-      if (msg.event === "init") post({ action: "load", xml: drawingOf(svg), autosave: 1, title: state.current.title });
+      // A Mermaid block becomes real draw.io shapes in one group that keeps the Mermaid text (double-click edits it).
+      if (msg.event === "init") post(mermaid
+        ? { action: "load", autosave: 1, title: state.current.title, descriptor: { format: "mermaid", wrap: true, data: mermaid } }
+        : { action: "load", xml: drawingOf(svg), autosave: 1, title: state.current.title });
       else if (msg.event === "autosave") { setDirty(true); setSaved(false); }
       // Ctrl+S inside draw.io: the same as our button.
       else if (msg.event === "save") post({ action: "export", format: "xmlsvg", spinKey: "saving" });
@@ -77,9 +78,10 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id
           if (!res.ok) { setError(res.error === "title_required" ? t("titleRequired") : res.error === "locked" ? td("locked") : t("saveError")); return; }
           setError(null); setDirty(false); setSaved(true);
           if (!current) {
-            // Stay in the editor (keeps undo); the address now names the new diagram.
             setDocId(res.data);
-            window.history.replaceState(null, "", `${base}/${res.data}?edit=1`);
+            // Stay in the editor (keeps undo); the address now names the new diagram, or the note learns about it.
+            if (onSaved) onSaved(res.data, name.trim());
+            else window.history.replaceState(null, "", `${base}/${res.data}?edit=1`);
           }
         });
       }
@@ -105,6 +107,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id
   };
   const close = (force = false) => {
     if (dirty && !force) { setLeaving(true); return; }
+    if (onClose) { onClose(); return; }
     router.push(back ?? (docId ? `${base}/${docId}` : base));
     router.refresh();
   };
@@ -112,7 +115,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id
   const lang = locale === "en" ? "en" : "de";
   const src = `${DRAWIO}/?embed=1&proto=json&spin=1&libraries=1&noSaveBtn=1&noExitBtn=1&saveAndExit=0&ui=kennedy&lang=${lang}`;
   return (
-    <div className="flex h-[calc(100dvh-8rem)] flex-col md:h-[calc(100dvh-4rem)]">
+    <div className={`flex flex-col ${onClose ? "h-dvh" : "h-[calc(100dvh-8rem)] md:h-[calc(100dvh-4rem)]"}`}>
       <div className="flex flex-wrap items-end gap-3 border-b border-line bg-surface px-4 py-3">
         <label className={`${field.label} min-w-[200px] flex-1`}>{t("titleLabel")}
           <input value={title} maxLength={200} onChange={(e) => { setTitle(e.target.value); setSaved(false); }} placeholder={t("titlePlaceholder")} className={field.input} />

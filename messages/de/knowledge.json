@@ -59,5 +59,14 @@
   "drawingPick": "Diagramm einfügen",
   "drawingNone": "Noch kein Diagramm. Zeichne eins unter Ich → Diagramme.",
   "drawingNew": "Neues Diagramm zeichnen",
-  "drawingHint": "Es erscheint immer die neueste Version. Lesende sehen es nur, wenn sie das Diagramm selbst sehen dürfen."
+  "drawingHint": "Es erscheint immer die neueste Version. Lesende sehen es nur, wenn sie das Diagramm selbst sehen dürfen.",
+  "toDrawio": "In draw.io weiterbearbeiten",
+  "backToMermaid": "Zurück zu Mermaid",
+  "convertedNote": "Der Mermaid-Block ist jetzt ein draw.io-Diagramm. Speichere die Notiz, damit es so bleibt.",
+  "backQuestion": "Wieder als Mermaid-Text in die Notiz? Das Diagramm bleibt unter Ich → Diagramme erhalten.",
+  "backQuestionChanged": "Wieder als Mermaid-Text in die Notiz? Was du in draw.io gestaltet hast (Farben, Positionen, zusätzliche Formen), kann Mermaid nicht halten und fehlt dann im Text. Das Diagramm bleibt unter Ich → Diagramme erhalten.",
+  "backNotPossible": "Zurück zu Mermaid geht nur, wenn das Diagramm nur aus einer Mermaid-Gruppe besteht. Dieses enthält mehr.",
+  "backDone": "Wieder Mermaid. Speichere die Notiz, damit es so bleibt.",
+  "diagramFrom": "{title} – Diagramm",
+  "diagramFromNote": "Diagramm aus einer Notiz"
 }

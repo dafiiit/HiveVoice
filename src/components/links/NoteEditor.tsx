@@ -4,7 +4,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { lockResource, readableDiagrams, releaseResource, saveNote, suggestChange } from "@/lib/actions/links";
 import { uploadImage } from "@/lib/upload";
-import { Markdown } from "../Markdown";
+import { Markdown, type MarkdownActions } from "../Markdown";
+import { DiagramEditor } from "./DiagramEditor";
+import { mermaidOf } from "@/lib/drawio";
 import { IconColumns, IconEye, IconImage } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
@@ -20,6 +22,18 @@ const MERMAID = "```mermaid\nflowchart LR\n  A[Idee] --> B[Gruppe]\n  B --> C{Ab
 const TABLE = "| Spalte A | Spalte B |\n| --- | --- |\n| Wert | Wert |\n";
 const FORMULA = "E = mc^2";
 type View = "write" | "preview" | "split";
+
+// A Mermaid block in the text and a diagram reference, to swap one for the other.
+const MERMAID_BLOCK = /```mermaid[^\n]*\n([\s\S]*?)\n?```/g;
+const swapMermaid = (body: string, code: string, by: string) => {
+  let done = false;
+  return body.replace(MERMAID_BLOCK, (all, inner: string) => {
+    if (done || inner.trimEnd() !== code.trimEnd()) return all;
+    done = true;
+    return by;
+  });
+};
+const swapDrawing = (body: string, id: string, by: string) => body.replace(new RegExp(`!\\[[^\\]]*\\]\\(diagram:${id}\\)`), by);
 const VIEW_KEY = "hv_note_view";
 
 /**
@@ -52,6 +66,20 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
   const area = useRef<HTMLTextAreaElement>(null);
   const preview = useDeferredValue(body);
   const selectedGroup = groups.find((g) => g.id === groupId);
+  // Mermaid ↔ draw.io: the block opens in draw.io over the note; once saved there, the note points to the diagram.
+  const [converting, setConverting] = useState<string | null>(null);
+  const [back, setBack] = useState<{ id: string; source: string; changed: boolean } | null>(null);
+  const [swapNote, setSwapNote] = useState<string | null>(null);
+  const actions: MarkdownActions = {
+    mermaid: { label: t("toDrawio"), run: (code) => { setSwapNote(null); setConverting(code); } },
+    drawing: { label: t("backToMermaid"), run: async (id) => {
+      setSwapNote(null); setBack(null);
+      const res = await fetch(`/api/diagrams/${id}`);
+      const found = res.ok ? await mermaidOf(await res.text()) : null;
+      if (!found) { setSwapNote(t("backNotPossible")); return; }
+      setBack({ id, ...found });
+    } },
+  };
 
   useEffect(() => {
     try {
@@ -164,6 +192,18 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
           </>}
           <ViewButtons view={view} choose={choose} t={t} />
         </div>
+        {swapNote && <Notice tone="status">{swapNote}</Notice>}
+        {back && (
+          <Notice tone="warning">
+            <span className="flex flex-wrap items-center gap-3">{t(back.changed ? "backQuestionChanged" : "backQuestion")}
+              <button type="button" className={btn.secondarySm} onClick={() => {
+                setBody((b) => swapDrawing(b, back.id, `\`\`\`mermaid\n${back.source.trimEnd()}\n\`\`\``));
+                setBack(null); setSwapNote(t("backDone"));
+              }}>{t("backToMermaid")}</button>
+              <button type="button" className={btn.link} onClick={() => setBack(null)}>{t("cancel")}</button>
+            </span>
+          </Notice>
+        )}
         <div className={`grid gap-4 ${view === "split" ? "@4xl:grid-cols-2" : ""}`}>
           <textarea ref={area} value={body} onChange={(e) => setBody(e.target.value)} maxLength={MAX} spellCheck aria-label={t("noteBody")} placeholder={t("notePlaceholder")}
             onPaste={(e) => { const files = [...e.clipboardData.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
@@ -171,9 +211,16 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
             onDrop={(e) => { const files = [...e.dataTransfer.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
             className={`${field.textarea} h-full min-h-[320px] min-w-0 font-mono text-sm lg:min-h-[480px] ${view === "preview" ? "hidden" : ""}`} />
           <section aria-label={t("preview")} className={`min-h-[320px] min-w-0 border border-line bg-surface p-4 lg:min-h-[480px] ${view === "write" ? "hidden" : view === "split" ? "@max-4xl:hidden" : ""}`}>
-            {preview.trim() ? <Markdown source={preview} /> : <p className="m-0 text-muted">{t("previewEmpty")}</p>}
+            {preview.trim() ? <Markdown source={preview} actions={suggesting ? undefined : actions} /> : <p className="m-0 text-muted">{t("previewEmpty")}</p>}
           </section>
         </div>
+        {converting !== null && (
+          <div role="dialog" aria-modal="true" aria-label={t("toDrawio")} className="fixed inset-0 z-50 bg-paper">
+            <DiagramEditor title={title.trim().length >= 3 ? t("diagramFrom", { title: title.trim() }).slice(0, 200) : t("diagramFromNote")} svg="" base="/me/diagrams" mermaid={converting}
+              onSaved={(id, name) => { const code = converting; setBody((b) => swapMermaid(b, code, `![${name.replace(/[[\]]/g, "")}](diagram:${id})`)); setSwapNote(t("convertedNote")); }}
+              onClose={() => setConverting(null)} />
+          </div>
+        )}
         {view !== "preview" && <span className="text-xs text-muted">{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>}
       </div>
 

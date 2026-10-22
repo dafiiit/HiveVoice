@@ -6,6 +6,7 @@ import remarkMath from "remark-math";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { imageUrl } from "@/lib/images";
+import { btn } from "./ui/styles";
 import "katex/dist/katex.min.css";
 
 // Photos uploaded into a note are written as `img:<auth user id>/<file>.jpg`, so the text does not depend on where images are served from.
@@ -19,7 +20,10 @@ const urlTransform = (url: string) => (OWN_IMAGE.test(url) || DIAGRAM.test(url) 
  * Raw HTML is not rendered, links open in a new tab. Photos uploaded here are shown; remote images are shown as links
  * (they would tell the other site who is reading).
  */
-export function Markdown({ source }: { source: string }) {
+/** What the note editor adds to its preview: a Mermaid block moves to draw.io, a diagram made from one comes back. */
+export type MarkdownActions = { mermaid?: { label: string; run: (code: string) => void }; drawing?: { label: string; run: (id: string) => void } };
+
+export function Markdown({ source, actions }: { source: string; actions?: MarkdownActions }) {
   const t = useTranslations("knowledge");
   return (
     <div className="md">
@@ -30,7 +34,7 @@ export function Markdown({ source }: { source: string }) {
           a: ({ href, children }) => <a href={href} target={href?.startsWith("#") ? undefined : "_blank"} rel="noopener noreferrer nofollow ugc">{children}</a>,
           img: ({ src, alt }) => {
             const drawing = typeof src === "string" ? DIAGRAM.exec(src)?.[1] : undefined;
-            if (drawing) return <Drawing id={drawing} title={alt ?? ""} />;
+            if (drawing) return <Drawing id={drawing} title={alt ?? ""} action={actions?.drawing} />;
             const own = typeof src === "string" ? OWN_IMAGE.exec(src)?.[1] : undefined;
             // eslint-disable-next-line @next/next/no-img-element -- photos from our own store, already shrunk on upload
             if (own) return <img src={imageUrl(own) ?? undefined} alt={alt ?? ""} loading="lazy" className="md-image" />;
@@ -45,7 +49,7 @@ export function Markdown({ source }: { source: string }) {
           },
           code: ({ className, children }) => {
             const language = /language-([\w-]+)/.exec(className ?? "")?.[1];
-            if (language === "mermaid") return <Mermaid code={String(children).replace(/\n$/, "")} />;
+            if (language === "mermaid") return <Mermaid code={String(children).replace(/\n$/, "")} action={actions?.mermaid} />;
             if (language === "math") return <Formula code={String(children)} display={/math-display/.test(className ?? "")} />;
             return <code className={className}>{children as ReactNode}</code>;
           },
@@ -61,18 +65,25 @@ export function Markdown({ source }: { source: string }) {
  * A draw.io diagram inside a text. Always the latest saved version; whoever may not read the diagram itself sees a note
  * instead of the picture. The link opens it in draw.io (or just shows it, for those who may not edit).
  */
-function Drawing({ id, title }: { id: string; title: string }) {
+function Drawing({ id, title, action }: { id: string; title: string; action?: MarkdownActions["drawing"] }) {
   const t = useTranslations("knowledge");
   const [missing, setMissing] = useState(false);
   // After drawing, "Schließen" leads back to the text the diagram sits in.
   const here = usePathname();
+  // Spans, not <figure>: Markdown puts an image inside a paragraph.
   return (
-    <figure className="md-drawing">
-      {missing ? <p className="m-0 text-sm text-muted">{t("drawingClosed")}</p>
+    <span className="md-drawing" role="group" aria-label={title || t("drawing")}>
+      {missing ? <span className="md-drawing-closed">{t("drawingClosed")}</span>
         // eslint-disable-next-line @next/next/no-img-element -- an SVG as <img>: scripts inside never run
         : <img src={`/api/diagrams/${id}`} alt={title || t("drawing")} loading="lazy" onError={() => setMissing(true)} />}
-      <figcaption>{title && <span>{title}</span>}<a href={`/links/${id}?edit=1&back=${encodeURIComponent(here)}`}>{t("drawingOpen")}</a></figcaption>
-    </figure>
+      <span className="md-drawing-caption">
+        <span>{title}</span>
+        <span className="md-drawing-actions">
+          {action && <button type="button" onClick={() => action.run(id)} className={btn.link}>{action.label}</button>}
+          <a href={`/links/${id}?edit=1&back=${encodeURIComponent(here)}`}>{t("drawingOpen")}</a>
+        </span>
+      </span>
+    </span>
   );
 }
 
@@ -97,7 +108,7 @@ const isDark = () => {
 };
 
 /** A Mermaid diagram drawn in the browser (the library loads only when a note has one), in strict mode: no scripts, no HTML labels. */
-function Mermaid({ code }: { code: string }) {
+function Mermaid({ code, action }: { code: string; action?: MarkdownActions["mermaid"] }) {
   const t = useTranslations("knowledge");
   const id = `mmd${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const [result, setResult] = useState<{ code: string; svg: string | null; error: string | null } | null>(null);
@@ -121,5 +132,7 @@ function Mermaid({ code }: { code: string }) {
   // While a changed diagram is being drawn, the last good picture stays.
   if (!result) return <figure className="md-diagram" aria-busy="true">{t("diagramLoading")}</figure>;
   if (result.error) return <pre role="alert" className="md-diagram-error">{t("diagramError", { error: result.error })}</pre>;
-  return <figure className="md-diagram" role="img" aria-label={t("diagram")} dangerouslySetInnerHTML={{ __html: result.svg ?? "" }} />;
+  const picture = <figure className="md-diagram" role="img" aria-label={t("diagram")} dangerouslySetInnerHTML={{ __html: result.svg ?? "" }} />;
+  if (!action) return picture;
+  return <div className="md-diagram-wrap">{picture}<button type="button" onClick={() => action.run(code)} className={btn.link}>{action.label}</button></div>;
 }

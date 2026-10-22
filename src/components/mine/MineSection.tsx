@@ -75,19 +75,22 @@ export async function MineSection({ kind, selected, detail, open, auto = true }:
         </div>
       </Popover>;
   const title = kind === "all" ? t("title") : t(`filters.${kind}`);
+  // Nothing in this section yet: wide screens open the page that makes the first one (initiatives are made outside Ich).
+  const startHere = kind !== "all" && kind !== "projects" && typeof create === "object" && create && "href" in create ? create.href : undefined;
 
   return (
     <Split open={open}
       list={
         <ListPane id={`mine-${kind}`} title={title} create={create} searchLabel={t("search")} rows={rows}
           empty={t(kind === "all" ? "empty" : kind === "notes" ? "emptyNotes" : kind === "diagrams" ? "emptyDiagrams" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}
-          autoOpen={!open && auto ? rows[0]?.href : undefined}
+          autoOpen={!open && auto ? rows[0]?.href ?? startHere : undefined}
           footer={kind === "notes" || kind === "diagrams" || kind === "uploads" ? <Link href={`${path}?more=1`} className="block border-b border-line px-4 py-3 text-sm text-ink underline">{t("more")}</Link> : undefined} />
       }
       detail={open ? <>{<BackToList href={path} label={title} />}{detail}</>
         // Nothing there yet: say so on the right and offer the first step, instead of "choose on the left".
         : rows.length === 0 && kind !== "all" && create && typeof create === "object" && "href" in create
           ? <Pick text={t(kind === "notes" ? "emptyNotes" : kind === "diagrams" ? "emptyDiagrams" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}><Link href={create.href} className={btn.primary}>{create.label}</Link></Pick>
+          : rows.length === 0 && kind === "lists" ? <Pick text={t("emptyFilter")}><NewList label={t("newList")} /></Pick>
           : (detail ?? <Pick text={t(rows.length ? "pick" : "empty")} />)} />
   );
 }

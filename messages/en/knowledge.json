@@ -51,5 +51,13 @@
   "imageUploading": "Uploading image …",
   "imageError": "The image could not be uploaded.",
   "showPreview": "Show preview",
-  "showSplit": "Text and preview side by side"
+  "showSplit": "Text and preview side by side",
+  "drawing": "Diagram",
+  "drawingOpen": "Open in draw.io",
+  "drawingClosed": "This diagram is not shared with you.",
+  "drawingInsert": "draw.io",
+  "drawingPick": "Insert diagram",
+  "drawingNone": "No diagram yet. Draw one under Me → Diagrams.",
+  "drawingNew": "Draw a new diagram",
+  "drawingHint": "Always shows the latest version. Readers only see it if they may see the diagram itself."
 }

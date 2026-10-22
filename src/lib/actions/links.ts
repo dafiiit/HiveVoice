@@ -130,6 +130,15 @@ export async function saveDiagram(input: { id?: string; title: string; svg: stri
   return res;
 }
 
+/** Diagrams I can put into a note: my own and those shared with me, newest first. */
+export async function readableDiagrams() {
+  return run(async (tx, session) => tx<{ id: string; title: string }[]>`
+    select r.id, r.title from public.resources r
+    where r.origin = 'diagram' and r.trashed_at is null
+      and (r.owner_id = ${session.profile.id} or exists (select 1 from public.resource_grants g where g.resource_id = r.id and g.profile_id = ${session.profile.id}))
+    order by r.updated_at desc limit 50`);
+}
+
 const touch = (id: string) => { revalidatePath(`/links/${id}`); revalidatePath("/settings");
  revalidatePath("/me"); revalidatePath("/community", "layout"); };
 

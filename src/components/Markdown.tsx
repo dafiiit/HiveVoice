@@ -4,15 +4,18 @@ import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import { useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { imageUrl } from "@/lib/images";
 import "katex/dist/katex.min.css";
 
 // Photos uploaded into a note are written as `img:<auth user id>/<file>.jpg`, so the text does not depend on where images are served from.
 const OWN_IMAGE = /^img:([0-9a-f-]{36}\/[0-9a-f]{32}\.jpg)$/;
-const urlTransform = (url: string) => (OWN_IMAGE.test(url) ? url : defaultUrlTransform(url));
+// A draw.io diagram from Ich → Diagramme is written as `![Name](diagram:<id>)`: it shows the saved picture and opens in draw.io.
+const DIAGRAM = /^diagram:([0-9a-f-]{36})$/;
+const urlTransform = (url: string) => (OWN_IMAGE.test(url) || DIAGRAM.test(url) ? url : defaultUrlTransform(url));
 
 /**
- * Markdown as formatted text: headings, lists, tables, task lists, code, formulas (LaTeX between $ or $$) and Mermaid diagrams.
+ * Markdown as formatted text: headings, lists, tables, task lists, code, formulas (LaTeX between $ or $$), Mermaid and draw.io diagrams.
  * Raw HTML is not rendered, links open in a new tab. Photos uploaded here are shown; remote images are shown as links
  * (they would tell the other site who is reading).
  */
@@ -26,6 +29,8 @@ export function Markdown({ source }: { source: string }) {
         components={{
           a: ({ href, children }) => <a href={href} target={href?.startsWith("#") ? undefined : "_blank"} rel="noopener noreferrer nofollow ugc">{children}</a>,
           img: ({ src, alt }) => {
+            const drawing = typeof src === "string" ? DIAGRAM.exec(src)?.[1] : undefined;
+            if (drawing) return <Drawing id={drawing} title={alt ?? ""} />;
             const own = typeof src === "string" ? OWN_IMAGE.exec(src)?.[1] : undefined;
             // eslint-disable-next-line @next/next/no-img-element -- photos from our own store, already shrunk on upload
             if (own) return <img src={imageUrl(own) ?? undefined} alt={alt ?? ""} loading="lazy" className="md-image" />;
@@ -49,6 +54,25 @@ export function Markdown({ source }: { source: string }) {
         {source}
       </ReactMarkdown>
     </div>
+  );
+}
+
+/**
+ * A draw.io diagram inside a text. Always the latest saved version; whoever may not read the diagram itself sees a note
+ * instead of the picture. The link opens it in draw.io (or just shows it, for those who may not edit).
+ */
+function Drawing({ id, title }: { id: string; title: string }) {
+  const t = useTranslations("knowledge");
+  const [missing, setMissing] = useState(false);
+  // After drawing, "Schließen" leads back to the text the diagram sits in.
+  const here = usePathname();
+  return (
+    <figure className="md-drawing">
+      {missing ? <p className="m-0 text-sm text-muted">{t("drawingClosed")}</p>
+        // eslint-disable-next-line @next/next/no-img-element -- an SVG as <img>: scripts inside never run
+        : <img src={`/api/diagrams/${id}`} alt={title || t("drawing")} loading="lazy" onError={() => setMissing(true)} />}
+      <figcaption>{title && <span>{title}</span>}<a href={`/links/${id}?edit=1&back=${encodeURIComponent(here)}`}>{t("drawingOpen")}</a></figcaption>
+    </figure>
   );
 }
 

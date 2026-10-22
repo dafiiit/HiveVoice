@@ -51,5 +51,13 @@
   "imageUploading": "Bild wird hochgeladen …",
   "imageError": "Das Bild konnte nicht hochgeladen werden.",
   "showPreview": "Vorschau zeigen",
-  "showSplit": "Text und Vorschau nebeneinander"
+  "showSplit": "Text und Vorschau nebeneinander",
+  "drawing": "Diagramm",
+  "drawingOpen": "In draw.io öffnen",
+  "drawingClosed": "Dieses Diagramm ist nicht für dich freigegeben.",
+  "drawingInsert": "draw.io",
+  "drawingPick": "Diagramm einfügen",
+  "drawingNone": "Noch kein Diagramm. Zeichne eins unter Ich → Diagramme.",
+  "drawingNew": "Neues Diagramm zeichnen",
+  "drawingHint": "Es erscheint immer die neueste Version. Lesende sehen es nur, wenn sie das Diagramm selbst sehen dürfen."
 }

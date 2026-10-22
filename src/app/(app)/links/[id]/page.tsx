@@ -24,6 +24,7 @@ import { Comments, CopyButton, Suggestions, Versions, type CommentRow, type Sugg
 import { RestoreResource } from "@/components/links/RestoreResource";
 import { WhyNot } from "@/components/WhyNot";
 import { BackLink, Notice, Page } from "@/components/ui/Page";
+import { CopyField } from "@/components/ui/Copy";
 
 export async function generateMetadata({ params }: PageProps<"/links/[id]">) {
   const { id } = await params;
@@ -107,6 +108,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   if (!data) notFound();
   const { r, meta, level } = data;
   const tk = await getTranslations("knowledge");
+  const tg = await getTranslations("diagrams");
   const kind = t.has(`kinds.${r.kind}`) ? t(`kinds.${r.kind}` as "kinds.page") : r.kind;
   const provider = t.has(`providers.${r.provider}`) ? t(`providers.${r.provider}` as "providers.web") : r.provider;
   const host = r.host.replace(/^www\./, "");
@@ -122,7 +124,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   const origin = await getOrigin();
   const linkUrl = meta.visibility === "link" && meta.link_token ? `${origin}/links/${id}?k=${meta.link_token}` : null;
   // Drawing takes the whole pane: draw.io and a bar with name, save and close.
-  if (isDiagram && editing) return <DiagramEditor id={id} title={r.title} svg={data.body} base={base.replace(/\/[^/]+$/, "")} />;
+  if (isDiagram && editing) return <DiagramEditor id={id} title={r.title} svg={data.body} base={base.replace(/\/[^/]+$/, "")} back={typeof sp.back === "string" && /^\/(?!\/)/.test(sp.back) ? sp.back : undefined} />;
   const picture = isDiagram ? `data:image/svg+xml;base64,${Buffer.from(data.body).toString("base64")}` : null;
   const home = SECTION[r.origin] ?? "/me/uploads";
   return (
@@ -219,6 +221,8 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           </div>
           {canDownload && <a href={picture} download={`${r.title.replace(/[\\/:*?"<>|]+/g, " ").trim() || "diagram"}.drawio.svg`} className={`${btn.secondarySm} self-start`}>{tk("downloadFile")}</a>}
           {!canDownload && <span className="text-sm font-bold">{td("page.noDownload")}</span>}
+          {level >= 1 && <CopyField label={tg("embedLabel")} value={`![${r.title.replace(/[[\]]/g, "")}](diagram:${id})`} />}
+          <span className="text-sm text-muted">{tg("embedHint")}</span>
         </section>
       )}
       {(editing || suggesting) && (

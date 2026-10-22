@@ -42,10 +42,24 @@ test.describe("diagrams (draw.io) @writes", () => {
       expect(await picture.getAttribute("src")).toMatch(/^data:image\/svg\+xml;base64,/);
       await expect(page.getByRole("link", { name: marker })).toBeVisible();
 
-      // Opening it again loads the saved drawing into draw.io.
-      await page.getByRole("link", { name: "Bearbeiten" }).click();
+      // Into a note: the snippet from the diagram page shows the picture there, and its link leads into draw.io and back.
+      const snippet = await page.getByLabel("In eine Notiz einfügen").inputValue();
+      expect(snippet).toMatch(/^!\[E2E Diagramm \d+\]\(diagram:[0-9a-f-]{36}\)$/);
+      await page.goto("/me/notes/new");
+      await page.getByLabel("Inhalt in Markdown").fill(`Vorher\n\n${snippet}\n`);
+      await page.getByRole("button", { name: "Text und Vorschau nebeneinander" }).click();
+      const preview = page.getByRole("region", { name: "Vorschau" });
+      const embedded = preview.getByRole("img", { name: marker });
+      await expect(embedded).toBeVisible();
+      await expect.poll(() => embedded.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+
+      // Opening it again loads the saved drawing into draw.io; closing leads back to the note.
+      await preview.getByRole("link", { name: "In draw.io öffnen" }).click();
+      await page.waitForURL(/\/me\/diagrams\/[0-9a-f-]{36}\?edit=1&back=/);
       await expect(editor.locator(".geDiagramContainer svg g g").first()).toBeAttached({ timeout: 90_000 });
       await expect(page.getByLabel("Name des Diagramms")).toHaveValue(marker);
+      await page.getByRole("button", { name: "Schließen" }).click();
+      await page.waitForURL(/\/me\/notes\/new$/);
     } finally {
       await exec(`delete from public.resources where title = '${marker}'`);
     }

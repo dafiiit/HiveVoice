@@ -7,7 +7,7 @@ import { relTime } from "@/lib/format";
 import { feedOrder } from "@/lib/order";
 import type { Message } from "@/lib/actions/messages";
 import { Avatar } from "@/components/ui/Avatar";
-import { BackToList, PANE_TITLES } from "@/components/shell/Split";
+import { BackToList, CREATE_SLOT, PANE_TITLES } from "@/components/shell/Split";
 import { AutoOpen } from "@/components/shell/AutoOpen";
 import { GroupView } from "@/app/(app)/groups/[slug]/page";
 import { ListingDetail } from "@/components/listings/ListingDetail";
@@ -206,6 +206,14 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
   const back = <Link href={href({ c: "" })} aria-label={t("back")} className="inline-flex h-9 w-9 flex-none items-center justify-center text-ink md:hidden"><IconBack size={18} /></Link>;
   const rowHref = (r: Row) => r.kind === "group" ? `/friends/g/${r.key.slice(2)}${(() => { const q = href({ c: "" }).split("?")[1]; return q ? `?${q}` : ""; })()}` : href({ c: r.key });
   const first = shown.find((r) => r.kind !== "listing") ?? shown[0];
+  // The "+" fits the section: people to chat with, a group, new contacts on the pinboard, an own listing.
+  const make = ({
+    all: { href: "/community/people", label: t("create.people"), short: t("create.chat") },
+    chats: { href: "/community/people", label: t("create.people"), short: t("create.chat") },
+    groups: { href: "/new/group", label: t("create.group"), short: t("create.groupShort") },
+    requests: { href: "/community", label: t("create.contacts"), short: t("create.contact") },
+    listings: { href: "/me/listings/new", label: t("create.listing"), short: t("create.listingShort") },
+  } satisfies Record<Filter, { href: string; label: string; short: string }>)[filter];
   const hasAnything = data.directs.length + data.groups.length + data.requests.length > 0;
 
   return (
@@ -214,20 +222,9 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
       {!session && <Notice tone="status" className="m-3 text-sm font-normal md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/friends" className="font-bold text-ink underline">{t("signIn")}</Link></Notice>}
       <div className="flex min-h-0 flex-1 flex-col bg-surface md:flex-row">
         <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:flex-none md:border-r ${LIST_COLUMN}`}>
-          <div className="flex flex-none flex-wrap items-center justify-end gap-2 px-4 pb-1 pt-4 md:justify-between">
-            <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only @max-[17rem]:basis-full">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
-            {session && (() => {
-              // The "+" fits the section: people to chat with, a group, new contacts on the pinboard, an own listing.
-              const make: Record<Filter, { href: string; label: string; short: string }> = {
-                all: { href: "/community/people", label: t("create.people"), short: t("create.chat") },
-                chats: { href: "/community/people", label: t("create.people"), short: t("create.chat") },
-                groups: { href: "/new/group", label: t("create.group"), short: t("create.groupShort") },
-                requests: { href: "/community", label: t("create.contacts"), short: t("create.contact") },
-                listings: { href: "/me/listings/new", label: t("create.listing"), short: t("create.listingShort") },
-              };
-              const c = make[filter];
-              return <Link href={c.href} title={c.label} className={btn.primarySm}><IconPlus size={14} /> {c.short}</Link>;
-            })()}
+          <div className={`flex flex-none flex-col gap-2 px-4 pb-1 pt-4 ${CREATE_SLOT.replace("flex flex-col ", "")}`}>
+            <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
+            {session && <Link href={make.href} title={make.label} className={btn.primarySm}><IconPlus size={14} /> {make.short}</Link>}
           </div>
           {session && (
             // Phones only: on wide screens the sidebar holds these as sections.
@@ -327,7 +324,9 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
           {!pane && (
             <div className="m-auto flex max-w-[420px] flex-col items-center gap-3 text-center">
               <AreaIcon area="friends" size={72} />
-              <p className="m-0 text-muted">{t("pick")}</p>
+              {/* Nothing here yet: the right side invites the first step instead of "choose on the left". */}
+              <p className="m-0 text-muted">{shown.length ? t("pick") : hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyList")}</p>
+              {session && !shown.length && <Link href={make.href} className={btn.primary}>{make.label}</Link>}
             </div>
           )}
         </section>

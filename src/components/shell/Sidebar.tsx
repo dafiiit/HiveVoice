@@ -119,7 +119,7 @@ function Bar({ folded, signedIn, badges, query, onToggle }: {
         })}
       </div>
       {/* The three areas: side by side when open, under each other when folded; each slides to its place. */}
-      <div className="relative flex-none border-t border-line transition-[height] duration-200 ease-out" style={{ height: folded ? cell * 3 + 16 : 72 }}>
+      <div className="relative flex-none border-t border-line transition-[height] duration-200 ease-out" style={{ height: folded ? cell * 3 + 16 : cell + 16 }}>
         {AREAS.map((a, i) => {
           const on = a === here;
           const x = folded ? 4 : 8 + i * cell;
@@ -127,7 +127,7 @@ function Bar({ folded, signedIn, badges, query, onToggle }: {
           return (
             <Link key={a} href={a === "me" && !signedIn ? "/login?next=/me" : `/${a === "me" ? "me" : a}`} aria-current={on ? "page" : undefined}
               aria-label={t(a)} title={t(a)}
-              style={{ transform: `translate(${x}px, ${y}px)`, width: folded ? 56 : cell, height: folded ? cell : 56 }}
+              style={{ transform: `translate(${x}px, ${y}px)`, width: folded ? 56 : cell, height: cell }}
               className={`absolute left-0 top-0 flex flex-col items-center justify-center gap-1 text-[11px] leading-none text-ink no-underline transition-[transform,width,height] duration-200 ease-out ${on ? "bg-paper font-bold outline outline-2 -outline-offset-2 outline-ink" : "hover:bg-chip"}`}>
               <span className="relative inline-flex"><AreaIcon area={a} size={24} />
                 {a === "friends" && badges.chats + badges.requests > 0 && <span className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center bg-red px-1 text-[10px] font-bold text-on-red">{badges.chats + badges.requests}</span>}

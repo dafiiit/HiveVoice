@@ -2,7 +2,7 @@
 import { useDeferredValue, useEffect, useRef, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { lockResource, releaseResource, saveNote, suggestChange } from "@/lib/actions/links";
+import { lockResource, readableDiagrams, releaseResource, saveNote, suggestChange } from "@/lib/actions/links";
 import { uploadImage } from "@/lib/upload";
 import { Markdown } from "../Markdown";
 import { IconColumns, IconEye, IconImage } from "../ui/Icons";
@@ -10,6 +10,7 @@ import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
 import { AccessPicker, type Access } from "./AccessPicker";
 import { Notice } from "@/components/ui/Page";
+import { Popover } from "../ui/Popover";
 
 type Group = { id: string; slug: string; name: string };
 export type NoteDraft = { id?: string; title: string; description: string; body: string; tags: string[] };
@@ -141,9 +142,10 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={field.input} />
       </label>
 
-      <div className={`grid gap-4 ${view === "split" ? "@4xl:grid-cols-2" : ""}`}>
-        <div className={`flex min-w-0 flex-col gap-2 ${view === "preview" ? "hidden" : ""}`}>
-          <div role="toolbar" aria-label={t("toolbar")} className="flex flex-wrap gap-1">
+      {/* One tool row over both columns, the view buttons at its end; text and preview start and end at the same height. */}
+      <div className="flex flex-col gap-2">
+        <div role="toolbar" aria-label={t("toolbar")} className="flex flex-wrap items-center gap-1">
+          {view === "preview" ? <span className="text-sm font-bold">{t("preview")}</span> : <>
             <Tool label={t("heading")} onClick={() => line("## ")} />
             <Tool label={t("bold")} onClick={() => wrap("**", "**", t("bold"))} />
             <Tool label={t("italic")} onClick={() => wrap("_", "_", t("italic"))} />
@@ -153,29 +155,26 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
             <Tool label={t("table")} onClick={() => wrap("\n", "", TABLE.trimEnd())} />
             <Tool label={t("diagram")} onClick={() => wrap("\n", "", MERMAID.trimEnd())} />
             <Tool label={t("formula")} onClick={() => wrap("$$\n", "\n$$", FORMULA)} />
+            <DrawingPicker t={t} onPick={(d) => wrap(`\n![${d.title.replace(/[[\]]/g, "")}](diagram:${d.id})\n`, "", "")} />
             <button type="button" onClick={() => picker.current?.click()} disabled={uploading > 0}
               className="inline-flex h-9 items-center gap-1.5 border border-line bg-surface px-2.5 text-sm text-ink disabled:opacity-60">
               <IconImage size={16} /> {uploading > 0 ? t("imageUploading") : t("image")}
             </button>
             <input ref={picker} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages([...(e.target.files ?? [])]); e.target.value = ""; }} />
-            <ViewButtons view={view} choose={choose} t={t} className={view === "split" ? "@4xl:hidden" : ""} />
-          </div>
+          </>}
+          <ViewButtons view={view} choose={choose} t={t} />
+        </div>
+        <div className={`grid gap-4 ${view === "split" ? "@4xl:grid-cols-2" : ""}`}>
           <textarea ref={area} value={body} onChange={(e) => setBody(e.target.value)} maxLength={MAX} spellCheck aria-label={t("noteBody")} placeholder={t("notePlaceholder")}
             onPaste={(e) => { const files = [...e.clipboardData.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
             onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) e.preventDefault(); }}
             onDrop={(e) => { const files = [...e.dataTransfer.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
-            className={`${field.textarea} min-h-[320px] font-mono text-sm lg:min-h-[480px]`} />
-          <span className="text-xs text-muted">{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>
-        </div>
-        <div className={`flex min-w-0 flex-col gap-2 ${view === "write" ? "hidden" : view === "split" ? "@max-4xl:hidden" : ""}`}>
-          <div className="flex min-h-9 items-center justify-end gap-1">
-            {view === "preview" && <span className="mr-auto text-sm font-bold">{t("preview")}</span>}
-            <ViewButtons view={view} choose={choose} t={t} />
-          </div>
-          <section aria-label={t("preview")} className="min-h-[320px] min-w-0 flex-1 border border-line bg-surface p-4 lg:min-h-[480px]">
+            className={`${field.textarea} h-full min-h-[320px] min-w-0 font-mono text-sm lg:min-h-[480px] ${view === "preview" ? "hidden" : ""}`} />
+          <section aria-label={t("preview")} className={`min-h-[320px] min-w-0 border border-line bg-surface p-4 lg:min-h-[480px] ${view === "write" ? "hidden" : view === "split" ? "@max-4xl:hidden" : ""}`}>
             {preview.trim() ? <Markdown source={preview} /> : <p className="m-0 text-muted">{t("previewEmpty")}</p>}
           </section>
         </div>
+        {view !== "preview" && <span className="text-xs text-muted">{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>}
       </div>
 
       <label className={field.label}>{tl("descriptionLabel")}
@@ -221,4 +220,28 @@ function ViewButtons({ view, choose, t, className = "" }: { view: View; choose: 
 
 function Tool({ label, onClick }: { label: string; onClick: () => void }) {
   return <button type="button" onClick={onClick} className="inline-flex h-9 items-center border border-line bg-surface px-2.5 text-sm text-ink">{label}</button>;
+}
+
+/** Puts a draw.io diagram from Ich → Diagramme into the text; the list loads when it opens. */
+function DrawingPicker({ t, onPick }: { t: (key: "drawingInsert" | "drawingPick" | "drawingNone" | "drawingNew" | "drawingHint") => string; onPick: (d: { id: string; title: string }) => void }) {
+  const [items, setItems] = useState<{ id: string; title: string }[] | null>(null);
+  const [open, setOpen] = useState(false);
+  const load = (now: boolean) => {
+    setOpen(now);
+    if (now) void readableDiagrams().then((res) => setItems(res.ok ? res.data : []));
+  };
+  return (
+    <Popover label={t("drawingInsert")} ariaLabel={t("drawingPick")} open={open} onOpenChange={load} panelClassName="w-[320px]">
+      <div className="flex flex-col" role="group" aria-label={t("drawingPick")}>
+        {items === null ? <span className="py-2 text-sm text-muted">…</span>
+          : items.length === 0 ? <span className="py-2 text-sm text-muted">{t("drawingNone")}</span>
+          : items.map((d) => (
+            <button key={d.id} type="button" onClick={() => { onPick(d); setOpen(false); }}
+              className="flex h-10 items-center truncate border-0 border-b border-line bg-transparent px-0 text-left text-ink">{d.title}</button>
+          ))}
+        <a href="/me/diagrams/new" target="_blank" rel="noopener" className="flex h-10 items-center text-ink underline">{t("drawingNew")}</a>
+        <span className="text-xs text-muted">{t("drawingHint")}</span>
+      </div>
+    </Popover>
+  );
 }

@@ -28,8 +28,9 @@ function svgOf(dataUri: string): string {
 /**
  * Draw a diagram with draw.io, filling the pane. Saving exports the SVG with the drawing inside: it shows as a picture
  * everywhere and opens here again. Each save is a new version. While open, nobody else edits it (a lock, like notes).
+ * `back`: where "Schließen" leads (the note the diagram was opened from); otherwise to the diagram itself.
  */
-export function DiagramEditor({ id, title: initialTitle, svg, base }: { id?: string; title: string; svg: string; base: string }) {
+export function DiagramEditor({ id, title: initialTitle, svg, base, back }: { id?: string; title: string; svg: string; base: string; back?: string }) {
   const t = useTranslations("diagrams");
   const td = useTranslations("docrights.page");
   const locale = useLocale();
@@ -104,7 +105,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base }: { id?: str
   };
   const close = (force = false) => {
     if (dirty && !force) { setLeaving(true); return; }
-    router.push(docId ? `${base}/${docId}` : base);
+    router.push(back ?? (docId ? `${base}/${docId}` : base));
     router.refresh();
   };
 

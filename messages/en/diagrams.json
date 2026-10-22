@@ -14,5 +14,7 @@
   "tooLarge": "The diagram is too large (2 MB at most). Make inserted images smaller.",
   "leaveQuestion": "Discard unsaved changes?",
   "discard": "Discard",
-  "keepEditing": "Keep drawing"
+  "keepEditing": "Keep drawing",
+  "embedLabel": "Insert into a note",
+  "embedHint": "Copy it into the note or pick it there with “draw.io”. The note always shows the latest version."
 }

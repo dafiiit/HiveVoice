@@ -180,7 +180,7 @@ test.describe("on a phone", () => {
 
   });
 
-  test("the line between list and opened item can be dragged; narrow, the search becomes a magnifier", async ({ page }, info) => {
+  test("the line between list and opened item can be dragged; narrow, the \"+\" and the search stay full width under each other", async ({ page }, info) => {
     test.skip(info.project.name === "mobile", "the list sits next to the item on wide screens only");
     await page.setViewportSize({ width: 1600, height: 1000 });
     await login(page);
@@ -193,8 +193,10 @@ test.describe("on a phone", () => {
     await page.mouse.move(box.x - 500, box.y + 300, { steps: 8 });
     await page.mouse.up();
     await expect.poll(() => column.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBe(200);
-    const search = column.getByRole("searchbox");
-    expect((await search.boundingBox())?.width ?? 0, "only the magnifier is left").toBeLessThan(5);
+    const search = (await column.getByRole("search").boundingBox())!;
+    const create = (await column.getByRole("link", { name: "Notiz", exact: true }).boundingBox())!;
+    expect(Math.round(create.width), "the \"+\" is as wide as the search").toBe(Math.round(search.width));
+    expect(create.y, "the search sits under the \"+\"").toBeLessThan(search.y);
     await page.reload();
     expect(await column.evaluate((el) => Math.round(el.getBoundingClientRect().width)), "the width is kept").toBe(200);
     await line.dblclick();

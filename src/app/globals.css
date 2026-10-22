@@ -222,6 +222,12 @@ select {
 .md th { background: var(--chip); }
 .md .md-diagram { background: var(--surface); border: 1px solid var(--line); padding: 1em; overflow-x: auto; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .md .md-diagram svg { max-width: 100%; height: auto; }
+.md .md-drawing { margin: 0 0 1em; border: 1px solid var(--line); }
+/* draw.io draws dark lines on a clear ground: always on white, also in dark mode. */
+.md .md-drawing img { display: block; max-width: 100%; height: auto; margin: 0 auto; padding: 0.75em; background: #fff; }
+.md .md-drawing p { padding: 1em; }
+.md .md-drawing figcaption { display: flex; flex-wrap: wrap; gap: 0.5em 1em; justify-content: space-between; border-top: 1px solid var(--line); padding: 0.5em 0.75em; font-size: 0.875rem; }
+.md .md-drawing figcaption a { margin-left: auto; color: var(--ink); }
 .md .md-image { display: block; max-width: 100%; height: auto; margin: 0 0 1em; border: 1px solid var(--line); }
 .md .md-math-display { margin: 0 0 1em; overflow-x: auto; overflow-y: hidden; }
 .md .md-math code { background: none; padding: 0; }

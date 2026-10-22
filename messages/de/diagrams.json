@@ -14,5 +14,7 @@
   "tooLarge": "Das Diagramm ist zu groß (höchstens 2 MB). Verkleinere eingefügte Bilder.",
   "leaveQuestion": "Ungespeicherte Änderungen verwerfen?",
   "discard": "Verwerfen",
-  "keepEditing": "Weiter zeichnen"
+  "keepEditing": "Weiter zeichnen",
+  "embedLabel": "In eine Notiz einfügen",
+  "embedHint": "In die Notiz kopieren oder dort über „draw.io“ auswählen. Die Notiz zeigt immer die neueste Version."
 }

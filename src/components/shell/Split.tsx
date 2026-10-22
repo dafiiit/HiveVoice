@@ -43,6 +43,9 @@ export function BackToList({ href, label }: { href: string; label: string }) {
   );
 }
 
+/** The "+" of a list fills the column, as wide as the search under it (links, buttons and a menu alike). */
+export const CREATE_SLOT = "flex flex-col [&>*]:w-full [&>a]:justify-center [&>button]:justify-center [&_summary]:w-full [&_summary]:justify-center";
+
 /** The list column: name, the "+" for this section, a search that filters while typing, filters, rows. */
 export async function ListPane({ id, title, create, searchLabel, rows, empty, top, children, autoOpen, footer }: {
   id: string; title: string; create?: { href: string; label: string } | ReactNode; searchLabel: string; rows: ListRow[]; empty: string;
@@ -55,14 +58,11 @@ export async function ListPane({ id, title, create, searchLabel, rows, empty, to
   return (
     <div id={id} className="flex flex-col">
       <div className="sticky top-0 z-10 flex flex-col gap-2 border-b border-line bg-surface px-4 pb-3 pt-4">
-        {/* Narrow (the line dragged far left): the title on its own row, below it the "+" and the search as an icon. */}
-        <div className="flex flex-wrap items-center justify-end gap-2 md:justify-between @max-[17rem]:justify-start">
-          <h1 className="m-0 min-w-0 flex-1 truncate text-[22px] font-bold leading-tight max-md:sr-only @max-[17rem]:basis-full">{title}</h1>
-          {create && typeof create === "object" && "href" in create
-            ? <Link href={create.href} aria-label={create.label} title={create.label} className={btn.primarySm}><IconPlus size={14} /> {create.label}</Link>
-            : create}
-          <ListSearch listId={id} value="" keep={{}} label={searchLabel} action="" collapsible />
-        </div>
+        <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only">{title}</h1>
+        {create && <div className={CREATE_SLOT}>{typeof create === "object" && "href" in create
+          ? <Link href={create.href} title={create.label} className={btn.primarySm}><IconPlus size={14} /> {create.label}</Link>
+          : create}</div>}
+        <ListSearch listId={id} value="" keep={{}} label={searchLabel} action="" />
         {top}
       </div>
       {autoOpen && <AutoOpen href={autoOpen} />}

@@ -24,7 +24,7 @@
     "chrome": "Auf „Installieren“ klicken oder rechts in der Adressleiste auf das Installieren-Symbol.",
     "firefox": "Firefox installiert keine Web-Apps. Öffne diese Seite in Chrome, Edge oder Safari und installiere sie dort."
   },
-  "downloadNote": "Die Programme sind noch nicht signiert: Beim ersten Start warnt das System, das ist erwartet.",
+  "downloadNote": "Die Programme sind kostenlos und nicht bei Apple oder Microsoft registriert, deshalb warnt das System beim ersten Start. Danach aktualisieren sie sich selbst.",
   "download": "HiveVoice für {system} laden",
   "homeScreen": "Zum Home-Bildschirm",
   "noStore": "ohne App-Store",
@@ -36,5 +36,11 @@
     "windows": "64 Bit",
     "mac": "Apple Silicon und Intel",
     "linux": "x86_64"
+  },
+  "firstStartTitle": "Erster Start",
+  "firstStart": {
+    "windows": "Windows warnt („Der Computer wurde durch Windows geschützt“): auf „Weitere Informationen“ klicken, dann „Trotzdem ausführen“.",
+    "mac": "HiveVoice in „Programme“ ziehen und öffnen, die Warnung mit „Fertig“ schließen. Dann Systemeinstellungen → Datenschutz & Sicherheit → ganz unten „Dennoch öffnen“ → Passwort eingeben. Nur beim ersten Mal.",
+    "linux": "AppImage: Rechtsklick → Eigenschaften → „Als Programm ausführen“ erlauben, dann doppelklicken. .deb: doppelklicken oder sudo apt install ./HiveVoice_*.deb."
   }
 }

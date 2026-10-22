@@ -24,7 +24,7 @@
     "chrome": "Click “Install”, or the install icon at the right of the address bar.",
     "firefox": "Firefox does not install web apps. Open this page in Chrome, Edge or Safari and install it there."
   },
-  "downloadNote": "The programs are not signed yet: the system warns on first start, which is expected.",
+  "downloadNote": "The programs are free and not registered with Apple or Microsoft, so the system warns on first start. After that they update themselves.",
   "download": "Download HiveVoice for {system}",
   "homeScreen": "Add to Home Screen",
   "noStore": "no app store",
@@ -36,5 +36,11 @@
     "windows": "64-bit",
     "mac": "Apple Silicon and Intel",
     "linux": "x86_64"
+  },
+  "firstStartTitle": "First start",
+  "firstStart": {
+    "windows": "Windows warns (“Windows protected your PC”): click “More info”, then “Run anyway”.",
+    "mac": "Drag HiveVoice into Applications and open it, close the warning with “Done”. Then System Settings → Privacy & Security → at the bottom “Open Anyway” → enter your password. Only the first time.",
+    "linux": "AppImage: right-click → Properties → allow “Run as program”, then double-click. .deb: double-click or sudo apt install ./HiveVoice_*.deb."
   }
 }

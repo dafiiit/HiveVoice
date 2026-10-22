@@ -78,6 +78,7 @@ export function InstallApp({ release }: { release: DesktopRelease | null }) {
         <>
           <a href={file.url} className={big}><IconDownload size={22} />{t("download", { system: t(`system.${system}`) })}</a>
           <Meta parts={[t(`system.${system}`), t(`arch.${system}`), mb(file.size), `v${release!.version}`]} />
+          <FirstStart title={t("firstStartTitle")} text={t(`firstStart.${system}`)} />
         </>
       );
     }
@@ -129,6 +130,7 @@ export function InstallApp({ release }: { release: DesktopRelease | null }) {
                 </a>
               ))}
               {isDesktop(s) && !release && <a href={releases} className="font-bold text-on-ink">{t("program")}</a>}
+              {isDesktop(s) && <span className="text-sm opacity-75"><strong>{t("firstStartTitle")}:</strong> {t(`firstStart.${s}`)}</span>}
               <span className="text-sm opacity-75">{isDesktop(s) ? `${t("orInstall")} ${steps(s)}` : steps(s)}</span>
             </li>
           ))}
@@ -141,4 +143,9 @@ export function InstallApp({ release }: { release: DesktopRelease | null }) {
 
 function Meta({ parts }: { parts: string[] }) {
   return <p className="m-0 max-w-[560px] text-[15px] opacity-75">{parts.join(" · ")}</p>;
+}
+
+/** Unsigned programs: what the system says the first time and how to open them anyway. */
+function FirstStart({ title, text }: { title: string; text: string }) {
+  return <p className="m-0 max-w-[560px] border border-on-ink/30 px-4 py-3 text-left text-sm"><strong>{title}:</strong> {text}</p>;
 }

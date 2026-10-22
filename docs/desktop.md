@@ -73,6 +73,11 @@ solange keine Secrets gesetzt sind, und signiert automatisch, sobald sie da sind
 
 ### Ohne Signatur starten
 
+Die Startseite zeigt diese Schritte bei jedem Download („Erster Start“). Der Mac-Build ist ad hoc signiert
+(`bundle.macOS.signingIdentity: "-"`, kostenlos): Dadurch meldet macOS „nicht verifizierter Entwickler“ mit „Dennoch öffnen“
+statt „ist beschädigt“.
+
+
 - **macOS (Gatekeeper):** „HiveVoice kann nicht geöffnet werden, da der Entwickler nicht verifiziert werden kann“.
   Rechtsklick auf HiveVoice → „Öffnen“ → „Öffnen“, oder Systemeinstellungen → Datenschutz & Sicherheit →
   „Dennoch öffnen“. Bei „ist beschädigt“ (Quarantäne-Flag nach dem Download): `xattr -dr com.apple.quarantine /Applications/HiveVoice.app`.

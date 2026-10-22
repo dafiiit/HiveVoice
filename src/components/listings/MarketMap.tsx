@@ -34,8 +34,11 @@ export function MarketMap({ points, placeHref, fill = false }: { points: MapPoin
     let gone = false;
     import("maplibre-gl").then(({ default: maplibregl }) => {
       if (gone || !box.current) return;
-      map = new maplibregl.Map({ container: box.current, style: STYLE, center: [10.4, 51.1], zoom: 5, attributionControl: { compact: true } });
+      map = new maplibregl.Map({ container: box.current, style: STYLE, center: [10.4, 51.1], zoom: 5, attributionControl: { compact: true },
+        locale: { "GeolocateControl.FindMyLocation": tm("locate"), "GeolocateControl.LocationNotAvailable": tm("noLocation") } });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+      // The position stays in the browser: it only moves the map, nothing is sent to us.
+      map.addControl(new maplibregl.GeolocateControl({ fitBoundsOptions: { maxZoom: 12 } }), "top-right");
       const bounds = new maplibregl.LngLatBounds();
       for (const p of points) {
         const el = document.createElement("button");
@@ -53,7 +56,7 @@ export function MarketMap({ points, placeHref, fill = false }: { points: MapPoin
       if (points.length) map.fitBounds(bounds, { padding: 60, maxZoom: 11, duration: 0 });
     });
     return () => { gone = true; map?.remove(); };
-  }, [ok, points, placeHref, t]);
+  }, [ok, points, placeHref, t, tm]);
 
   if (!ok) {
     return (

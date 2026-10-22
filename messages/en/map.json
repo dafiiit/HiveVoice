@@ -1,4 +1,6 @@
 {
   "consent": "The map loads map material from {host}. That service sees your IP address, as with any website. It sets no cookies and does not track you. We remember your choice only in this browser.",
-  "load": "Load map"
+  "load": "Load map",
+  "locate": "Go to my location",
+  "noLocation": "Location not available"
 }

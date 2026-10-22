@@ -23,5 +23,11 @@
     "macSafari": "Choose File → “Add to Dock”. It then sits in the Dock and Launchpad.",
     "chrome": "Click “Install”, or the install icon at the right of the address bar.",
     "firefox": "Firefox does not install web apps. Open this page in Chrome, Edge or Safari and install it there."
-  }
+  },
+  "download": {
+    "windows": "Or download the program (.msi or .exe)",
+    "mac": "Or download the program (.dmg)",
+    "linux": "Or download the program (.AppImage or .deb)"
+  },
+  "downloadNote": "The programs are not signed yet: the system warns on first start, which is expected."
 }

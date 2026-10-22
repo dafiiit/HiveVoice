@@ -23,5 +23,11 @@
     "macSafari": "Im Menü „Ablage“ → „Zum Dock hinzufügen“ wählen. Danach im Dock und im Launchpad.",
     "chrome": "Auf „Installieren“ klicken oder rechts in der Adressleiste auf das Installieren-Symbol.",
     "firefox": "Firefox installiert keine Web-Apps. Öffne diese Seite in Chrome, Edge oder Safari und installiere sie dort."
-  }
+  },
+  "download": {
+    "windows": "Oder als Programm laden (.msi oder .exe)",
+    "mac": "Oder als Programm laden (.dmg)",
+    "linux": "Oder als Programm laden (.AppImage oder .deb)"
+  },
+  "downloadNote": "Die Programme sind noch nicht signiert: Beim ersten Start warnt das System, das ist erwartet."
 }

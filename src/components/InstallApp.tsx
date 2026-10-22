@@ -5,8 +5,12 @@ import { btn } from "@/components/ui/styles";
 
 // HiveVoice installs as a web app (PWA) on every system: the same service worker keeps it usable offline,
 // updates arrive with the next start, and there is nothing to sign or to approve in a store.
+// Windows, Mac and Linux additionally get a download for those who prefer a program (docs/desktop.md).
 const systems = ["iphone", "ipad", "android", "windows", "mac", "linux"] as const;
 type System = (typeof systems)[number];
+// Desktops can also get a program: a Tauri window around this site (desktop/), built for each release.
+const downloads = "https://github.com/dafiiit/HiveVoice/releases/latest";
+const desktops: readonly System[] = ["windows", "mac", "linux"];
 
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: "accepted" | "dismissed" }> };
 
@@ -79,11 +83,14 @@ export function InstallApp() {
                 {here && <span className="ml-2 text-[13px] font-bold text-red">{t("thisDevice")}</span>}
               </strong>
               <span>{steps(s)}</span>
+              {desktops.includes(s) && (
+                <a href={downloads} className={`${btn.link} self-start font-bold`}>{t(`download.${s}`)}</a>
+              )}
             </li>
           );
         })}
       </ul>
-      <p className="m-0 max-w-[640px] text-sm text-muted">{t("offline")}</p>
+      <p className="m-0 max-w-[640px] text-sm text-muted">{t("offline")} {t("downloadNote")}</p>
     </section>
   );
 }

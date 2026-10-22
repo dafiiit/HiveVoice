@@ -1478,3 +1478,35 @@ describe("examples", () => {
     expect((await mine())[0].chats).toBe(1);
   }));
 });
+
+describe("federation outbox", () => {
+  it("queues only public objects and names people by their alias", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const queued = async (id: string) =>
+      (await tx<{ activity: string }[]>`select activity from app.federation_queue(1000) where object_id = ${id} order by id`).map((r) => r.activity);
+
+    // A secret group leaves no trace; a public one is a Create, later changes add nothing while it waits.
+    const [{ secret }] = await as(tx, a, () => tx<{ secret: string }[]>`select app.create_group('{"name":"Stille Runde","visibility":"secret"}'::jsonb) as secret`);
+    const [{ open }] = await as(tx, b, () => tx<{ open: string }[]>`select app.create_group('{"name":"Offene Runde","join_policy":"open"}'::jsonb) as open`);
+    await as(tx, a, () => tx`update public.groups set visibility = 'members' where id = ${secret}`);
+    await as(tx, b, () => tx`update public.groups set tools = '{goals}' where id = ${open}`);
+    expect(await queued(secret)).toEqual([]);
+    expect(await queued(open)).toEqual(["Create"]);
+    // Leaving the public is a Delete.
+    await as(tx, b, () => tx`update public.groups set visibility = 'members' where id = ${open}`);
+    expect(await queued(open)).toEqual(["Create", "Delete"]);
+
+    // A listing shared with a few people is taken back, and comes again once it is public.
+    const [{ id: listing }] = await as(tx, a, () => tx<{ id: string }[]>`select app.save_listing(${tx.json({ kind: "offer", title: "Leiter zu verleihen", category: "item" })}) as id`);
+    await as(tx, a, () => tx`select app.set_object_access('listing', ${listing}, 'people', 'me')`);
+    await as(tx, a, () => tx`select app.set_object_access('listing', ${listing}, 'people', 'people')`);
+    expect(await queued(listing)).toEqual(["Create", "Delete"]);
+    await as(tx, a, () => tx`select app.set_object_access('listing', ${listing}, 'public', 'me')`);
+    expect(await queued(listing)).toEqual(["Create", "Delete", "Create"]);
+
+    // Real names never leave the instance.
+    const [{ name }] = await tx<{ name: string }[]>`select app.federation_name(${a}) as name`;
+    expect(name).not.toBe("Ada");
+    expect(name.length).toBeGreaterThan(0);
+  }));
+});

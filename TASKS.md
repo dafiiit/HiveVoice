@@ -5,7 +5,7 @@ Grundlage für die Wellen 1–4: docs/personas.md (30 Personas, Feature-Codes F0
 ## Active
 
 ### Welle 1: Zeit und Geld (20 von 30 Personas)
-- [ ] **Kalender und Termine (F01, 13 Personas)** - Termine in Gruppen und persönlich, Zu-/Absage (auch je Rolle: „2. Geige fehlt“), Erinnerung, iCal-Abo, öffentliche Termine in Entdecken. Erster Schritt: Zu-/Absage an „Kurse & Treffen“. Häufigste Lücke auch in docs/verknuepfungen.md
+- [ ] **Kalender und Termine (F01, 13 Personas)** - Termine in Gruppen und persönlich, Zu-/Absage (auch je Rolle: „2. Geige fehlt“), Erinnerung, iCal-Abo, öffentliche Termine in Entdecken. Erster Schritt: Zu-/Absage an „Kurse & Treffen“. Häufigste Lücke auch in docs/verknuepfungen.md. Datenmodell so anlegen, dass es sich als ActivityPub-`Event` ausgeben lässt (docs/architektur.md, Föderation): kompatibel mit Mobilizon/Gancio, iCal aus denselben Feldern
 - [ ] **Wiederkehrende Aufgaben und Dienstpläne (F02, 9)** - Rotation, Dienste tauschen, Vertretung, „wer war zuletzt dran“. Zusammen mit F01 als ein Baustein bauen: ein Dienst ist ein wiederkehrender Termin mit Zuständigen (Putzplan WG, Gießplan Garten, Kleiderkammer, Müll-Touren)
 - [ ] **Zeitfenster und Buchen (F03, 7)** - wiederkehrende Verfügbarkeit an Angeboten („Gassi Di und Do 17 Uhr“), Räume, Geräte und Sprechstunden buchen, Konflikte erkennen
 - [ ] **Gemeinsames Geld (F04, 9)** - Ausgaben teilen (WG), Kassenbuch mit Belegen (für Mitglieder oder öffentlich), Beiträge, Spenden, Alles-oder-nichts. Schema `funding_campaigns`/`pledges` existiert. Zahlung nur über externe Anbieter, die Plattform hält nie Geld

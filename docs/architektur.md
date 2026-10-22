@@ -54,11 +54,29 @@ kleine Zahlen werden nicht überbewertet. Ab 0,15 zeigt die App „Findet Zustim
 
 ## Föderation: Fahrplan
 
-1. **Jetzt:** Schema vorbereitet, Outbox füllt sich, keine Auslieferung.
+1. **Jetzt:** Schema vorbereitet, Outbox füllt sich, keine Auslieferung. Nur öffentliche Inhalte kommen in die
+   Outbox (`app.federation_public`: öffentliche Gruppe ohne Altersgrenze, veröffentlichte und nicht gesperrte
+   Initiative, sichtbares Argument, öffentlicher aktiver Eintrag; keine Beispiele). Öffentlich werden ist `Create`,
+   öffentlich bleiben `Update`, nicht mehr öffentlich `Delete`. Private Inhalte hinterlassen keine Spur.
 2. **Selfhost-Paket:** Compose mit Postgres, GoTrue (Supabase Auth) und App.
 3. **Nur-Lese-Föderation:** Gruppen und Initiativen als ActivityPub-Actors, Mastodon kann folgen (z. B. mit Fedify).
 4. **Beidseitig:** Remote-Argumente und Kommentare, Instanz-Allowlist.
 5. **Verifier-Attestierungen:** Unterstützungen und Stimmen aus fremden Instanzen zählen nur mit signierter Bestätigung.
+
+Regeln für den Worker (ab Stufe 3):
+
+- **Beim Ausliefern neu prüfen.** Der Worker liest `app.federation_queue()`, prüft jedes Objekt noch einmal mit
+  `app.federation_public` und baut die Nutzlast erst dann aus der aktuellen Zeile. Die Warteschlange enthält nur
+  Typ, ID und Aktivität, nie Inhalte.
+- **Nur Aliasnamen.** Was eine Instanz verlässt, liegt bei fremden Servern dauerhaft. Personen heißen nach außen
+  immer `app.federation_name` (der Alias), auch bei `display_mode = 'real'`. Zum Start keine Personen-Actors, nur
+  Gruppen (`Group` nach FEP-1b12, wie Lemmy) und Initiativen; Beiträge nennen die Person nur als Alias im Text.
+- **Termine als `Event`.** Termine (F01) bekommen Felder, die sich ohne Umbau als ActivityStreams-`Event`
+  ausgeben lassen (`startTime`, `endTime`, Ort als `Place` mit Adresse und Koordinaten, Zeitzone, Status
+  abgesagt/verschoben, Teilnahme als `Accept`/`TentativeAccept`/`Reject`). Dann sind öffentliche Termine mit
+  Mobilizon und Gancio kompatibel und das iCal-Abo folgt aus denselben Feldern.
+- **Löschen ist eine Bitte.** Ein `Delete` an fremde Server lässt sich nicht erzwingen; der Datenschutztext muss
+  das sagen, bevor ausgeliefert wird.
 
 ## Später ergänzen (Schema steht schon)
 

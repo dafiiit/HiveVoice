@@ -60,5 +60,25 @@
     "mode_invite": "By invitation",
     "mint": "Make 10 invitation codes",
     "mintText": "For the start-up phase when nobody can invite yet. The codes are valid for 30 days."
+  },
+  "friends": {
+    "button": "Invite",
+    "title": "Invite people you know",
+    "lead": "The more people from your area join, the more gets done. Send friends, neighbours or colleagues a link.",
+    "message": "I am on HiveVoice: people from our area help each other, propose things and vote fairly. Join us:",
+    "subject": "Join HiveVoice",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram",
+    "sms": "SMS",
+    "email": "Email",
+    "more": "Other app …",
+    "copy": "Copy text with link",
+    "qr": "Show QR code",
+    "qrHint": "Scan with the phone camera.",
+    "codeText": "Right now a new account needs an invitation code. You have {n, plural, one {one} other {#}} left.",
+    "codeNone": "Right now a new account needs an invitation code and you have none left. Reading works without one.",
+    "code": "Make a personal link with a code",
+    "codeMade": "The link now contains your invitation code. It works for one person.",
+    "all": "All invitations and codes"
   }
 }

@@ -13,6 +13,8 @@ import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 import { AutoOpen } from "@/components/shell/AutoOpen";
 import { feedOrder } from "@/lib/order";
+import { getOrigin } from "@/lib/origin";
+import { InviteFriends } from "@/components/growth/InviteFriends";
 
 type Kind = "initiatives" | "groups" | "people";
 const LEVELS = ["all", "borough", "municipality", "district", "state", "country"] as const;
@@ -114,6 +116,16 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
     const s = p.toString();
     return `/community/${area}${s ? `?${s}` : ""}`;
   };
+  // Personen invites people one knows; codes only count while sign-up needs one.
+  const invite = area === "people" ? {
+    origin: await getOrigin(),
+    codesLeft: await asViewer(viewer, async (tx) => {
+      const [{ mode }] = await tx<{ mode: string }[]>`select app.registration_mode() as mode`;
+      if (mode !== "invite" || !viewer) return null;
+      const [{ ok, left }] = await tx<{ ok: boolean; left: number }[]>`select app.invite_redeemed() as ok, app.invites_left() as left`;
+      return ok ? left : null;
+    }),
+  } : null;
   const count = data.initiatives?.length ?? data.groups?.length ?? data.people?.length ?? 0;
 
   const keep = (() => { const p = new URLSearchParams(href({}).split("?")[1] ?? ""); return p.size ? `?${p}` : ""; })();
@@ -131,6 +143,7 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
     <>
       <div className="flex items-center justify-between gap-2">
         <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{title}</h1>
+        {invite && <InviteFriends origin={invite.origin} codesLeft={invite.codesLeft} />}
         {create && <Link href={session ? create.href : `/login?next=${create.href}`} title={create.label} className={`${btn.primarySm} ml-auto`}><IconPlus size={14} /> {create.short}</Link>}
       </div>
       {area === "groups" && (

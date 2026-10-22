@@ -60,5 +60,25 @@
     "mode_invite": "Mit Einladung",
     "mint": "10 Einladungscodes erzeugen",
     "mintText": "Für die Anlaufphase, wenn noch niemand einladen kann. Die Codes gelten 30 Tage."
+  },
+  "friends": {
+    "button": "Einladen",
+    "title": "Bekannte einladen",
+    "lead": "Je mehr Menschen aus deiner Gegend dabei sind, desto mehr bewegt sich. Schick Freundinnen, Nachbarn oder Kolleg:innen einen Link.",
+    "message": "Ich bin auf HiveVoice: Menschen aus unserer Gegend helfen sich, schlagen Dinge vor und stimmen fair ab. Komm dazu:",
+    "subject": "Komm zu HiveVoice",
+    "whatsapp": "WhatsApp",
+    "telegram": "Telegram",
+    "sms": "SMS",
+    "email": "E-Mail",
+    "more": "Andere App …",
+    "copy": "Text mit Link kopieren",
+    "qr": "QR-Code zeigen",
+    "qrHint": "Mit der Kamera des Handys scannen.",
+    "codeText": "Im Moment braucht ein neues Konto einen Einladungscode. Du hast noch {n, plural, one {einen} other {#}}.",
+    "codeNone": "Im Moment braucht ein neues Konto einen Einladungscode, und du hast gerade keinen übrig. Lesen geht auch ohne.",
+    "code": "Persönlichen Link mit Code erzeugen",
+    "codeMade": "Der Link enthält jetzt deinen Einladungscode. Er gilt für eine Person.",
+    "all": "Alle Einladungen und Codes"
   }
 }

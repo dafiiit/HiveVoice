@@ -102,17 +102,21 @@ export async function shareFile(input: FileShareInput) {
   return res;
 }
 
-export type NoteInput = { id?: string; title: string; description: string; body: string; tags: string[]; groupId: string | null; note?: string; visibility?: string; license?: string };
+export type NoteInput = {
+  id?: string; title: string; description: string; body: string; tags: string[]; groupId: string | null; note?: string; visibility?: string; license?: string;
+  /** Saved by itself while the editor is open: keeps the lock, and the page is not drawn again. */ autosave?: boolean;
+};
 
 /** A Markdown note: new, or a change to one's own. */
 export async function saveNote(input: NoteInput) {
   const res = await run(async (tx) => {
     const [{ id }] = await tx<{ id: string }[]>`select app.save_note(${tx.json({
       id: input.id ?? "", title: input.title, description: input.description, body: input.body.slice(0, 100000), tags: input.tags.slice(0, 10), group_id: input.groupId ?? "",
-      note: input.note ?? "", visibility: input.visibility ?? "", license: input.license ?? "",
+      note: input.note ?? "", visibility: input.visibility ?? "", license: input.license ?? "", autosave: !!input.autosave,
     })}) as id`;
     return id;
   });
+  if (input.autosave) return res;
   revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
   if (res.ok) revalidatePath(`/links/${res.data}`);
@@ -120,11 +124,13 @@ export async function saveNote(input: NoteInput) {
 }
 
 /** A draw.io diagram (the SVG with the drawing inside): new, or a new version of one I may edit. */
-export async function saveDiagram(input: { id?: string; title: string; svg: string }) {
+export async function saveDiagram(input: { id?: string; title: string; svg: string; autosave?: boolean }) {
   const res = await run(async (tx) => {
     const [{ id }] = await tx<{ id: string }[]>`select app.save_diagram(${tx.json({ id: input.id ?? "", title: input.title, svg: input.svg })}) as id`;
     return id;
   });
+  // Saved by itself while drawing: the page is not drawn again (that would only disturb).
+  if (input.autosave && input.id) return res;
   revalidatePath("/me", "layout");
   if (res.ok) revalidatePath(`/links/${res.data}`);
   return res;

@@ -1,5 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
+import { DraftNotice } from "@/components/ui/DraftNotice";
+import { useDraft } from "@/lib/drafts";
 import { useTranslations } from "next-intl";
 import { updateListing } from "@/lib/actions/listings";
 import { btn, field } from "../ui/styles";
@@ -14,9 +16,11 @@ export function EditListing({ id, title, description, path }: { id: string; titl
   const [de, setDe] = useState(description ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const draft = useDraft(`listing-edit:${id}`, { ti, de }, (v) => { setTi(v.ti); setDe(v.de); setOpen(true); });
   if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.secondarySm}>{t("button")}</button>;
   return (
     <div className="flex w-full max-w-[720px] flex-col gap-3 border border-ink bg-surface p-4">
+      <DraftNotice draft={draft} />
       <label className={field.label}>{t("title")}<input value={ti} maxLength={200} onChange={(e) => setTi(e.target.value)} className={field.input} /></label>
       <label className={field.label}>{t("description")}<textarea rows={5} value={de} onChange={(e) => setDe(e.target.value)} className={field.textarea} /></label>
       {error && <Notice tone="error">{error}</Notice>}
@@ -24,9 +28,10 @@ export function EditListing({ id, title, description, path }: { id: string; titl
         <button type="button" disabled={pending || ti.trim().length < 3} className={btn.primary} onClick={() => start(async () => {
           const res = await updateListing(id, ti, de, path);
           if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+          draft.clear();
           setOpen(false);
         })}>{t("save")}</button>
-        <button type="button" onClick={() => setOpen(false)} className={btn.ghost}>{tc("cancel")}</button>
+        <button type="button" onClick={() => { draft.discard(); setOpen(false); }} className={btn.ghost}>{tc("cancel")}</button>
       </div>
     </div>
   );

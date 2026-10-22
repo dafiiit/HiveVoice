@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { proposeGoal, toggleSubgoal } from "@/lib/actions/groups";
@@ -33,6 +34,7 @@ export function Goals({ slug, groupId, goals, members, canPropose, canEdit, canV
   const [needs, setNeeds] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  useDraft(`goal:${slug}`, { title, timeline, subs, needs }, (v) => { setTitle(v.title); setTimeline(v.timeline); setSubs(v.subs); setNeeds(v.needs); setOpen(true); });
   const submit = () => start(async () => {
     const res = await proposeGoal(slug, {
       groupId, title, description: "", timeline, owners: owner ? [owner] : [], days: 7,

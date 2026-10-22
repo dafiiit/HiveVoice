@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -99,6 +100,7 @@ export function Comments({ id, items, canComment, me, canModerate }: { id: strin
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  useDraft(`comment:${id}`, body, setBody);
   return (
     <section aria-label={t("comments")} className="flex flex-col gap-3">
       <h2 className="m-0 text-xl font-bold">{t("comments")}</h2>

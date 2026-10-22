@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { forgetDevice } from "@/lib/drafts";
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "../ui/Avatar";
@@ -39,7 +40,8 @@ export function AccountMenu({ id, name, seed, path, admin }: { id: string; name:
         {/* Server admins (ADMIN_EMAILS, confirmed address) switch to the admin view here. */}
         {admin && <Link href="/admin" className={`${item} font-bold`}>{t("admin")}</Link>}
         <Link href="/principles" className={item}>{t("principles")}</Link>
-        <form method="post" action="/auth/signout">
+        {/* Signing out leaves nothing written behind on the device (drafts, messages waiting to be sent). */}
+        <form method="post" action="/auth/signout" onSubmit={forgetDevice}>
           <button type="submit" className="flex h-11 w-full items-center border-0 bg-transparent px-4 text-left text-ink hover:bg-chip">{t("signOut")}</button>
         </form>
       </div>

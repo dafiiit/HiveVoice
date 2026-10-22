@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
+import { forgetDevice } from "@/lib/drafts";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { deleteAccount, setHomeRegion, setProfileTags, updatePreferences } from "@/lib/actions/settings";
@@ -100,7 +101,7 @@ export function Settings({ language, easy, theme, order, places, interests, sugg
         <strong>{t("security")}</strong>
         <div className="flex flex-wrap gap-2">
           {passkeys && <button type="button" onClick={registerPasskey} className={btn.secondary}>{t("addPasskey")}</button>}
-          <form action="/auth/signout" method="post" onSubmit={() => { try { localStorage.removeItem("hv-outbox"); } catch {} }}><button type="submit" className={btn.secondary}>{t("signOut")}</button></form>
+          <form action="/auth/signout" method="post" onSubmit={forgetDevice}><button type="submit" className={btn.secondary}>{t("signOut")}</button></form>
         </div>
       </section>
       {msg && <p role="status" className="m-0 font-bold">{msg}</p>}

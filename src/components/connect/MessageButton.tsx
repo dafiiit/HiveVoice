@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -18,6 +19,7 @@ export function MessageButton({ toId, name, seed, path, signedIn }: { toId: stri
   const [msg, setMsg] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const draft = useDraft(`message:${toId}`, msg, (v) => { setMsg(v); setOpen(true); });
   if (!signedIn) return <Link href="/login" className={btn.secondary}>{t("button")}</Link>;
   return (
     <>
@@ -32,6 +34,7 @@ export function MessageButton({ toId, name, seed, path, signedIn }: { toId: stri
               <button type="button" disabled={pending || !msg.trim()} className={btn.primary} onClick={() => start(async () => {
                 const res = await requestDirect(toId, msg);
                 if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+                draft.clear();
                 router.push(res.data.conversation_id ? `/friends?c=d:${res.data.conversation_id}` : `/friends?c=c:${res.data.request_id}`);
               })}>{tc("send")}</button>
               <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>

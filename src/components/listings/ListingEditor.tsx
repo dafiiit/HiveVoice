@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { DraftNotice } from "@/components/ui/DraftNotice";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { saveListing, type ListingInput } from "@/lib/actions/listings";
@@ -67,6 +69,13 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ id: string; kind: "offer" | "need"; pair: boolean } | null>(null);
   const [pending, start] = useTransition();
+  // A listing begun but not published stays on the device and opens again where one left it.
+  const draft = useDraft("listing:new", { kind, title, description, details, location, schedule, recurring, seats, pay, rate, fixed, swap, tags, images, category, catTouched, attrs, pairTitle, pairDesc },
+    (v) => {
+      setKind(v.kind); setTitle(v.title); setDescription(v.description); setDetails(v.details); setLocation(v.location); setSchedule(v.schedule);
+      setRecurring(v.recurring); setSeats(v.seats); setPay(v.pay); setRate(v.rate); setFixed(v.fixed); setSwap(v.swap); setTags(v.tags); setImages(v.images);
+      setCategory(v.category); setCatTouched(v.catTouched); setAttrs(v.attrs); setPairTitle(v.pairTitle); setPairDesc(v.pairDesc); setOpen(true);
+    });
 
   const auto = useMemo(() => suggestTags(`${title} ${description}`), [title, description]);
   const guess = useMemo(() => guessCategory(title), [title]);
@@ -98,6 +107,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
     void status;
     reset();
+    draft.clear();
     setDone({ id: res.data.id, kind, pair: !!res.data.pairId });
   });
 
@@ -105,6 +115,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
 
   return (
     <section aria-label={t(give ? "newOffer" : "newNeed")} className="@container flex flex-col gap-4 border border-line bg-surface p-5">
+      <DraftNotice draft={draft} />
       {/* One switch: offering or looking. Documents and links are part of the toolbox (Ich → Dokumente). */}
       <div role="radiogroup" aria-label={t("kindLabel")} className={`${segments} flex-wrap`}>
         {(["offer", "need"] as const).map((k) => {

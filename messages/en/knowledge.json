@@ -61,12 +61,14 @@
   "drawingNew": "Draw a new diagram",
   "drawingHint": "Always shows the latest version. Readers only see it if they may see the diagram itself.",
   "toDrawio": "Continue in draw.io",
-  "backToMermaid": "Back to Mermaid",
   "convertedNote": "The Mermaid block is now a draw.io diagram. Save the note to keep it.",
-  "backQuestion": "Put it back into the note as Mermaid text? The diagram stays under Me → Diagrams.",
-  "backQuestionChanged": "Put it back into the note as Mermaid text? What you styled in draw.io (colours, positions, extra shapes) cannot be kept by Mermaid and will be missing in the text. The diagram stays under Me → Diagrams.",
-  "backNotPossible": "Back to Mermaid only works when the diagram is just one Mermaid group. This one contains more.",
-  "backDone": "Mermaid again. Save the note to keep it.",
   "diagramFrom": "{title} – diagram",
-  "diagramFromNote": "Diagram from a note"
+  "diagramFromNote": "Diagram from a note",
+  "close": "Close",
+  "autosave": {
+    "idle": "",
+    "saving": "Saving automatically …",
+    "saved": "Saved automatically.",
+    "failed": "Saving automatically did not work. The text stays on this device."
+  }
 }

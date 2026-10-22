@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import { useTranslations } from "next-intl";
 import { createRequest } from "@/lib/actions/responsible";
 import { btn, field } from "../ui/styles";
@@ -13,6 +14,7 @@ export function RequestForm({ responsibilityId, name, projects }: { responsibili
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  const draft = useDraft(`request:${responsibilityId}`, body, (v) => { setBody(v); setOpen(true); });
   if (sent) return <span role="status" className="text-sm font-bold">{t("sent")}</span>;
   if (!open) return <button type="button" onClick={() => setOpen(true)} className={btn.primary}>{t("ask")}</button>;
   return (
@@ -34,6 +36,7 @@ export function RequestForm({ responsibilityId, name, projects }: { responsibili
           const [kind, id] = project.split(":");
           const res = await createRequest({ responsibilityId, body, initiativeId: kind === "initiative" ? id : undefined, groupId: kind === "group" ? id : undefined });
           if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+          draft.clear();
           setSent(true);
         })} className={btn.primary}>{tc("send")}</button>
         <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>

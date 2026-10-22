@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
+import { DraftNotice } from "@/components/ui/DraftNotice";
+import { useDraft } from "@/lib/drafts";
 import { useTranslations } from "next-intl";
 import { createGroup, similarGroups } from "@/lib/actions/groups";
 import { TagPicker } from "../TagPicker";
@@ -41,6 +43,12 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
   const [tools, setTools] = useState<GroupTool[]>(initial?.tools ?? [...GROUP_TOOLS]);
   const tt = useTranslations("group.tools");
   const [pending, start] = useTransition();
+  // A group begun but not founded stays on the device until it is sent.
+  const draft = useDraft(`group:new:${invite?.id ?? ""}`, { name, summary, description, kind, visibility, joinPolicy, tags, focus, template, adultsOnly, modTasks, preset, tools },
+    (v) => {
+      setName(v.name); setSummary(v.summary); setDescription(v.description); setKind(v.kind); setVisibility(v.visibility); setJoinPolicy(v.joinPolicy);
+      setTags(v.tags); setFocus(v.focus); setTemplate(v.template); setAdultsOnly(v.adultsOnly); setModTasks(v.modTasks); setPreset(v.preset); setTools(v.tools);
+    });
   const tp = useTranslations("group.presets");
   const apply = (c: CommunityPreset | null) => {
     setPreset(c?.key ?? null);
@@ -58,10 +66,13 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
     <form className="flex flex-col gap-6" onSubmit={(e) => {
       e.preventDefault();
       start(async () => {
+        // Success leads to the new group right away, so the draft goes first and comes back if founding fails.
+        draft.clear();
         const res = await createGroup({ name, summary, description, kind, visibility, joinPolicy, regionId: region?.id ?? "", modTasks, modOfficial: false, tags, focus, template, adultsOnly, tools, invite: invite?.id });
-        if (res && !res.ok) setError(tc(`errors.${res.error}` as "errors.unknown"));
+        if (res && !res.ok) { draft.keep(); setError(tc(`errors.${res.error}` as "errors.unknown")); }
       });
     }}>
+      <DraftNotice draft={draft} />
       {invite && <Notice tone="status" className="text-sm font-normal">{t("inviteNote", { name: invite.name })}</Notice>}
       <div className="flex flex-col gap-2">
         <span className="text-sm font-bold">{tp("title")}</span>

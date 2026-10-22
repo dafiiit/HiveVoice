@@ -29,9 +29,9 @@ test.describe("diagrams (draw.io) @writes", () => {
       // One shape from draw.io's own palette, then our save button.
       const editor = page.frameLocator("iframe[title='draw.io-Editor']");
       await editor.locator(".geSidebar a.geItem").first().click({ timeout: 90_000 });
-      await expect(page.getByText("Ungespeicherte Änderungen.")).toBeVisible();
+      await expect(page.getByText("Noch nicht gespeichert.")).toBeVisible();
       await page.getByRole("button", { name: "Speichern" }).click();
-      await expect(page.getByText("Gespeichert, neue Version angelegt.")).toBeVisible({ timeout: 60_000 });
+      await expect(page.getByText(/^(Automatisch g|G)espeichert\.$/)).toBeVisible({ timeout: 60_000 });
       await expect(page).toHaveURL(/\/me\/diagrams\/[0-9a-f-]{36}\?edit=1$/);
 
       await page.getByRole("button", { name: "Schließen" }).click();
@@ -69,7 +69,7 @@ test.describe("diagrams (draw.io) @writes", () => {
     }
   });
 
-  test("a Mermaid block moves to draw.io, the note points to the diagram, and it comes back as Mermaid", async ({ page }, info) => {
+  test("a Mermaid block moves to draw.io and the note then points to the diagram", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "writes data");
     test.setTimeout(240_000);
     const marker = `E2E Mermaid ${Date.now()}`;
@@ -90,18 +90,13 @@ test.describe("diagrams (draw.io) @writes", () => {
       await expect(editor.getByText("Gruppe", { exact: true }).first()).toBeAttached({ timeout: 90_000 });
       await expect(dialog.getByLabel("Name des Diagramms")).toHaveValue(`${marker} – Diagramm`);
       await dialog.getByRole("button", { name: "Speichern" }).click();
-      await expect(dialog.getByText("Gespeichert, neue Version angelegt.")).toBeVisible({ timeout: 60_000 });
+      await expect(dialog.getByText(/^(Automatisch g|G)espeichert\.$/)).toBeVisible({ timeout: 60_000 });
       await dialog.getByRole("button", { name: "Schließen" }).click();
       await expect(dialog).toHaveCount(0);
       await expect(text).toHaveValue(new RegExp(`!\\[${marker} – Diagramm\\]\\(diagram:[0-9a-f-]{36}\\)`));
       await expect(text).not.toHaveValue(/```mermaid/);
       await expect(preview.getByRole("img", { name: `${marker} – Diagramm` })).toBeVisible();
 
-      // Back: the diagram is only the Mermaid group, so its text returns into the note.
-      await preview.getByRole("button", { name: "Zurück zu Mermaid" }).click();
-      await page.getByRole("status").getByRole("button", { name: "Zurück zu Mermaid" }).click();
-      await expect(text).toHaveValue(new RegExp(`\`\`\`mermaid\\n${code.replace(/[[\]]/g, "\\$&").replace("\n", "\\n")}\\n\`\`\``));
-      await expect(page.getByText("Wieder Mermaid.", { exact: false })).toBeVisible();
     } finally {
       await exec(`delete from public.resources where title like '${marker}%'`);
     }

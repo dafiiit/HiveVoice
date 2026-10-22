@@ -6,13 +6,14 @@ import { lockResource, readableDiagrams, releaseResource, saveNote, suggestChang
 import { uploadImage } from "@/lib/upload";
 import { Markdown, type MarkdownActions } from "../Markdown";
 import { DiagramEditor } from "./DiagramEditor";
-import { mermaidOf } from "@/lib/drawio";
 import { IconColumns, IconEye, IconImage } from "../ui/Icons";
 import { TagPicker } from "../TagPicker";
 import { btn, field } from "../ui/styles";
 import { AccessPicker, type Access } from "./AccessPicker";
 import { Notice } from "@/components/ui/Page";
 import { Popover } from "../ui/Popover";
+import { DraftNotice } from "../ui/DraftNotice";
+import { useDraft } from "@/lib/drafts";
 
 type Group = { id: string; slug: string; name: string };
 export type NoteDraft = { id?: string; title: string; description: string; body: string; tags: string[] };
@@ -23,7 +24,7 @@ const TABLE = "| Spalte A | Spalte B |\n| --- | --- |\n| Wert | Wert |\n";
 const FORMULA = "E = mc^2";
 type View = "write" | "preview" | "split";
 
-// A Mermaid block in the text and a diagram reference, to swap one for the other.
+// A Mermaid block in the text, to swap it for the diagram made from it.
 const MERMAID_BLOCK = /```mermaid[^\n]*\n([\s\S]*?)\n?```/g;
 const swapMermaid = (body: string, code: string, by: string) => {
   let done = false;
@@ -33,7 +34,6 @@ const swapMermaid = (body: string, code: string, by: string) => {
     return by;
   });
 };
-const swapDrawing = (body: string, id: string, by: string) => body.replace(new RegExp(`!\\[[^\\]]*\\]\\(diagram:${id}\\)`), by);
 const VIEW_KEY = "hv_note_view";
 
 /**
@@ -66,19 +66,31 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
   const area = useRef<HTMLTextAreaElement>(null);
   const preview = useDeferredValue(body);
   const selectedGroup = groups.find((g) => g.id === groupId);
-  // Mermaid ↔ draw.io: the block opens in draw.io over the note; once saved there, the note points to the diagram.
+  // Nothing typed is lost: kept on the device until saved, and a note being changed also saves itself on the server
+  // shortly after each pause (into one version per sitting, see app.save_version).
+  const draft = useDraft(`note:${mode}:${initial.id ?? "new"}`, { title, description, body, tags, changeNote },
+    (v) => { setTitle(v.title); setDescription(v.description); setBody(v.body); setTags(v.tags); setChangeNote(v.changeNote); });
+  const [autoState, setAutoState] = useState<"idle" | "saving" | "saved" | "failed">("idle");
+  const lastSaved = useRef(JSON.stringify([initial.title, initial.description, initial.body, initial.tags]));
+  const autosaving = editing && !suggesting && !lockedBy;
+  useEffect(() => {
+    if (!autosaving || title.trim().length < 3 || !body.trim()) return;
+    const now = JSON.stringify([title, description, body, tags]);
+    if (now === lastSaved.current) return;
+    const id = setTimeout(() => {
+      setAutoState("saving");
+      void saveNote({ id: initial.id, title, description, body, tags, groupId: null, autosave: true }).then((res) => {
+        if (res.ok) { lastSaved.current = now; setAutoState("saved"); } else setAutoState("failed");
+      });
+    }, 2500);
+    return () => clearTimeout(id);
+  }, [autosaving, title, description, body, tags, initial.id]);
+
+  // Mermaid → draw.io: the block opens in draw.io over the note; once saved there, the note points to the diagram.
   const [converting, setConverting] = useState<string | null>(null);
-  const [back, setBack] = useState<{ id: string; source: string; changed: boolean } | null>(null);
   const [swapNote, setSwapNote] = useState<string | null>(null);
   const actions: MarkdownActions = {
     mermaid: { label: t("toDrawio"), run: (code) => { setSwapNote(null); setConverting(code); } },
-    drawing: { label: t("backToMermaid"), run: async (id) => {
-      setSwapNote(null); setBack(null);
-      const res = await fetch(`/api/diagrams/${id}`);
-      const found = res.ok ? await mermaidOf(await res.text()) : null;
-      if (!found) { setSwapNote(t("backNotPossible")); return; }
-      setBack({ id, ...found });
-    } },
   };
 
   useEffect(() => {
@@ -153,6 +165,7 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
     if (suggesting) {
       const sent = await suggestChange(initial.id!, { title, description, body, note: changeNote });
       if (!sent.ok) return setError(t.has(`errors.${sent.error}`) ? t(`errors.${sent.error}` as "errors.invalid") : tc(`errors.${sent.error}` as "errors.unknown"));
+      draft.clear();
       router.push(`${docHref(initial.id ?? "")}?suggested=1`);
       router.refresh();
       return;
@@ -160,12 +173,14 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
     const visibility = !editing ? access.visibility : undefined;
     const res = await saveNote({ id: initial.id, title, description, body, tags, groupId: groupId || null, note: changeNote, visibility, license: !editing && access.visibility === "public" ? access.license : undefined });
     if (!res.ok) return setError(t.has(`errors.${res.error}`) ? t(`errors.${res.error}` as "errors.invalid") : tc(`errors.${res.error}` as "errors.unknown"));
+    draft.clear();
     router.push(docHref(res.data));
     router.refresh();
   });
 
   return (
     <div className="flex flex-col gap-4">
+      <DraftNotice draft={draft} />
       <label className={field.label}>{t("noteTitle")}
         <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={field.input} />
       </label>
@@ -193,17 +208,6 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
           <ViewButtons view={view} choose={choose} t={t} />
         </div>
         {swapNote && <Notice tone="status">{swapNote}</Notice>}
-        {back && (
-          <Notice tone="warning">
-            <span className="flex flex-wrap items-center gap-3">{t(back.changed ? "backQuestionChanged" : "backQuestion")}
-              <button type="button" className={btn.secondarySm} onClick={() => {
-                setBody((b) => swapDrawing(b, back.id, `\`\`\`mermaid\n${back.source.trimEnd()}\n\`\`\``));
-                setBack(null); setSwapNote(t("backDone"));
-              }}>{t("backToMermaid")}</button>
-              <button type="button" className={btn.link} onClick={() => setBack(null)}>{t("cancel")}</button>
-            </span>
-          </Notice>
-        )}
         <div className={`grid gap-4 ${view === "split" ? "@4xl:grid-cols-2" : ""}`}>
           <textarea ref={area} value={body} onChange={(e) => setBody(e.target.value)} maxLength={MAX} spellCheck aria-label={t("noteBody")} placeholder={t("notePlaceholder")}
             onPaste={(e) => { const files = [...e.clipboardData.files]; if (files.some((f) => f.type.startsWith("image/"))) { e.preventDefault(); void addImages(files); } }}
@@ -221,7 +225,10 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
               onClose={() => setConverting(null)} />
           </div>
         )}
-        {view !== "preview" && <span className="text-xs text-muted">{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>}
+        <span className="flex flex-wrap justify-between gap-2 text-xs text-muted" aria-live="polite">
+          {view !== "preview" && <span>{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>}
+          {autosaving && autoState !== "idle" && <span className={autoState === "failed" ? "font-bold text-red" : ""}>{t(`autosave.${autoState}`)}</span>}
+        </span>
       </div>
 
       <label className={field.label}>{tl("descriptionLabel")}
@@ -248,7 +255,16 @@ export function NoteEditor({ initial, groups, initialGroup, ideas, mode = "edit"
         <button type="button" disabled={pending || title.trim().length < 3 || !body.trim() || (suggesting && changeNote.trim().length < 5) || (!!lockedBy && !suggesting)} onClick={save} className={btn.primary}>
           {pending ? t("saving") : suggesting ? td("suggestSend") : editing ? t("save") : t("publishNote")}
         </button>
-        {editing && <button type="button" onClick={() => router.push(docHref(initial.id ?? ""))} className={btn.secondary}>{t("cancel")}</button>}
+        {/* Changes save themselves, so this only closes the editor; a change not yet saved goes along first. */}
+        {editing && <button type="button" disabled={pending} onClick={() => start(async () => {
+          if (autosaving && JSON.stringify([title, description, body, tags]) !== lastSaved.current && title.trim().length >= 3 && body.trim()) {
+            const res = await saveNote({ id: initial.id, title, description, body, tags, groupId: null, autosave: true });
+            if (!res.ok) { setAutoState("failed"); return; }
+          }
+          draft.clear();
+          router.push(docHref(initial.id ?? ""));
+          router.refresh();
+        })} className={btn.secondary}>{suggesting ? t("cancel") : t("close")}</button>}
       </div>
     </div>
   );

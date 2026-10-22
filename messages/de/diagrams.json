@@ -6,15 +6,19 @@
   "save": "Speichern",
   "saving": "Speichert …",
   "close": "Schließen",
-  "saved": "Gespeichert, neue Version angelegt.",
-  "unsaved": "Ungespeicherte Änderungen.",
-  "hint": "Erst nur für dich. Jedes Speichern legt eine Version an.",
   "titleRequired": "Gib dem Diagramm einen Namen (mindestens 3 Zeichen).",
   "saveError": "Speichern hat nicht geklappt. Versuch es noch einmal.",
   "tooLarge": "Das Diagramm ist zu groß (höchstens 2 MB). Verkleinere eingefügte Bilder.",
-  "leaveQuestion": "Ungespeicherte Änderungen verwerfen?",
-  "discard": "Verwerfen",
+  "leaveQuestion": "Ohne Namen kann das Diagramm nicht gespeichert werden. Trotzdem schließen? Die Zeichnung bleibt auf diesem Gerät.",
   "keepEditing": "Weiter zeichnen",
   "embedLabel": "In eine Notiz einfügen",
-  "embedHint": "In die Notiz kopieren oder dort über „draw.io“ auswählen. Die Notiz zeigt immer die neueste Version."
+  "embedHint": "In die Notiz kopieren oder dort über „draw.io“ auswählen. Die Notiz zeigt immer die neueste Version.",
+  "status": {
+    "hint": "Erst nur für dich. Speichert sich selbst, sobald es einen Namen hat.",
+    "unsaved": "Noch nicht gespeichert.",
+    "saving": "Speichert …",
+    "saved": "Gespeichert.",
+    "autosaved": "Automatisch gespeichert."
+  },
+  "leaveAnyway": "Trotzdem schließen"
 }

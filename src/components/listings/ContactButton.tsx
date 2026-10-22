@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { requestContact } from "@/lib/actions/listings";
@@ -24,6 +25,8 @@ export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, titl
   const [via, setVia] = useState(initialVia ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // A request begun but not sent comes back (the prefilled greeting alone does not count).
+  const draft = useDraft(sent ? null : `contact:${listingId}`, msg, (v) => { if (v && v !== t("defaultMessage")) { setMsg(v); setOpen(true); } });
   if (!signedIn) return <Link href="/login" className={className ?? btn.primary}>{label}</Link>;
   if (sent) {
     return (
@@ -60,7 +63,7 @@ export function ContactButton({ listingId, ownerName, ownerSeed, ownerPath, titl
               <button type="button" disabled={pending || !msg.trim()} onClick={() => start(async () => {
                 const res = await requestContact(listingId, msg, via || null);
                 if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
-                setRequestId(res.data); setSent(true); setOpen(false);
+                draft.clear(); setRequestId(res.data); setSent(true); setOpen(false);
               })} className={btn.primary}>{tc("send")}</button>
               <button type="button" onClick={() => setOpen(false)} className={btn.secondary}>{tc("cancel")}</button>
             </div>

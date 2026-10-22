@@ -1,5 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
+import { DraftNotice } from "@/components/ui/DraftNotice";
+import { useDraft } from "@/lib/drafts";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { setProfileTags, updateProfile } from "@/lib/actions/settings";
@@ -18,9 +20,12 @@ export function DisplayToggle({ mode, realName, alias, headline, bio }: { mode: 
   const [edit, setEdit] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // Changes to name, line and text stay on the device until saved.
+  const draft = useDraft("profile", { real, al, hl, b }, (v) => { setReal(v.real); setAl(v.al); setHl(v.hl); setB(v.b); setEdit(true); });
   const save = (next: typeof m) => start(async () => {
     const res = await updateProfile({ displayMode: next, realName: real, alias: al, headline: hl, bio: b });
     if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+    draft.clear();
     setError(null); setEdit(false); router.refresh();
   });
   return (
@@ -38,6 +43,7 @@ export function DisplayToggle({ mode, realName, alias, headline, bio }: { mode: 
       <span className="text-sm text-muted">{m === "alias" ? t("aliasNote") : t("realNote")}</span>
       {edit && (
         <div className="flex max-w-[560px] flex-col gap-3 border border-line bg-surface p-4">
+          <DraftNotice draft={draft} />
           <label className={field.label}>{t("realName")}<input value={real} onChange={(e) => setReal(e.target.value)} className={field.input} /></label>
           <label className={field.label}>{t("alias")}<input value={al} onChange={(e) => setAl(e.target.value)} className={field.input} /></label>
           <label className={field.label}>{t("headline")}<input value={hl} onChange={(e) => setHl(e.target.value)} placeholder={t("headlinePlaceholder")} className={field.input} /></label>

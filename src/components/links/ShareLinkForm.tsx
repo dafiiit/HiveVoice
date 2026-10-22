@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { previewLink, shareLink } from "@/lib/actions/links";
@@ -31,6 +32,8 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
   const [groupId, setGroupId] = useState<string>(groups.find((g) => g.slug === initialGroup)?.id ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // A link begun but not shared stays on the device (it is checked again before sharing).
+  const draft = useDraft("link:new", { url, title, description, tags }, (v) => { setUrl(v.url); setTitle(v.title); setDescription(v.description); setTags(v.tags); });
 
   async function check(e?: React.FormEvent) {
     e?.preventDefault();
@@ -57,6 +60,7 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
       const key = res.error.startsWith("link_") ? `blocks.${res.error.slice(5)}` : null;
       return setError(key ? t(key as "blocks.unsafe") : res.error === "duplicate" ? t("alreadyShared") : tc(`errors.${res.error}` as "errors.unknown"));
     }
+    draft.clear();
     const group = groups.find((g) => g.id === groupId);
     router.push(group ? `/groups/${group.slug}?tab=links` : docHref(res.data));
   });

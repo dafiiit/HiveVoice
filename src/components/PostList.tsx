@@ -1,5 +1,6 @@
 "use client";
 import { useOptimistic, useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { PostView } from "@/lib/posts";
@@ -32,6 +33,8 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   const reply = !!ctx.parentId;
   // The buttons (photo, poll, post) appear once one starts writing, so the empty composer stays one line.
   const [active, setActive] = useState(false);
+  // A post begun but not sent stays on the device; it comes back with its buttons showing.
+  useDraft(`post:${path}:${ctx.parentId ?? ""}`, body, (v) => { setBody(v); setActive(true); });
   const canSend = (!!body.trim() || x.has) && !x.blocked && !pending;
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

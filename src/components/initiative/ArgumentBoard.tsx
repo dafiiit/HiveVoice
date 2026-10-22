@@ -1,5 +1,6 @@
 "use client";
 import { useMemo, useOptimistic, useState, useTransition } from "react";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { addArgument, deleteArgument, replyToArgument, toggleArgumentSupport } from "@/lib/actions/initiatives";
@@ -41,6 +42,7 @@ function Argument({ a, initiativeId, canWrite, viewerId }: { a: ArgumentView; in
   const [on, setOn] = useOptimistic(a.supported);
   const [open, setOpen] = useState(false);
   const [reply, setReply] = useState("");
+  useDraft(`argument-reply:${a.id}`, reply, (v) => { setReply(v); setOpen(true); });
   const [pending, start] = useTransition();
   const bridging = Number(a.bridge_score) >= 0.15;
   const count = a.support_count - (a.supported ? 1 : 0) + (on ? 1 : 0);
@@ -100,6 +102,7 @@ function AddArgument({ side, initiativeId }: { side: "pro" | "contra"; initiativ
   const [body, setBody] = useState("");
   const [source, setSource] = useState("");
   const [tone, setTone] = useState(false);
+  useDraft(`argument:${initiativeId}:${side}`, { body, source }, (v) => { setBody(v.body); setSource(v.source); });
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const post = (text: string) => start(async () => {

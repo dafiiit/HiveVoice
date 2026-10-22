@@ -6,15 +6,19 @@
   "save": "Save",
   "saving": "Saving …",
   "close": "Close",
-  "saved": "Saved, new version created.",
-  "unsaved": "Unsaved changes.",
-  "hint": "Only for you at first. Every save creates a version.",
   "titleRequired": "Give the diagram a name (at least 3 characters).",
   "saveError": "Saving did not work. Please try again.",
   "tooLarge": "The diagram is too large (2 MB at most). Make inserted images smaller.",
-  "leaveQuestion": "Discard unsaved changes?",
-  "discard": "Discard",
+  "leaveQuestion": "Without a name the diagram cannot be saved. Close anyway? The drawing stays on this device.",
   "keepEditing": "Keep drawing",
   "embedLabel": "Insert into a note",
-  "embedHint": "Copy it into the note or pick it there with “draw.io”. The note always shows the latest version."
+  "embedHint": "Copy it into the note or pick it there with “draw.io”. The note always shows the latest version.",
+  "status": {
+    "hint": "Only for you at first. Saves itself once it has a name.",
+    "unsaved": "Not saved yet.",
+    "saving": "Saving …",
+    "saved": "Saved.",
+    "autosaved": "Saved automatically."
+  },
+  "leaveAnyway": "Close anyway"
 }

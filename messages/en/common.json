@@ -133,5 +133,9 @@
   "searchPerson": "Search a name (at least 3 letters)",
   "nobodyFound": "Nobody found.",
   "copied": "Copied",
-  "copyLink": "Copy link"
+  "copyLink": "Copy link",
+  "draft": {
+    "restored": "Unsaved draft from {when} restored.",
+    "discard": "Discard"
+  }
 }

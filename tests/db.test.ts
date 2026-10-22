@@ -1034,6 +1034,28 @@ describe("documents: visibility, rights, versions, suggestions, copies, trash", 
     await as(tx, b, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung für das Beet", body: "Jetzt bin ich dran" })})`);
   }));
 
+  it("saving again within one sitting updates one's own latest version instead of adding one, also while autosaving", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const id = await note(tx, a);
+    const versions = async () => (await as(tx, a, () => tx<{ version_no: number; body_md: string }[]>`
+      select version_no, body_md from public.resource_versions where resource_id = ${id} order by version_no`)).map((v) => `${v.version_no}:${v.body_md}`);
+    await as(tx, a, () => tx`select app.lock_resource(${id})`);
+    await as(tx, a, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung Beet", body: "Zwischenstand", autosave: true })})`);
+    await as(tx, a, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung Beet", body: "Fertig", note: "fertig" })})`);
+    expect(await versions()).toEqual(["1:Fertig"]);
+    expect((await as(tx, a, () => tx<{ body_md: string; version_no: number }[]>`select body_md, version_no from public.resources where id = ${id}`))[0]).toEqual({ body_md: "Fertig", version_no: 1 });
+    // Someone else's change is its own version; a suggestion keeps the version it is based on.
+    await as(tx, a, () => tx`select app.grant_resource(${id}, ${b}, null, 'edit', null)`);
+    await as(tx, b, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung Beet", body: "Von Ben" })})`);
+    expect(await versions()).toEqual(["1:Fertig", "2:Von Ben"]);
+    await as(tx, a, () => tx`select app.set_resource_access(${id}, 'public', 'suggest', true, 'cc_by_sa')`);
+    await as(tx, a, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung Beet", body: "Von Ada" })})`);
+    const c = await person(tx, "Cem");
+    await as(tx, c, () => tx`select app.suggest_change(${id}, ${tx.json({ title: "Anleitung Beet", body: "Vorschlag", note: "Bitte so" })})`);
+    await as(tx, a, () => tx`select app.save_note(${tx.json({ id, title: "Anleitung Beet", body: "Ada weiter", autosave: true })})`);
+    expect(await versions()).toEqual(["1:Fertig", "2:Von Ben", "3:Von Ada", "4:Ada weiter"]);
+  }));
+
   it("copies only what the licence or the download switch allows, and points to the original", () => scenario(async (tx) => {
     const a = await person(tx, "Ada"), b = await person(tx, "Ben");
     const id = await note(tx, a);

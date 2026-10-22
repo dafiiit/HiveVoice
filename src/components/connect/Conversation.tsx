@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useDraft } from "@/lib/drafts";
 import { useLocale, useTranslations } from "next-intl";
 import { fetchMessages, sendMessage, type Message } from "@/lib/actions/messages";
 import { OUTBOX_EVENT, enqueue, flushOutbox, offline, queued, type OutboxDetail } from "@/lib/outbox";
@@ -38,6 +39,8 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const [messages, setMessages] = useState<Local[]>(() => initial.map((m) => ({ ...m, key: m.id })));
   const [readAt, setReadAt] = useState<string | Date | null>(initialRead);
   const [draft, setDraft] = useState("");
+  // A message begun but not sent stays on the device (an empty field after sending leaves nothing behind).
+  useDraft(`chat:${id}`, draft, setDraft);
   const [error, setError] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<Quote | null>(null);
   const [flash, setFlash] = useState<string | null>(null);

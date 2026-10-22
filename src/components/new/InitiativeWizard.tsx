@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
+import { DraftNotice } from "@/components/ui/DraftNotice";
+import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { createInitiative, updateInitiative } from "@/lib/actions/initiatives";
@@ -39,6 +41,9 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [pending, start] = useTransition();
+  // An initiative begun (or a change to one) stays on the device until it is sent.
+  const draft = useDraft(`initiative:${initial?.id ?? "new"}`, { title, summary, body, easy, tags, addresseeText, cost, note },
+    (v) => { setTitle(v.title); setSummary(v.summary); setBody(v.body); setEasy(v.easy); setTags(v.tags); setAddresseeText(v.addresseeText); setCost(v.cost); setNote(v.note); });
 
   useEffect(() => {
     const h = setTimeout(() => {
@@ -65,13 +70,16 @@ export function InitiativeWizard({ chain, initial, ideas = [] }: { chain: { id: 
 
   const submit = () => start(async () => {
     const payload = { title, summary, body, bodyEasy: easy, addresseeResponsibilityId: addressee?.id ?? "", addresseeText: addressee ? "" : addresseeText, costEuro: cost };
+    // Success leads to the initiative's page right away, so the draft goes first and comes back if sending fails.
+    draft.clear();
     const res = editing ? await updateInitiative(initial!.id, payload, note) : await createInitiative({ ...payload, regionId: region!.id, tags });
-    if (res && !res.ok) setError(tc(`errors.${res.error}` as "errors.unknown"));
+    if (res && !res.ok) { draft.keep(); setError(tc(`errors.${res.error}` as "errors.unknown")); }
   });
 
   return (
     <div className="grid grid-cols-1 gap-10 @4xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex flex-col gap-8">
+        <DraftNotice draft={draft} />
         <ol aria-label={t("steps")} className="m-0 grid list-none gap-1 p-0" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
           {steps.map((s, i) => (
             <li key={s} aria-current={i === step ? "step" : undefined} className="flex flex-col gap-2">

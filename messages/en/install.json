@@ -1,6 +1,6 @@
 {
-  "title": "Install as an app",
-  "lead": "HiveVoice runs as an app on every device: its own icon, its own window, no app store. Updates arrive by themselves.",
+  "title": "HiveVoice as an app",
+  "lead": "Its own icon, its own window, even without a connection. Updates arrive by themselves.",
   "button": "Install HiveVoice",
   "installed": "HiveVoice is installed on this device.",
   "thisDevice": "This device",
@@ -24,10 +24,17 @@
     "chrome": "Click “Install”, or the install icon at the right of the address bar.",
     "firefox": "Firefox does not install web apps. Open this page in Chrome, Edge or Safari and install it there."
   },
-  "download": {
-    "windows": "Or download the program (.msi or .exe)",
-    "mac": "Or download the program (.dmg)",
-    "linux": "Or download the program (.AppImage or .deb)"
-  },
-  "downloadNote": "The programs are not signed yet: the system warns on first start, which is expected."
+  "downloadNote": "The programs are not signed yet: the system warns on first start, which is expected.",
+  "download": "Download HiveVoice for {system}",
+  "homeScreen": "Add to Home Screen",
+  "noStore": "no app store",
+  "orBrowser": "Or install right in the browser",
+  "all": "Windows, Mac, Linux, iPhone, iPad and Android",
+  "program": "Download the program",
+  "orInstall": "Or in the browser:",
+  "arch": {
+    "windows": "64-bit",
+    "mac": "Apple Silicon and Intel",
+    "linux": "x86_64"
+  }
 }

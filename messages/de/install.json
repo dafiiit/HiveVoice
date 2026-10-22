@@ -1,6 +1,6 @@
 {
-  "title": "Als App installieren",
-  "lead": "HiveVoice läuft auf jedem Gerät als App: eigenes Symbol, eigenes Fenster, kein App-Store. Updates kommen von selbst.",
+  "title": "HiveVoice als App",
+  "lead": "Eigenes Symbol, eigenes Fenster, auch ohne Netz. Updates kommen von selbst.",
   "button": "HiveVoice installieren",
   "installed": "HiveVoice ist auf diesem Gerät installiert.",
   "thisDevice": "Dieses Gerät",
@@ -24,10 +24,17 @@
     "chrome": "Auf „Installieren“ klicken oder rechts in der Adressleiste auf das Installieren-Symbol.",
     "firefox": "Firefox installiert keine Web-Apps. Öffne diese Seite in Chrome, Edge oder Safari und installiere sie dort."
   },
-  "download": {
-    "windows": "Oder als Programm laden (.msi oder .exe)",
-    "mac": "Oder als Programm laden (.dmg)",
-    "linux": "Oder als Programm laden (.AppImage oder .deb)"
-  },
-  "downloadNote": "Die Programme sind noch nicht signiert: Beim ersten Start warnt das System, das ist erwartet."
+  "downloadNote": "Die Programme sind noch nicht signiert: Beim ersten Start warnt das System, das ist erwartet.",
+  "download": "HiveVoice für {system} laden",
+  "homeScreen": "Zum Home-Bildschirm",
+  "noStore": "ohne App-Store",
+  "orBrowser": "Oder direkt im Browser installieren",
+  "all": "Windows, Mac, Linux, iPhone, iPad und Android",
+  "program": "Programm laden",
+  "orInstall": "Oder im Browser:",
+  "arch": {
+    "windows": "64 Bit",
+    "mac": "Apple Silicon und Intel",
+    "linux": "x86_64"
+  }
 }

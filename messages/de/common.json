@@ -95,7 +95,10 @@
     "already_member": "Du bist schon dabei.",
     "email_not_allowed": "Mit dieser E-Mail-Adresse kann man sich nicht anmelden (Wegwerf-Adresse).",
     "spam_detected": "Das sieht nach Spam aus: derselbe Text oder viele Links in kurzer Zeit. Warte bitte etwas.",
-    "admins_from_config": "Admins werden in der Einstellung ADMIN_EMAILS festgelegt."
+    "admins_from_config": "Admins werden in der Einstellung ADMIN_EMAILS festgelegt.",
+    "amount_required": "Bitte gib einen Betrag ein.",
+    "split_people": "Hake mindestens eine Person an.",
+    "split_mismatch": "Die Aufteilung ergibt nicht die Summe."
   },
   "phase": {
     "idea": "Idee",

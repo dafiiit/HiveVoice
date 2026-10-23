@@ -10,6 +10,7 @@ import ns_connect from "./connect.json";
 import ns_diagrams from "./diagrams.json";
 import ns_docrights from "./docrights.json";
 import ns_errorPage from "./errorPage.json";
+import ns_expenses from "./expenses.json";
 import ns_explore from "./explore.json";
 import ns_extras from "./extras.json";
 import ns_group from "./group.json";
@@ -61,6 +62,7 @@ const messages = {
   "diagrams": ns_diagrams,
   "docrights": ns_docrights,
   "errorPage": ns_errorPage,
+  "expenses": ns_expenses,
   "explore": ns_explore,
   "extras": ns_extras,
   "group": ns_group,

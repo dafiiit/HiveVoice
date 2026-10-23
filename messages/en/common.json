@@ -95,7 +95,10 @@
     "already_member": "You are in already.",
     "email_not_allowed": "You cannot sign up with this address (disposable address).",
     "spam_detected": "This looks like spam: the same text or many links in a short time. Please wait a little.",
-    "admins_from_config": "Admins are set in ADMIN_EMAILS."
+    "admins_from_config": "Admins are set in ADMIN_EMAILS.",
+    "amount_required": "Please enter an amount.",
+    "split_people": "Tick at least one person.",
+    "split_mismatch": "The split does not add up to the total."
   },
   "phase": {
     "idea": "Idea",

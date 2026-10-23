@@ -39,3 +39,8 @@ export function addsInfo(first: string, second: string) {
   const stem = (x: string) => x.slice(0, Math.max(4, Math.min(x.length, 5)));
   return !(a === b || b.startsWith(stem(a)) || a.startsWith(stem(b)));
 }
+
+/** An amount in any currency, with cents only when there are some ("12 €", "12,50 €"). */
+export function money(cents: number, currency: string, locale: string, opts: { cents?: boolean } = {}) {
+  return new Intl.NumberFormat(locale, { style: "currency", currency, minimumFractionDigits: opts.cents || cents % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(cents / 100);
+}

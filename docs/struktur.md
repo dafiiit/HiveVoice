@@ -108,7 +108,8 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
 | Einladung, Teilen, Rechte, Transparenz, Verwaltung | /invite, /sharing, /rights, /transparency, /admin | deutsch |
 
 ## Noch nicht gebaut (aus dem Baum oben)
-* Kalender, Dienstpläne, Abstimmungen als Werkzeug für Ich (Welle 1), Kasse, Timeline/Wirkung, Rechtegruppen frei benennen
+* Kalender, Dienstpläne, Abstimmungen als Werkzeug für Ich (Welle 1), Timeline/Wirkung, Rechtegruppen frei benennen
+* Kasse: „Ausgaben teilen" ist gebaut (Werkzeug für Gruppen und 1-zu-1-Chats, 2026-10-23); offen sind Beiträge, Spenden und ein öffentliches Kassenbuch
 * Bilder und Texte als eigene Inhaltsart unter Ich, „Heute“-Übersicht
 * Wissen ist nicht mehr öffentlich durchsuchbar (Tab „Wissen“ entfällt); öffentliche Dokumente sind nur über Link, Gruppe oder Pinnwand zu finden
 

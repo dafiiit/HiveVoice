@@ -164,7 +164,10 @@
       "post_pin": "Beitrag angepinnt",
       "post_unpin": "Anpinnen aufgehoben",
       "post_lock": "Kommentare gesperrt",
-      "post_unlock": "Kommentare freigegeben"
+      "post_unlock": "Kommentare freigegeben",
+      "expense_updated": "Ausgabe geändert",
+      "expense_deleted": "Ausgabe gelöscht",
+      "expense_restored": "Ausgabe wiederhergestellt"
     }
   },
   "join_page": {

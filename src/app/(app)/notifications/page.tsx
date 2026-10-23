@@ -3,7 +3,7 @@ import { chip } from "@/components/ui/styles";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer, type Tx } from "@/lib/db";
 import { requireSession } from "@/lib/session";
-import { relTime } from "@/lib/format";
+import { money, relTime } from "@/lib/format";
 import { Avatar } from "@/components/ui/Avatar";
 import { Glyph } from "@/components/ui/Glyph";
 import { MarkAllRead } from "@/components/MarkAllRead";
@@ -27,7 +27,7 @@ const GLYPH: Record<string, string> = {
   join_request: "flower", join_accepted: "flower", join_declined: "flower", goal_vote: "flower", goal_adopted: "flower", goal_rejected: "flower", working_group: "flower",
   initiative_vote: "arch", initiative_passed: "arch", initiative_failed: "arch",
   listing_match: "gift", request_answered: "lupe", request_forwarded: "lupe", responsibility_request: "lupe",
-  post_reply: "bubble", jury_invite: "keyhole", report_decided: "split", content_hidden: "split",
+  post_reply: "bubble", jury_invite: "keyhole", expense_added: "split", expense_payment: "split", report_decided: "split", content_hidden: "split",
 };
 
 /** What a notification needs besides its own payload: names, previews, unread counts. */
@@ -163,6 +163,11 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
     } else if (kind === "listing_match") {
       kind = `listing_match_${p.kind === "need" ? "need" : "offer"}`;
       href = `/listings/${p.listing_id}`; label = t("labels.request");
+    } else if (kind === "expense_added" || kind === "expense_payment") {
+      // A private chat's expenses open in the chat, a group's in its tab.
+      href = p.conversation_id ? `/friends?c=d:${p.conversation_id}&t=expenses` : `/groups/${p.slug}?tab=expenses`; label = t("labels.expenses");
+      const cur = p.currency ?? "EUR";
+      values = { ...values, amount: money(Number(p.amount_cents), cur, locale, { cents: true }), share: money(Number(p.share_cents), cur, locale, { cents: true }) };
     } else if (kind === "report_decided" || kind === "content_hidden") {
       href = "/settings?tab=reports"; label = t("labels.jury");
     }

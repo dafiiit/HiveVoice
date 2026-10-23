@@ -46,3 +46,11 @@ export const IconEllipse = ({ size = 20, className }: P) => <svg {...base(size)}
 export const IconArrow = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 19L19 5M10 5h9v9" /></svg>;
 export const IconText = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 7V4h14v3M12 4v16M9 20h6" /></svg>;
 export const IconUndo = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M9 14L4 9l5-5" /><path d="M4 9h11a5 5 0 0 1 0 10h-4" /></svg>;
+// Kinds of expenses (Ausgaben).
+export const IconReceipt = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z" /><path d="M9 8h6M9 12h6M9 16h3" /></svg>;
+export const IconFood = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M6 3v7a2 2 0 0 0 2 2v9M10 3v7a2 2 0 0 1-2 2M8 3v6" /><path d="M17 21V3c-2 0-3 2-3 5v5h3" /></svg>;
+export const IconCart = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M2 4h3l2.5 11h11L21 7H6.5" /><circle cx="9" cy="19.5" r="1.5" /><circle cx="17" cy="19.5" r="1.5" /></svg>;
+export const IconCar = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 16v-4l2-5h14l2 5v4z" /><path d="M3 12h18" /><circle cx="7.5" cy="16.5" r="1.5" /><circle cx="16.5" cy="16.5" r="1.5" /></svg>;
+export const IconPlane = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 13l18-8-6 16-3-6z" /><path d="M12 15l3-4" /></svg>;
+export const IconTicket = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z" /><path d="M14 7v10" strokeDasharray="2 2" /></svg>;
+export const IconSwap = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M4 8h15M15 4l4 4-4 4" /><path d="M20 16H5M9 12l-4 4 4 4" /></svg>;

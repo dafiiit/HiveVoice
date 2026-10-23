@@ -62,7 +62,8 @@
     "tasks": "Aufgaben",
     "team": "Mitglieder und Rechte",
     "about": "Über",
-    "links": "Wissen"
+    "links": "Wissen",
+    "expenses": "Ausgaben"
   },
   "talkPlaceholder": "In „{name}“ schreiben …",
   "joinToPost": "Tritt der Gruppe bei, um mitzuschreiben.",
@@ -199,7 +200,11 @@
       },
       "couple": {
         "name": "Zu zweit",
-        "text": "Paar, Familie, Freunde: planen mit Aufgaben und Dokumenten."
+        "text": "Paar, Familie, Freunde: planen mit Aufgaben, Dokumenten und geteilten Ausgaben."
+      },
+      "flatshare": {
+        "name": "WG",
+        "text": "Für die Mitbewohner, nur mit Einladung. Putzplan als Aufgaben, Einkäufe und Miete als geteilte Ausgaben."
       }
     }
   },
@@ -229,6 +234,10 @@
       "needs": {
         "name": "Anliegen",
         "text": "Was die Gruppe sucht"
+      },
+      "expenses": {
+        "name": "Ausgaben teilen",
+        "text": "Wer hat was bezahlt, wer schuldet wem, mit Belegen"
       }
     }
   }

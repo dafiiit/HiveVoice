@@ -20,7 +20,8 @@
     "group": "Group",
     "initiative": "Initiative",
     "jury": "Jury",
-    "other": "Notice"
+    "other": "Notice",
+    "expenses": "Expenses"
   },
   "open": "Open",
   "unreadN": "{n, plural, one {1 new message} other {# new messages}}",
@@ -376,6 +377,14 @@
     "object_shared": {
       "title": "“{title}” was shared with you",
       "body": "You may read{write, select, true { and edit} other {}} it."
+    },
+    "expense_added": {
+      "title": "{name}: “{title}”",
+      "body": "{amount} in “{group}”, your share {share}"
+    },
+    "expense_payment": {
+      "title": "Payment in “{group}”",
+      "body": "{name} noted a payment of {amount} that involves you."
     }
   }
 }

@@ -62,7 +62,8 @@
     "tasks": "Tasks",
     "team": "Members and rights",
     "about": "About",
-    "links": "Knowledge"
+    "links": "Knowledge",
+    "expenses": "Expenses"
   },
   "talkPlaceholder": "Write in “{name}” …",
   "joinToPost": "Join the group to write here.",
@@ -199,7 +200,11 @@
       },
       "couple": {
         "name": "Just the two of us",
-        "text": "Couple, family, friends: plan with tasks and documents."
+        "text": "Couple, family, friends: plan with tasks, documents and shared expenses."
+      },
+      "flatshare": {
+        "name": "Flat share",
+        "text": "For the flatmates, by invitation only. Cleaning as tasks, groceries and rent as shared expenses."
       }
     }
   },
@@ -229,6 +234,10 @@
       "needs": {
         "name": "Listings",
         "text": "What the group is looking for"
+      },
+      "expenses": {
+        "name": "Split expenses",
+        "text": "Who paid what, who owes whom, with receipts"
       }
     }
   }

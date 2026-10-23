@@ -12,6 +12,8 @@ import { asideBlock, tag } from "@/components/ui/styles";
 import { JoinPanel } from "@/components/group/JoinPanel";
 import { Goals, type GoalView } from "@/components/group/Goals";
 import { Tasks, type TaskView } from "@/components/group/Tasks";
+import { Expenses } from "@/components/group/Expenses";
+import { loadExpenses } from "@/lib/expenses";
 import { Team } from "@/components/group/Team";
 import { Composer, PostList } from "@/components/PostList";
 import { ContactButton } from "@/components/listings/ContactButton";
@@ -33,7 +35,7 @@ import { loadRefCards, type RefCard } from "@/lib/refs";
 import { BackLink, Notice, Page, Section, Tabs } from "@/components/ui/Page";
 import { dateLong, dateTime } from "@/lib/format";
 
-const TABS = ["goals", "talk", "links", "collection", "needs", "tasks", "team", "about"] as const;
+const TABS = ["goals", "talk", "links", "collection", "needs", "tasks", "expenses", "team", "about"] as const;
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
@@ -122,7 +124,8 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
       goals.push({ ...go, ballot });
     }
     // Only the tools the admins switched on have a tab; chat, members and the about page are always there.
-    const on = (k: (typeof TABS)[number]) => !(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool);
+    // The book of expenses is for members only, whatever the group's visibility.
+    const on = (k: (typeof TABS)[number]) => (!(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool)) && (k !== "expenses" || !!role);
     const first = firstTab ?? (g.tools.includes("goals") ? "goals" : "talk");
     const active = (TABS as readonly string[]).includes(String(sp.tab)) && on(sp.tab as (typeof TABS)[number]) ? (sp.tab as (typeof TABS)[number]) : first;
     const links = active === "links" ? await tx<ResourceRow[]>`select ${resourceColumns(tx, me ?? null)} from ${resourceFrom(tx)} where r.group_id = ${g.id} and r.hidden_at is null and r.trashed_at is null and r.visibility in ('public', 'group') order by r.score desc, r.created_at desc limit 100` : [];
@@ -137,6 +140,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
           from public.object_grants og join public.profiles p on p.id = og.profile_id where og.object_type = 'task' and og.object_id = tk.id), '[]') else '[]' end as grants,
         coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'name', p.display_name, 'seed', p.avatar_seed)) from public.task_assignees a join public.profiles p on p.id = a.profile_id where a.task_id = tk.id), '[]') as assignees
       from public.tasks tk where tk.group_id = ${g.id} order by tk.position, tk.created_at` : [];
+    const book = active === "expenses" ? await loadExpenses(tx, g.id) : null;
     const requests = active === "team" && can_manage ? await tx<{ id: string; profile_id: string; name: string; seed: number; path: string | null; message: string | null }[]>`
       select r.id, r.profile_id, p.display_name as name, p.avatar_seed as seed, p.avatar_path as path, r.message from public.group_join_requests r join public.profiles p on p.id = r.profile_id
       where r.group_id = ${g.id} and r.status = 'pending' order by r.created_at` : [];
@@ -179,7 +183,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
       return card ? [{ card, note: i.note, byName: i.by_name, mine: i.added_by === me }] : [];
     });
     const partOf = parents.flatMap((p) => cards.get(`group:${p.id}`) ?? []) as RefCard[];
-    return { collection, partOf, team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
+    return { book, collection, partOf, team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
   });
   if (!data) notFound();
   const { g, role, active } = data;
@@ -194,12 +198,13 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
     links: t("tabs.links"),
     needs: t("tabs.needs", { n: data.needs.length }),
     tasks: t("tabs.tasks"),
+    expenses: t("tabs.expenses"),
     team: t("tabs.team"),
     about: t("tabs.about"),
   };
   // Five tabs in front, the rarer ones under "Mehr".
-  const has = (k: (typeof TABS)[number]) => !(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool);
-  const front = (["goals", "talk", "collection", "tasks", "team"] as const).filter((k) => (k !== "tasks" || g.mod_tasks) && has(k));
+  const has = (k: (typeof TABS)[number]) => (!(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool)) && (k !== "expenses" || !!role);
+  const front = (["goals", "talk", "collection", "tasks", "expenses", "team"] as const).filter((k) => (k !== "tasks" || g.mod_tasks) && has(k));
   const back = (["links", "needs", "about"] as const).filter(has);
   const first = firstTab ?? (g.tools.includes("goals") ? "goals" : "talk");
   const tabHref = (k: (typeof TABS)[number]) => `${path}${k === first ? "" : `?tab=${k}`}`;
@@ -295,6 +300,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
             </div>
           </section>
         )}
+        {!locked && active === "expenses" && data.book && me && <Expenses slug={slug} groupId={g.id} book={data.book} me={me} canWrite={!!role && role !== "guest"} />}
         {!locked && active === "tasks" && <Tasks slug={slug} groupId={g.id} tasks={data.tasks} canEdit={data.can_tasks} viewerId={me} signedIn={!!session} />}
         {!locked && active === "team" && (
           <div className="flex flex-col gap-10">

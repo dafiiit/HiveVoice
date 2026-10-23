@@ -20,7 +20,8 @@
     "group": "Gruppe",
     "initiative": "Initiative",
     "jury": "Jury",
-    "other": "Hinweis"
+    "other": "Hinweis",
+    "expenses": "Ausgaben"
   },
   "open": "Öffnen",
   "unreadN": "{n, plural, one {1 neue Nachricht} other {# neue Nachrichten}}",
@@ -376,6 +377,14 @@
     "object_shared": {
       "title": "„{title}“ wurde für dich freigegeben",
       "body": "Du darfst es lesen{write, select, true { und bearbeiten} other {}}."
+    },
+    "expense_added": {
+      "title": "{name}: „{title}“",
+      "body": "{amount} in „{group}“, dein Anteil {share}"
+    },
+    "expense_payment": {
+      "title": "Zahlung in „{group}“",
+      "body": "{name} hat eine Zahlung über {amount} eingetragen, an der du beteiligt bist."
     }
   }
 }

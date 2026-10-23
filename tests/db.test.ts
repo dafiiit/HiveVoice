@@ -1532,3 +1532,89 @@ describe("federation outbox", () => {
     expect(name.length).toBeGreaterThan(0);
   }));
 });
+
+describe("shared expenses", () => {
+  const save = (tx: postgres.TransactionSql, p: Record<string, unknown>) =>
+    tx<{ id: string }[]>`select app.save_expense(${tx.json(p as postgres.JSONValue)}) as id`.then((r) => r[0].id);
+  // Read as someone in the group: row level security hides the book from everyone else.
+  const parts = (tx: postgres.TransactionSql, id: string, viewer: string) =>
+    as(tx, viewer, () => tx<{ profile_id: string; amount_cents: string }[]>`select profile_id, amount_cents from public.expense_shares where expense_id = ${id}`)
+      .then((r) => Object.fromEntries(r.map((x) => [x.profile_id, Number(x.amount_cents)])));
+
+  it("splits equally, by percent, by shares and exactly, always adding up to the total", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"WG Küche","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    // The tool has to be switched on first.
+    expect(await fails(tx, (sp) => as(sp, a, () => save(sp, { group_id: gid, title: "Pizza", amount_cents: 1000, paid_by: a, shares: [{ profile_id: a }] })))).toContain("forbidden");
+    await as(tx, a, () => tx`update public.groups set tools = tools || '{expenses}' where id = ${gid}`);
+
+    const all = [{ profile_id: a }, { profile_id: b }, { profile_id: c }];
+    const pizza = await as(tx, a, () => save(tx, { group_id: gid, title: "Pizza", amount_cents: 1000, paid_by: a, split: "equal", shares: all }));
+    expect(Object.values(await parts(tx, pizza, a)).sort()).toEqual([333, 333, 334]);
+
+    const fuel = await as(tx, b, () => save(tx, { group_id: gid, title: "Tanken", amount_cents: 4806, paid_by: b, split: "percent", shares: [{ profile_id: a, value: 50 }, { profile_id: b, value: 50 }] }));
+    expect(await parts(tx, fuel, a)).toEqual({ [a]: 2403, [b]: 2403 });
+    expect(await fails(tx, (sp) => as(sp, b, () => save(sp, { group_id: gid, title: "Falsch", amount_cents: 100, paid_by: b, split: "percent", shares: [{ profile_id: a, value: 40 }, { profile_id: b, value: 50 }] })))).toContain("split_mismatch");
+
+    const rent = await as(tx, c, () => save(tx, { group_id: gid, title: "Strom", amount_cents: 1000, paid_by: c, split: "shares", shares: [{ profile_id: a, value: 2 }, { profile_id: b, value: 1 }] }));
+    expect(await parts(tx, rent, a)).toEqual({ [a]: 667, [b]: 333 });
+
+    expect(await fails(tx, (sp) => as(sp, c, () => save(sp, { group_id: gid, title: "Exakt", amount_cents: 500, paid_by: c, split: "exact", shares: [{ profile_id: a, value: 200 }, { profile_id: b, value: 200 }] })))).toContain("split_mismatch");
+    const exact = await as(tx, c, () => save(tx, { group_id: gid, title: "Exakt", amount_cents: 500, paid_by: c, split: "exact", shares: [{ profile_id: a, value: 300 }, { profile_id: b, value: 200 }] }));
+    expect(await parts(tx, exact, a)).toEqual({ [a]: 300, [b]: 200 });
+
+    // Ben and Cem were told their part, Ada (who wrote it) was not.
+    const told = async (who: string) => (await as(tx, who, () => tx<{ share: string }[]>`
+      select payload ->> 'share_cents' as share from public.notifications where kind = 'expense_added' and payload ->> 'expense_id' = ${pizza}`)).map((x) => Number(x.share));
+    expect([...await told(b), ...await told(c)].sort()).toEqual([333, 333]);
+    expect(await told(a)).toEqual([]);
+  }));
+
+  it("keeps balances, suggests who pays whom, settles up and only shows the book to members", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem"), d = await person(tx, "Dora");
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Reisekasse","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, c, () => tx`select app.join_group(${gid}, null)`);
+    await as(tx, a, () => tx`update public.groups set tools = tools || '{expenses}' where id = ${gid}`);
+    const all = [{ profile_id: a }, { profile_id: b }, { profile_id: c }];
+    const hotel = await as(tx, a, () => save(tx, { group_id: gid, title: "Hotel", amount_cents: 9000, paid_by: a, shares: all }));
+    await as(tx, b, () => save(tx, { group_id: gid, title: "Essen", amount_cents: 3000, paid_by: b, shares: all }));
+
+    type Summary = { balances: { profile_id: string; net: number }[]; settle: { from: string; to: string; amount: number }[] };
+    const summary = async (who: string) => (await as(tx, who, () => tx<{ s: Summary }[]>`select app.expense_summary(${gid}) as s`))[0].s;
+    let s = await summary(c);
+    expect(Object.fromEntries(s.balances.map((x) => [x.profile_id, x.net]))).toEqual({ [a]: 5000, [b]: -1000, [c]: -4000 });
+    expect(s.settle).toEqual(expect.arrayContaining([{ from: c, to: a, currency: "EUR", amount: 4000 }, { from: b, to: a, currency: "EUR", amount: 1000 }]));
+
+    // Settling up: Cem pays Ada.
+    await as(tx, c, () => save(tx, { group_id: gid, kind: "payment", amount_cents: 4000, paid_by: c, shares: [{ profile_id: a }] }));
+    s = await summary(b);
+    expect(s.settle).toEqual([{ from: b, to: a, currency: "EUR", amount: 1000 }]);
+
+    // Deleting takes an entry out of the balances, restoring brings it back.
+    await as(tx, b, () => tx`select app.delete_expense(${hotel}, false)`);
+    s = await summary(a);
+    expect(s.balances.find((x) => x.profile_id === a)?.net).toBe(-5000);
+    await as(tx, b, () => tx`select app.delete_expense(${hotel}, true)`);
+    expect((await summary(a)).settle).toEqual([{ from: b, to: a, currency: "EUR", amount: 1000 }]);
+
+    // Outsiders see nothing and cannot write, nor put people from outside into an entry.
+    expect(await as(tx, d, () => tx`select id from public.expenses where group_id = ${gid}`)).toHaveLength(0);
+    expect(await fails(tx, (sp) => as(sp, d, () => sp`select app.expense_summary(${gid})`))).toContain("forbidden");
+    expect(await fails(tx, (sp) => as(sp, d, () => save(sp, { group_id: gid, title: "Fremd", amount_cents: 100, paid_by: d, shares: [{ profile_id: d }] })))).toContain("forbidden");
+    expect(await fails(tx, (sp) => as(sp, a, () => save(sp, { group_id: gid, title: "Fremd", amount_cents: 100, paid_by: a, shares: [{ profile_id: d }] })))).toContain("forbidden");
+    expect(await as(tx, b, () => tx`select id from public.expenses where group_id = ${gid}`)).toHaveLength(3);
+  }));
+
+  it("can be switched on in a private chat", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ r }] = await as(tx, a, () => tx<{ r: { request_id: string } }[]>`select app.request_direct(${b}, 'Hallo Ben, Kino?') as r`);
+    const [{ conv }] = await as(tx, b, () => tx<{ conv: string }[]>`select app.decide_contact(${r.request_id}, true) as conv`);
+    await as(tx, a, () => tx`select app.chat_tools(${conv}, '{expenses}')`);
+    const [{ id: gid }] = await as(tx, a, () => tx<{ id: string }[]>`select id from public.groups where conversation_id = ${conv}`);
+    const id = await as(tx, b, () => save(tx, { group_id: gid, title: "Kino", amount_cents: 2400, paid_by: b, shares: [{ profile_id: a }, { profile_id: b }] }));
+    expect(await parts(tx, id, a)).toEqual({ [a]: 1200, [b]: 1200 });
+  }));
+});

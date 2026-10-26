@@ -6,7 +6,12 @@ export const LAST_LOGIN_COOKIE = "hv-last-login";
 // Set once a day by the proxy when it writes the session cookies again from the server (see proxy.ts).
 export const TOUCH_COOKIE = "hv-touch";
 
+// Supabase names the session cookie after the first part of its address (sb-<ref>-auth-token).
+// Fixed here so a custom domain for Supabase (auth.example.org) does not sign everyone out.
+const SESSION_COOKIE = "sb-wpfkxekiumonxmscwcvc-auth-token";
+
 export const cookieOptions = {
+  name: SESSION_COOKIE,
   path: "/",
   sameSite: "lax" as const,
   maxAge: 60 * 60 * 24 * 400,

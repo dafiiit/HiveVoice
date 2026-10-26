@@ -29,7 +29,7 @@ Die App ist schon vorbereitet: Sobald die Umgebungsvariablen unten gesetzt sind 
    - `http://localhost:3000` (nur zum Entwickeln)
 4. **Autorisierte Weiterleitungs-URIs** hinzufügen, genau diese:
    `https://wpfkxekiumonxmscwcvc.supabase.co/auth/v1/callback`
-   (Das ist die Supabase-Adresse deines Projekts. Supabase zeigt sie dir auch im nächsten Schritt an.)
+   (Das ist die Supabase-Adresse deines Projekts. Supabase zeigt sie dir auch im nächsten Schritt an. Mit eigener Adresse für Supabase kommt `https://auth.deinedomain.de/auth/v1/callback` dazu, siehe docs/betrieb.md.)
 5. **Erstellen**. Es erscheinen **Client-ID** und **Clientschlüssel**. Beides kopieren. Den Schlüssel nie in den Chat, ins Repo oder in `.env.example` schreiben.
 
 ### 4. In Supabase einschalten

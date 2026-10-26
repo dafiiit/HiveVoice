@@ -270,6 +270,17 @@
       word-break: break-word;
     }
 
+    .task-images { display: flex; flex-direction: column; gap: 8px; margin: 8px 0 0 30px; }
+    .task-image { position: relative; display: inline-block; max-width: 100%; }
+    .task-image img { display: block; max-width: 100%; max-height: 360px; border-radius: 6px; border: 1px solid var(--border-light); cursor: zoom-in; }
+    .task-image .remove-image {
+      position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border: none; border-radius: 50%;
+      background: rgba(0,0,0,0.65); color: #fff; font-size: 14px; line-height: 1; cursor: pointer; display: none;
+    }
+    .task-image:hover .remove-image { display: block; }
+    .add-image { font-size: 12px; font-style: italic; color: var(--text-muted); cursor: pointer; margin: 6px 0 0 30px; display: none; }
+    .task-card:hover .add-image, .list-item:hover .add-image { display: block; }
+    .task-card.file-over, .list-item.file-over { outline: 2px dashed var(--accent); }
     .card-subtasks {
       margin-top: 10px;
       padding-top: 10px;
@@ -1334,8 +1345,17 @@
       return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     }
 
+    // Everything the dashboard has no field for stays in the file as it is: the text above the first section
+    // (fileHead), lines under a section heading before its first task (section.head) and lines under a task that are
+    // neither subtasks nor images (task.extra, which also holds the image lines "  - ![alt](path)").
+    let fileHead = [];
+    const IMAGE_LINE = /^\s*- !\[(.*?)\]\((.+?)\)\s*$/;
+    const trimBlank = (lines) => { const l = [...lines]; while (l.length && !l[l.length - 1].trim()) l.pop(); while (l.length && !l[0].trim()) l.shift(); return l; };
+    const taskImages = (task) => (task.extra || []).map((line, index) => { const m = line.match(IMAGE_LINE); return m ? { alt: m[1], src: m[2], index } : null; }).filter(Boolean);
+
     function parseTaskMarkdown(content) {
       const resultSections = [];
+      const head = [];
       const resultTasks = {};
       let currentSection = null;
       let currentSectionId = null;
@@ -1343,6 +1363,7 @@
       const lines = content.split('\n');
       let currentTask = null;
 
+      let currentSectionObj = null;
       for (const line of lines) {
         const headerMatch = line.match(/^## \*{0,2}(.+?)\*{0,2}$/);
         if (headerMatch) {
@@ -1356,8 +1377,11 @@
           currentSection = sectionName;
 
           if (!resultTasks[currentSectionId]) {
-            resultSections.push({ id: currentSectionId, name: sectionName });
+            currentSectionObj = { id: currentSectionId, name: sectionName, head: [] };
+            resultSections.push(currentSectionObj);
             resultTasks[currentSectionId] = [];
+          } else {
+            currentSectionObj = resultSections.find(x => x.id === currentSectionId);
           }
         } else if (currentSectionId && line.match(/^- \[[ xX]\]/)) {
           if (currentTask) {
@@ -1380,12 +1404,19 @@
             note,
             checked,
             subtasks: [],
+            extra: [],
             section: currentSectionId
           };
         } else if (currentTask && line.match(/^\s+- \[[ xX]\]/)) {
           const checked = line.match(/\[[xX]\]/) !== null;
           const text = line.replace(/^\s+- \[[ xX]\]\s*/, '');
           currentTask.subtasks.push({ text, checked });
+        } else if (currentTask) {
+          currentTask.extra.push(line);
+        } else if (currentSectionObj) {
+          currentSectionObj.head.push(line);
+        } else {
+          head.push(line);
         }
       }
 
@@ -1393,14 +1424,18 @@
         resultTasks[currentSectionId].push(currentTask);
       }
 
+      resultSections.forEach(sec => { sec.head = trimBlank(sec.head); });
+      Object.values(resultTasks).forEach(list => list.forEach(t => { t.extra = trimBlank(t.extra); }));
+      fileHead = trimBlank(head);
       return { sections: resultSections, tasks: resultTasks };
     }
 
     function toMarkdown() {
-      let md = '# Tasks\n';
+      let md = (fileHead.length ? fileHead.join('\n') : '# Tasks') + '\n';
 
       sections.forEach((section, idx) => {
         md += `\n## ${section.name}\n`;
+        if (section.head && section.head.length) md += section.head.join('\n') + '\n';
         const sectionTasks = tasks[section.id] || [];
         sectionTasks.forEach(t => {
           const checkbox = t.checked ? '[x]' : '[ ]';
@@ -1410,11 +1445,157 @@
             const stCheckbox = st.checked ? '[x]' : '[ ]';
             md += `  - ${stCheckbox} ${st.text}\n`;
           });
+          (t.extra || []).forEach(line => { md += `${line}\n`; });
         });
       });
 
       return md.trimEnd() + '\n';
     }
+
+    // ===== IMAGES =====
+    // Pictures live in docs/tasks/ of the project and are referenced as "  - ![alt](docs/tasks/name.png)" under a task.
+    // Adding one needs the project folder once (the browser asks), because TASKS.md alone gives no access to its folder.
+    let rootHandle = null;
+    let hoverTask = null;
+    const IMAGE_DIR = ['docs', 'tasks'];
+    const imageInput = document.createElement('input');
+    imageInput.type = 'file';
+    imageInput.accept = 'image/*';
+    imageInput.multiple = true;
+    imageInput.hidden = true;
+    document.body.appendChild(imageInput);
+
+    async function storedRoot() {
+      try {
+        const db = await handleDb();
+        return await new Promise((resolve) => {
+          const req = db.transaction('handles').objectStore('handles').get('root');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+      } catch (e) { return null; }
+    }
+
+    async function getRoot(ask) {
+      if (!rootHandle) rootHandle = await storedRoot();
+      if (rootHandle) {
+        let state = await rootHandle.queryPermission({ mode: 'readwrite' });
+        if (state !== 'granted' && ask) state = await rootHandle.requestPermission({ mode: 'readwrite' });
+        if (state === 'granted') return rootHandle;
+      }
+      if (!ask) return null;
+      const dir = await window.showDirectoryPicker({ mode: 'readwrite' });
+      try { await dir.getFileHandle('TASKS.md'); } catch (e) {
+        showStatus('Choose the project folder (the one that contains TASKS.md)');
+        return null;
+      }
+      rootHandle = dir;
+      try { (await handleDb()).transaction('handles', 'readwrite').objectStore('handles').put(dir, 'root'); } catch (e) { /* not remembered */ }
+      return dir;
+    }
+
+    async function imageDir(root, create) {
+      let dir = root;
+      for (const part of IMAGE_DIR) dir = await dir.getDirectoryHandle(part, { create });
+      return dir;
+    }
+
+    async function addImages(task, files) {
+      const pictures = [...files].filter(f => f.type.startsWith('image/'));
+      if (!pictures.length) return;
+      try {
+        const root = await getRoot(true);
+        if (!root) return;
+        const dir = await imageDir(root, true);
+        for (const file of pictures) {
+          const ext = (file.name.match(/\.(\w+)$/)?.[1] || file.type.split('/')[1] || 'png').toLowerCase().replace('jpeg', 'jpg');
+          const base = (file.name.replace(/\.\w+$/, '') || 'bild').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'bild';
+          const stamp = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+          const name = `${stamp}-${base}.${ext}`;
+          const writable = await (await dir.getFileHandle(name, { create: true })).createWritable();
+          await writable.write(file);
+          await writable.close();
+          task.extra = task.extra || [];
+          task.extra.push(`  - ![${base}](${IMAGE_DIR.join('/')}/${name})`);
+        }
+        markChanged();
+        renderTasks();
+      } catch (e) {
+        if (e.name !== 'AbortError') showStatus('Image not added: ' + e.message);
+      }
+    }
+
+    function pickImages(task) {
+      imageInput.onchange = () => { addImages(task, imageInput.files); imageInput.value = ''; };
+      imageInput.click();
+    }
+
+    function imagesElement(task) {
+      const list = taskImages(task);
+      if (!list.length) return null;
+      const box = document.createElement('div');
+      box.className = 'task-images';
+      list.forEach(img => {
+        const wrap = document.createElement('div');
+        wrap.className = 'task-image';
+        const el = document.createElement('img');
+        el.alt = img.alt;
+        el.dataset.src = img.src;
+        el.loading = 'lazy';
+        el.addEventListener('click', (e) => { e.stopPropagation(); window.open(el.src, '_blank'); });
+        const remove = document.createElement('button');
+        remove.className = 'remove-image';
+        remove.title = 'Remove image from task (the file stays in docs/tasks)';
+        remove.innerHTML = '&times;';
+        remove.addEventListener('click', (e) => {
+          e.stopPropagation();
+          task.extra.splice(img.index, 1);
+          markChanged();
+          renderTasks();
+        });
+        wrap.appendChild(el);
+        wrap.appendChild(remove);
+        box.appendChild(wrap);
+        showImage(el, img.src);
+      });
+      return box;
+    }
+
+    // Opened from the project folder, the relative path just works; otherwise the picture is read through the folder handle.
+    async function showImage(el, src) {
+      el.src = src;
+      el.onerror = async () => {
+        el.onerror = null;
+        try {
+          const root = await getRoot(false);
+          if (!root) return;
+          let dir = root;
+          const parts = src.split('/');
+          for (const part of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(part);
+          el.src = URL.createObjectURL(await (await dir.getFileHandle(parts[parts.length - 1])).getFile());
+        } catch (e) { el.alt = 'Image not found: ' + src; }
+      };
+    }
+
+    function imageControls(el, task, addButton) {
+      el.addEventListener('mouseenter', () => { hoverTask = task; });
+      el.addEventListener('mouseleave', () => { if (hoverTask === task) hoverTask = null; });
+      el.addEventListener('dragover', (e) => { if ([...(e.dataTransfer?.types || [])].includes('Files')) { e.preventDefault(); el.classList.add('file-over'); } });
+      el.addEventListener('dragleave', () => el.classList.remove('file-over'));
+      el.addEventListener('drop', (e) => {
+        el.classList.remove('file-over');
+        if (e.dataTransfer?.files?.length) { e.preventDefault(); e.stopPropagation(); addImages(task, e.dataTransfer.files); }
+      });
+      addButton.addEventListener('click', (e) => { e.stopPropagation(); pickImages(task); });
+    }
+
+    // Paste a screenshot while the pointer is over a task.
+    document.addEventListener('paste', (e) => {
+      const files = [...(e.clipboardData?.files || [])].filter(f => f.type.startsWith('image/'));
+      if (!files.length || !hoverTask || /input|textarea/i.test(e.target.tagName)) return;
+      e.preventDefault();
+      addImages(hoverTask, files);
+    });
 
     function createCard(task) {
       const card = document.createElement('div');
@@ -1453,6 +1634,14 @@
       }
 
       card.innerHTML = html;
+
+      const pictures = imagesElement(task);
+      if (pictures) card.querySelector('.card-note').after(pictures);
+      const addPicture = document.createElement('div');
+      addPicture.className = 'add-image';
+      addPicture.textContent = '+ Add image (or paste / drop)';
+      card.appendChild(addPicture);
+      imageControls(card, task, addPicture);
 
       card.addEventListener('dragstart', (e) => {
         card.classList.add('dragging');
@@ -2212,6 +2401,15 @@
 
         content.appendChild(subtasksContainer);
       }
+
+      const pictures = imagesElement(task);
+      if (pictures) { pictures.style.marginLeft = '0'; content.appendChild(pictures); }
+      const addPicture = document.createElement('div');
+      addPicture.className = 'add-image';
+      addPicture.style.marginLeft = '0';
+      addPicture.textContent = '+ Add image (or paste / drop)';
+      content.appendChild(addPicture);
+      imageControls(item, task, addPicture);
 
       const addSubtask = document.createElement('div');
       addSubtask.className = 'list-item-add-subtask';

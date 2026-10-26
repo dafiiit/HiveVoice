@@ -1350,7 +1350,7 @@
     // neither subtasks nor images (task.extra, which also holds the image lines "  - ![alt](path)").
     let fileHead = [];
     const IMAGE_LINE = /^\s*- !\[(.*?)\]\((.+?)\)\s*$/;
-    const trimBlank = (lines) => { const l = [...lines]; while (l.length && !l[l.length - 1].trim()) l.pop(); while (l.length && !l[0].trim()) l.shift(); return l; };
+    const trimBlank = (lines) => { const l = [...lines]; while (l.length && !l[l.length - 1].trim()) l.pop(); return l; };
     const taskImages = (task) => (task.extra || []).map((line, index) => { const m = line.match(IMAGE_LINE); return m ? { alt: m[1], src: m[2], index } : null; }).filter(Boolean);
 
     function parseTaskMarkdown(content) {

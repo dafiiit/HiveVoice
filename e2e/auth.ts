@@ -43,6 +43,16 @@ async function session(fresh = false): Promise<Cached> {
   return c;
 }
 
+/**
+ * /friends opens for guests too, so the address says nothing about being signed in: a session the app did not accept
+ * (expired, wrong cookie name) ends as a guest, and every test after it fails somewhere far from the cause.
+ */
+async function expectSignedIn(page: Page) {
+  if (await page.getByText("Du liest als Gast").count()) {
+    throw new Error("Login failed: the app shows the guest page after signing in (session cookie not accepted, see src/proxy.ts and src/lib/supabase/options.ts).");
+  }
+}
+
 /** Signs in the test account. `fresh`: an own session, for a test that renews or ends it (the shared one must stay valid). */
 export async function login(page: Page, opts: { fresh?: boolean } = {}) {
   if (service) {
@@ -50,6 +60,7 @@ export async function login(page: Page, opts: { fresh?: boolean } = {}) {
     await page.context().addCookies((await session(opts.fresh)).cookies.map((c) => ({ ...c, url: base.origin, sameSite: "Lax" as const, expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 400 })));
     await page.goto("/friends");
     await page.waitForURL(/\/(friends|onboarding)/);
+    await expectSignedIn(page);
     return;
   }
   await page.goto("/login");
@@ -57,6 +68,7 @@ export async function login(page: Page, opts: { fresh?: boolean } = {}) {
   await page.getByLabel("Passwort").fill(process.env.TEST_USER_PASSWORD!);
   await page.getByRole("button", { name: "Anmelden" }).click();
   await page.waitForURL(/\/(friends|onboarding)/);
+  await expectSignedIn(page);
 }
 
 /** A Supabase client signed in as the test account, for cleaning up stored files. */

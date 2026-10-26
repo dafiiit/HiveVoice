@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { TOUCH_COOKIE, cookieOptions } from "./lib/supabase/options";
+import { touchSession } from "./lib/supabase/touch";
 import { verifiedClaims } from "./lib/supabase/claims";
 
 export async function proxy(request: NextRequest) {
@@ -27,14 +28,8 @@ export async function proxy(request: NextRequest) {
   });
   // Refreshes an expired session token and hands the new cookies to the browser; do not remove.
   const claims = await verifiedClaims(supabase);
-  // Safari keeps cookies that scripts write (the browser client renews the session that way) for only seven days.
-  // Writing the session cookies again from the server, once a day, keeps people signed in on their device.
-  if (claims && !refreshed && !request.cookies.has(TOUCH_COOKIE)) {
-    for (const c of request.cookies.getAll()) {
-      if (c.name.startsWith("sb-") && c.name.includes("-auth-token")) response.cookies.set(c.name, c.value, cookieOptions);
-    }
-    response.cookies.set(TOUCH_COOKIE, "1", { ...cookieOptions, maxAge: 60 * 60 * 24, httpOnly: true });
-  }
+  // Once a day the session cookies are written again from the server (see touch.ts).
+  if (claims && !refreshed && !request.cookies.has(TOUCH_COOKIE)) touchSession(request, response);
   return response;
 }
 

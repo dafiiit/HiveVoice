@@ -23,6 +23,25 @@ test("the login page remembers the last account on this device and can forget it
   await expect(page.getByRole("button", { name: /^Weiter als/ })).toHaveCount(0);
 });
 
+test("the first request of the day does not end the session: the next page still knows who is signed in", async ({ page, context }) => {
+  test.skip(!signedIn || !process.env.SUPABASE_SERVICE_ROLE_KEY, "needs the test account");
+  await login(page);
+  const session = () => context.cookies().then((all) => all.filter((c) => c.name.includes("-auth-token")));
+  const before = await session();
+  expect(before.length).toBeGreaterThan(0);
+  // The proxy writes the session cookies again on the first request of the day, so go on to the next pages.
+  for (const path of ["/me", "/community", "/friends"]) {
+    await page.goto(path);
+    await expect(page.getByText("Du liest als Gast")).toHaveCount(0);
+  }
+  const after = await session();
+  expect(after.map((c) => c.name).sort()).toEqual(before.map((c) => c.name).sort());
+  for (const c of after) expect(c.value.length).toBeGreaterThan(50);
+  // A reload from a fresh page load, as after closing and opening the app.
+  await page.reload();
+  await expect(page.getByText("Du liest als Gast")).toHaveCount(0);
+});
+
 test("the session cookies are written again by the server once a day", async ({ page, context }) => {
   test.skip(!signedIn || !process.env.SUPABASE_SERVICE_ROLE_KEY, "needs the test account");
   await login(page);

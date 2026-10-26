@@ -10,10 +10,14 @@ export const TOUCH_COOKIE = "hv-touch";
 // Fixed here so a custom domain for Supabase (auth.example.org) does not sign everyone out.
 const SESSION_COOKIE = "sb-wpfkxekiumonxmscwcvc-auth-token";
 
-export const cookieOptions = {
-  name: SESSION_COOKIE,
+// How every cookie we write behaves. No name in here: passed to `response.cookies.set(name, value, …)`, a `name`
+// in the options would replace the cookie's own name (the session cookie was once overwritten that way).
+export const cookieAttributes = {
   path: "/",
   sameSite: "lax" as const,
   maxAge: 60 * 60 * 24 * 400,
   secure: process.env.NODE_ENV === "production",
 };
+
+// For the Supabase clients, which take the session cookie's name from here.
+export const cookieOptions = { name: SESSION_COOKIE, ...cookieAttributes };

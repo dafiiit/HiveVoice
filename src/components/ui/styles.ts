@@ -25,8 +25,8 @@ export const btn = {
   redSm: button("red", "sm"),
   // Text actions are always underlined, so they read as links. Muted ones are side actions (report, pause).
   ghost: "inline-flex items-center h-11 px-0 bg-transparent border-0 text-muted underline cursor-pointer disabled:opacity-45",
-  link: "inline text-left bg-transparent border-0 p-0 text-ink underline cursor-pointer disabled:opacity-45",
-  linkMuted: "inline text-left bg-transparent border-0 p-0 text-muted underline cursor-pointer hover:text-ink disabled:opacity-45",
+  link: "inline text-left bg-transparent border-0 px-0 py-1 pointer-coarse:py-3 text-ink underline cursor-pointer disabled:opacity-45",
+  linkMuted: "inline text-left bg-transparent border-0 px-0 py-1 pointer-coarse:py-3 text-muted underline cursor-pointer hover:text-ink disabled:opacity-45",
   // An icon with a short label (reply, like): the icon marks it as an action, so no underline.
   text: "inline-flex items-center gap-1.5 bg-transparent border-0 p-0 text-muted cursor-pointer hover:text-ink disabled:opacity-45",
 };
@@ -50,7 +50,7 @@ export const segment = (on: boolean) =>
   `inline-flex items-center justify-center h-9 px-3 text-sm font-bold no-underline cursor-pointer border border-ink ${on ? "bg-ink text-on-ink" : "bg-surface text-ink"}`;
 export const segments = "inline-flex [&>*+*]:-ml-px";
 
-export const tag = "inline-flex items-center h-7 px-2.5 border border-line text-[13px]";
+export const tag = "inline-flex items-center h-7 pointer-coarse:h-10 px-2.5 border border-line text-[13px]";
 
 export const tab = (on: boolean) =>
   `flex-none inline-flex items-center h-11 px-3 md:px-4 whitespace-nowrap no-underline text-ink border-b-4 ${on ? "border-ink font-bold" : "border-transparent"}`;

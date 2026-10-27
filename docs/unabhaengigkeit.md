@@ -48,7 +48,7 @@ Konzerne und ohne zentralen Betreiber laufen kann. Stand: Oktober 2026.
 | Google Fotos | normaler Datei-Upload (gibt es); optional Nextcloud-/WebDAV-Import | – | – |
 | Safe Browsing | eigene Sperrlisten (z. B. URLhaus, Phishing.Database) | klein | bei Bedarf |
 | OpenFreeMap | eigene PMTiles-Datei für Deutschland (~1 GB) im eigenen Speicher, MapLibre-Stil zeigt darauf | klein | sobald Karten viel genutzt werden |
-| draw.io | eigener draw.io-Server (Docker `jgraph/drawio`, statische Dateien), `NEXT_PUBLIC_DRAWIO_URL` zeigt darauf | klein | sobald Diagramme viel genutzt werden |
+| draw.io | eigener draw.io-Server (Docker `jgraph/drawio`, statische Dateien), `NEXT_PUBLIC_DRAWIO_URL` zeigt darauf. Liegt er unter derselben Adresse im Pfad `/drawio` (`NEXT_PUBLIC_DRAWIO_URL=/drawio`), hält der Service Worker (`public/sw.js`) ihn nach der ersten Benutzung für den Offline-Gebrauch | klein | sobald Diagramme viel genutzt werden oder offline gehen sollen |
 | GitHub | Codeberg/Forgejo als Spiegel, Releases als Container-Images in einer offenen Registry | klein | jederzeit |
 | Next.js | bleibt (offen, MIT); Risiko beobachten. Die Fachlogik in SQL macht einen späteren Wechsel des Frontends möglich | – | – |
 

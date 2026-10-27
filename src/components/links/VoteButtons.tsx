@@ -6,7 +6,7 @@ import { voteResource } from "@/lib/actions/links";
 import { IconDown, IconUp } from "../ui/Icons";
 import { Pop, Roll, usePulse } from "../ui/Vote";
 
-const press = "inline-flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 transition-transform duration-150 ease-out active:scale-90";
+const press = "inline-flex h-9 w-9 flex-none items-center justify-center border-0 bg-transparent p-0 transition-transform duration-150 ease-out active:scale-90";
 
 /** Up and down vote. Voting again on the same arrow takes the vote back. */
 export function VoteButtons({ id, score, mine, canVote }: { id: string; score: number; mine: number | null; canVote: boolean }) {

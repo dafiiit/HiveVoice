@@ -21,7 +21,7 @@ Drei Bereiche nach Nähe, Layout wie MS Teams. Anliegen erscheinen in allen drei
 Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander gezeigt (Liste → Antippen → Detail mit Zurück).
 
 ## Überall
-* ＋ Neu: Anliegen (biete / suche) · Chat · Gruppe gründen · Termin · Liste · Dokument – landet im aktuellen Kontext (Ich oder geöffnete Gruppe)
+* ＋ Neu: Anliegen · Chat · Gruppe · Initiative · Pinnwand-Beitrag · Notiz · Liste · Diagramm · Hochladen (Termin kommt mit F01) – überall dieselbe Liste (`src/components/new/items.ts`): auf /new, in Ich → Neu und über „＋“ am Handy
 * An jedem Inhalt: Teilen (Zugriff: privat · Personen · Gruppe · öffentlich) · Weitergeben in Chat
 * Im Schreibfeld: Format · Emoji · Datei · ＋ aus meiner Toolbox (wird Karte: Termin zusagen, Liste abhaken) · Senden
 
@@ -102,7 +102,7 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
 | Freunde | /friends | /connect |
 | Ich → Überblick, Listen, Notizen, Dokumente, Initiativen | /me(?f=…) | /inhalte |
 | Ich → Meine Anliegen | /me/listings | /anliegen |
-| Liste | /me/lists/[id] | /inhalte/listen/[id] |
+| Liste (eine Notiz mit Aufgaben) | /me/notes/[id] (alt: /me/lists/[id] leitet dorthin) | /inhalte/notizen/[id] |
 | Anliegen | /listings/[id] | /anliegen/[id] |
 | Einstellungen (Konto-Menü) | /settings | /me |
 | Einladung, Teilen, Rechte, Transparenz, Verwaltung | /invite, /sharing, /rights, /transparency, /admin | deutsch |
@@ -119,7 +119,7 @@ Mobil: dieselben 3 Icons als untere Leiste, Spalte 2 und 3 werden nacheinander g
 * Jeder Unterpunkt: Liste in der Mitte (Name, ＋ passend zum Unterpunkt, Suche, Inhalt), das geöffnete Element rechts
    * Gemeinschaft: Pinnwand (Beitrag mit Antworten rechts), Anliegen (Karte rechts), Gruppen (/community/groups/[slug], Initiativen /community/groups/i/[id]), Personen
    * Freunde: Alle, Chats, Gruppen (/friends/g/[slug] mit allen Tabs), Kontaktanfragen, Anliegen
-   * Ich: Überblick, Anliegen (/me/listings, neu: /me/listings/new), Listen, Notizen, Uploads, Initiativen
+   * Ich: Überblick, Anliegen (/me/listings, neu: /me/listings/new), Notizen (Filter „Mit Aufgaben“ zeigt die Listen), Diagramme, Uploads, Initiativen
 * Handy: unten die drei Bereiche, Unterpunkte als Tabs, Liste und Detail nacheinander
 
 ## Regeln für alle Bereiche (2026-10-21, nach der ersten Durchsicht)
@@ -143,3 +143,9 @@ Aus den Anmerkungen zum ersten Stand, verallgemeinert, damit dieselben Fehler ni
 * Karte: jedes Anliegen am Mittelpunkt seiner Postleitzahl (aus dem Ort, z. B. „81369 München“; Daten: GeoNames, CC BY 4.0), sonst am Mittelpunkt des Ortes
 * Beispielinhalte: von jeder Art genau eins, jedes Konto trifft jedes genau einmal (`app.ensure_demo` beim ersten Besuch); in der Verwaltung für alle aus- und wieder einschaltbar, ohne zu löschen (`demo_visible`, restriktive Regeln auf allen Tabellen)
 * Screenshots aller Ansichten: `npm run screens` (tools/screens), Grundlage für Durchsichten
+
+## Notizen und Listen (seit 2026-10-27)
+
+* Eine Notiz ist eine Markdown-Datei. Sie entsteht privat, sobald es etwas zu speichern gibt, und speichert sich selbst (eine Version je Sitzung); Teilen ist ein eigener Schritt auf der Seite der Notiz („Teilen“ → Zugriff).
+* Eine Liste ist eine Notiz, deren Zeilen Aufgaben sind (`- [ ] …`). Die Ansicht „Liste“ ändert den Text der Notiz selbst; „Dargestellt“ zeigt dieselbe Datei beim Tippen so, wie sie aussieht, „Quelltext“ als reinen Text.
+* Alte Listen (`todo_lists`) wurden in Notizen umgewandelt (Migration 062); die Tabellen bleiben als Sicherung. Das Dateiformat ist damit festgelegt, auf dem der geplante Ordner-Abgleich (TASKS.md, „Speicher verbessern“) aufsetzt.

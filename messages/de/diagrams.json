@@ -20,5 +20,7 @@
     "saved": "Gespeichert.",
     "autosaved": "Automatisch gespeichert."
   },
-  "leaveAnyway": "Trotzdem schließen"
+  "leaveAnyway": "Trotzdem schließen",
+  "loadFailed": "Der Zeichen-Editor (draw.io) hat sich nicht gemeldet. Ohne Internet geht das Zeichnen noch nicht; sonst hilft ein neuer Versuch.",
+  "retry": "Noch einmal versuchen"
 }

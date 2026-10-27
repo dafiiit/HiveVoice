@@ -8,6 +8,7 @@ import { ListSearch } from "../connect/ListSearch";
 import { AutoOpen } from "./AutoOpen";
 import { ListResizer } from "./ListResizer";
 import { LIST_COLUMN } from "./listWidth";
+import { KeepPages } from "../KeepPages";
 
 /** Titles inside an opened item are smaller than on a page of their own: the list next to it carries the weight. */
 export const PANE_TITLES = "pane-titles";
@@ -44,7 +45,7 @@ export function BackToList({ href, label }: { href: string; label: string }) {
 }
 
 /** The "+" of a list fills the column, as wide as the search under it (links, buttons and a menu alike). */
-export const CREATE_SLOT = "flex flex-col [&>*]:w-full [&>a]:justify-center [&>button]:justify-center [&_summary]:w-full [&_summary]:justify-center";
+export const CREATE_SLOT = "flex flex-col [&>:not(h1)]:w-full [&>a]:justify-center [&>button]:justify-center [&_summary]:w-full [&_summary]:justify-center";
 
 /** The list column: name, the "+" for this section, a search that filters while typing, filters, rows. */
 export async function ListPane({ id, title, create, searchLabel, rows, empty, top, children, autoOpen, footer }: {
@@ -66,6 +67,7 @@ export async function ListPane({ id, title, create, searchLabel, rows, empty, to
         {top}
       </div>
       {autoOpen && <AutoOpen href={autoOpen} />}
+      {!children && <KeepPages hrefs={rows.map((r) => r.href)} />}
       {children ?? (
         <>
           {rows.map((r) => (

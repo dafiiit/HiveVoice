@@ -1,14 +1,40 @@
 // Service worker: makes HiveVoice installable and keeps what was seen readable without a connection.
 // Pages always come fresh from the network when there is one; the copy kept here is only shown offline.
 // Signing out deletes all kept pages, so the next person on this device sees none of them.
-const STATIC = 'hivevoice-static-v2';
-const PAGES = 'hivevoice-pages-v2';
-const MEDIA = 'hivevoice-media-v2';
+const STATIC = 'hivevoice-static-v3';
+const PAGES = 'hivevoice-pages-v3';
+const MEDIA = 'hivevoice-media-v3';
+const CONFIG = 'hivevoice-config-v1';
 const OFFLINE = '/offline.html';
 const MAX_PAGES = 120;
-const MAX_STATIC = 400;
-const KEEP = [STATIC, PAGES, MEDIA];
+const MAX_STATIC = 3000;
+const KEEP = [STATIC, PAGES, MEDIA, CONFIG];
 const forget = () => Promise.all([caches.delete(PAGES), caches.delete(MEDIA)]).then(() => fetched.clear());
+
+// What the person chose under Einstellungen → Offline (the page tells us; kept in a cache entry so it survives a restart of this worker):
+//   mode 'off': nothing is kept; 'text': pages; 'all': pages and pictures. wifiOnly: pictures and files only when the
+//   connection is not a mobile one (and the device is not asked to save data), where the browser tells.
+let settings = null;
+async function config() {
+  if (settings) return settings;
+  try {
+    const hit = await (await caches.open(CONFIG)).match('/__offline-settings');
+    settings = hit ? await hit.json() : null;
+  } catch { /* none kept */ }
+  return (settings = settings || { mode: 'all', wifiOnly: true });
+}
+async function setConfig(next) {
+  settings = { mode: ['off', 'text', 'all'].includes(next.mode) ? next.mode : 'all', wifiOnly: next.wifiOnly !== false };
+  if (settings.mode === 'off') await forget();
+  try { await (await caches.open(CONFIG)).put('/__offline-settings', new Response(JSON.stringify(settings), { headers: { 'Content-Type': 'application/json' } })); } catch { /* not kept */ }
+}
+const metered = () => { const c = self.navigator && self.navigator.connection; return !!c && (c.saveData === true || c.type === 'cellular'); };
+async function mayKeep(kind) {
+  const c = await config();
+  if (c.mode === 'off') return false;
+  if (kind === 'media') return c.mode === 'all' && !(c.wifiOnly && metered());
+  return true;
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(STATIC).then((c) => c.addAll([OFFLINE, '/icons/192', '/icons/512'])));
@@ -33,6 +59,7 @@ const pageKey = (url) => { const u = new URL(url); u.hash = ''; return u.href; }
 const skip = (url) => url.pathname.startsWith('/auth/') || url.pathname.startsWith('/api/cron') || url.pathname === '/sw.js';
 
 async function savePage(key, res) {
+  if (!(await mayKeep('page'))) return;
   const cache = await caches.open(PAGES);
   await cache.delete(key);
   await cache.put(key, res);
@@ -44,7 +71,7 @@ async function savePage(key, res) {
 const fetched = new Map();
 async function remember(href) {
   const url = new URL(href, self.location.origin);
-  if (url.origin !== self.location.origin || skip(url)) return;
+  if (url.origin !== self.location.origin || skip(url) || !(await mayKeep('page'))) return;
   const key = pageKey(url.href);
   if (Date.now() - (fetched.get(key) || 0) < 120000) return;
   fetched.set(key, Date.now());
@@ -57,7 +84,9 @@ async function remember(href) {
 self.addEventListener('message', (event) => {
   const data = event.data || {};
   if (data.type === 'keep' && typeof data.url === 'string') event.waitUntil(remember(data.url));
+  if (data.type === 'keep-many' && Array.isArray(data.urls)) event.waitUntil((async () => { for (const u of data.urls.slice(0, 20)) if (typeof u === 'string') await remember(u); })());
   if (data.type === 'forget') event.waitUntil(forget());
+  if (data.type === 'config') event.waitUntil(setConfig(data));
 });
 
 self.addEventListener('fetch', (event) => {
@@ -99,6 +128,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // draw.io served from this site (NEXT_PUBLIC_DRAWIO_URL=/drawio, see docs/desktop.md): kept after the first use, so that
+  // diagrams can be drawn without a connection. Shown from the cache at once, renewed in the background.
+  if (url.pathname.startsWith('/drawio/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(STATIC);
+      const hit = await cache.match(req);
+      const fresh = fetch(req).then((res) => { if (keepable(res)) cache.put(req, res.clone()); return res; }).catch(() => null);
+      if (hit) { event.waitUntil(fresh); return hit; }
+      return (await fresh) || Response.error();
+    })());
+    return;
+  }
+
   // Scripts, styles, fonts and icons never change under their name: from the cache once there.
   if (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/icons/') || url.pathname.startsWith('/images/')) {
     event.respondWith((async () => {
@@ -121,7 +163,7 @@ self.addEventListener('fetch', (event) => {
         const res = await fetch(req);
         if (keepable(res)) {
           const copy = res.clone();
-          event.waitUntil(caches.open(MEDIA).then((c) => c.put(req, copy)).then(() => trim(MEDIA, MAX_PAGES * 3)));
+          event.waitUntil(mayKeep('media').then((ok) => ok && caches.open(MEDIA).then((c) => c.put(req, copy)).then(() => trim(MEDIA, MAX_PAGES * 3))));
         }
         return res;
       } catch {

@@ -116,14 +116,16 @@ export function AvatarUpload({ name, seed, path, size = 120 }: { name: string; s
   const working = busy || pending;
 
   return (
-    <div className="flex w-[160px] max-w-full flex-col items-stretch gap-2"
+    <div className="flex flex-wrap items-start gap-4"
       onDragOver={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(true); } }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { if (hasFiles(e)) { e.preventDefault(); setOver(false); void pick(e.dataTransfer.files); } }}>
-      <div className={`${over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""} w-full max-md:[zoom:0.6]`}><Avatar name={name} seed={seed} path={path} size={size} /></div>
-      <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondarySm} w-full px-2`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
-      <GooglePhotosButton wide max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondarySm} w-full px-2`}>{t("fromGoogle")}</GooglePhotosButton>
-      {path && <button type="button" disabled={working} onClick={remove} className="h-9 w-full border-0 bg-transparent px-0 text-sm text-muted underline">{t("removePhoto")}</button>}
+      <div className={`${over ? "outline-dashed outline-2 outline-offset-2 outline-ink" : ""} flex-none`}><Avatar name={name} seed={seed} path={path} size={size} /></div>
+      <div className="flex w-[200px] max-w-full flex-col items-stretch gap-2">
+        <button type="button" disabled={working} onClick={() => input.current?.click()} className={`${btn.secondarySm} w-full px-2`}>{working ? t("uploading") : path ? t("change") : t("addPhoto")}</button>
+        <GooglePhotosButton wide max={1} maxSide={640} onPicked={(paths) => void save(paths[0])} className={`${btn.secondarySm} w-full px-2`}>{t("fromGoogle")}</GooglePhotosButton>
+        {path && <button type="button" disabled={working} onClick={remove} className="h-9 w-full border-0 bg-transparent px-0 text-left text-sm text-muted underline">{t("removePhoto")}</button>}
+      </div>
       <input ref={input} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden="true" onChange={(e) => pick(e.target.files)} />
       {error && <p role="alert" className="m-0 text-sm font-bold">{error}</p>}
     </div>

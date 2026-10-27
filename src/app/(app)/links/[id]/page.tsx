@@ -144,7 +144,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       {!writing && !suggesting && <h1 className="display m-0 break-words">{r.title}</h1>}
       <span className="flex flex-wrap items-center gap-2 text-sm">
         <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={28} />
-        <Link href={`/profile/${r.owner_id}`} className="font-bold text-ink no-underline">{r.owner_name}</Link>
+        <Link href={`/profile/${r.owner_id}`} className="inline-flex min-h-7 items-center font-bold text-ink no-underline">{r.owner_name}</Link>
         {r.group_name && <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink underline">{t("inGroupName", { name: r.group_name })}</Link>}
         <span className="text-muted">{[dateLong(r.created_at, locale),
           isNote || isDiagram ? td("page.version", { n: meta.version_no }) : null,

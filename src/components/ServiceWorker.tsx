@@ -3,6 +3,7 @@ import { Suspense, useEffect, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { flushOutbox } from "@/lib/outbox";
+import { announceOffline } from "@/lib/offline";
 
 const enabled = () => typeof navigator !== "undefined" && "serviceWorker" in navigator && process.env.NODE_ENV === "production";
 
@@ -26,8 +27,9 @@ export function ServiceWorker() {
   useEffect(() => {
     if (enabled()) {
       navigator.serviceWorker.register("/sw.js", { scope: "/", updateViaCache: "none" }).then(() => {
-        // The places one returns to most are kept from the start.
-        for (const url of ["/friends", "/me"]) navigator.serviceWorker.controller?.postMessage({ type: "keep", url });
+        // The worker learns what the person chose to keep; the places one returns to most are kept from the start.
+        announceOffline();
+        for (const url of ["/friends", "/me", "/me/notes", "/me/notes/new", "/community"]) navigator.serviceWorker.controller?.postMessage({ type: "keep", url });
       }).catch(() => {});
     }
     const update = () => {

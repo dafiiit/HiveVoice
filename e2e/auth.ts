@@ -20,8 +20,10 @@ async function tokenHash() {
 }
 
 // Supabase limits how many magic links may be issued, so one session serves the whole run (it lasts an hour; the
-// run takes minutes). It is kept in a file because every Playwright worker is its own process.
-const CACHE = "test-results/.auth-session.json";
+// run takes minutes). It is kept in a file because every Playwright worker is its own process. The file is made once before
+// the workers start (e2e/global-setup.ts) and lives outside test-results/, which Playwright empties at the start of every run:
+// with two workers both used to find it gone and issued a link at the same moment, and one of them failed.
+const CACHE = "node_modules/.cache/hivevoice-e2e/session.json";
 type Cached = { at: number; cookies: { name: string; value: string }[]; access_token: string; refresh_token: string };
 
 async function session(fresh = false): Promise<Cached> {
@@ -37,10 +39,15 @@ async function session(fresh = false): Promise<Cached> {
   if (error || !data.session) throw error ?? new Error("no session");
   const c: Cached = { at: Date.now(), cookies: [...jar].map(([name, value]) => ({ name, value })), access_token: data.session.access_token, refresh_token: data.session.refresh_token };
   if (!fresh) {
-    mkdirSync("test-results", { recursive: true });
+    mkdirSync("node_modules/.cache/hivevoice-e2e", { recursive: true });
     writeFileSync(CACHE, JSON.stringify(c));
   }
   return c;
+}
+
+/** Signs in once for the whole run (called before the workers start). */
+export async function warmSession() {
+  if (service) await session();
 }
 
 /**

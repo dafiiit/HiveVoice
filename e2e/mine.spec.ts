@@ -39,12 +39,12 @@ test.describe("Ich: my own things", () => {
       await page.getByLabel("Neuen Punkt hinzufügen").fill("Milch");
       await page.getByRole("button", { name: "Hinzufügen" }).click();
       await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
-      // The note exists now, at its own address, and is private.
-      await expect(page).toHaveURL(/\/me\/notes\/[0-9a-f-]{36}$/);
+      // The note exists now (in the list next to the editor) and is private; the tick is kept, too.
       await page.getByRole("checkbox", { name: "Brot kaufen" }).click();
       await expect(page.getByText("1 von 2 erledigt")).toBeVisible();
       await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
-      await page.reload();
+      await page.goto("/me/notes?f=tasks");
+      await page.getByRole("link", { name: new RegExp(name) }).click();
       // Mostly tasks: it opens as a list again, and the tick is still there.
       await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeChecked();
       await expect(page.getByRole("button", { name: "Teilen" }), "lists share like everything else").toBeVisible();

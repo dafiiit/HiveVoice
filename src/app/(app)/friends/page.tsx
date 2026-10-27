@@ -218,7 +218,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
 
   return (
     <div className="flex flex-col max-md:h-[calc(100dvh-8rem-env(safe-area-inset-bottom))] md:h-[calc(100dvh-4rem)] md:min-h-[520px]">
-      <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} />
+      <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} scope="friends" />
       {!session && <Notice tone="status" className="m-3 text-sm font-normal md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/friends" className="font-bold text-ink underline">{t("signIn")}</Link></Notice>}
       <div className="flex min-h-0 flex-1 flex-col bg-surface md:flex-row">
         <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:flex-none md:border-r ${LIST_COLUMN}`}>
@@ -228,7 +228,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
           </div>
           {session && (
             // Phones only: on wide screens the sidebar holds these as sections.
-            <div role="group" aria-label={t("filter.label")} className="flex flex-none gap-1.5 overflow-x-auto px-4 py-2 md:hidden">
+            <div role="group" aria-label={t("filter.label")} className="scroll-hint flex flex-none gap-1.5 overflow-x-auto px-4 py-2 md:hidden">
               {FILTERS.map((f) => (
                 <Link key={f} href={href({ f, c: "" })} aria-pressed={filter === f}
                   className={`inline-flex h-8 flex-none items-center gap-1 px-3 text-sm no-underline ${filter === f ? "bg-ink font-bold text-on-ink" : "bg-chip text-ink"}`}>
@@ -305,7 +305,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
               {pane.blocked && <Notice tone="status" className="flex-none text-sm font-normal">{ts("chat.blockedNote", { name: pane.other.split(" ")[0] })}</Notice>}
               {/* With tools switched on, the chat gets tabs: "Chat" first, then each tool (the chat's own small group). */}
               {pane.tools && pane.tools.tools.length > 0 && (
-                <div role="tablist" aria-label={t("chatTools")} className="flex flex-none overflow-x-auto border-b border-line">
+                <div role="tablist" aria-label={t("chatTools")} className="scroll-hint flex flex-none overflow-x-auto border-b border-line">
                   {[null, ...GROUP_TOOLS.filter((k) => pane.tools!.tools.includes(k))].map((k) => (
                     <Link key={k ?? "chat"} role="tab" aria-selected={(tool ?? null) === k} href={`${href({ c: `d:${pane.id}` })}${k ? `&t=${k}` : ""}`} className={tab((tool ?? null) === k)}>
                       {k ? tg(`tools.items.${k}.name`) : t("chatTab")}
@@ -325,7 +325,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
             <div className="m-auto flex max-w-[420px] flex-col items-center gap-3 text-center">
               <AreaIcon area="friends" size={72} />
               {/* Nothing here yet: the right side invites the first step instead of "choose on the left". */}
-              <p className="m-0 text-muted">{shown.length ? t("pick") : hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyList")}</p>
+              <p className="m-0 text-muted">{shown.length ? t("pick") : hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyStart")}</p>
               {session && !shown.length && <Link href={make.href} className={btn.primary}>{make.label}</Link>}
             </div>
           )}

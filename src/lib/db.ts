@@ -1,5 +1,6 @@
 import "server-only";
 import postgres from "postgres";
+import { withRetry } from "./dbRetry";
 
 // One pooled connection set per server instance. The login role is only a
 // member of hivevoice_server: it can call trusted functions and switch to the
@@ -14,6 +15,8 @@ function connect() {
     prepare: false, // transaction pooler
     ssl: /localhost|127\.0\.0\.1/.test(url) ? false : "require",
     idle_timeout: 20,
+    // A connection that does not come up within 10 s is given up (and tried once more, see asViewer) instead of hanging a page.
+    connect_timeout: 10,
     onnotice: () => {},
     transform: { undefined: null },
   });
@@ -31,15 +34,22 @@ export type Viewer = { authId: string; profileId: string } | null;
  * would for a direct API client: the transaction switches to the role
  * "authenticated" (or "anon" for guests) and carries the identity in
  * request.jwt.claims.
+ *
+ * No page waits for a database that does not answer: a statement takes 20 s at most, waiting for a lock 10 s. A connection
+ * that broke before the work was done (so nothing was committed) is replaced and the work is tried once more; one that broke
+ * during the commit is not, because it may have gone through.
  */
 export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, opts?: { linkToken?: string | null }): Promise<T> {
-  return sql.begin(async (tx) => {
+  return withRetry((done) => sql.begin(async (tx) => {
     const role = viewer ? "authenticated" : "anon";
     const claims = viewer ? JSON.stringify({ sub: viewer.authId, profile_id: viewer.profileId, role }) : "{}";
     // A link key opens a document that is shared "with everybody who has the link"; without it that document stays closed.
-    await tx`select set_config('request.jwt.claims', ${claims}, true), set_config('role', ${role}, true), set_config('app.link_token', ${opts?.linkToken ?? ""}, true)`;
-    return fn(tx);
-  }) as Promise<T>;
+    await tx`select set_config('request.jwt.claims', ${claims}, true), set_config('role', ${role}, true), set_config('app.link_token', ${opts?.linkToken ?? ""}, true),
+                    set_config('statement_timeout', '20000', true), set_config('lock_timeout', '10000', true)`;
+    const result = await fn(tx);
+    done();
+    return result;
+  }) as Promise<T>);
 }
 
 /** Maps database exceptions raised by app.* functions to stable error codes. */

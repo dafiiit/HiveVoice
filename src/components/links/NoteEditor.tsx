@@ -115,9 +115,8 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
     (v) => { setTitle(v.title); setDescription(v.description); setBody(v.body); setTags(v.tags); setChangeNote(v.changeNote); });
 
   const draftRef = useRef(draft);
-  const hereRef = useRef(here);
   const statusRef = useRef(status);
-  useEffect(() => { now.current = { title, description, body, tags }; draftRef.current = draft; hereRef.current = here; statusRef.current = status; });
+  useEffect(() => { now.current = { title, description, body, tags }; draftRef.current = draft; statusRef.current = status; });
 
   // A text that changed on the server (a version was restored, somebody else saved) is taken over when nothing here is waiting to be saved.
   const incoming = JSON.stringify([initial.title, initial.description, initial.body, initial.tags]);
@@ -160,8 +159,9 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
         kept.current = snapshot;
         setKeptShown(snapshot);
         if (!noteId.current) {
+          // The address stays the one of the new note's page: another address would draw another page and start the editor
+          // anew in the middle of typing. The note now exists, shows up in the list next to the editor, and is found there.
           noteId.current = res.data;
-          try { window.history.replaceState(null, "", hereRef.current.startsWith("/me/") ? `/me/notes/${res.data}` : `/links/${res.data}`); } catch { /* address stays */ }
         }
         // Only what is saved may leave the device: text typed meanwhile stays kept until the next save.
         if (JSON.stringify([now.current.title, now.current.description, now.current.body, now.current.tags]) === snapshot) draftRef.current.clear();

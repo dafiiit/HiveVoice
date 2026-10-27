@@ -57,17 +57,29 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
   const swipe = useRef<{ x: number; y: number } | null>(null);
 
   // Polling keeps the setup portable: no realtime service needed. The server clock of the last answer marks "what is new".
+  // It asks every 4 s while the conversation is alive (something arrived or was typed in the last two minutes), then
+  // less often, so that a chat left open on a desk does not keep a phone's radio busy.
   useEffect(() => {
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout>;
+    let last = Date.now();
+    const bump = () => { last = Date.now(); };
+    const wait = () => { const idle = Date.now() - last; return idle < 120_000 ? 4000 : idle < 600_000 ? 12_000 : 30_000; };
     const tick = async () => {
-      if (document.visibilityState !== "visible" || offline()) return;
-      const res = await fetchMessages(id, new Date(new Date(asOf.current).getTime() - 2000).toISOString()).catch(() => null);
-      if (!res?.ok) return;
-      asOf.current = res.data.asOf;
-      setReadAt(res.data.otherReadAt);
-      if (res.data.messages.length) setMessages((m) => merge(m, res.data.messages));
+      if (document.visibilityState === "visible" && !offline()) {
+        const res = await fetchMessages(id, new Date(new Date(asOf.current).getTime() - 2000).toISOString()).catch(() => null);
+        if (res?.ok) {
+          asOf.current = res.data.asOf;
+          setReadAt(res.data.otherReadAt);
+          if (res.data.messages.length) { last = Date.now(); setMessages((m) => merge(m, res.data.messages)); }
+        }
+      }
+      if (alive) timer = setTimeout(tick, wait());
     };
-    const h = setInterval(tick, 4000);
-    return () => clearInterval(h);
+    timer = setTimeout(tick, wait());
+    document.addEventListener("keydown", bump);
+    document.addEventListener("pointerdown", bump);
+    return () => { alive = false; clearTimeout(timer); document.removeEventListener("keydown", bump); document.removeEventListener("pointerdown", bump); };
   }, [id]);
 
   // Written without a connection: shown as waiting, sent by the outbox once the connection is back.

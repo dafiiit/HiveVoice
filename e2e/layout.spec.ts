@@ -78,6 +78,32 @@ test.describe("the layout like Teams", () => {
     for (const name of ["Mein Profil", "Einstellungen", "Abmelden"]) await expect(page.getByRole(name === "Abmelden" ? "button" : "link", { name })).toBeVisible();
   });
 
+  test("the sidebar acts like Chrome's: a click folds it for good, the pointer opens a folded one on top of the page for a while", async ({ page, context, baseURL }, info) => {
+    test.skip(info.project.name === "mobile", "the sidebar is for wide screens");
+    await login(page);
+    await context.addCookies([{ name: "hv_sidebar", value: "folded", url: baseURL! }]);
+    await page.goto("/friends");
+    const bar = page.locator("[data-sidebar]");
+    const widths = () => bar.evaluate((el) => ({ page: Math.round(el.getBoundingClientRect().width), bar: Math.round(el.querySelector("nav")!.getBoundingClientRect().width), main: Math.round(document.querySelector("main")!.getBoundingClientRect().x) }));
+    await expect(bar).toHaveAttribute("data-sidebar", "folded");
+    expect(await widths()).toEqual({ page: 64, bar: 64, main: 64 });
+    // Hovering opens it over the page; the page does not move.
+    await page.mouse.move(30, 300);
+    await expect(bar).toHaveAttribute("data-sidebar", "peek");
+    await expect.poll(widths).toEqual({ page: 64, bar: 248, main: 64 });
+    await page.mouse.move(900, 400);
+    await expect(bar).toHaveAttribute("data-sidebar", "folded");
+    // A click opens it for good (and the choice is remembered); the next click folds it, even with the pointer still on it.
+    await bar.getByRole("button", { name: /ausklappen/ }).click();
+    await expect(bar).toHaveAttribute("data-sidebar", "open");
+    await expect.poll(widths).toEqual({ page: 248, bar: 248, main: 248 });
+    await page.reload();
+    await expect(bar).toHaveAttribute("data-sidebar", "open");
+    await bar.getByRole("button", { name: /einklappen/ }).click();
+    await expect(bar).toHaveAttribute("data-sidebar", "folded");
+    await expect.poll(widths).toEqual({ page: 64, bar: 64, main: 64 });
+  });
+
   test("Freunde fills the screen: the list scrolls, the page does not", async ({ page }, info) => {
     test.skip(info.project.name === "mobile", "wide screens");
     await login(page);

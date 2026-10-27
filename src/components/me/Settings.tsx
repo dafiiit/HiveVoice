@@ -3,6 +3,7 @@ import { useEffect, useState, useTransition } from "react";
 import { forgetDevice } from "@/lib/drafts";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { OfflineSettings } from "./OfflineSettings";
 import { deleteAccount, setHomeRegion, setProfileTags, updatePreferences } from "@/lib/actions/settings";
 import { boroughsOf, searchPlaces, type Place } from "@/app/onboarding/actions";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
@@ -96,6 +97,8 @@ export function Settings({ language, easy, theme, order, places, interests, sugg
           <span className="basis-full text-sm text-muted md:ml-[10.5rem] md:basis-auto">{t("orderHint")}</span>
         </div>
       </section>
+
+      <OfflineSettings />
 
       <section className="flex flex-col gap-3 border-b border-line pb-6">
         <strong>{t("security")}</strong>

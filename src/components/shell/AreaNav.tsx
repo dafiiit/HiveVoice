@@ -50,7 +50,7 @@ function Live({ items, params }: { items: AreaItem[]; params: URLSearchParams | 
 
 function List({ items, active }: { items: AreaItem[]; active: number }) {
   return (
-    <div className="flex overflow-x-auto border-b border-line md:flex-col md:border-b-0 md:pb-6">
+    <div className="scroll-hint flex overflow-x-auto border-b border-line md:flex-col md:border-b-0 md:pb-6">
       {items.map((it, i) => {
         const on = i === active;
         return (

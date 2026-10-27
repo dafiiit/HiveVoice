@@ -27,7 +27,7 @@ export function BottomNav({ items, newLabel, label, signedIn = true }: { items: 
   };
   const [a, b, ...rest] = items;
   return (
-    <nav aria-label={label} className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(4rem+env(safe-area-inset-bottom))] auto-cols-fr grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav aria-label={label} className="fixed inset-x-0 bottom-0 z-30 grid h-[calc(4rem+env(safe-area-inset-bottom))] auto-cols-[minmax(0,1fr)] grid-flow-col border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden">
       {cell(a)}
       {cell(b)}
       {/* Guests cannot make anything yet: no "Neu" for them. */}

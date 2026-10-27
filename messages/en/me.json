@@ -105,7 +105,10 @@
     "on": "On",
     "off": "Off",
     "order": "Order of lists",
-    "orders": { "chrono": "Newest first", "suggested": "Suggested" },
+    "orders": {
+      "chrono": "Newest first",
+      "suggested": "Suggested"
+    },
     "orderHint": "Applies to Friends, listings and groups: “Suggested” shows what fits you or waits for an answer first.",
     "theme": "Appearance",
     "themes": {
@@ -123,6 +126,21 @@
     "leave": "Delete account",
     "leaveConfirm": "Please confirm.",
     "leaveConfirmText": "Your account and all your content will be removed for good. Shared initiatives keep their other authors.",
-    "leaveFinal": "Delete for good"
+    "leaveFinal": "Delete for good",
+    "offline": {
+      "title": "Keep offline",
+      "hint": "What this device keeps so that HiveVoice opens without a connection. Signing out deletes it all.",
+      "modes": {
+        "all": "Text and images",
+        "text": "Text only",
+        "off": "Nothing"
+      },
+      "wifiOnly": "Images and files only on Wi-Fi",
+      "used": "Used on this device: {size}",
+      "usedUnknown": "This device does not show its storage.",
+      "clear": "Delete kept pages",
+      "cleared": "Deleted.",
+      "signOutHint": "Notes and messages that are not sent yet stay on the device until they are."
+    }
   }
 }

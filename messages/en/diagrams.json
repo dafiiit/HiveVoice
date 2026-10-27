@@ -20,5 +20,7 @@
     "saved": "Saved.",
     "autosaved": "Saved automatically."
   },
-  "leaveAnyway": "Close anyway"
+  "leaveAnyway": "Close anyway",
+  "loadFailed": "The drawing editor (draw.io) did not answer. Drawing does not work offline yet; otherwise try again.",
+  "retry": "Try again"
 }

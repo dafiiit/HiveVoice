@@ -80,7 +80,7 @@ export function Tabs({ label, items, more = [], moreLabel = "Mehr" }: { label: s
   const rest = more.filter((m) => !m.on);
   return (
     <div className="flex border-b border-line">
-      <div role="tablist" aria-label={label} className="flex min-w-0 overflow-x-auto">
+      <div role="tablist" aria-label={label} className="scroll-hint flex min-w-0 overflow-x-auto">
         {shown.map((it) => (
           <Link key={it.href} role="tab" aria-selected={it.on} href={it.href} scroll={false} className={tab(it.on)}>{it.label}</Link>
         ))}

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
-import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
-import { THEME_COOKIE } from "@/i18n/config";
+import { EASY_COOKIE, LANG_COOKIE, THEME_COOKIE } from "@/i18n/config";
+import { I18nProvider } from "@/components/I18nProvider";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import "./globals.css";
 
@@ -32,15 +32,17 @@ export async function generateViewport(): Promise<Viewport> {
 }
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const jar = await cookies();
   const locale = await getLocale();
-  const theme = themeOf((await cookies()).get(THEME_COOKIE)?.value);
+  const theme = themeOf(jar.get(THEME_COOKIE)?.value);
+  const lang = jar.get(LANG_COOKIE)?.value === "en" ? "en" : "de";
   return (
     <html lang={locale} data-theme={theme}>
       <body className="min-h-dvh">
-        <NextIntlClientProvider>
+        <I18nProvider lang={lang} easy={lang === "de" && jar.get(EASY_COOKIE)?.value === "1"}>
           {children}
           <ServiceWorker />
-        </NextIntlClientProvider>
+        </I18nProvider>
       </body>
     </html>
   );

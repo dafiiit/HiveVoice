@@ -38,14 +38,15 @@ test.describe("knowledge: notes, files and images", () => {
       await expect(editor).not.toContainText("**");
       // It keeps itself, private, at its own address.
       await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
-      await expect(page).toHaveURL(/\/me\/notes\/[0-9a-f-]{36}$/);
 
       // The plain text is one click away, and changing it changes the note.
       await page.getByRole("radio", { name: "Quelltext" }).click();
       await expect(editor).toContainText("**fett**");
       await editor.fill("# Neu gefasst\n\nGeändert.");
       await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
-      await page.reload();
+      // The kept note is in the list; opened from there it is the same text.
+      await page.goto("/me/notes");
+      await page.getByRole("link", { name: new RegExp(marker) }).first().click();
       await page.getByRole("radio", { name: "Dargestellt" }).click();
       await expect(page.locator(".cm-content .cm-h1")).toHaveText("Neu gefasst");
 

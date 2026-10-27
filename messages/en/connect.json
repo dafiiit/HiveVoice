@@ -129,5 +129,6 @@
     "listings": "Search listings"
   },
   "listWidth": "Width of the list",
-  "listWidthHint": "Drag to make the list wider or narrower. Double click: standard width."
+  "listWidthHint": "Drag to make the list wider or narrower. Double click: standard width.",
+  "emptyStart": "Start with a chat."
 }

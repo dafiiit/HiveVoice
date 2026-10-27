@@ -55,7 +55,7 @@ export async function Pinboard({ sp, openId }: { sp: Record<string, string | str
   const topics = Array.from(new Set([...(tagParam ? [tagParam] : []), ...data.tags]));
   return (
     <div className="flex flex-col gap-4">
-      <AutoRefresh seconds={30} />
+      <AutoRefresh seconds={30} scope="board" />
       {!area ? (
         <div className="flex flex-wrap items-center gap-3">
           <p className="m-0 text-muted">{t("noPlace")}</p>
@@ -65,7 +65,7 @@ export async function Pinboard({ sp, openId }: { sp: Record<string, string | str
         <div className="flex flex-col gap-3">
           {/* The reach as one switch (near to far), the own place at the far end of the same line. The names of the places are in the tooltips and in the writing field below. */}
           <div role="group" aria-label={t("where")} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-            <nav aria-label={t("reach")} className={`${segments} max-w-full overflow-x-auto max-md:[&>*]:px-2`}>
+            <nav aria-label={t("reach")} className={`${segments} scroll-hint max-w-full overflow-x-auto max-md:[&>*]:px-2`}>
               {steps.map((s) => (
                 <Link key={s.level} href={href({ r: s.level })} title={s.region!.name} aria-current={area.level === s.level ? "true" : undefined} className={`${segment(area.level === s.level)} flex-none`}>
                   {t(`levels.${s.level}`)}

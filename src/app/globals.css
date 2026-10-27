@@ -292,3 +292,15 @@ select {
 .cm-host .cm-grid table { border-collapse: collapse; min-width: 60%; }
 .cm-host .cm-grid th, .cm-host .cm-grid td { border: 1px solid var(--line-strong); padding: 0.4em 0.7em; vertical-align: top; }
 .cm-host .cm-grid th { background: var(--chip); }
+
+/* A strip that scrolls sideways fades out at the edge while there is more behind it (where the browser can tie it to the scrolling). */
+@property --scroll-fade { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@keyframes scroll-fade { from { --scroll-fade: 28px; } to { --scroll-fade: 0px; } }
+@supports (animation-timeline: scroll()) {
+  .scroll-hint {
+    mask-image: linear-gradient(to right, #000 calc(100% - var(--scroll-fade)), transparent);
+    animation: scroll-fade linear both;
+    animation-timeline: scroll(self inline);
+    animation-range: calc(100% - 28px) 100%;
+  }
+}

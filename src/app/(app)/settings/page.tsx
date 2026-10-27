@@ -107,13 +107,12 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
     <Page>
       {/* A compact head: picture, name, one line; the tabs right under it. Photo and name are changed in the profile tab. */}
       {active === "profile" && <section className="flex items-center gap-4">
-        <Avatar name={session.profile.display_name} seed={session.profile.avatar_seed} path={session.profile.avatar_path} size={56} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <h1 className="display m-0 flex flex-wrap items-center gap-x-2 break-words">{session.profile.display_name}{session.profile.verified && <span className="flex-none" aria-label={t("verified")} title={t("verified")}><IconCheck size={20} /></span>}</h1>
           <span className="text-sm text-muted">{[t("stats", { groups: d.p.group_count, helped: d.p.helped_count }), d.places].filter(Boolean).join(" · ")}</span>
         </div>
       </section>}
-      {active !== "profile" && <h1 className="display m-0">{t(`tabs.${active}`)}</h1>}
+      {active !== "profile" && <h1 className="sr-only">{t(`tabs.${active}`)}</h1>}
       <Tabs label={t("sections")} items={TABS.map((k) => ({ href: `/settings${k === "profile" ? "" : `?tab=${k}`}`, label: t(`tabs.${k}`), on: active === k }))} />
       {active === "profile" && (
         <section className="flex flex-col gap-3">

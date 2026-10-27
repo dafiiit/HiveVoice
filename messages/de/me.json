@@ -105,7 +105,10 @@
     "on": "An",
     "off": "Aus",
     "order": "Reihenfolge der Listen",
-    "orders": { "chrono": "Neueste zuerst", "suggested": "Vorgeschlagen" },
+    "orders": {
+      "chrono": "Neueste zuerst",
+      "suggested": "Vorgeschlagen"
+    },
     "orderHint": "Gilt für Freunde, Anliegen und Gruppen: „Vorgeschlagen“ zeigt zuerst, was zu dir passt oder auf eine Antwort wartet.",
     "theme": "Darstellung",
     "themes": {
@@ -123,6 +126,21 @@
     "leave": "Konto verlassen",
     "leaveConfirm": "Bitte bestätige.",
     "leaveConfirmText": "Dein Konto und alle deine Inhalte werden endgültig entfernt. Gemeinsame Initiativen behalten ihre anderen Autor:innen.",
-    "leaveFinal": "Endgültig verlassen"
+    "leaveFinal": "Endgültig verlassen",
+    "offline": {
+      "title": "Offline halten",
+      "hint": "Was dieses Gerät behält, damit HiveVoice auch ohne Verbindung aufgeht. Beim Abmelden wird alles gelöscht.",
+      "modes": {
+        "all": "Texte und Bilder",
+        "text": "Nur Texte",
+        "off": "Nichts"
+      },
+      "wifiOnly": "Bilder und Dateien nur im WLAN",
+      "used": "Auf diesem Gerät belegt: {size}",
+      "usedUnknown": "Der Speicher dieses Geräts lässt sich nicht anzeigen.",
+      "clear": "Gespeicherte Seiten löschen",
+      "cleared": "Gelöscht.",
+      "signOutHint": "Notizen und Nachrichten, die noch nicht gesendet sind, bleiben bis zum Senden auf dem Gerät."
+    }
   }
 }

@@ -42,12 +42,12 @@ export async function Shell({ session, children }: { session: Session | null; ch
 
   return (
     <div data-shell className="flex min-h-dvh flex-col" style={listW ? ({ "--list-w": `${listW}px` } as CSSProperties) : undefined}>
-      <header className="sticky top-0 z-30 flex h-16 flex-none items-center gap-3 border-b border-line bg-paper px-3 md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,600px)_minmax(0,1fr)] md:px-5">
+      <header className="sticky top-0 z-30 flex h-16 flex-none items-center gap-3 border-b border-line bg-paper px-3 md:grid md:grid-cols-[auto_minmax(0,1fr)_auto] md:px-5">
         <Link href={session ? "/friends" : "/"} className="flex flex-none items-center text-ink no-underline" aria-label="HiveVoice">
           <span className="md:hidden"><LogoMark size={34} /></span>
           <span className="max-md:hidden"><Logo size={34} /></span>
         </Link>
-        <QuickSearch className="min-w-0 flex-1" />
+        <QuickSearch className="min-w-0 flex-1 md:mx-auto md:w-full" />
         <div className="flex flex-none items-center justify-end gap-2">
           {session ? (
             <>

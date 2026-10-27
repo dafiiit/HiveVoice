@@ -52,6 +52,9 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
   const [leaving, setLeaving] = useState(false);
   const [lockedBy, setLockedBy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // draw.io comes from another server: it may not answer (no connection, blocked, down). Then there is a message and a new try.
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "failed">("loading");
+  const [attempt, setAttempt] = useState(0);
 
   // The latest values for the message handler, which is set up once.
   const latest = useRef({ docId, title, xml: "", locked: false });
@@ -99,6 +102,11 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
   }, [id]);
 
   useEffect(() => {
+    const wait = setTimeout(() => setLoadState((s) => (s === "loading" ? "failed" : s)), 15_000);
+    return () => clearTimeout(wait);
+  }, [attempt]);
+
+  useEffect(() => {
     const store = async (out: string) => {
       const { docId: current, title: name } = latest.current;
       const byHand = manual.current;
@@ -132,6 +140,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
       let msg: { event?: string; data?: string; xml?: string };
       try { msg = JSON.parse(e.data); } catch { return; }
       // A Mermaid block becomes real draw.io shapes in one group that keeps the Mermaid text (double-click edits it).
+      if (msg.event === "init") setLoadState("ready");
       if (msg.event === "init") post(latest.current.xml ? { action: "load", xml: latest.current.xml, autosave: 1, title: latest.current.title }
         : mermaid ? { action: "load", autosave: 1, title: latest.current.title, descriptor: { format: "mermaid", wrap: true, data: mermaid } }
         : { action: "load", xml: drawingOf(svg), autosave: 1, title: latest.current.title });
@@ -212,7 +221,13 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
           </span>
         </Notice>
       )}
-      <iframe ref={frame} src={src} title={t("editorTitle")} className="min-h-0 w-full flex-1 border-0 bg-surface" />
+      {loadState === "failed" && (
+        <div role="alert" className="m-4 flex flex-col items-start gap-3 border-l-4 border-red bg-surface p-4">
+          <span>{t("loadFailed")}</span>
+          <button type="button" onClick={() => { setLoadState("loading"); setAttempt((n) => n + 1); }} className={btn.primary}>{t("retry")}</button>
+        </div>
+      )}
+      <iframe key={attempt} ref={frame} src={src} title={t("editorTitle")} className={`min-h-0 w-full flex-1 border-0 bg-surface ${loadState === "failed" ? "hidden" : ""}`} />
     </div>
   );
 }

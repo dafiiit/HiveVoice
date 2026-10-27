@@ -50,9 +50,10 @@ test.describe("diagrams (draw.io) @writes", () => {
       const snippet = await page.getByLabel("In eine Notiz einfügen").inputValue();
       expect(snippet).toMatch(/^!\[E2E Diagramm \d+\]\(diagram:[0-9a-f-]{36}\)$/);
       await page.goto("/me/notes/new");
+      await page.getByLabel("Titel", { exact: true }).fill(`${marker} Notiz`);
       await page.getByLabel("Inhalt in Markdown").fill(`Vorher\n\n${snippet}\n`);
-      await page.getByRole("button", { name: "Text und Vorschau nebeneinander" }).click();
-      const preview = page.getByRole("region", { name: "Vorschau" });
+      // The note shows the picture right in the text.
+      const preview = page.locator(".cm-drawing");
       const embedded = preview.getByRole("img", { name: marker });
       await expect(embedded).toBeVisible();
       await expect.poll(() => embedded.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
@@ -63,9 +64,9 @@ test.describe("diagrams (draw.io) @writes", () => {
       await expect(editor.locator(".geDiagramContainer svg g g").first()).toBeAttached({ timeout: 90_000 });
       await expect(page.getByLabel("Name des Diagramms")).toHaveValue(marker);
       await page.getByRole("button", { name: "Schließen" }).click();
-      await page.waitForURL(/\/me\/notes\/new$/);
+      await page.waitForURL(/\/me\/notes\/(new|[0-9a-f-]{36})$/);
     } finally {
-      await exec(`delete from public.resources where title = '${marker}'`);
+      await exec(`delete from public.resources where title like '${marker}%'`);
     }
   });
 
@@ -80,12 +81,11 @@ test.describe("diagrams (draw.io) @writes", () => {
       await page.getByLabel("Titel").fill(marker);
       const text = page.getByLabel("Inhalt in Markdown");
       await text.fill(`Vorher\n\n\`\`\`mermaid\n${code}\n\`\`\`\n`);
-      await page.getByRole("button", { name: "Text und Vorschau nebeneinander" }).click();
-      const preview = page.getByRole("region", { name: "Vorschau" });
-      await preview.getByRole("button", { name: "In draw.io weiterbearbeiten" }).click();
+      // The block is drawn in the text; its button moves it to draw.io.
+      await page.getByRole("button", { name: "Als Diagramm weiterbearbeiten" }).click();
 
       // draw.io opens over the note with the Mermaid diagram as its own shapes.
-      const dialog = page.getByRole("dialog", { name: "In draw.io weiterbearbeiten" });
+      const dialog = page.getByRole("dialog", { name: "Als Diagramm weiterbearbeiten" });
       const editor = dialog.frameLocator("iframe[title='draw.io-Editor']");
       await expect(editor.getByText("Gruppe", { exact: true }).first()).toBeAttached({ timeout: 90_000 });
       await expect(dialog.getByLabel("Name des Diagramms")).toHaveValue(`${marker} – Diagramm`);
@@ -93,9 +93,10 @@ test.describe("diagrams (draw.io) @writes", () => {
       await expect(dialog.getByText(/^(Automatisch g|G)espeichert\.$/)).toBeVisible({ timeout: 60_000 });
       await dialog.getByRole("button", { name: "Schließen" }).click();
       await expect(dialog).toHaveCount(0);
-      await expect(text).toHaveValue(new RegExp(`!\\[${marker} – Diagramm\\]\\(diagram:[0-9a-f-]{36}\\)`));
-      await expect(text).not.toHaveValue(/```mermaid/);
-      await expect(preview.getByRole("img", { name: `${marker} – Diagramm` })).toBeVisible();
+      await expect(page.locator(".cm-drawing").getByRole("img", { name: `${marker} – Diagramm` })).toBeVisible();
+      await page.getByRole("radio", { name: "Quelltext" }).click();
+      await expect(text).toContainText(new RegExp(`!\\[${marker} – Diagramm\\]\\(diagram:[0-9a-f-]{36}\\)`));
+      await expect(text).not.toContainText("```mermaid");
 
     } finally {
       await exec(`delete from public.resources where title like '${marker}%'`);

@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
 import { AreaIcon } from "../ui/Logo";
-import { IconBoard, IconChat, IconDiagram, IconFlag, IconHands, IconHome, IconList, IconMail, IconNote, IconSidebar, IconUpload, IconUser, IconUsers, IconInbox } from "../ui/Icons";
+import { IconBoard, IconChat, IconDiagram, IconFlag, IconHands, IconHome, IconMail, IconNote, IconSidebar, IconUpload, IconUser, IconUsers, IconInbox } from "../ui/Icons";
 import { AREAS, areaOf, type Area } from "./areas";
 
 const watchWidth = (cb: () => void) => { window.addEventListener("resize", cb); return () => window.removeEventListener("resize", cb); };
@@ -69,7 +69,6 @@ function Bar({ folded, signedIn, badges, query, onToggle }: {
     me: [
       { href: "/me", label: tm("all"), icon: IconHome },
       { href: "/me/listings", label: tm("listings"), icon: IconHands },
-      { href: "/me/lists", label: tm("lists"), icon: IconList },
       { href: "/me/notes", label: tm("notes"), icon: IconNote },
       { href: "/me/diagrams", label: tm("diagrams"), icon: IconDiagram },
       { href: "/me/uploads", label: tm("uploads"), icon: IconUpload },

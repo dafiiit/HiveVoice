@@ -6,7 +6,7 @@ import { ShareKnowledge } from "@/components/links/ShareKnowledge";
 import { Page, PageHeader } from "@/components/ui/Page";
 
 /** A new note (Markdown) or a new upload (file or link), on the right side of Ich. */
-export async function NewDoc({ mode, group }: { mode: "note" | "file" | "link"; group: string | null }) {
+export async function NewDoc({ mode, group, list = false }: { mode: "note" | "file" | "link"; group: string | null; list?: boolean }) {
   const session = await requireSession(mode === "note" ? "/me/notes/new" : "/me/uploads/new");
   const tm = await getTranslations("mine");
   const { groups, ideas } = await asViewer({ authId: session.authId, profileId: session.profile.id }, async (tx) => ({
@@ -17,8 +17,8 @@ export async function NewDoc({ mode, group }: { mode: "note" | "file" | "link"; 
   }));
   return (
     <Page width="narrow">
-      <PageHeader title={mode === "note" ? tm("newDocTitle") : tm("uploadTitle")} lead={mode === "note" ? tm("newNoteLead") : tm("uploadLead")} />
-      <ShareKnowledge groups={groups} initialGroup={group} ideas={ideas} initialMode={mode} />
+      {mode !== "note" && <PageHeader title={tm("uploadTitle")} />}
+      <ShareKnowledge groups={groups} initialGroup={group} ideas={ideas} initialMode={mode} startList={list} />
     </Page>
   );
 }

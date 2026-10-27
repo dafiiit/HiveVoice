@@ -83,7 +83,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
       from public.resources r2 left join public.resources orig on orig.id = r2.copied_from where r2.id = ${id}`;
     const body = r.origin === "note" || r.origin === "diagram" ? (await tx<{ body_md: string | null }[]>`select body_md from public.resources where id = ${id}`)[0]?.body_md ?? "" : "";
     const level = meta.level;
-    const ideas = r.origin === "note" && level >= 3 && sp.edit === "1" ? await popularTags(tx) : [];
+    const ideas = r.origin === "note" && (level >= 3 || (sp.suggest === "1" && level >= 2)) ? await popularTags(tx) : [];
     const grants = level >= 4 ? await tx<GrantRow[]>`
       select g.id, g.level, g.expires_at, p.display_name as person_name, gr.name as group_name
       from public.resource_grants g left join public.profiles p on p.id = g.profile_id left join public.groups gr on gr.id = g.group_id
@@ -115,8 +115,10 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   const host = r.host.replace(/^www\./, "");
   const careful = r.safety === "caution";
   const isLink = r.origin === "link", isNote = r.origin === "note", isFile = r.origin === "file", isDiagram = r.origin === "diagram";
-  const editing = (isNote || isDiagram) && sp.edit === "1" && level >= 3 && !meta.trashed_at;
-  const suggesting = isNote && sp.suggest === "1" && level >= 2;
+  // A diagram opens in the drawing editor on request; a note one may write in is simply the editor.
+  const editing = isDiagram && sp.edit === "1" && level >= 3 && !meta.trashed_at;
+  const suggesting = isNote && sp.suggest === "1" && level >= 2 && level < 3;
+  const writing = isNote && level >= 3 && !meta.trashed_at;
   const photo = isFile && r.file_id && r.file_mime && isImage(r.file_mime);
   const viewable = !!photo || r.file_mime === "application/pdf";
   const canDownload = meta.allow_download || level >= 3;
@@ -139,7 +141,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
         </div>
       )}
-      <h1 className="display m-0 break-words">{r.title}</h1>
+      {!writing && !suggesting && <h1 className="display m-0 break-words">{r.title}</h1>}
       <span className="flex flex-wrap items-center gap-2 text-sm">
         <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={28} />
         <Link href={`/profile/${r.owner_id}`} className="font-bold text-ink no-underline">{r.owner_name}</Link>
@@ -151,7 +153,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           meta.visibility === "link" && level < 4 ? td("page.viaLink") : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
         {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink underline">· {td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
       </span>
-      {r.description && <p className="m-0 whitespace-pre-line text-lg">{r.description}</p>}
+      {r.description && !writing && !suggesting && <p className="m-0 whitespace-pre-line text-lg">{r.description}</p>}
       <div className="flex flex-wrap items-center gap-2">
         {session && !meta.trashed_at && (
           <ShareMenu type="resource" id={id} title={r.title} className={btn.secondarySm}
@@ -161,8 +163,8 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
                 linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
             ) : undefined} />
         )}
-        {(isNote || isDiagram) && !editing && !suggesting && !meta.trashed_at && level >= 3 && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
-        {isNote && !editing && !suggesting && !meta.trashed_at && level === 2 && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
+        {isDiagram && !editing && !meta.trashed_at && level >= 3 && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
+        {isNote && !suggesting && !meta.trashed_at && level === 2 && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
         {meta.lock && !meta.lock.mine && <span className="text-sm font-bold text-red">{td("page.locked")}</span>}
         {isNote && level < 3 && level !== 2 && !!me && <WhyNot action="resource.edit" objectId={id} />}
         <span className="ml-auto flex items-center gap-3">
@@ -171,7 +173,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} home={home} />}
         </span>
       </div>
-      {r.tags.length > 0 && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
+      {r.tags.length > 0 && !writing && !suggesting && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
       {sp.suggested === "1" && <Notice tone="status">{td("page.suggestSent")}</Notice>}
 
       {isLink && (
@@ -209,7 +211,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
         </section>
       )}
 
-      {isNote && !editing && !suggesting && (
+      {isNote && !writing && !suggesting && (
         <article className="border border-line bg-surface p-4 md:p-6">
           <Markdown source={data.body} />
         </article>
@@ -226,15 +228,16 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           <span className="text-sm text-muted">{tg("embedHint")}</span>
         </section>
       )}
-      {(editing || suggesting) && (
-        <NoteEditor mode={editing ? "edit" : "suggest"} initial={{ id: r.id, title: r.title, description: r.description ?? "", body: data.body, tags: r.tags }} groups={[]} initialGroup={null} ideas={data.ideas} />
+      {(writing || suggesting) && (
+        <NoteEditor mode={writing ? "edit" : "suggest"} initial={{ id: r.id, title: r.title, description: r.description ?? "", body: data.body, tags: r.tags }} ideas={data.ideas}
+          lock={writing && (meta.visibility !== "me" || data.grants.length > 0 || r.owner_id !== me || !!r.group_id || meta.edit_mode !== "me")} />
       )}
 
       {data.canCopy && !meta.trashed_at && <CopyButton id={id} groups={data.myGroups} linkKey={key} />}
 
-      {!editing && !suggesting && <Suggestions id={id} items={data.suggestions} />}
+      {!editing && <Suggestions id={id} items={data.suggestions} />}
       {data.transfer && level >= 4 && <span className="flex items-center gap-2 text-sm">{td("access.transferPending", { name: data.transfer.to_name })} <CancelTransfer transferId={data.transfer.id} /></span>}
-      {(isNote || isDiagram) && level >= 3 && !editing && !suggesting && meta.version_no > 1 && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
+      {(isNote || isDiagram) && level >= 3 && !editing && meta.version_no > 1 && data.versions.length > 0 && <Versions id={id} versions={data.versions} canRestore />}
       <Comments id={id} items={data.comments} canComment={level >= 2 && !!me} me={me} canModerate={level >= 4} />
     </Page>
   );

@@ -8,6 +8,8 @@ import { getSession } from "../session";
 import { inspectLink, type Inspection } from "../links/inspect";
 import { purgeFiles } from "../storage";
 import type { UploadedFile } from "../files";
+import { getTranslations } from "next-intl/server";
+import { titleFrom } from "@/components/editor/tasks";
 
 /** Domains of public bodies (the admin list): links there count as trusted. */
 async function officialHosts() {
@@ -21,7 +23,7 @@ export async function previewLink(url: string): Promise<{ ok: true; data: Inspec
   return { ok: true, data: await inspectLink(url, await officialHosts()) };
 }
 
-export type ShareInput = { url: string; title: string; description: string; tags: string[]; groupId: string | null };
+export type ShareInput = { url: string; title: string; description: string; tags: string[]; groupId: string | null; /** "me" and "link" are set after the link is kept; public and group are what a new link is anyway. */ visibility?: "me" | "link" | "public" | "group" };
 
 /** Step two: check again on the server (the browser is never trusted) and keep link plus preview details. */
 export async function shareLink(input: ShareInput) {
@@ -33,10 +35,12 @@ export async function shareLink(input: ShareInput) {
       url: found.url, host: found.host, provider: found.provider, kind: found.kind, title: input.title, description: input.description,
       preview: found.preview, safety: found.trust, notes: found.notes, tags: input.tags.slice(0, 10), group_id: input.groupId ?? "",
     })}) as id`;
+    if (input.visibility === "me" || input.visibility === "link") await tx`select app.set_resource_access(${id}, ${input.visibility}, 'me', ${input.visibility === "link"}, null)`;
     return id;
   });
   revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
+  revalidatePath("/me", "layout");
   return res;
 }
 
@@ -99,6 +103,7 @@ export async function shareFile(input: FileShareInput) {
   });
   revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
+  revalidatePath("/me", "layout");
   return res;
 }
 
@@ -107,16 +112,22 @@ export type NoteInput = {
   /** Saved by itself while the editor is open: keeps the lock, and the page is not drawn again. */ autosave?: boolean;
 };
 
-/** A Markdown note: new, or a change to one's own. */
+/**
+ * A Markdown note: new, or a change to one's own. A new note is private unless it is made for a group; it needs neither a title
+ * (then its first line names it) nor a text yet. Saving by itself (`autosave`) does not draw the pages again.
+ */
 export async function saveNote(input: NoteInput) {
+  const title = titleFrom(input.title, input.body, (await getTranslations("knowledge"))("newNoteTitle"));
   const res = await run(async (tx) => {
     const [{ id }] = await tx<{ id: string }[]>`select app.save_note(${tx.json({
-      id: input.id ?? "", title: input.title, description: input.description, body: input.body.slice(0, 100000), tags: input.tags.slice(0, 10), group_id: input.groupId ?? "",
-      note: input.note ?? "", visibility: input.visibility ?? "", license: input.license ?? "", autosave: !!input.autosave,
+      id: input.id ?? "", title, description: input.description, body: input.body.slice(0, 100000), tags: input.tags.slice(0, 10), group_id: input.groupId ?? "",
+      note: input.note ?? "", visibility: input.visibility ?? (input.id ? "" : input.groupId ? "group" : "me"), license: input.license ?? "", autosave: !!input.autosave,
     })}) as id`;
     return id;
   });
-  if (input.autosave) return res;
+  // A change while the editor stays open needs no new page; a new note shows up in the lists.
+  if (input.autosave && input.id) return res;
+  revalidatePath("/me", "layout");
   revalidatePath("/community", "layout");
   revalidatePath("/groups", "layout");
   if (res.ok) revalidatePath(`/links/${res.data}`);

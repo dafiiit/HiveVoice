@@ -1475,8 +1475,44 @@ describe("to-do lists", () => {
   }));
 });
 
+describe("notes and lists", () => {
+  it("a note is private and may be empty; private notes do not use up the share limit", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const make = (extra: object = {}) => as(tx, a, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title: "Neue Notiz", body: "", ...extra })}) as id`).then((r) => r[0].id);
+    const first = await make();
+    for (let i = 0; i < 14; i++) await make();
+    const [row] = await as(tx, a, () => tx<{ visibility: string; body_md: string }[]>`select visibility, body_md from public.resources where id = ${first}`);
+    expect(row).toEqual({ visibility: "me", body_md: "" });
+    expect(await as(tx, b, () => tx`select 1 from public.resources where id = ${first}`)).toHaveLength(0);
+    // Writing into it later is a new version of one's own note, and the text may grow.
+    await as(tx, a, () => tx`select app.save_note(${tx.json({ id: first, title: "Einkauf", body: "- [ ] Brot", autosave: true })})`);
+    expect((await as(tx, a, () => tx<{ body_md: string }[]>`select body_md from public.resources where id = ${first}`))[0].body_md).toBe("- [ ] Brot");
+  }));
+
+  it("an old list becomes a note with its items, its rights and the people it was shared with", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const [{ id }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.todo_lists (title) values ('Einkauf') returning id`);
+    await as(tx, a, () => tx`insert into public.todo_items (list_id, title, position, done_at) values (${id}, 'Brot', 0, now()), (${id}, 'Milch', 1, null)`);
+    await as(tx, a, () => tx`select app.set_object_access('list', ${id}, 'people', 'people')`);
+    await as(tx, a, () => tx`select app.grant_object('list', ${id}, ${b}, true)`);
+    const note = (await as(tx, a, () => tx<{ n: string }[]>`select app.my_list_note(${id}) as n`))[0].n;
+    const [r] = await as(tx, a, () => tx<{ body_md: string; visibility: string; title: string; origin: string }[]>`select body_md, visibility, title, origin from public.resources where id = ${note}`);
+    expect(r).toEqual({ body_md: "- [x] Brot\n- [ ] Milch", visibility: "invited", title: "Einkauf", origin: "note" });
+    expect(await as(tx, b, () => tx`select 1 from public.resources where id = ${note}`)).toHaveLength(1);
+    expect(await as(tx, c, () => tx`select 1 from public.resources where id = ${note}`)).toHaveLength(0);
+    // Asking again gives the same note, and nobody else can convert (or learn) somebody's list.
+    expect((await as(tx, a, () => tx<{ n: string }[]>`select app.my_list_note(${id}) as n`))[0].n).toBe(note);
+    const [{ id: other }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.todo_lists (title) values ('Privat') returning id`);
+    expect((await as(tx, c, () => tx<{ n: string | null }[]>`select app.my_list_note(${other}) as n`))[0].n).toBeNull();
+  }));
+});
+
 describe("examples", () => {
-  it("are made once per account and can be hidden for everyone without deleting anything", () => scenario(async (tx) => {
+  it("are made once per account and can be hidden for everyone without deleting anything", (ctx) => scenario(async (tx) => {
+    // The examples need the two example people; a database where they were purged for good has none, and the app role cannot make them.
+    if (!(await tx`select 1 from public.profiles where is_demo limit 1`).length) return ctx.skip();
+    // The switch lives in the database: set it here (rolled back) so the test does not depend on how it stands today.
+    await tx`select app.admin_set_setting('demo_visible', 'true'::jsonb)`;
     const a = await person(tx, "Ada");
     await as(tx, a, () => tx`select app.ensure_demo()`);
     await as(tx, a, () => tx`select app.ensure_demo()`);
@@ -1487,7 +1523,7 @@ describe("examples", () => {
              (select count(*)::int from public.listings where owner_id = ${a}) as listings,
              (select count(*)::int from public.todo_lists where owner_id = ${a}) as lists,
              (select count(*)::int from public.resources where owner_id = ${a}) as notes`);
-    expect((await mine())[0]).toEqual({ chats: 1, groups: 1, requests: 1, listings: 2, lists: 1, notes: 1 });
+    expect((await mine())[0]).toEqual({ chats: 1, groups: 1, requests: 1, listings: 2, lists: 0, notes: 2 });
     // The own examples are private: somebody else sees neither the offer nor the group.
     const b = await person(tx, "Ben");
     expect(await as(tx, b, () => tx`select 1 from public.listings where owner_id = ${a}`)).toHaveLength(0);

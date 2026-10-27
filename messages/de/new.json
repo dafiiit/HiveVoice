@@ -76,29 +76,41 @@
     "toGroup": "Ihr wollt gemeinsam etwas umsetzen? Gruppe gründen"
   },
   "tiles": {
-    "need": {
-      "title": "Gesuch erstellen",
-      "text": "Klein oder groß: was dir fehlt. Wer etwas Passendes hat, meldet sich."
+    "listing": {
+      "title": "Anliegen",
+      "text": "Etwas suchen oder anbieten."
     },
-    "offer": {
-      "title": "Angebot erstellen",
-      "text": "Können, Zeit oder Dinge, kostenlos, als Tausch oder bezahlt."
+    "chat": {
+      "title": "Chat",
+      "text": "Mit einer Person schreiben."
     },
     "group": {
-      "title": "Gruppe gründen",
-      "text": "Ein Projekt, ein Verein, eine Nachbarschaft. Mit Zielen, Aufgaben und Rollen."
+      "title": "Gruppe",
+      "text": "Mit Zielen, Aufgaben und Rollen."
     },
     "initiative": {
-      "title": "Initiative starten",
-      "text": "Etwas fordern: von einer zuständigen Stelle, mit Debatte, Abstimmung und Antwortpflicht."
+      "title": "Initiative",
+      "text": "Etwas von einer zuständigen Stelle fordern."
     },
     "voice": {
-      "title": "Auf der Pinnwand schreiben",
-      "text": "Eine Frage oder Neuigkeit für alle in deinem Ort."
+      "title": "Pinnwand-Beitrag",
+      "text": "Eine Frage oder Neuigkeit für deinen Ort."
     },
-    "doc": {
-      "title": "Notiz schreiben",
-      "text": "In Markdown, mit Versionen. Erst nur für dich, teilen kannst du später."
+    "note": {
+      "title": "Notiz",
+      "text": "Text, Aufgaben und Formeln."
+    },
+    "list": {
+      "title": "Liste",
+      "text": "Aufgaben zum Abhaken."
+    },
+    "diagram": {
+      "title": "Diagramm",
+      "text": "Einen Ablauf oder eine Skizze zeichnen."
+    },
+    "upload": {
+      "title": "Hochladen",
+      "text": "Eine Datei, ein Foto oder ein Link."
     }
   }
 }

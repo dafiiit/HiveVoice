@@ -24,40 +24,57 @@ test.describe("Ich: my own things", () => {
     await expect(page).toHaveURL(/\/me\/notes/);
   });
 
-  test("a new list is private, items can be added, ticked and removed, and the list deleted", async ({ page }, info) => {
-    test.skip(info.project.name !== "desktop", "writes data");
+  test("a new list is a private note: items are added, ticked and removed, and it shows under notes with tasks", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop" || !migrator, "writes data, and needs the migration connection for cleaning up");
     const name = `Liste ${Date.now()}`;
-    await login(page);
-    await page.goto("/me/lists");
-    await page.getByRole("button", { name: "Liste" }).click();
-    await page.getByLabel("Name der Liste").fill(name);
-    await page.getByRole("button", { name: "Anlegen" }).click();
-    await expect(page.getByRole("heading", { name })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Teilen" }), "lists share like everything else").toBeVisible();
+    try {
+      await login(page);
+      await page.goto("/new");
+      await page.getByRole("link", { name: /^Liste/ }).click();
+      await expect(page).toHaveURL(/\/me\/notes\/new\?list=1/);
+      await expect(page.getByRole("radio", { name: "Liste" })).toBeChecked();
+      await page.getByLabel("Titel", { exact: true }).fill(name);
+      await page.getByLabel("Neuen Punkt hinzufügen").fill("Brot kaufen");
+      await page.getByRole("button", { name: "Hinzufügen" }).click();
+      await page.getByLabel("Neuen Punkt hinzufügen").fill("Milch");
+      await page.getByRole("button", { name: "Hinzufügen" }).click();
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
+      // The note exists now, at its own address, and is private.
+      await expect(page).toHaveURL(/\/me\/notes\/[0-9a-f-]{36}$/);
+      await page.getByRole("checkbox", { name: "Brot kaufen" }).click();
+      await expect(page.getByText("1 von 2 erledigt")).toBeVisible();
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
+      await page.reload();
+      // Mostly tasks: it opens as a list again, and the tick is still there.
+      await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeChecked();
+      await expect(page.getByRole("button", { name: "Teilen" }), "lists share like everything else").toBeVisible();
 
-    await page.getByLabel("Neuen Punkt hinzufügen").fill("Brot kaufen");
-    await page.getByRole("button", { name: "Hinzufügen" }).click();
-    await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeVisible();
-    await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeEnabled();
-    await Promise.all([page.waitForResponse((r) => r.request().method() === "POST"), page.getByRole("checkbox", { name: "Brot kaufen" }).check()]);
-    await expect(page.getByRole("heading", { name: /Erledigt · 1/ })).toBeVisible();
-    await page.reload();
-    await expect(page.getByRole("checkbox", { name: "Brot kaufen" })).toBeChecked();
-
-    await page.goto("/me/lists");
-    await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("Privat");
-    await page.getByRole("link", { name: new RegExp(name) }).click();
-    await page.getByRole("button", { name: "Liste löschen" }).click();
-    await page.getByRole("button", { name: "Ja", exact: true }).click();
-    await expect(page).toHaveURL(/\/me\/lists/);
-    await expect(page.getByRole("link", { name: new RegExp(name) })).toHaveCount(0);
+      await page.goto("/me/notes?f=tasks");
+      await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("Privat");
+      await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("1 von 2 erledigt");
+      // The old address of lists leads to notes.
+      await page.goto("/me/lists");
+      await expect(page).toHaveURL(/\/me\/notes\?f=tasks/);
+    } finally {
+      await exec(`delete from public.resources where title = '${name}'`);
+    }
   });
 
-  test("new documents are private unless written for a group", async ({ page }) => {
-    await login(page);
-    await page.goto("/new/link?mode=note");
-    await expect(page.getByRole("heading", { name: "Neue Notiz" })).toBeVisible();
-    await expect(page.getByLabel("Wer darf das sehen?")).toHaveValue("me");
+  test("a new note is private and keeps itself as soon as there is something to keep", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop" || !migrator, "writes data, and needs the migration connection for cleaning up");
+    const name = `Notiz ${Date.now()}`;
+    try {
+      await login(page);
+      await page.goto("/new/link?mode=note");
+      await expect(page.getByLabel("Wer darf das sehen?"), "sharing is a later step").toHaveCount(0);
+      await expect(page.getByRole("button", { name: /veröffentlichen/i })).toHaveCount(0);
+      await page.getByLabel("Titel", { exact: true }).fill(name);
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
+      await page.goto("/me/notes");
+      await expect(page.getByRole("link", { name: new RegExp(name) })).toContainText("Privat");
+    } finally {
+      await exec(`delete from public.resources where title = '${name}'`);
+    }
   });
 
   test("old links to notes and documents in the settings lead here", async ({ page }) => {

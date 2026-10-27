@@ -21,7 +21,7 @@ test.describe("knowledge: notes, files and images", () => {
   test.skip(!signedIn || !migrator, "needs a test account and the migration connection for cleaning up");
   test.describe.configure({ mode: "serial" });
 
-  test("a Markdown note has a live preview with a Mermaid diagram, can be published and edited", async ({ page }, info) => {
+  test("a note is written in its finished look, with a Mermaid diagram and a formula, and keeps itself", async ({ page }, info) => {
     test.skip(info.project.name !== "desktop", "writes data, and both projects would race");
     const marker = `Notiztest ${Date.now()}`;
     try {
@@ -29,29 +29,25 @@ test.describe("knowledge: notes, files and images", () => {
       await page.goto("/new/link?mode=note");
       await page.getByLabel("Titel", { exact: true }).fill(marker);
       await page.getByLabel("Inhalt in Markdown").fill("# Hauptteil\n\nText mit **fett** und einer Liste:\n\n- eins\n- zwei\n\n```mermaid\nflowchart LR\n  A[Idee] --> B[Gruppe]\n```\n\nFormel $a^2+b^2=c^2$\n");
-      // Only the text at first; the eye shows the preview instead (side by side needs a wide pane).
-      const preview = page.getByRole("region", { name: "Vorschau" });
-      await expect(preview).toBeHidden();
-      await page.getByRole("button", { name: "Vorschau zeigen" }).first().click();
-      await expect(page.getByLabel("Inhalt in Markdown")).toBeHidden();
-      await expect(preview.locator(".katex").first()).toBeVisible({ timeout: 20_000 });
-      await expect(preview.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
-      await expect(preview.getByText("fett")).toBeVisible();
-      await expect(preview.getByRole("img", { name: "Diagramm" }).locator("svg")).toBeVisible({ timeout: 20_000 });
-      // Documents start private; this one is shared with everybody.
-      await page.getByLabel("Wer darf das sehen?").selectOption("public");
-      await page.getByRole("button", { name: "Notiz veröffentlichen" }).click();
-      await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
-      const article = page.locator("article.border");
-      await expect(article.getByRole("img", { name: "Diagramm" }).locator("svg")).toBeVisible({ timeout: 20_000 });
-      await expect(article.getByRole("heading", { name: "Hauptteil" })).toBeVisible();
+      // The text is drawn as it will look; the signs of the Markdown stay out of the way.
+      const editor = page.locator(".cm-content");
+      await expect(editor.locator(".katex").first()).toBeVisible({ timeout: 20_000 });
+      await expect(editor.locator(".cm-h1")).toHaveText("Hauptteil");
+      await expect(editor.locator(".cm-strong")).toHaveText("fett");
+      await expect(editor.locator(".cm-mermaid .md-diagram svg")).toBeVisible({ timeout: 20_000 });
+      await expect(editor).not.toContainText("**");
+      // It keeps itself, private, at its own address.
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
+      await expect(page).toHaveURL(/\/me\/notes\/[0-9a-f-]{36}$/);
 
-      // Edit it.
-      await page.getByRole("link", { name: "Bearbeiten", exact: true }).click();
-      await page.getByLabel("Inhalt in Markdown").fill("# Neu gefasst\n\nGeändert.");
-      await page.getByRole("button", { name: "Speichern" }).click();
-      await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
-      await expect(page.locator("article.border").getByRole("heading", { name: "Neu gefasst" })).toBeVisible();
+      // The plain text is one click away, and changing it changes the note.
+      await page.getByRole("radio", { name: "Quelltext" }).click();
+      await expect(editor).toContainText("**fett**");
+      await editor.fill("# Neu gefasst\n\nGeändert.");
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
+      await page.reload();
+      await page.getByRole("radio", { name: "Dargestellt" }).click();
+      await expect(page.locator(".cm-content .cm-h1")).toHaveText("Neu gefasst");
 
       // It is listed under Ich → Notizen.
       await page.goto("/me/notes");
@@ -71,16 +67,18 @@ test.describe("knowledge: notes, files and images", () => {
       await page.getByRole("radio", { name: "Datei" }).click();
       // Markdown goes to the editor.
       await page.locator("input[type=file]").setInputFiles({ name: "protokoll.md", mimeType: "text/markdown", buffer: Buffer.from("# Protokoll\n\n- Punkt A\n") });
-      await expect(page.getByRole("status")).toContainText("steht jetzt als Notiz im Editor");
-      await expect(page.getByLabel("Inhalt in Markdown")).toHaveValue(/# Protokoll/);
+      await expect(page.getByRole("status")).toContainText("ist jetzt eine Notiz");
+      await page.getByRole("radio", { name: "Quelltext" }).click();
+      await expect(page.getByLabel("Inhalt in Markdown")).toContainText("# Protokoll");
       await expect(page.getByLabel("Titel", { exact: true })).toHaveValue("protokoll");
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 20_000 });
 
       // A photo.
       await page.getByRole("radio", { name: "Datei" }).click();
       await page.locator("input[type=file]").setInputFiles({ name: "skizze.png", mimeType: "image/png", buffer: PNG });
       await expect(page.getByText("skizze.jpg").first()).toBeVisible();
       await page.getByLabel("Titel", { exact: true }).fill(photoTitle);
-      await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
+      await page.getByRole("button", { name: "Speichern", exact: true }).click();
       await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       const img = page.locator("main img[src^='/api/files/']");
       await expect(img).toBeVisible();
@@ -95,7 +93,7 @@ test.describe("knowledge: notes, files and images", () => {
       await page.locator("input[type=file]").setInputFiles({ name: "bericht.pdf", mimeType: "application/pdf", buffer: PDF });
       await expect(page.getByText("bericht.pdf").first()).toBeVisible();
       await page.getByLabel("Titel", { exact: true }).fill(pdfTitle);
-      await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
+      await page.getByRole("button", { name: "Speichern", exact: true }).click();
       await expect(page).toHaveURL(/\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       const open = page.getByRole("link", { name: "Datei öffnen" });
       await expect(open).toBeVisible();
@@ -105,7 +103,7 @@ test.describe("knowledge: notes, files and images", () => {
       // New files are private until shared: without an account the same address gives nothing.
       expect((await request.get((await open.getAttribute("href"))!, { maxRedirects: 0 })).status()).toBe(404);
     } finally {
-      await exec(`delete from public.resources where title in ('${photoTitle}', '${pdfTitle}')`);
+      await exec(`delete from public.resources where title in ('${photoTitle}', '${pdfTitle}', 'protokoll')`);
       for (const path of stored) await removeStored(path);
     }
   });

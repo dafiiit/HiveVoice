@@ -1,10 +1,6 @@
-import { getTranslations } from "next-intl/server";
-import { MineSection } from "@/components/mine/MineSection";
+import { redirect } from "next/navigation";
 
-export async function generateMetadata() {
-  return { title: (await getTranslations("mine.filters"))("lists") };
-}
-
-export default async function MineLists() {
-  return <MineSection kind="lists" open={false} />;
+// Lists are notes with tasks now: the old address leads to them.
+export default function MineLists() {
+  redirect("/me/notes?f=tasks");
 }

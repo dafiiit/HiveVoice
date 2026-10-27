@@ -10,8 +10,9 @@ import { IconFile, IconPen } from "../ui/Icons";
 import { ImageEditor } from "../ImageEditor";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { btn, field } from "../ui/styles";
-import { AccessPicker, type Access } from "./AccessPicker";
+import { ShareTarget, resolveTarget, targetFor, type Target } from "./ShareTarget";
 import { Notice } from "@/components/ui/Page";
+import { Optional } from "../ui/Optional";
 
 type Group = { id: string; slug: string; name: string };
 
@@ -33,8 +34,7 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [groupId, setGroupId] = useState(groups.find((g) => g.slug === initialGroup)?.id ?? "");
-  const [access, setAccess] = useState<Access>({ visibility: groups.some((g) => g.slug === initialGroup) ? "group" : "me", license: "all_rights" });
+  const [target, setTarget] = useState<Target>(targetFor(groups, initialGroup));
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [pending, start] = useTransition();
@@ -72,7 +72,8 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
   const share = () => start(async () => {
     if (!file) return;
     setError(null);
-    const res = await shareFile({ file, title, description, tags, groupId: groupId || null, visibility: access.visibility, license: access.visibility === "public" ? access.license : undefined });
+    const { groupId, visibility } = resolveTarget(target);
+    const res = await shareFile({ file, title, description, tags, groupId, visibility, license: visibility === "public" ? target.license : undefined });
     if (!res.ok) return setError(t.has(`errors.${res.error}`) ? t(`errors.${res.error}` as "errors.invalid") : tc(`errors.${res.error}` as "errors.unknown"));
     const group = groups.find((g) => g.id === groupId);
     router.push(group ? `/groups/${group.slug}?tab=links` : docHref(res.data));
@@ -105,21 +106,15 @@ export function ShareFileForm({ groups, initialGroup, ideas, onMarkdown }: { gro
           <label className={field.label}>{tl("titleLabel")}
             <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={field.input} />
           </label>
-          <label className={field.label}>{tl("descriptionLabel")}
-            <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} placeholder={tl("descriptionPlaceholder")} className={field.textarea} />
-          </label>
-          <TagPicker label={tl("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={tl("tagsPlaceholder")} max={10} />
-          {groups.length > 0 && (
-            <label className={field.label}>{tl("groupLabel")}
-              <select value={groupId} onChange={(e) => { setGroupId(e.target.value); setAccess((a) => ({ ...a, visibility: e.target.value ? "group" : "me" })); }} className={`${field.select}`}>
-                <option value="">{tl("everyone")}</option>
-                {groups.map((g) => <option key={g.id} value={g.id}>{tl("inGroup", { name: g.name })}</option>)}
-              </select>
+          <Optional label={tl("optional")}>
+            <label className={field.label}>{tl("descriptionLabel")}
+              <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} placeholder={tl("descriptionPlaceholder")} className={field.textarea} />
             </label>
-          )}
-          <AccessPicker value={access} onChange={setAccess} inGroup={!!groupId} />
+            <TagPicker label={tl("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={tl("tagsPlaceholder")} max={10} />
+          </Optional>
+          <ShareTarget value={target} onChange={setTarget} groups={groups} />
           <div>
-            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primary}>{pending ? tl("publishing") : tl("publish")}</button>
+            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primary}>{pending ? tl("saving") : target.where === "me" ? tl("save") : tl("shareNow")}</button>
           </div>
         </>
       )}

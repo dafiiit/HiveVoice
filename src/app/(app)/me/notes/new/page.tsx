@@ -8,5 +8,5 @@ export async function generateMetadata() {
 
 export default async function NewNote({ searchParams }: PageProps<"/me/notes/new">) {
   const sp = await searchParams;
-  return <MineSection kind="notes" open detail={<NewDoc mode={sp.mode === "link" ? "link" : "note"} group={typeof sp.group === "string" ? sp.group : null} />} />;
+  return <MineSection kind="notes" open detail={<NewDoc mode={sp.mode === "link" ? "link" : "note"} group={typeof sp.group === "string" ? sp.group : null} list={sp.list === "1"} />} />;
 }

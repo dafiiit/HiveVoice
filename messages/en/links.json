@@ -2,8 +2,6 @@
   "title": "Knowledge and links",
   "share": "Add knowledge",
   "shareTitle": "Add knowledge",
-  "shareLead": "Share knowledge as a link to something you keep elsewhere, as a file (photo, PDF) or as a Markdown note you write here and can edit later. For links HiveVoice only keeps the link and a small preview.",
-  "shareLeadShort": "Share links, files or notes.",
   "urlLabel": "Link address",
   "urlPlaceholder": "https://drive.google.com/…",
   "check": "Check",
@@ -143,5 +141,14 @@
   "preview": "How the card looks",
   "tileTitle": "No preview image",
   "alreadyShared": "You already shared this link.",
-  "fromOther": "More links from {name}"
+  "fromOther": "More links from {name}",
+  "target": {
+    "label": "Where to share?",
+    "me": "Do not share (only me)",
+    "link": "Everyone with the link"
+  },
+  "save": "Save",
+  "saving": "Saving …",
+  "shareNow": "Share",
+  "optional": "Description and hashtags (optional)"
 }

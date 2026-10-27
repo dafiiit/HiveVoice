@@ -14,7 +14,7 @@
   "embedLabel": "In eine Notiz einfügen",
   "embedHint": "In die Notiz kopieren oder dort über „draw.io“ auswählen. Die Notiz zeigt immer die neueste Version.",
   "status": {
-    "hint": "Erst nur für dich. Speichert sich selbst, sobald es einen Namen hat.",
+    "hint": "Speichert sich selbst, sobald es einen Namen hat.",
     "unsaved": "Noch nicht gespeichert.",
     "saving": "Speichert …",
     "saved": "Gespeichert.",

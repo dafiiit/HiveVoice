@@ -13,22 +13,25 @@ async function exec(statement: string) {
 test.describe("nothing typed is lost", () => {
   test.skip(!signedIn, "needs a test account");
 
-  test("a note begun comes back after leaving the page, and can be discarded", async ({ page }, info) => {
-    test.skip(info.project.name !== "desktop", "one browser is enough");
-    await login(page);
-    await page.goto("/me/notes/new");
-    await page.getByLabel("Titel").fill("Halb fertig");
-    await page.getByLabel("Inhalt in Markdown").fill("Noch nicht gespeichert");
-    await page.goto("/me");
-    await page.goto("/me/notes/new");
-    await expect(page.getByText(/Nicht gespeicherter Entwurf von .* wiederhergestellt\./)).toBeVisible();
-    await expect(page.getByLabel("Titel")).toHaveValue("Halb fertig");
-    await expect(page.getByLabel("Inhalt in Markdown")).toHaveValue("Noch nicht gespeichert");
-    await page.getByRole("button", { name: "Verwerfen" }).click();
-    await expect(page.getByLabel("Inhalt in Markdown")).toHaveValue("");
-    await page.reload();
-    await expect(page.getByLabel("Titel")).toHaveValue("");
-    await expect(page.getByText(/wiederhergestellt/)).toHaveCount(0);
+  test("a note written offline stays on the device and is saved once the connection is back", async ({ page, context }, info) => {
+    test.skip(info.project.name !== "desktop" || !migrator, "writes data, and needs the migration connection for cleaning up");
+    const marker = `E2E Offline ${Date.now()}`;
+    try {
+      await login(page);
+      await page.goto("/me/notes/new");
+      await page.waitForSelector(".cm-content");
+      await context.setOffline(true);
+      await page.getByLabel("Titel", { exact: true }).fill(marker);
+      await page.getByLabel("Inhalt in Markdown").fill("Noch nicht gesendet");
+      await expect(page.getByText(/Du bist offline/)).toBeVisible({ timeout: 20_000 });
+      expect(await page.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith("hv-draft:note:")).length), "kept on the device").toBe(1);
+      await context.setOffline(false);
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 45_000 });
+      await page.goto("/me/notes");
+      await expect(page.getByRole("link", { name: new RegExp(marker) })).toBeVisible();
+    } finally {
+      await exec(`delete from public.resources where title = '${marker}'`);
+    }
   });
 
   test("a note being changed saves itself, into the same version", async ({ page }, info) => {
@@ -45,10 +48,10 @@ test.describe("nothing typed is lost", () => {
       await login(page);
       await page.goto("/me/notes");
       await page.getByRole("link", { name: new RegExp(marker) }).first().click();
-      await page.getByRole("link", { name: "Bearbeiten" }).click();
+      // The note is the editor: there is nothing to open and nothing to save.
       const text = page.getByLabel("Inhalt in Markdown");
       await text.fill("Zweite Fassung, ohne auf Speichern zu drücken");
-      await expect(page.getByText("Automatisch gespeichert.")).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByText("Gespeichert")).toBeVisible({ timeout: 30_000 });
       await text.fill("Dritte Fassung, ohne auf Speichern zu drücken");
       const view = page.url().split("?")[0];
       await expect.poll(async () => (await page.request.get(view)).text(), { timeout: 30_000 }).toContain("Dritte Fassung");

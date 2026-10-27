@@ -76,29 +76,41 @@
     "toGroup": "You want to make something happen together? Found a group"
   },
   "tiles": {
-    "need": {
-      "title": "Post wanted",
-      "text": "Big or small: what you are missing. Whoever has something that fits gets in touch."
+    "listing": {
+      "title": "Request or offer",
+      "text": "Look for something or offer it."
     },
-    "offer": {
-      "title": "Create offer",
-      "text": "Skills, time or things, free, as a swap or paid."
+    "chat": {
+      "title": "Chat",
+      "text": "Write to a person."
     },
     "group": {
-      "title": "Found a group",
-      "text": "A project, a club, a neighbourhood. With goals, tasks and roles."
+      "title": "Group",
+      "text": "With goals, tasks and roles."
     },
     "initiative": {
-      "title": "Start an initiative",
-      "text": "Demand something from a responsible office, with debate, a vote and a duty to answer."
+      "title": "Initiative",
+      "text": "Demand something from a responsible office."
     },
     "voice": {
-      "title": "Write on the noticeboard",
-      "text": "A question or news for everyone in your place."
+      "title": "Noticeboard post",
+      "text": "A question or news for your place."
     },
-    "doc": {
-      "title": "Write a note",
-      "text": "In Markdown, with versions. Only for you until you share it."
+    "note": {
+      "title": "Note",
+      "text": "Text, tasks and formulas."
+    },
+    "list": {
+      "title": "List",
+      "text": "Tasks to tick off."
+    },
+    "diagram": {
+      "title": "Diagram",
+      "text": "Draw a flow or a sketch."
+    },
+    "upload": {
+      "title": "Upload",
+      "text": "A file, a photo or a link."
     }
   }
 }

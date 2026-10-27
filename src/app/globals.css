@@ -235,3 +235,60 @@ select {
 .md .md-math-display { margin: 0 0 1em; overflow-x: auto; overflow-y: hidden; }
 .md .md-math code { background: none; padding: 0; }
 .md .md-diagram-error { background: var(--red-soft); color: var(--ink); border-left: 4px solid var(--red); font-size: 0.9rem; white-space: pre-wrap; }
+
+/* The note editor: Markdown drawn as it will look (src/components/editor/live.ts). Headings and lists follow .md above. */
+.cm-host { min-width: 0; }
+.cm-host .cm-editor { background: var(--surface); border: 1px solid var(--line-strong); color: var(--ink); font-size: 1rem; }
+.cm-host .cm-editor.cm-focused { outline: 2px solid var(--red); outline-offset: 2px; }
+.cm-host .cm-scroller { font-family: inherit; line-height: 1.6; overflow: auto; }
+.cm-host .cm-content { padding: 1rem; caret-color: var(--ink); min-height: 320px; overflow-wrap: anywhere; }
+@media (min-width: 1024px) { .cm-host .cm-content { min-height: 480px; padding: 1.25rem 1.5rem; } }
+.cm-host .cm-line { padding: 0 0.1em 0 0; }
+.cm-host .cm-cursor { border-left: 2px solid var(--ink); }
+.cm-host .cm-selectionBackground, .cm-host .cm-focused .cm-selectionBackground { background: color-mix(in srgb, var(--red) 28%, transparent) !important; }
+.cm-host .cm-placeholder { color: var(--muted); white-space: pre-wrap; }
+.cm-host .cm-source .cm-content, .cm-host .cm-editor.cm-source .cm-content { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.875rem; }
+.cm-host .cm-h { font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; padding-top: 0.5em; padding-bottom: 0.2em; }
+.cm-host .cm-h1 { font-size: 1.9rem; }
+.cm-host .cm-h2 { font-size: 1.45rem; border-top: 3px solid var(--ink); margin-top: 0.8em; }
+.cm-host .cm-h3 { font-size: 1.2rem; }
+.cm-host .cm-h4, .cm-host .cm-h5, .cm-host .cm-h6 { font-size: 1rem; }
+.cm-host .cm-line:first-child.cm-h2 { margin-top: 0; border-top: 0; }
+.cm-host .cm-setext-mark { color: var(--muted); font-size: 0.75rem; line-height: 1; }
+.cm-host .cm-strong { font-weight: 700; }
+.cm-host .cm-em { font-style: italic; }
+.cm-host .cm-strike { text-decoration: line-through; color: var(--muted); }
+.cm-host .cm-code { background: var(--chip); padding: 0.1em 0.35em; font-size: 0.92em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.cm-host .cm-link { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; cursor: text; }
+.cm-host .cm-url { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.cm-host .cm-quote { border-left: 4px solid var(--ink); padding-left: 1em; color: var(--muted); }
+.cm-host .cm-li { padding-left: calc(1.5em * (var(--depth, 0) + 1)); text-indent: -1.5em; }
+.cm-host .cm-bullet { display: inline-block; width: 1.5em; text-indent: 0; text-align: center; font-weight: 700; }
+.cm-host .cm-olmark { display: inline-block; min-width: 1.5em; text-indent: 0; font-variant-numeric: tabular-nums; }
+.cm-host .cm-check { appearance: none; -webkit-appearance: none; display: inline-block; vertical-align: -0.2em; width: 1.1em; height: 1.1em; margin: 0 0.4em 0 0.2em; border: 2px solid var(--ink); background: var(--surface); border-radius: 0; cursor: pointer; text-indent: 0; position: relative; }
+.cm-host .cm-check:checked { background: var(--ink); }
+.cm-host .cm-check:checked::after { content: ""; position: absolute; left: 0.28em; top: 0.02em; width: 0.28em; height: 0.6em; border: solid var(--on-ink); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.cm-host .cm-task-done { text-decoration: line-through; color: var(--muted); }
+.cm-host .cm-rule { border: 0; border-top: 1px solid var(--line-strong); margin: 0.8em 0; }
+.cm-host .cm-code-line { background: var(--chip); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; padding-left: 0.8em; padding-right: 0.8em; }
+.cm-host .cm-fence { color: var(--muted); }
+.cm-host .cm-table-line { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.88em; background: var(--chip); }
+.cm-host .cm-math-source { color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+.cm-host .cm-image-source { color: var(--muted); }
+.cm-host .cm-picture { display: block; max-width: 100%; height: auto; margin: 0.4em 0; border: 1px solid var(--line); }
+.cm-host .cm-remote-image { text-decoration: underline; color: var(--ink); }
+.cm-host .cm-drawing { display: block; margin: 0.4em 0; border: 1px solid var(--line); text-indent: 0; }
+.cm-host .cm-drawing img { display: block; max-width: 100%; height: auto; margin: 0 auto; padding: 0.75em; background: #fff; }
+.cm-host .cm-drawing-closed { display: block; padding: 1em; color: var(--muted); font-size: 0.875rem; }
+.cm-host .cm-drawing-caption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5em 1em; justify-content: space-between; border-top: 1px solid var(--line); padding: 0.5em 0.75em; font-size: 0.875rem; }
+.cm-host .cm-drawing-caption a { color: var(--ink); }
+.cm-host .cm-math-display { margin: 0.4em 0; overflow-x: auto; overflow-y: hidden; }
+.cm-host .cm-math code { background: none; padding: 0; }
+.cm-host .cm-mermaid { margin: 0.4em 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0.4em; }
+.cm-host .cm-mermaid .md-diagram { align-self: stretch; margin: 0; background: var(--surface); border: 1px solid var(--line); padding: 1em; overflow-x: auto; text-align: center; color: var(--muted); font-size: 0.9rem; }
+.cm-host .cm-mermaid .md-diagram svg { max-width: 100%; height: auto; }
+.cm-host .cm-mermaid-convert { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; font-size: 0.875rem; cursor: pointer; }
+.cm-host .cm-grid { margin: 0.4em 0; overflow-x: auto; }
+.cm-host .cm-grid table { border-collapse: collapse; min-width: 60%; }
+.cm-host .cm-grid th, .cm-host .cm-grid td { border: 1px solid var(--line-strong); padding: 0.4em 0.7em; vertical-align: top; }
+.cm-host .cm-grid th { background: var(--chip); }

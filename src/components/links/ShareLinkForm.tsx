@@ -9,7 +9,9 @@ import { TagPicker } from "../TagPicker";
 import { PreviewImage } from "./PreviewImage";
 import { IconCheck } from "../ui/Icons";
 import { btn, cardFrame, field } from "../ui/styles";
+import { ShareTarget, resolveTarget, targetFor, type Target } from "./ShareTarget";
 import { Notice } from "@/components/ui/Page";
+import { Optional } from "../ui/Optional";
 
 type Group = { id: string; slug: string; name: string };
 type Good = Extract<Inspection, { ok: true }>;
@@ -29,7 +31,7 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [groupId, setGroupId] = useState<string>(groups.find((g) => g.slug === initialGroup)?.id ?? "");
+  const [target, setTarget] = useState<Target>(targetFor(groups, initialGroup));
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   // A link begun but not shared stays on the device (it is checked again before sharing).
@@ -55,7 +57,8 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
   const share = () => start(async () => {
     if (!found) return;
     setError(null);
-    const res = await shareLink({ url: found.url, title, description, tags, groupId: groupId || null });
+    const { groupId, visibility } = resolveTarget(target);
+    const res = await shareLink({ url: found.url, title, description, tags, groupId, visibility });
     if (!res.ok) {
       const key = res.error.startsWith("link_") ? `blocks.${res.error.slice(5)}` : null;
       return setError(key ? t(key as "blocks.unsafe") : res.error === "duplicate" ? t("alreadyShared") : tc(`errors.${res.error}` as "errors.unknown"));
@@ -108,22 +111,17 @@ export function ShareLinkForm({ groups, initialGroup, ideas }: { groups: Group[]
           <label className={field.label}>{t("titleLabel")}
             <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} className={field.input} />
           </label>
-          <label className={field.label}>{t("descriptionLabel")}
-            <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} placeholder={t("descriptionPlaceholder")} className={field.textarea} />
-          </label>
-          <TagPicker label={t("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={t("tagsPlaceholder")} max={10} />
-          {groups.length > 0 && (
-            <label className={field.label}>{t("groupLabel")}
-              <select value={groupId} onChange={(e) => setGroupId(e.target.value)} className={`${field.select}`}>
-                <option value="">{t("everyone")}</option>
-                {groups.map((g) => <option key={g.id} value={g.id}>{t("inGroup", { name: g.name })}</option>)}
-              </select>
+          <Optional label={t("optional")}>
+            <label className={field.label}>{t("descriptionLabel")}
+              <textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} placeholder={t("descriptionPlaceholder")} className={field.textarea} />
             </label>
-          )}
+            <TagPicker label={t("tagsLabel")} value={tags} onChange={setTags} suggestions={ideas} placeholder={t("tagsPlaceholder")} max={10} />
+          </Optional>
+          <ShareTarget value={target} onChange={setTarget} groups={groups} license={false} />
           <p className="m-0 text-sm text-muted">{t("privacy")}</p>
           {error && <Notice tone="error">{error}</Notice>}
           <div>
-            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primary}>{pending ? t("publishing") : t("publish")}</button>
+            <button type="button" disabled={pending || title.trim().length < 3} onClick={share} className={btn.primary}>{pending ? t("saving") : target.where === "me" ? t("save") : t("shareNow")}</button>
           </div>
         </>
       )}

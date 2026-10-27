@@ -6,12 +6,12 @@
   "newList": "Liste",
   "filters": {
     "all": "Überblick",
-    "lists": "Listen",
     "notes": "Notizen",
     "projects": "Initiativen",
     "listings": "Anliegen",
     "uploads": "Uploads",
-    "diagrams": "Diagramme"
+    "diagrams": "Diagramme",
+    "tasks": "Mit Aufgaben"
   },
   "filterLabel": "Inhalte filtern",
   "kind": {
@@ -57,7 +57,12 @@
     "delete": "Liste löschen",
     "deleteConfirm": "Liste mit allen Punkten löschen?",
     "back": "Meine Inhalte",
-    "readOnly": "Liste von {name}"
+    "readOnly": "Liste von {name}",
+    "progress": "{done} von {total} erledigt",
+    "hideDone": "Erledigte ausblenden",
+    "itemLabel": "Punkt",
+    "up": "Nach oben",
+    "down": "Nach unten"
   },
   "newDocTitle": "Neue Notiz",
   "area": "Ich",
@@ -66,11 +71,9 @@
   "newUpload": "Hochladen",
   "myNotes": "Meine Notizen",
   "myUploads": "Meine Uploads",
-  "emptyNotes": "Noch keine Notiz. Notizen schreibst du in Markdown, mit Versionen, und teilst sie, wenn du willst.",
-  "emptyUploads": "Noch nichts hochgeladen. Dateien, Fotos, PDFs und Links landen hier.",
-  "newNoteLead": "In Markdown, mit Versionen. Erst nur für dich, teilen kannst du später.",
+  "emptyNotes": "Noch keine Notiz.",
+  "emptyUploads": "Noch nichts hochgeladen.",
   "uploadTitle": "Hochladen",
-  "uploadLead": "Eine Datei (Foto, PDF …) oder einen Link. Erst nur für dich.",
   "search": "Durchsuchen",
   "pick": "Wähle links etwas aus, dann öffnet es sich hier.",
   "newListing": "Anliegen",
@@ -80,5 +83,5 @@
   "new": "Neu",
   "newDiagram": "Diagramm",
   "myDiagrams": "Meine Diagramme",
-  "emptyDiagrams": "Noch kein Diagramm. Zeichne Abläufe, Pläne und Skizzen mit draw.io, mit Versionen, und teile sie, wenn du willst."
+  "emptyDiagrams": "Noch kein Diagramm."
 }

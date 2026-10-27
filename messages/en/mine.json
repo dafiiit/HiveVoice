@@ -6,12 +6,12 @@
   "newList": "List",
   "filters": {
     "all": "Overview",
-    "lists": "Lists",
     "notes": "Notes",
     "projects": "Initiatives",
     "listings": "Offers and requests",
     "uploads": "Uploads",
-    "diagrams": "Diagrams"
+    "diagrams": "Diagrams",
+    "tasks": "With tasks"
   },
   "filterLabel": "Filter content",
   "kind": {
@@ -57,7 +57,12 @@
     "delete": "Delete list",
     "deleteConfirm": "Delete the list with all items?",
     "back": "My content",
-    "readOnly": "List by {name}"
+    "readOnly": "List by {name}",
+    "progress": "{done} of {total} done",
+    "hideDone": "Hide done",
+    "itemLabel": "Item",
+    "up": "Move up",
+    "down": "Move down"
   },
   "newDocTitle": "New note",
   "area": "Me",
@@ -66,11 +71,9 @@
   "newUpload": "Upload",
   "myNotes": "My notes",
   "myUploads": "My uploads",
-  "emptyNotes": "No note yet. Notes are written in Markdown, with versions, and shared when you want.",
-  "emptyUploads": "Nothing uploaded yet. Files, photos, PDFs and links end up here.",
-  "newNoteLead": "In Markdown, with versions. Only for you until you share it.",
+  "emptyNotes": "No notes yet.",
+  "emptyUploads": "Nothing uploaded yet.",
   "uploadTitle": "Upload",
-  "uploadLead": "A file (photo, PDF …) or a link. Only for you at first.",
   "search": "Search",
   "pick": "Pick something on the left and it opens here.",
   "newListing": "Listing",
@@ -80,5 +83,5 @@
   "new": "New",
   "newDiagram": "Diagram",
   "myDiagrams": "My diagrams",
-  "emptyDiagrams": "No diagram yet. Draw flows, plans and sketches with draw.io, with versions, and share them when you like."
+  "emptyDiagrams": "No diagrams yet."
 }

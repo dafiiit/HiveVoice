@@ -2,8 +2,6 @@
   "title": "Wissen und Links",
   "share": "Wissen hinzufügen",
   "shareTitle": "Wissen hinzufügen",
-  "shareLead": "Teile Wissen als Link zu etwas, das du schon anderswo abgelegt hast, als Datei (Foto, PDF) oder als Markdown-Notiz, die du hier schreibst und später weiter bearbeiten kannst. Bei Links speichert HiveVoice nur den Link und eine kleine Vorschau.",
-  "shareLeadShort": "Teile Links, Dateien oder Notizen.",
   "urlLabel": "Adresse des Links",
   "urlPlaceholder": "https://drive.google.com/…",
   "check": "Prüfen",
@@ -143,5 +141,14 @@
   "preview": "So sieht die Karte aus",
   "tileTitle": "Ohne Vorschaubild",
   "alreadyShared": "Diesen Link hast du schon geteilt.",
-  "fromOther": "Weitere Links von {name}"
+  "fromOther": "Weitere Links von {name}",
+  "target": {
+    "label": "Wo teilen?",
+    "me": "Nicht teilen (nur für mich)",
+    "link": "Alle, die den Link haben"
+  },
+  "save": "Speichern",
+  "saving": "Speichert …",
+  "shareNow": "Teilen",
+  "optional": "Beschreibung und Hashtags (freiwillig)"
 }

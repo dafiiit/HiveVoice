@@ -14,7 +14,7 @@
   "embedLabel": "Insert into a note",
   "embedHint": "Copy it into the note or pick it there with “draw.io”. The note always shows the latest version.",
   "status": {
-    "hint": "Only for you at first. Saves itself once it has a name.",
+    "hint": "Saves itself once it has a name.",
     "unsaved": "Not saved yet.",
     "saving": "Saving …",
     "saved": "Saved.",

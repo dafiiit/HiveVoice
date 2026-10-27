@@ -215,7 +215,9 @@ test.describe("signed in", () => {
     await expect(page.getByText("Bekannter Dienst").first()).toBeVisible({ timeout: 20_000 });
     const title = `E2E Testlink ${Date.now()} (wird gleich gelöscht)`;
     await page.getByLabel("Titel", { exact: true }).fill(title);
-    await page.getByRole("button", { name: "Veröffentlichen", exact: true }).click();
+    // Nothing is shared unless chosen: the button says "Speichern" until a place is picked.
+    await expect(page.getByLabel("Wo teilen?")).toHaveValue("me");
+    await page.getByRole("button", { name: "Speichern", exact: true }).click();
     await page.waitForURL(/\/(links|me\/uploads)\/[0-9a-f-]{36}/);
     await expect(page.getByRole("heading", { name: /E2E Testlink/ })).toBeVisible();
     await expect(page.getByRole("link", { name: /Link öffnen/ })).toHaveAttribute("rel", /noopener/);
@@ -226,12 +228,16 @@ test.describe("signed in", () => {
     await page.waitForURL(/\/me\/uploads$/);
   });
 
-  test("Neu has six equal tiles with the words of the buttons; group and initiative have their own forms", async ({ page }) => {
+  test("Neu has one list of nine tiles, the same wherever it opens; group and initiative have their own forms", async ({ page }) => {
     await login(page);
     await page.goto("/new");
     const tiles = page.locator("main a").filter({ has: page.locator("strong") });
-    await expect(tiles).toHaveCount(6);
-    for (const name of ["Gesuch erstellen", "Angebot erstellen", "Gruppe gründen", "Initiative starten", "Notiz schreiben", "Auf der Pinnwand schreiben"]) await expect(page.getByRole("link", { name: new RegExp(name) })).toBeVisible();
+    await expect(tiles).toHaveCount(9);
+    for (const name of ["Anliegen", "Chat", "Gruppe", "Initiative", "Pinnwand-Beitrag", "Notiz", "Liste", "Diagramm", "Hochladen"]) await expect(tiles.filter({ hasText: new RegExp(`^${name}`) })).toHaveCount(1);
+    // In Ich the "Neu" menu offers exactly these.
+    await page.goto("/me");
+    await page.getByRole("button", { name: "Neu" }).first().click();
+    await expect(page.getByRole("group", { name: "Neu" }).getByRole("link")).toHaveCount(9);
     // Knowledge has no buttons of its own any more: documents are part of the toolbox.
     await page.goto("/me/listings?as=offer");
     await expect(page.getByRole("radio", { name: "Ich teile Wissen" })).toHaveCount(0);

@@ -1277,7 +1277,7 @@ describe("polls and the rights matrix", () => {
     expect((await can(tx, b, "nonsense.action", null)).reason).toBe("unknown_action");
     expect((await can(tx, null, "group.post", randomUUID())).reason).toBe("not_authenticated");
 
-    const note = (await as(tx, a, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title: "Anleitung Beet", body: "Text" })}) as id`))[0].id;
+    const note = (await as(tx, a, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title: "Anleitung Beet", body: "Text", visibility: "public" })}) as id`))[0].id;
     expect((await can(tx, b, "resource.view", note)).allowed).toBe(true);
     expect(await can(tx, b, "resource.edit", note)).toEqual({ allowed: false, reason: "view_only" });
     expect(await can(tx, b, "resource.manage", note)).toEqual({ allowed: false, reason: "not_owner" });

@@ -957,7 +957,7 @@ describe("responsibilities: levels, limits, requests, hand-over, disputes", () =
 
 describe("documents: visibility, rights, versions, suggestions, copies, trash", () => {
   const note = async (tx: postgres.TransactionSql, who: string, title = "Anleitung für das Beet", extra: Record<string, unknown> = {}) =>
-    (await as(tx, who, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title, body: "# Beet\nErst graben, dann säen.", ...extra })}) as id`))[0].id;
+    (await as(tx, who, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title, body: "# Beet\nErst graben, dann säen.", ...(extra.group_id ? {} : { visibility: "public" }), ...extra })}) as id`))[0].id;
   const visible = async (tx: postgres.TransactionSql, who: string | null, id: string) =>
     (await as(tx, who, () => tx`select 1 from public.resources where id = ${id}`)).length === 1;
 

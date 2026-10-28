@@ -1,6 +1,8 @@
 # HiveVoice as a single container (Next.js standalone output).
 # Build:  docker build -t hivevoice .
 # Run:    docker run --env-file .env -p 3000:3000 hivevoice
+# Self-hosting with database, login and files: selfhost/ (docs/selbsthosting.md). The image also carries the migrations:
+#         docker run --env-file .env hivevoice node scripts/migrate.mjs
 FROM node:22-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -26,6 +28,9 @@ RUN addgroup -S app && adduser -S app -G app
 COPY --from=build --chown=app:app /app/.next/standalone ./
 COPY --from=build --chown=app:app /app/.next/static ./.next/static
 COPY --from=build --chown=app:app /app/public ./public
+# The database schema and the scripts that set it up, for a self-hosted instance (selfhost/setup.sh).
+COPY --from=build --chown=app:app /app/supabase/migrations ./supabase/migrations
+COPY --from=build --chown=app:app /app/scripts/migrate.mjs /app/scripts/import-regions.mjs /app/scripts/import-region-coords.mjs ./scripts/
 USER app
 EXPOSE 3000
 CMD ["node", "server.js"]

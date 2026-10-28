@@ -70,6 +70,7 @@ function Row({ o, me, now, showGroup, slug }: { o: Occurrence; me: string | null
   const past = new Date(o.ends_at).getTime() < now;
   const meta = [
     showGroup ? o.group_name : null,
+    o.external ? o.external.calendar : null,
     o.place,
     o.kind === "event" && o.rsvp && (o.yes_count || o.maybe_count) ? t("rsvp.count", { yes: o.yes_count, maybe: o.maybe_count }) : null,
   ].filter(Boolean).join(" · ");
@@ -77,9 +78,12 @@ function Row({ o, me, now, showGroup, slug }: { o: Occurrence; me: string | null
     <li className={`flex flex-wrap items-start gap-x-4 gap-y-2 border-b border-line py-3 ${o.cancelled || past ? "text-muted" : ""}`}>
       <span className="w-14 flex-none pt-0.5 text-sm font-bold tabular-nums">{o.all_day ? t("allDay") : clock(o.occurs_at, locale)}</span>
       <span className="flex min-w-[180px] flex-1 flex-col gap-1">
-        <Link href={occurrenceHref(o)} className={`font-bold text-ink no-underline hover:underline ${o.cancelled ? "line-through" : ""}`}>{o.title}</Link>
+        {o.external
+          ? <a href={o.external.href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-7 items-center font-bold text-ink no-underline hover:underline">{o.title}</a>
+          : <Link href={occurrenceHref(o)} className={`inline-flex min-h-7 items-center font-bold text-ink no-underline hover:underline ${o.cancelled ? "line-through" : ""}`}>{o.title}</Link>}
         {meta && <span className="text-sm text-muted">{meta}</span>}
         <span className="flex flex-wrap gap-1.5">
+          {o.external && <span className={tag}>Nextcloud</span>}
           {o.cancelled && <span className={`${tag} border-red text-red`}>{t("badges.cancelled")}</span>}
           {o.visibility === "public" && <span className={tag}>{t("badges.public")}</span>}
           {o.kind === "duty" && <span className={`${tag} ${mine && !done ? "border-ink font-bold" : ""}`}>
@@ -91,7 +95,7 @@ function Row({ o, me, now, showGroup, slug }: { o: Occurrence; me: string | null
         </span>
       </span>
       {/* What I can do right here: answer, take over, tick off. The rest is on the date's own page. */}
-      {me && !o.cancelled && !past && (
+      {me && !o.cancelled && !past && !o.external && (
         <span className="flex flex-wrap items-center gap-2">
           {o.kind === "event" && o.rsvp && (
             <>

@@ -16,7 +16,8 @@ export const cookieAttributes = {
   path: "/",
   sameSite: "lax" as const,
   maxAge: 60 * 60 * 24 * 400,
-  secure: process.env.NODE_ENV === "production",
+  // Only over https in production; a self-hosted instance in the home network (APP_URL http://192.168…) has no https.
+  secure: process.env.NODE_ENV === "production" && !(process.env.APP_URL ?? "").startsWith("http://"),
 };
 
 // For the Supabase clients, which take the session cookie's name from here.

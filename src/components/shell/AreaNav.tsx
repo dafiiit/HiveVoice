@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, type ReactNode } from "react";
+import { Swipe } from "./Swipe";
 
 /**
  * `match`: the paths (and optionally one query value, "f=docs") that count as this section.
@@ -23,7 +24,8 @@ export function AreaFrame({ title, label, items, children }: { title: string; la
         {/* The query part (?f=docs) is only known in the browser; the server marks the section by its path alone. */}
         <Suspense fallback={<Live items={items} params={null} />}><WithParams items={items} /></Suspense>
       </nav>
-      <div className="min-w-0 flex-1">{children}</div>
+      {/* Phones: a swipe sideways goes to the next or previous section. */}
+      <Suspense fallback={<div className="min-w-0 flex-1">{children}</div>}><SwipeSections items={items}>{children}</SwipeSections></Suspense>
     </div>
   );
 }
@@ -32,7 +34,17 @@ function WithParams({ items }: { items: AreaItem[] }) {
   return <Live items={items} params={useSearchParams()} />;
 }
 
+function SwipeSections({ items, children }: { items: AreaItem[]; children: ReactNode }) {
+  const active = useActive(items, useSearchParams());
+  return <Swipe hrefs={items.map((it) => it.href)} active={active}>{children}</Swipe>;
+}
+
 function Live({ items, params }: { items: AreaItem[]; params: URLSearchParams | ReturnType<typeof useSearchParams> | null }) {
+  return <List items={items} active={useActive(items, params)} />;
+}
+
+/** The section open now: the most specific match wins (a section with a query value before the plain one). */
+function useActive(items: AreaItem[], params: URLSearchParams | ReturnType<typeof useSearchParams> | null) {
   const path = usePathname();
   const hit = (m: string) => {
     const [p, q] = m.split("?");
@@ -42,10 +54,9 @@ function Live({ items, params }: { items: AreaItem[]; params: URLSearchParams | 
     const [k, v] = q.split("=");
     return (params?.get(k) ?? "") === v;
   };
-  // The most specific match wins: a section with a query value before the plain one.
   const scored = items.map((it, i) => ({ i, score: Math.max(-1, ...(it.match ?? [it.href]).map((m) => (hit(m) ? m.length : -1))) }));
   const best = scored.reduce((a, b) => (b.score > a.score ? b : a), { i: -1, score: -1 });
-  return <List items={items} active={best.score >= 0 ? best.i : -1} />;
+  return best.score >= 0 ? best.i : -1;
 }
 
 function List({ items, active }: { items: AreaItem[]; active: number }) {

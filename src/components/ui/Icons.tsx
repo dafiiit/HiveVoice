@@ -55,3 +55,17 @@ export const IconCar = ({ size = 20, className }: P) => <svg {...base(size)} str
 export const IconPlane = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 13l18-8-6 16-3-6z" /><path d="M12 15l3-4" /></svg>;
 export const IconTicket = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z" /><path d="M14 7v10" strokeDasharray="2 2" /></svg>;
 export const IconSwap = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M4 8h15M15 4l4 4-4 4" /><path d="M20 16H5M9 12l-4 4 4 4" /></svg>;
+// Writing (the note editor's tool bar), drawn like the buttons of a word processor.
+export const IconHeading = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M5 4v16M16 4v16M5 12h11M19 13l2-1v8" /></svg>;
+export const IconBold = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={3} className={className}><path d="M7 4h6a4 4 0 0 1 0 8H7zM7 12h7a4 4 0 0 1 0 8H7z" /></svg>;
+export const IconItalic = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M10 4h8M6 20h8M14 4l-4 16" /></svg>;
+export const IconTask = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><rect x="3" y="3" width="18" height="18" /><path d="M7 12l3 3 7-7" /></svg>;
+export const IconBullets = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M4 6h1M4 12h1M4 18h1M9 6h11M9 12h11M9 18h11" /></svg>;
+export const IconLink = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M10 14a4 4 0 0 0 6 0l3-3a4 4 0 0 0-6-6l-1 1M14 10a4 4 0 0 0-6 0l-3 3a4 4 0 0 0 6 6l1-1" /></svg>;
+export const IconCode = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M8 7l-5 5 5 5M16 7l5 5-5 5" /></svg>;
+export const IconTable = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="3" y="4" width="18" height="16" /><path d="M3 10h18M3 15h18M10 4v16" /></svg>;
+export const IconFormula = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M18 5V4H6l7 8-7 8h12v-1" /></svg>;
+export const IconMarkdown = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="2" y="5" width="20" height="14" /><path d="M6 15V9l2.5 3L11 9v6M16 9v6M14 13l2 2 2-2" /></svg>;
+export const IconChecklist = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2.5} className={className}><path d="M3 6l2 2 3-3M3 13l2 2 3-3M11 7h10M11 14h10M11 20h10" /></svg>;
+export const IconMore = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={0} fill="currentColor" className={className}><rect x="4" y="10.5" width="3.5" height="3.5" /><rect x="10.25" y="10.5" width="3.5" height="3.5" /><rect x="16.5" y="10.5" width="3.5" height="3.5" /></svg>;
+export const IconTrash = ({ size = 18, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" /></svg>;

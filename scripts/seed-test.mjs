@@ -8,7 +8,7 @@ import postgres from 'postgres';
 const url = process.env.MIGRATION_DATABASE_URL;
 if (!url) throw new Error('MIGRATION_DATABASE_URL is not set');
 const email = process.env.TEST_USER_EMAIL ?? '';
-const sql = postgres(url, { max: 1, ssl: url.includes('localhost') ? false : 'require', onnotice: (n) => console.log(n.message) });
+const sql = postgres(url, { max: 1, ssl: /localhost|sslmode=disable/.test(url) ? false : 'require', onnotice: (n) => console.log(n.message) });
 const dir = path.join(process.cwd(), 'supabase', 'seed', 'test');
 const quote = (s) => `'${s.replace(/'/g, "''")}'`;
 try {

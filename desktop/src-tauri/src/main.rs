@@ -5,6 +5,8 @@
 // keeps opened pages readable offline. Besides the window, only the shell's own updates run here:
 // a check shortly after start, "Nach Updates suchen …" in the macOS app menu, and two commands for the
 // button in the site's settings (capabilities/updates.json). Updates are signed (docs/desktop.md).
+mod server;
+
 use std::sync::Mutex;
 use std::time::Duration;
 use tauri::menu::{Menu, MenuItem, MenuItemKind};
@@ -100,7 +102,8 @@ fn main() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .manage(Pending::default())
-        .invoke_handler(tauri::generate_handler![update_check, update_install])
+        .manage(server::Busy::default())
+        .invoke_handler(tauri::generate_handler![update_check, update_install, server::server_status, server::server_setup, server::server_stop])
         .setup(|app| {
             // macOS always has a menu bar: the item goes into the app menu, under "About HiveVoice".
             if cfg!(target_os = "macos") {

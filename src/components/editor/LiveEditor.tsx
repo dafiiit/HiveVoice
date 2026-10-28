@@ -69,6 +69,10 @@ export default function LiveEditor(props: Props) {
         keymap.of([
           // Tab moves in a list (and out of the editor elsewhere, so the keyboard is never trapped here).
           { key: "Tab", run: (v) => (inList(v.state) ? indentMore(v) : false), shift: (v) => (inList(v.state) ? indentLess(v) : false) },
+          // The usual keys of a word processor, also named in the buttons' tooltips.
+          { key: "Mod-b", run: (v) => { wrap(v, "**", "**", ""); return true; } },
+          { key: "Mod-i", run: (v) => { wrap(v, "_", "_", ""); return true; } },
+          { key: "Mod-k", run: (v) => { wrap(v, "[", "](https://)", ""); return true; } },
           ...historyKeymap,
           ...defaultKeymap,
         ]),

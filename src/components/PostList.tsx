@@ -9,7 +9,7 @@ import { sendOrQueue } from "@/lib/queue";
 import { moderatePost } from "@/lib/actions/safety";
 import { relTime } from "@/lib/format";
 import { Avatar } from "./ui/Avatar";
-import { IconCheck, IconDown, IconReply, IconUp } from "./ui/Icons";
+import { IconCheck, IconDown, IconReply, IconTrash, IconUp } from "./ui/Icons";
 import { Pop, Roll, usePulse } from "./ui/Vote";
 import { ReportButton } from "./ReportDialog";
 import { Attachments } from "./Attachments";
@@ -143,7 +143,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
               <Pop arrow={1} pulse={pulse}><IconUp /></Pop> <Roll value={score} />
             </button>
             <button type="button" aria-pressed={vote === -1} aria-label={tc("downvote")} onClick={() => cast(-1)} disabled={!canWrite}
-              className={`${press} ${vote === -1 ? "text-ink" : "text-muted"}`}>
+              className={`${press} min-w-9 justify-center ${vote === -1 ? "text-ink" : "text-muted"}`}>
               <Pop arrow={-1} pulse={pulse}><IconDown /></Pop>
             </button>
             <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
@@ -152,8 +152,9 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
             </button>
             {canModerate && <Moderation post={p} path={path} />}
             {viewerId === p.author_id ? (
-              <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} className={btn.linkMuted}>{tc("delete")}</button>
-            ) : canWrite ? <ReportButton type="post" id={p.id} /> : null}
+              <button type="button" onClick={() => start(async () => { await deletePost(p.id, path); })} aria-label={tc("delete")} title={tc("delete")}
+                className="inline-flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 text-muted hover:text-ink"><IconTrash /></button>
+            ) : canWrite ? <ReportButton type="post" id={p.id} icon /> : null}
           </div>
         )}
         {open && (

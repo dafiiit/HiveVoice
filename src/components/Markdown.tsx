@@ -6,6 +6,7 @@ import remarkMath from "remark-math";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { imageUrl } from "@/lib/images";
+import { parseAlt } from "./editor/imageSize";
 import { btn } from "./ui/styles";
 import "katex/dist/katex.min.css";
 
@@ -34,10 +35,11 @@ export function Markdown({ source, actions }: { source: string; actions?: Markdo
           a: ({ href, children }) => <a href={href} target={href?.startsWith("#") ? undefined : "_blank"} rel="noopener noreferrer nofollow ugc">{children}</a>,
           img: ({ src, alt }) => {
             const drawing = typeof src === "string" ? DIAGRAM.exec(src)?.[1] : undefined;
-            if (drawing) return <Drawing id={drawing} title={alt ?? ""} />;
+            if (drawing) return <Drawing id={drawing} title={parseAlt(alt ?? "").name} />;
             const own = typeof src === "string" ? OWN_IMAGE.exec(src)?.[1] : undefined;
+            // `![Name|300](…)`: the width set in the editor.
             // eslint-disable-next-line @next/next/no-img-element -- photos from our own store, already shrunk on upload
-            if (own) return <img src={imageUrl(own) ?? undefined} alt={alt ?? ""} loading="lazy" className="md-image" />;
+            if (own) { const { name, width } = parseAlt(alt ?? ""); return <img src={imageUrl(own) ?? undefined} alt={name} width={width ?? undefined} loading="lazy" className="md-image" />; }
             return <a href={typeof src === "string" ? src : undefined} target="_blank" rel="noopener noreferrer nofollow ugc">{t("externalImage", { alt: alt || t("image") })}</a>;
           },
           table: ({ children }) => <div className="md-table"><table>{children}</table></div>,

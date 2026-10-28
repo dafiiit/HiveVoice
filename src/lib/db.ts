@@ -13,7 +13,8 @@ function connect() {
   return postgres(url, {
     max: Number(process.env.DATABASE_POOL_SIZE ?? 5),
     prepare: false, // transaction pooler
-    ssl: /localhost|127\.0\.0\.1/.test(url) ? false : "require",
+    // A database next to the app (self-hosting, in Docker: ?sslmode=disable) speaks without TLS.
+    ssl: /localhost|127\.0\.0\.1|sslmode=disable/.test(url) ? false : "require",
     idle_timeout: 20,
     // A connection that does not come up within 10 s is given up (and tried once more, see asViewer) instead of hanging a page.
     connect_timeout: 10,
@@ -22,24 +23,32 @@ function connect() {
   });
 }
 
-let pool = globalForDb.pool ?? connect();
-if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
+// Made on the first query, not on import: building the app (which loads every module) needs no database.
+let pool: postgres.Sql | null = globalForDb.pool ?? null;
+const current = () => {
+  if (!pool) {
+    pool = connect();
+    if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
+  }
+  return pool;
+};
 
 /** Throws the pool away and starts a new one: the old connections are closed at once, work still waiting on them fails. */
 function renewPool() {
   const old = pool;
-  pool = connect();
-  if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
+  pool = null;
+  current();
   console.warn("database did not answer for 30 s, starting new connections");
-  old.end({ timeout: 0 }).catch(() => {});
+  old?.end({ timeout: 0 }).catch(() => {});
 }
 
 /** The pool of the moment (it is replaced when its connections stop answering). */
 export const sql = new Proxy(function () {} as unknown as postgres.Sql, {
-  apply: (_t, self, args) => Reflect.apply(pool as unknown as (...a: unknown[]) => unknown, self, args),
+  apply: (_t, self, args) => Reflect.apply(current() as unknown as (...a: unknown[]) => unknown, self, args),
   get: (_t, key) => {
-    const v = (pool as unknown as Record<PropertyKey, unknown>)[key];
-    return typeof v === "function" ? v.bind(pool) : v;
+    const p = current();
+    const v = (p as unknown as Record<PropertyKey, unknown>)[key];
+    return typeof v === "function" ? v.bind(p) : v;
   },
 });
 
@@ -62,7 +71,7 @@ export type Viewer = { authId: string; profileId: string } | null;
  * connection that is gone: the pool is replaced and the work tried once more on a new connection.
  */
 export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, opts?: { linkToken?: string | null }): Promise<T> {
-  return withRetry((done) => withDeadline(pool.begin(async (tx) => {
+  return withRetry((done) => withDeadline(current().begin(async (tx) => {
     const role = viewer ? "authenticated" : "anon";
     const claims = viewer ? JSON.stringify({ sub: viewer.authId, profile_id: viewer.profileId, role }) : "{}";
     // A link key opens a document that is shared "with everybody who has the link"; without it that document stays closed.

@@ -1,48 +1,103 @@
 # Selbst hosten
 
-Das MVP läuft auf Vercel + Supabase. Die Architektur ist so gebaut, dass ein eigener Server dieselbe Software betreibt.
+HiveVoice läuft für alle in der Cloud (Vercel + Supabase). Wer seine Daten selbst halten will, betreibt dieselbe
+Software auf einem eigenen Rechner: einem PC, der ohnehin läuft, einem kleinen Heimserver oder einem Raspberry Pi
+(Anleitung: `docs/raspberry-pi.md`). Alles liegt dann dort: Datenbank, Anmeldung, Fotos und Dateien.
 
-## Was du brauchst
+## Drei Wege
 
-- PostgreSQL 15 oder neuer
-- Supabase Auth (GoTrue) als Login-Dienst, z. B. als einzelnen Container `supabase/auth`
-  (alternativ das komplette Supabase-Selfhosting)
-- Einen S3-kompatiblen Objektspeicher für Fotos (z. B. MinIO). Auf Supabase ist Storage schon dabei
-- Den App-Container aus dem `Dockerfile`
+1. **Desktop-App, ein Klick** (macOS, Linux): Einstellungen → „Diesen Rechner als Server“. Die App legt das Paket
+   nach `~/HiveVoice-Server`, lädt das fertige Image (`ghcr.io/dafiiit/hivevoice`) und richtet alles ein. Braucht
+   Docker Desktop (oder Docker unter Linux). Windows: Weg 2 in WSL.
+2. **Skript**: im Repository `selfhost/setup.sh` ausführen. Es fragt, wie andere den Server erreichen sollen.
+3. **Von Hand**: wie unten unter „Bausteine“, für eigene Server mit eigener Postgres-Datenbank.
 
-## Datenbank einrichten
+## Wie andere den Server erreichen
+
+| Zugang | Was man braucht | Adresse |
+|---|---|---|
+| `local` | nichts | `http://<IP im Heimnetz>:8080`, nur im eigenen WLAN |
+| `tailscale` | kostenloses Tailscale-Konto, ein Auth-Key, „Funnel“ im Tailnet erlaubt | fest, mit https: `https://hivevoice.<tailnet>.ts.net`, von überall, **ohne Router-Einstellungen** |
+| `cloudflare` | Domain bei Cloudflare, ein Tunnel mit öffentlichem Hostnamen auf `http://gateway:80` | `https://hv.deine-domain.de`, ohne Router-Einstellungen |
+| `domain` | eine Domain, die auf deine Internetadresse zeigt, Ports 80 und 443 im Router an den Rechner weitergeleitet | `https://hv.deine-domain.de`; das Zertifikat holt Caddy selbst |
+
+Tailscale ist der einfachste Weg „von überall“: keine Domain, keine Portfreigabe, und die Adresse ändert sich nicht.
+Ändert man den Zugang später, `./setup.sh --mode …` noch einmal: die Daten bleiben, nur die Adresse wechselt.
+
+## Mit dem Skript
 
 ```bash
-# Superuser-Verbindung, Migrationen direkt ausführen
-MIGRATION_MODE=direct MIGRATION_DATABASE_URL=postgresql://postgres:<pw>@localhost:5432/hivevoice npm run db:migrate
-MIGRATION_MODE=direct MIGRATION_DATABASE_URL=... npm run db:regions
+git clone https://github.com/dafiiit/HiveVoice.git
 ```
 
-`20261015000003_supabase.sql` setzt `pg_cron` und das `auth`-Schema von GoTrue voraus. Ohne `pg_cron`:
-Zeile mit `cron.schedule` weglassen und alle fünf Minuten `GET /api/cron` mit `Authorization: Bearer $CRON_SECRET` aufrufen.
+```bash
+cd HiveVoice/selfhost && ./setup.sh
+```
 
-App-Login anlegen:
+Ohne Fragen, zum Beispiel für Tailscale:
+
+```bash
+./setup.sh --mode tailscale --ts-authkey tskey-auth-… --admin du@example.org --yes
+```
+
+Weitere Schalter: `--image ghcr.io/dafiiit/hivevoice:latest` (fertiges Image statt selbst bauen; auf dem Raspberry Pi
+dringend empfohlen), `--regions` (Gemeinden und Postleitzahlen aus OpenPLZ laden, einige Minuten), `--status`, `--stop`.
+Noch einmal `./setup.sh` aktualisiert: neues Image, neue Migrationen, Neustart; Daten und Geheimnisse bleiben.
+
+Danach unter der angezeigten Adresse mit der Admin-E-Mail registrieren und unter Einstellungen → Ansicht auf
+„Verwaltung“ wechseln. Ohne Mailserver werden neue Konten sofort bestätigt (für eine kleine Instanz unter Menschen, die
+sich kennen); mit `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` und `MAIL_AUTOCONFIRM=false` in
+`selfhost/.env` bekommt jede Anmeldung eine Bestätigungsmail.
+
+## Sichern und umziehen
+
+```bash
+./backup.sh
+```
+
+schreibt `selfhost/backups/hivevoice-<datum>.tar.gz` (Datenbank mit allen Konten und die gespeicherten Dateien).
+Auf einem neuen Rechner: `./setup.sh`, dann `./backup.sh --restore backups/hivevoice-….tar.gz`. Die Sicherung gehört
+auf eine zweite Platte oder einen anderen Rechner; `selfhost/.env` (die Geheimnisse) ebenso, aber getrennt aufbewahrt.
+
+## Aus der Cloud herausziehen
+
+Die Software ist dieselbe, also lassen sich die Daten mitnehmen: mit der direkten Postgres-Verbindung des
+Supabase-Projekts (Einstellungen → Database, als `postgres`) `pg_dump --data-only` der Schemas `public` und `auth`,
+dann auf dem eigenen Server einspielen (`psql` mit `session_replication_role = replica`), die Dateien aus dem Bucket
+`images` mit dem Service-Schlüssel herunterladen und in `selfhost/data/storage` ablegen. Das ist noch Handarbeit und
+nicht gegen die Live-Datenbank geprobt; ein Skript dafür steht in TASKS.md.
+
+## Bausteine (was das Paket startet)
+
+`selfhost/compose.yml`, alle Images gibt es für x86 und 64-Bit-ARM:
+
+| Dienst | Image | Wofür |
+|---|---|---|
+| `db` | `supabase/postgres` | Postgres mit `pg_cron`, Vault und den Rollen, die Supabase Auth und Storage brauchen |
+| `auth` | `supabase/gotrue` | Anmeldung (dieselbe Software wie in der Cloud) |
+| `storage` | `supabase/storage-api` | Fotos und Dateien, auf der Platte unter `selfhost/data/storage` |
+| `app` | `hivevoice` (dieses Repository, `Dockerfile`) | die App; trägt die Migrationen mit (`node scripts/migrate.mjs`) |
+| `gateway` | `caddy` | eine Adresse für alles: `/auth/v1` → Anmeldung, `/storage/v1` → Dateien, sonst die App; bei `domain` mit Zertifikat |
+| `tailscale` / `cloudflared` | offizielle Images | der Zugang von außen (nur mit `--profile`) |
+
+Die App bekommt Adresse und öffentlichen Schlüssel der Anmeldung erst beim Start (`SUPABASE_PUBLIC_URL`,
+`SUPABASE_ANON_KEY`, `src/lib/supabase/config.ts`); deshalb läuft dasselbe Image unter jeder Adresse. Die Geheimnisse
+(Datenbank-Passwörter, JWT-Schlüssel, Abstimmungs-Geheimnis) erzeugt `setup.sh` einmal und schreibt sie nach
+`selfhost/.env` (nicht im Git).
+
+## Von Hand, mit eigener Datenbank
+
+```bash
+MIGRATION_MODE=direct MIGRATION_DATABASE_URL=postgresql://postgres:<pw>@localhost:5432/hivevoice npm run db:migrate
+```
+
+`20261015000003_supabase.sql` setzt `pg_cron` und das `auth`-Schema von GoTrue voraus, `…067_nextcloud.sql` Supabase
+Vault. Ohne `pg_cron`: alle fünf Minuten `GET /api/cron` mit `Authorization: Bearer $CRON_SECRET` aufrufen. App-Login:
 
 ```sql
 create role hivevoice_app login noinherit password '<starkes-passwort>';
 grant hivevoice_server to hivevoice_app with inherit true, set true;
 ```
 
-## App starten
-
-```bash
-docker build -t hivevoice \
-  --build-arg NEXT_PUBLIC_SUPABASE_URL=https://auth.example.org \
-  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<anon-key> .
-docker run --env-file .env -p 3000:3000 hivevoice
-```
-
-Vorher `ADMIN_EMAILS` mit deiner E-Mail-Adresse setzen. Danach anmelden und unter Einstellungen → Ansicht auf „Verwaltung“ wechseln.
-Dort trägst du auch die offiziellen E-Mail-Domains ein und schaltest später auf „Nur Online-Ausweis“ um.
-
-## Fotos
-
-`20261015000007_images_chats.sql` legt den Bucket `images` und seine Policies nur an, wenn das Schema `storage` existiert.
-Ohne Supabase Storage: Bucket in deinem Speicher anlegen (öffentlich lesbar, Schreiben nur im Ordner der
-eingeloggten Person), `NEXT_PUBLIC_IMAGE_BASE_URL` als Build-Argument auf die öffentliche Adresse setzen und
-`src/lib/upload.ts` auf deinen Speicher umstellen (heute: `supabase.storage.from("images").upload`).
+Für die App reichen dann `DATABASE_URL` (mit `?sslmode=disable`, wenn die Datenbank ohne TLS daneben läuft),
+`SUPABASE_PUBLIC_URL`, `SUPABASE_ANON_KEY`, `APP_URL`, `BALLOT_SECRET`, `ADMIN_EMAILS`.

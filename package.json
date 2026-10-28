@@ -16,6 +16,7 @@
     "messages": "node scripts/messages-index.mjs",
     "db:images": "node --env-file-if-exists=.env.local scripts/upload-demo-images.mjs",
     "screens": "playwright test -c tools/screens/playwright.config.ts",
+    "review": "node -e \"require('fs').rmSync('test-results/review',{recursive:true,force:true})\" && playwright test -c tools/review/playwright.config.ts; node tools/review/report.mjs",
     "db:seed:test": "node --env-file-if-exists=.env.local scripts/seed-test.mjs",
     "drawio": "node scripts/drawio.mjs",
     "prebuild": "node scripts/drawio.mjs"

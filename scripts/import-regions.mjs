@@ -12,7 +12,7 @@ const API = 'https://openplzapi.org/de';
 const url = process.env.MIGRATION_DATABASE_URL;
 if (!url) throw new Error('MIGRATION_DATABASE_URL is not set');
 const direct = process.env.MIGRATION_MODE === 'direct';
-const sql = postgres(url, { max: 1, ssl: url.includes('localhost') ? false : 'require', onnotice: () => {} });
+const sql = postgres(url, { max: 1, ssl: /localhost|sslmode=disable/.test(url) ? false : 'require', onnotice: () => {} });
 
 async function getAll(path) {
   const out = [];

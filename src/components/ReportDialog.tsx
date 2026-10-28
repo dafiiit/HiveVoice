@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { IconFlag } from "./ui/Icons";
 import { createReport } from "@/lib/actions/reports";
 import { Dialog } from "./ui/Dialog";
 import { btn, field } from "./ui/styles";
@@ -10,7 +11,8 @@ import { Notice } from "@/components/ui/Page";
 const RULES = ["insult", "harassment", "threat", "illegal", "child_safety", "spam", "misinformation", "personal_data", "unsafe_link"] as const;
 
 /** "Melden": a three-step dialog that hands the content to a citizen jury. */
-export function ReportButton({ type, id, className }: { type: "post" | "argument" | "argument_reply" | "listing" | "message" | "resource"; id: string; className?: string }) {
+/** `icon`: a small flag with the word as tooltip, for rows of icon buttons (under a post). */
+export function ReportButton({ type, id, className, icon = false }: { type: "post" | "argument" | "argument_reply" | "listing" | "message" | "resource"; id: string; className?: string; icon?: boolean }) {
   const t = useTranslations("report");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -32,7 +34,9 @@ export function ReportButton({ type, id, className }: { type: "post" | "argument
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={className ?? `${btn.linkMuted} text-sm`}>{tc("report")}</button>
+      {icon
+        ? <button type="button" onClick={() => setOpen(true)} aria-label={tc("report")} title={tc("report")} className={className ?? "inline-flex h-9 w-9 items-center justify-center border-0 bg-transparent p-0 text-muted hover:text-ink"}><IconFlag size={18} /></button>
+        : <button type="button" onClick={() => setOpen(true)} className={className ?? `${btn.linkMuted} text-sm`}>{tc("report")}</button>}
       {open && (
         <Dialog title={step === 2 ? t("sent") : t("title")} kicker={t("step", { n: step + 1 })} onClose={close}>
             {step === 0 && (

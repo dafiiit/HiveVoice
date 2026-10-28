@@ -47,3 +47,8 @@ playwright-report/
 
 # draw.io, fetched before the build (scripts/drawio.mjs)
 /public/drawio/
+
+# Self-hosted instance (selfhost/setup.sh): settings with secrets and all data
+/selfhost/.env
+/selfhost/data/
+/selfhost/backups/

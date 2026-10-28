@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SwipeOn } from "@/components/shell/Swipe";
 import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
@@ -226,6 +227,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
             <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
             {session && <Link href={make.href} title={make.label} className={btn.primarySm}><IconPlus size={14} /> {make.short}</Link>}
           </div>
+          {session && <SwipeOn id="chat-list" hrefs={FILTERS.map((f) => href({ f, c: "" }))} active={FILTERS.indexOf(filter)} />}
           {session && (
             // Phones only: on wide screens the sidebar holds these as sections.
             <div role="group" aria-label={t("filter.label")} className="scroll-hint flex flex-none gap-1.5 overflow-x-auto px-4 py-2 md:hidden">

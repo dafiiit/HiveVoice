@@ -34,16 +34,19 @@ import { Collection, type CollectionItem } from "@/components/refs/Collection";
 import { loadRefCards, type RefCard } from "@/lib/refs";
 import { BackLink, Notice, Page, Section, Tabs } from "@/components/ui/Page";
 import { dateLong, dateTime } from "@/lib/format";
-import { dayStart, loadCalendar } from "@/lib/calendar";
+import { byTime, dayStart, loadCalendar } from "@/lib/calendar";
+import { calendarFor, links as cloudLinks } from "@/lib/nextcloud";
+import { NextcloudConnect } from "@/components/nextcloud/NextcloudConnect";
+import { NextcloudGallery } from "@/components/nextcloud/NextcloudGallery";
 import { Agenda } from "@/components/calendar/Agenda";
 import { EventForm } from "@/components/calendar/EventForm";
 import { IconPlus } from "@/components/ui/Icons";
 
-const TABS = ["goals", "talk", "calendar", "links", "collection", "needs", "tasks", "expenses", "team", "about"] as const;
+const TABS = ["goals", "talk", "calendar", "links", "collection", "needs", "tasks", "expenses", "nextcloud", "team", "about"] as const;
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
-  join_policy: "open" | "request" | "invite"; member_count: number; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
+  join_policy: "open" | "request" | "invite"; member_count: number; is_chat: boolean; cover_seed: number; cover_path: string | null; mod_tasks: boolean; region_name: string | null; created_at: string;
   owner_id: string | null; owner_name: string | null; orphaned_at: string | null; delete_requested_at: string | null; archived_at: string | null;
   slow_mode_seconds: number; adults_only: boolean; admins_manage_initiatives: boolean; can_takeover: boolean; tools: GroupTool[];
 };
@@ -93,6 +96,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
       select g.id, g.slug::text, g.name, g.summary, g.description, g.kind::text, g.visibility::text, g.join_policy::text, g.member_count,
              g.cover_seed, g.cover_path, g.mod_tasks, g.created_at, r.name as region_name,
              g.owner_id, op.display_name as owner_name, g.orphaned_at, g.delete_requested_at, g.archived_at, g.slow_mode_seconds, g.adults_only, g.admins_manage_initiatives, g.tools,
+             g.conversation_id is not null as is_chat,
              (g.orphaned_at is not null or g.owner_id is null or app.last_activity(g.owner_id) < now() - interval '30 days') as can_takeover
       from public.groups g left join public.regions r on r.id = g.region_id left join public.profiles op on op.id = g.owner_id where g.slug = ${slug}`;
     if (!g) return null;
@@ -195,6 +199,11 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
   if (!data) notFound();
   const { g, role, active } = data;
   const locked = g.visibility !== "public" && !role;
+  // The group's Nextcloud (members only): its calendar joins the group calendar, its folder is the Nextcloud tab.
+  const member = !!role && role !== "guest";
+  const groupCloud = member && (active === "nextcloud" || active === "calendar") ? (await cloudLinks(viewer).catch(() => [])).find((l) => l.group_id === g.id) ?? null : null;
+  const cloud = member && active === "calendar" && groupCloud?.calendar_path ? await calendarFor(viewer, g.id, dayStart(-1), dayStart(56)) : null;
+  const tnc = await getTranslations("nextcloud");
   const path = base;
   const voting = data.goals.filter((x) => x.status === "voting").length;
   const admins = data.members.filter((m) => m.role === "admin");
@@ -207,6 +216,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
     needs: t("tabs.needs", { n: data.needs.length }),
     tasks: t("tabs.tasks"),
     expenses: t("tabs.expenses"),
+    nextcloud: t("tabs.nextcloud"),
     team: t("tabs.team"),
     about: t("tabs.about"),
   };
@@ -275,7 +285,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="m-0 max-w-[640px]">{tl("groupIntro")}</p>
               {data.can_post
-                ? <Link href={`/new/link?group=${slug}`} className={btn.primarySm}>+ {tl("groupShare")}</Link>
+                ? <Link href={`/new/link?group=${slug}`} className={btn.primarySm}>+ {tl(g.is_chat ? "chatShare" : "groupShare")}</Link>
                 : <span className="text-sm text-muted">{session ? t("joinToPost") : tc("signInToWrite")}</span>}
             </div>
             {data.links.length === 0 && <Notice tone="hint" className="text-base">{tl("empty")}</Notice>}
@@ -318,7 +328,19 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
                   canPublic: false }} label={<><IconPlus size={16} /> {tcal("newDuty")}</>} look={btn.secondary} />
               </div>
             )}
-            <Agenda items={data.calendar} me={me ?? null} slug={slug} empty={tcal("emptyGroup")} />
+            {cloud?.error && <Notice tone="warning">{tcal("nextcloudError", { name: cloud.link?.calendar_name ?? "Nextcloud" })}</Notice>}
+            <Agenda items={byTime(data.calendar, cloud?.items ?? [])} me={me ?? null} slug={slug} empty={tcal("emptyGroup")} />
+          </section>
+        )}
+        {!locked && active === "nextcloud" && (
+          <section className="flex max-w-[960px] flex-col gap-6">
+            {groupCloud?.folder && <NextcloudGallery viewer={viewer} link={groupCloud} sub={typeof sp.nc === "string" ? sp.nc : ""} base={`${base}?tab=nextcloud`} />}
+            {(role === "admin" || !groupCloud) && (
+              <details open={!groupCloud} className="flex flex-col gap-3 border-t border-line pt-4">
+                <summary className="cursor-pointer text-lg font-bold">{tnc("title")}</summary>
+                <div className="pt-3"><NextcloudConnect link={groupCloud} groupId={g.id} canConnect={role === "admin"} /></div>
+              </details>
+            )}
           </section>
         )}
         {!locked && active === "expenses" && data.book && me && <Expenses slug={slug} groupId={g.id} book={data.book} me={me} canWrite={!!role && role !== "guest"} />}

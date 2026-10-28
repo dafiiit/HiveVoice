@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "server",
+  "description": "The settings page of the live site may make this computer a HiveVoice server (selfhost/ with Docker), ask how it is doing and stop it, nothing else.",
+  "windows": ["main"],
+  "remote": { "urls": ["https://hive-voice.vercel.app/*"] },
+  "permissions": ["allow-server-status", "allow-server-setup", "allow-server-stop"]
+}

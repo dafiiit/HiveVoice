@@ -64,7 +64,8 @@
     "about": "Über",
     "links": "Wissen",
     "expenses": "Ausgaben",
-    "calendar": "Kalender"
+    "calendar": "Kalender",
+    "nextcloud": "Nextcloud"
   },
   "talkPlaceholder": "In „{name}“ schreiben …",
   "joinToPost": "Tritt der Gruppe bei, um mitzuschreiben.",
@@ -243,6 +244,10 @@
       "calendar": {
         "name": "Kalender und Dienste",
         "text": "Termine mit Zu- und Absage, Dienstpläne mit Reihenfolge"
+      },
+      "nextcloud": {
+        "name": "Nextcloud",
+        "text": "Fotos aus einem Ordner und den Kalender eurer Nextcloud zeigen"
       }
     }
   }

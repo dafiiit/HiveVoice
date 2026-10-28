@@ -1,5 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { serverSupabaseUrl, supabaseKey } from "./config";
 
 // The signing keys of the login service change rarely. Keeping them for ten minutes
 // saves a network call on every request, and a short outage of that call can no longer
@@ -9,8 +10,8 @@ let cache: { keys: JsonWebKey[]; at: number } | null = null;
 
 async function keys(force = false) {
   if (!force && cache && Date.now() - cache.at < TTL) return cache.keys;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/.well-known/jwks.json`, {
-    headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY! },
+  const res = await fetch(`${serverSupabaseUrl()}/auth/v1/.well-known/jwks.json`, {
+    headers: { apikey: supabaseKey() },
     cache: "no-store",
     signal: AbortSignal.timeout(4000),
   });

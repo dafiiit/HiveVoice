@@ -172,8 +172,8 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
               </div>
             )}
             {session && (
-              <Link href={href({ mine: mine ? "" : "1" })} className="inline-flex items-center gap-2 text-ink no-underline" aria-pressed={mine}>
-                <span className={`inline-flex h-5 w-5 items-center justify-center border border-ink ${mine ? "bg-ink text-on-ink" : ""}`}>{mine && <IconCheck size={12} />}</span>
+              <Link href={href({ mine: mine ? "" : "1" })} className="inline-flex min-h-10 items-center gap-2 text-ink no-underline" aria-pressed={mine}>
+                <span className={`inline-flex h-6 w-6 items-center justify-center border border-ink ${mine ? "bg-ink text-on-ink" : ""}`}>{mine && <IconCheck size={12} />}</span>
                 {kind === "initiatives" ? t("canVote") : t("nearMe")}
               </Link>
             )}

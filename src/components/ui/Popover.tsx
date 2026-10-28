@@ -10,9 +10,11 @@ import { useEffect, useRef, type ReactNode } from "react";
  * or a map next to it never cuts it off.
  * `size`: "sm" (36 px) next to other tool bar controls, "md" (44 px) in the top bar.
  * `open` / `onOpenChange` make it controlled (for menus that close themselves after an action).
+ * `icon`: the button is a square with only an icon (and no arrow); `ariaLabel` then names it, also as its tooltip.
+ * `primary`: black like the main button of a page (a "+ Neu" that opens a choice).
  */
-export function Popover({ label, badge, align = "left", size = "sm", ariaLabel, open, onOpenChange, panelClassName, className = "", children }: {
-  label: ReactNode; badge?: number; align?: "left" | "right"; size?: "sm" | "md"; ariaLabel?: string;
+export function Popover({ label, badge, align = "left", size = "sm", ariaLabel, icon = false, primary = false, open, onOpenChange, panelClassName, className = "", children }: {
+  label: ReactNode; badge?: number; align?: "left" | "right"; size?: "sm" | "md"; ariaLabel?: string; icon?: boolean; primary?: boolean;
   open?: boolean; onOpenChange?: (open: boolean) => void; panelClassName?: string; className?: string; children: ReactNode;
 }) {
   const ref = useRef<HTMLDetailsElement>(null);
@@ -31,11 +33,11 @@ export function Popover({ label, badge, align = "left", size = "sm", ariaLabel, 
   }, [onOpenChange]);
   return (
     <details ref={ref} className={`group relative ${className}`} onToggle={(e) => { onOpenChange?.(e.currentTarget.open); if (e.currentTarget.open) { closeOthers(e.currentTarget); float(e.currentTarget, panel.current, align); } }}>
-      <summary role="button" aria-label={ariaLabel}
-        className={`inline-flex cursor-pointer list-none items-center gap-1.5 border border-line-strong bg-surface px-3 text-sm font-bold text-ink [&::-webkit-details-marker]:hidden ${size === "md" ? "h-11" : "h-9"}`}>
+      <summary role="button" aria-label={ariaLabel} title={icon ? ariaLabel : undefined}
+        className={`inline-flex cursor-pointer list-none items-center gap-1.5 border text-sm font-bold [&::-webkit-details-marker]:hidden ${primary ? "border-ink bg-ink text-on-ink" : "border-line-strong bg-surface text-ink"} ${size === "md" ? "h-11" : "h-9"} ${icon ? `justify-center px-0 group-open:bg-ink group-open:text-on-ink ${size === "md" ? "w-11" : "w-9"}` : "px-3"}`}>
         {label}
         {!!badge && <span className="inline-flex h-4 min-w-4 items-center justify-center bg-ink px-1 text-[11px] font-bold text-on-ink">{badge}</span>}
-        <span aria-hidden="true" className="text-xs transition-transform group-open:rotate-180">▾</span>
+        {!icon && <span aria-hidden="true" className="text-xs transition-transform group-open:rotate-180">▾</span>}
       </summary>
       <div ref={panel} onClick={(e) => { if ((e.target as HTMLElement).closest("a")) { e.currentTarget.closest("details")?.removeAttribute("open"); onOpenChange?.(false); } }}
         className={panelClassName ?? `absolute z-40 mt-1 flex w-[min(320px,calc(100vw-3rem))] flex-col gap-3 border border-ink bg-surface p-3 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-[calc(4rem+env(safe-area-inset-bottom))] max-sm:top-auto max-sm:z-[70] max-sm:mt-0 max-sm:max-h-[65dvh] max-sm:w-auto max-sm:overflow-y-auto max-sm:border-x-0 max-sm:border-b-0 max-sm:p-4 ${align === "right" ? "right-0" : "left-0"}`}>

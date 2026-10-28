@@ -64,7 +64,8 @@
     "about": "About",
     "links": "Knowledge",
     "expenses": "Expenses",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "nextcloud": "Nextcloud"
   },
   "talkPlaceholder": "Write in “{name}” …",
   "joinToPost": "Join the group to write here.",
@@ -243,6 +244,10 @@
       "calendar": {
         "name": "Calendar and duties",
         "text": "Dates with yes and no, duty rotas in turn"
+      },
+      "nextcloud": {
+        "name": "Nextcloud",
+        "text": "Show photos from a folder and the calendar of your Nextcloud"
       }
     }
   }

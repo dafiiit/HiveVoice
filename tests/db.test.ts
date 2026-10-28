@@ -1759,3 +1759,45 @@ describe("calendar and duties", () => {
     expect(await tx`select 1 from app.calendar_feed('falsch')`).toHaveLength(0);
   }));
 });
+
+describe("nextcloud", () => {
+  const save = (tx: postgres.TransactionSql, p: object) => tx<{ id: string }[]>`select app.nextcloud_save(${tx.json(p as never)}) as id`.then((r) => r[0].id);
+  const list = (tx: postgres.TransactionSql) => tx<{ id: string; group_id: string | null; can_manage: boolean; folder: string | null }[]>`select * from app.nextcloud_list()`;
+
+  it("keeps the app password in the vault, readable only by the app server, for the owner or the group's members", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const own = await as(tx, a, () => save(tx, { server: "https://cloud.example.org", login_name: "ada", app_password: "geheim-1" }));
+    // The table itself is closed to the app's roles; the list has no secret.
+    await fails(tx, (sp) => as(sp, a, () => sp`select secret_id from public.nextcloud_links`));
+    expect((await as(tx, a, () => list(tx))).map((x) => x.id)).toEqual([own]);
+    expect(await as(tx, b, () => list(tx))).toHaveLength(0);
+    // Only the server role reads the password, and it is the one given.
+    await fails(tx, (sp) => as(sp, a, () => sp`select * from app.nextcloud_credentials(${own})`));
+    const [cred] = await tx<{ app_password: string; login_name: string }[]>`select * from app.nextcloud_credentials(${own})`;
+    expect(cred).toMatchObject({ app_password: "geheim-1", login_name: "ada" });
+
+    // A group's Nextcloud: admins connect it, members use it, others see nothing.
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Gartengruppe","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, b, () => tx`select app.join_group(${gid}, null)`);
+    await fails(tx, (sp) => as(sp, b, () => save(sp, { group_id: gid, server: "https://cloud.example.org", login_name: "ben", app_password: "x" })));
+    const shared = await as(tx, a, () => save(tx, { group_id: gid, server: "https://cloud.example.org", login_name: "garten", app_password: "geheim-2" }));
+    const seen = await as(tx, b, () => list(tx));
+    expect(seen.map((x) => x.id)).toEqual([shared]);
+    expect(seen[0].can_manage).toBe(false);
+    expect((await as(tx, b, () => tx<{ ok: boolean }[]>`select app.nextcloud_access(${shared}) as ok`))[0].ok).toBe(true);
+    expect((await as(tx, c, () => tx<{ ok: boolean }[]>`select app.nextcloud_access(${shared}) as ok`))[0].ok).toBe(false);
+    // Members cannot change it; the admin picks the folder (no way out of it with "..").
+    await fails(tx, (sp) => as(sp, b, () => save(sp, { id: shared, folder: "Fotos" })));
+    await as(tx, a, () => save(tx, { id: shared, folder: "/Fotos/Garten/" }));
+    expect((await as(tx, b, () => list(tx)))[0].folder).toBe("Fotos/Garten");
+    await fails(tx, (sp) => as(sp, a, () => save(sp, { id: shared, folder: "Fotos/../../etc" })));
+
+    // Connecting again replaces the old password; disconnecting forgets it.
+    const again = await as(tx, a, () => save(tx, { server: "https://cloud.example.org", login_name: "ada", app_password: "geheim-3" }));
+    expect(again).toBe(own);
+    expect((await tx<{ app_password: string }[]>`select app_password from app.nextcloud_credentials(${own})`)[0].app_password).toBe("geheim-3");
+    await fails(tx, (sp) => as(sp, b, () => sp`select app.nextcloud_remove(${own})`));
+    await as(tx, a, () => tx`select app.nextcloud_remove(${own})`);
+    expect(await as(tx, a, () => list(tx))).toHaveLength(1);
+  }));
+});

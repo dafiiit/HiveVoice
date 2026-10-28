@@ -6,3 +6,13 @@ test-results
 playwright-report
 .git
 desktop
+.next-*
+selfhost/data
+selfhost/.env
+tools
+e2e
+tests
+.claude
+docs
+*.md
+!README.md

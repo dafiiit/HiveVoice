@@ -4,9 +4,11 @@ import { requireSession } from "@/lib/session";
 import { formatSize } from "@/lib/files";
 import { MyDocuments, type DocRow, type SharedRow, type IncomingTransfer } from "@/components/me/MyDocuments";
 import { Page, PageHeader } from "@/components/ui/Page";
+import { NextcloudGallery } from "@/components/nextcloud/NextcloudGallery";
+import { links } from "@/lib/nextcloud";
 
 /** Right side of Ich → Notizen / Diagramme / Uploads before one is opened: shared with me, hand-overs, trash (and storage for uploads). */
-export async function MyDocsSide({ kind }: { kind: "notes" | "diagrams" | "uploads" }) {
+export async function MyDocsSide({ kind, sub = "" }: { kind: "notes" | "diagrams" | "uploads"; /** Uploads: a folder inside the Nextcloud gallery. */ sub?: string }) {
   const session = await requireSession(`/me/${kind}`);
   const me = session.profile.id;
   const t = await getTranslations("mine");
@@ -26,9 +28,13 @@ export async function MyDocsSide({ kind }: { kind: "notes" | "diagrams" | "uploa
     const [usage] = notes ? [{ u: { used: 0, limit: 0 } }] : await tx<{ u: { used: number; limit: number } }[]>`select app.storage_usage() as u`;
     return { docs, shared, transfers, usage: usage.u };
   });
+  // Uploads: the photos of one's own Nextcloud folder come first, when one chose one (Einstellungen → Nextcloud).
+  const viewer = { authId: session.authId, profileId: me };
+  const cloud = kind === "uploads" ? (await links(viewer).catch(() => [])).find((l) => !l.group_id && l.owner_id === me && l.folder) : undefined;
   return (
     <Page width="narrow">
       <PageHeader title={t(kind === "notes" ? "myNotes" : kind === "diagrams" ? "myDiagrams" : "myUploads")} lead={t("pick")} />
+      {cloud && <NextcloudGallery viewer={viewer} link={cloud} sub={sub} base="/me/uploads" />}
       <MyDocuments hideMine docs={d.docs} shared={d.shared} incoming={d.transfers} trashDays={30}
         usage={notes ? null : { used: formatSize(d.usage.used), limit: formatSize(d.usage.limit) }} />
     </Page>

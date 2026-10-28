@@ -1,0 +1,35 @@
+{
+  "title": "This computer as a server",
+  "text": "If this computer is always on, it can run your own HiveVoice with all its data: database, sign-in and files are here then, not in the cloud. You need Docker.",
+  "noDocker": "Docker is missing or not running. Install Docker Desktop (docker.com) and start it, then try again here.",
+  "windows": "On Windows this is not one click yet. Guide: docs/selbsthosting.md (with WSL).",
+  "how": "How should others reach it?",
+  "modes": {
+    "local": "Only in my own network (Wi-Fi)",
+    "tailscale": "From everywhere, without router settings (Tailscale)",
+    "cloudflare": "From everywhere through a Cloudflare Tunnel",
+    "domain": "Own domain (ports 80 and 443 forwarded)"
+  },
+  "admin": "Your email address (first admin)",
+  "tsKey": "Tailscale auth key",
+  "tsKeyHint": "login.tailscale.com → Settings → Keys → “Generate auth key” (reusable). Funnel must be allowed in the tailnet.",
+  "cfToken": "Cloudflare Tunnel token",
+  "publicUrl": "Public address (https://…)",
+  "domain": "Domain",
+  "start": "Set up and start the server",
+  "update": "Update and restart",
+  "working": "Setting up … (a few minutes the first time)",
+  "running": "Your server is running:",
+  "stopped": "Your server is set up but stopped.",
+  "stop": "Stop",
+  "folder": "Data and backups: {folder}",
+  "log": "Log",
+  "errors": {
+    "docker": "Docker is not running.",
+    "busy": "The setup is already running.",
+    "invalid": "Please give the access and an email address.",
+    "windows": "Not one click on Windows yet.",
+    "stop": "Stopping did not work.",
+    "unknown": "That did not work."
+  }
+}

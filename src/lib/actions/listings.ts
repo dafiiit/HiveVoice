@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { run } from "../action";
 import type { Tx } from "../db";
 import { cleanAttrs, isCategory, type Category } from "../market";
+import { serverSupabaseUrl } from "@/lib/supabase/config";
 
 export type ListingInput = {
   kind: "offer" | "need";
@@ -47,7 +48,7 @@ async function insertListing(tx: Tx, input: ListingInput) {
 /** Lets the Edge Function compute missing embeddings (it only works off pending listings). Never fails the save. */
 async function embedListings() {
   try {
-    await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed-listings`, { method: "POST", signal: AbortSignal.timeout(10_000) });
+    await fetch(`${serverSupabaseUrl()}/functions/v1/embed-listings`, { method: "POST", signal: AbortSignal.timeout(10_000) });
   } catch {
     // The next save picks it up.
   }

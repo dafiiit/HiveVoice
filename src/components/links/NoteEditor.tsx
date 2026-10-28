@@ -9,12 +9,12 @@ import type { EditorApi } from "../editor/LiveEditor";
 import { TaskView } from "../editor/TaskView";
 import { blocks, titleFrom } from "../editor/tasks";
 import { DiagramEditor } from "./DiagramEditor";
-import { IconImage } from "../ui/Icons";
+import { IconBold, IconBullets, IconChecklist, IconCode, IconDiagram, IconEye, IconFormula, IconHeading, IconImage, IconItalic, IconLink, IconMarkdown, IconTable, IconTask } from "../ui/Icons";
+import { Toolbar } from "../editor/Toolbar";
 import { TagPicker } from "../TagPicker";
 import { Optional } from "../ui/Optional";
 import { btn, field, segment, segments } from "../ui/styles";
 import { Notice } from "@/components/ui/Page";
-import { Popover } from "../ui/Popover";
 import { DraftNotice } from "../ui/DraftNotice";
 import { useDraft } from "@/lib/drafts";
 
@@ -247,7 +247,7 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
   const readOnly = !!lockedBy;
   const shown: Status = status === "saved" && JSON.stringify([title, description, body, tags]) !== keptShown ? "idle" : status;
   const labels = {
-    externalImage: (alt: string) => t("externalImage", { alt }), image: t("image"), drawing: t("drawing"), drawingOpen: t("drawingOpen"), drawingClosed: t("drawingClosed"),
+    externalImage: (alt: string) => t("externalImage", { alt }), image: t("image"), resize: t("imageResize"), drawing: t("drawing"), drawingOpen: t("drawingOpen"), drawingClosed: t("drawingClosed"),
     diagramLoading: t("diagramLoading"), diagramError: (error: string) => t("diagramError", { error }), toDrawio: t("toDrawio"),
   };
 
@@ -259,32 +259,28 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
         className="m-0 min-h-12 w-full border-0 border-b-2 border-line-strong bg-transparent px-0 pb-2 text-[28px] font-bold leading-tight tracking-tight text-ink placeholder:text-muted focus:border-ink focus:outline-none" />
 
       <div className="flex flex-col gap-2">
-        <div role="toolbar" aria-label={t("toolbar")} className="flex flex-wrap items-center gap-1">
-          {view !== "list" && !readOnly && <>
-            <Tool label={t("heading")} onClick={() => api.current?.prefix("## ")} />
-            <Tool label={t("bold")} onClick={() => api.current?.wrap("**", "**", t("bold"))} />
-            <Tool label={t("italic")} onClick={() => api.current?.wrap("_", "_", t("italic"))} />
-            <Tool label={t("task")} onClick={() => api.current?.prefix("- [ ] ")} />
-            <Tool label={t("list")} onClick={() => api.current?.prefix("- ")} />
-            <Tool label={t("link")} onClick={() => api.current?.wrap("[", "](https://)", t("link"))} />
-            <Tool label={t("code")} onClick={() => api.current?.wrap("`", "`", "code")} />
-            <Tool label={t("table")} onClick={() => api.current?.block("", TABLE)} />
-            <Tool label={t("formula")} onClick={() => api.current?.block("$$\n", FORMULA, "\n$$")} />
-            <DrawingPicker t={t} onPick={(d) => api.current?.insert(`![${d.title.replace(/[[\]]/g, "")}](diagram:${d.id})`, true)} />
-            <button type="button" onClick={() => picker.current?.click()} disabled={uploading > 0}
-              className="inline-flex h-9 items-center gap-1.5 border border-line bg-surface px-2.5 text-sm text-ink disabled:opacity-60">
-              <IconImage size={16} /> {uploading > 0 ? t("imageUploading") : t("image")}
-            </button>
-            <input ref={picker} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages([...(e.target.files ?? [])]); e.target.value = ""; }} />
-          </>}
-          <div role="radiogroup" aria-label={t("viewLabel")} className={`ml-auto ${segments}`}>
-            {(["live", "source", "list"] as const).map((v) => (
-              <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => choose(v)} className={segment(view === v)}>
-                {t(v === "live" ? "viewLive" : v === "source" ? "viewSource" : "viewList")}
+        <Toolbar label={t("toolbar")} moreLabel={t("moreTools")} backLabel={t("back")} tools={view === "list" || readOnly ? [] : [
+          { key: "heading", label: t("heading"), icon: <IconHeading />, run: () => api.current?.prefix("## ") },
+          { key: "bold", label: t("bold"), icon: <IconBold />, keys: "B", run: () => api.current?.wrap("**", "**", t("bold")) },
+          { key: "italic", label: t("italic"), icon: <IconItalic />, keys: "I", run: () => api.current?.wrap("_", "_", t("italic")) },
+          { key: "task", label: t("task"), icon: <IconTask />, run: () => api.current?.prefix("- [ ] ") },
+          { key: "list", label: t("list"), icon: <IconBullets />, run: () => api.current?.prefix("- ") },
+          { key: "link", label: t("link"), icon: <IconLink />, keys: "K", run: () => api.current?.wrap("[", "](https://)", t("link")) },
+          { key: "image", label: uploading > 0 ? t("imageUploading") : t("image"), icon: <IconImage size={18} />, disabled: uploading > 0, run: () => picker.current?.click() },
+          { key: "diagram", label: t("drawingPick"), icon: <IconDiagram size={18} />, panel: (close) => <DrawingPicker t={t} onPick={(d) => { api.current?.insert(`![${d.title.replace(/[[\]]/g, "")}](diagram:${d.id})`, true); close(); }} /> },
+          { key: "table", label: t("table"), icon: <IconTable />, run: () => api.current?.block("", TABLE) },
+          { key: "code", label: t("code"), icon: <IconCode />, run: () => api.current?.wrap("`", "`", "code") },
+          { key: "formula", label: t("formula"), icon: <IconFormula />, run: () => api.current?.block("$$\n", FORMULA, "\n$$") },
+        ]} side={
+          <div role="radiogroup" aria-label={t("viewLabel")} className={segments}>
+            {([["live", t("viewLive"), <IconEye key="i" size={18} />], ["source", t("viewSource"), <IconMarkdown key="i" />], ["list", t("viewList"), <IconChecklist key="i" />]] as const).map(([v, name, icon]) => (
+              <button key={v} type="button" role="radio" aria-checked={view === v} aria-label={name} title={name} onClick={() => choose(v)} className={`${segment(view === v)} w-10 px-0`}>
+                {icon}
               </button>
             ))}
           </div>
-        </div>
+        } />
+        <input ref={picker} type="file" accept="image/*" multiple hidden onChange={(e) => { void addImages([...(e.target.files ?? [])]); e.target.value = ""; }} />
         {swapNote && <Notice tone="status">{swapNote}</Notice>}
         {readOnly && <Notice tone="error">{t("readOnlyLocked")}</Notice>}
 
@@ -330,31 +326,21 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
   );
 }
 
-function Tool({ label, onClick }: { label: string; onClick: () => void }) {
-  return <button type="button" onClick={onClick} className="inline-flex h-9 items-center border border-line bg-surface px-2.5 text-sm text-ink">{label}</button>;
-}
-
 /** Puts a draw.io diagram from Ich → Diagramme into the text; the list loads when it opens. */
-function DrawingPicker({ t, onPick }: { t: (key: "drawingInsert" | "drawingPick" | "drawingNone" | "drawingNew" | "drawingHint") => string; onPick: (d: { id: string; title: string }) => void }) {
+function DrawingPicker({ t, onPick }: { t: (key: "drawingPick" | "drawingNone" | "drawingNew" | "drawingHint") => string; onPick: (d: { id: string; title: string }) => void }) {
   const [items, setItems] = useState<{ id: string; title: string }[] | null>(null);
-  const [open, setOpen] = useState(false);
-  const load = (now: boolean) => {
-    setOpen(now);
-    if (now) void readableDiagrams().then((res) => setItems(res.ok ? res.data : []));
-  };
+  // The list loads when the menu opens.
+  useEffect(() => { void readableDiagrams().then((res) => setItems(res.ok ? res.data : [])); }, []);
   return (
-    <Popover label={t("drawingInsert")} ariaLabel={t("drawingPick")} open={open} onOpenChange={load} panelClassName="w-[320px]">
-      <div className="flex flex-col" role="group" aria-label={t("drawingPick")}>
-        {items === null ? <span className="py-2 text-sm text-muted">…</span>
-          : items.length === 0 ? <span className="py-2 text-sm text-muted">{t("drawingNone")}</span>
-          : items.map((d) => (
-            <button key={d.id} type="button" onClick={() => { onPick(d); setOpen(false); }}
-              className="flex h-10 items-center truncate border-0 border-b border-line bg-transparent px-0 text-left text-ink">{d.title}</button>
-          ))}
-        <a href="/me/diagrams/new" target="_blank" rel="noopener" className="flex h-10 items-center text-ink underline">{t("drawingNew")}</a>
-        <span className="text-xs text-muted">{t("drawingHint")}</span>
-      </div>
-    </Popover>
+    <div className="flex flex-col" role="group" aria-label={t("drawingPick")}>
+      {items === null ? <span className="py-2 text-sm text-muted">…</span>
+        : items.length === 0 ? <span className="py-2 text-sm text-muted">{t("drawingNone")}</span>
+        : items.map((d) => (
+          <button key={d.id} type="button" onClick={() => onPick(d)}
+            className="flex h-10 items-center truncate border-0 border-b border-line bg-transparent px-0 text-left text-ink">{d.title}</button>
+        ))}
+      <a href="/me/diagrams/new" target="_blank" rel="noopener" className="flex h-10 items-center text-ink underline">{t("drawingNew")}</a>
+      <span className="text-xs text-muted">{t("drawingHint")}</span>
+    </div>
   );
 }
-

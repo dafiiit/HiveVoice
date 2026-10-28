@@ -80,5 +80,8 @@
   "details": "What is it about? Hashtags (optional)",
   "offline": "You are offline. The text stays on this device and is sent as soon as you are back online.",
   "readOnlyLocked": "Somebody else is editing this note right now.",
-  "newNoteTitle": "New note"
+  "newNoteTitle": "New note",
+  "moreTools": "More tools",
+  "back": "Back",
+  "imageResize": "Change the picture width (drag; double click: natural size)"
 }

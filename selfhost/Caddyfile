@@ -1,0 +1,25 @@
+# One address for everything (selfhost/compose.yml). SITE_ADDRESS ":80" serves plain http (on this machine, or behind
+# Tailscale/Cloudflare, which bring https); a domain ("example.org") makes Caddy fetch a certificate by itself.
+{
+	admin off
+}
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# Login (Supabase Auth, GoTrue): without the prefix, as Supabase's own gateway does it.
+	handle_path /auth/v1/* {
+		reverse_proxy auth:9999
+	}
+
+	# Files (Supabase Storage); it builds its addresses with the prefix.
+	handle_path /storage/v1/* {
+		reverse_proxy storage:5000 {
+			header_up X-Forwarded-Prefix /storage/v1
+		}
+	}
+
+	handle {
+		reverse_proxy app:3000
+	}
+}

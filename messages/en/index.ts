@@ -36,6 +36,7 @@ import ns_mine from "./mine.json";
 import ns_modrights from "./modrights.json";
 import ns_nav from "./nav.json";
 import ns_new from "./new.json";
+import ns_nextcloud from "./nextcloud.json";
 import ns_notifications from "./notifications.json";
 import ns_onboarding from "./onboarding.json";
 import ns_posts from "./posts.json";
@@ -47,6 +48,7 @@ import ns_responsible from "./responsible.json";
 import ns_resprights from "./resprights.json";
 import ns_rights from "./rights.json";
 import ns_safety from "./safety.json";
+import ns_selfhost from "./selfhost.json";
 import ns_social from "./social.json";
 import ns_updates from "./updates.json";
 import ns_welcome from "./welcome.json";
@@ -89,6 +91,7 @@ const messages = {
   "modrights": ns_modrights,
   "nav": ns_nav,
   "new": ns_new,
+  "nextcloud": ns_nextcloud,
   "notifications": ns_notifications,
   "onboarding": ns_onboarding,
   "posts": ns_posts,
@@ -100,6 +103,7 @@ const messages = {
   "resprights": ns_resprights,
   "rights": ns_rights,
   "safety": ns_safety,
+  "selfhost": ns_selfhost,
   "social": ns_social,
   "updates": ns_updates,
   "welcome": ns_welcome,

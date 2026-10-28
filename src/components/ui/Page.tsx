@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { IconBack } from "./Icons";
-import { sectionRule, sectionTitle, tab } from "./styles";
+import { sectionRule, sectionTitle } from "./styles";
+import { TabRow } from "./TabRow";
 
 const frame = "px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-10";
 // Next to a list (Split) the pane is already the limit: there "narrow" fills it (globals.css, .page-narrow).
@@ -73,30 +74,10 @@ export type TabItem = { href: string; label: ReactNode; on: boolean };
 
 /**
  * Tabs that switch between the parts of one page (links, so every tab has its own address).
- * At most five stay visible; `more` goes into a "Mehr" menu at the end (the active one always shows).
+ * As many as fit stay in the row, the rest (`more` first) goes into a "Mehr" menu at the end; the active one always shows.
  */
 export function Tabs({ label, items, more = [], moreLabel = "Mehr" }: { label: string; items: TabItem[]; more?: TabItem[]; moreLabel?: string }) {
-  const shown = [...items, ...more.filter((m) => m.on)];
-  const rest = more.filter((m) => !m.on);
-  return (
-    <div className="flex border-b border-line">
-      <div role="tablist" aria-label={label} className="scroll-hint flex min-w-0 overflow-x-auto">
-        {shown.map((it) => (
-          <Link key={it.href} role="tab" aria-selected={it.on} href={it.href} scroll={false} className={tab(it.on)}>{it.label}</Link>
-        ))}
-      </div>
-      {rest.length > 0 && (
-        <details className="group relative flex-none">
-          <summary className={`${tab(false)} cursor-pointer list-none gap-1.5 [&::-webkit-details-marker]:hidden`}>
-            {moreLabel}<span aria-hidden="true" className="text-xs transition-transform group-open:rotate-180">▾</span>
-          </summary>
-          <div className="absolute right-0 z-20 mt-1 flex min-w-[200px] flex-col border border-ink bg-surface">
-            {rest.map((it) => <Link key={it.href} href={it.href} className="flex h-11 items-center border-b border-line px-3 text-ink no-underline last:border-b-0 hover:bg-chip">{it.label}</Link>)}
-          </div>
-        </details>
-      )}
-    </div>
-  );
+  return <TabRow label={label} items={items} more={more} moreLabel={moreLabel} />;
 }
 
 /** The row above a list: filter, sorting, a create button, and how many there are on the right. Always in this order. */

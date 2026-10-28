@@ -80,5 +80,8 @@
   "details": "Worum geht es? Hashtags (freiwillig)",
   "offline": "Du bist offline. Der Text bleibt auf diesem Gerät und wird gesendet, sobald du wieder online bist.",
   "readOnlyLocked": "Gerade bearbeitet jemand anderes diese Notiz.",
-  "newNoteTitle": "Neue Notiz"
+  "newNoteTitle": "Neue Notiz",
+  "moreTools": "Weitere Werkzeuge",
+  "back": "Zurück",
+  "imageResize": "Bildbreite ändern (ziehen; Doppelklick: Originalgröße)"
 }

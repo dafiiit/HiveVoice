@@ -3,11 +3,12 @@ import { getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { getOrigin } from "@/lib/origin";
-import { dayStart, loadCalendar } from "@/lib/calendar";
+import { byTime, dayStart, loadCalendar } from "@/lib/calendar";
+import { calendarFor } from "@/lib/nextcloud";
 import { Agenda } from "@/components/calendar/Agenda";
 import { EventForm } from "@/components/calendar/EventForm";
 import { CalendarSettings } from "@/components/calendar/CalendarSettings";
-import { Page, PageHeader } from "@/components/ui/Page";
+import { Notice, Page, PageHeader } from "@/components/ui/Page";
 import { IconPlus } from "@/components/ui/Icons";
 import { segment, segments } from "@/components/ui/styles";
 
@@ -31,6 +32,8 @@ export default async function MyCalendar({ searchParams }: PageProps<"/me/calend
     items: await loadCalendar(tx, from, to, "mine"),
     prefs: (await tx<{ s: { remind_day: boolean; remind_hour: boolean; feed_token: string } }[]>`select app.calendar_settings('{}'::jsonb) as s`)[0].s,
   }));
+  // The Nextcloud calendar one chose in the settings stands in the same list.
+  const cloud = await calendarFor(viewer, null, from, to);
   const href = (p: { r?: string; w?: number }) => {
     const q = new URLSearchParams();
     const r = p.r ?? range; if (r !== "month") q.set("r", r);
@@ -54,7 +57,8 @@ export default async function MyCalendar({ searchParams }: PageProps<"/me/calend
           <Link href={href({ w: shift + 1 })} className={segment(false)}>{t("later")} →</Link>
         </span>
       </div>
-      <Agenda items={items} me={session.profile.id} showGroup empty={t("empty")} />
+      {cloud.error && <Notice tone="warning">{t("nextcloudError", { name: cloud.link?.calendar_name ?? "Nextcloud" })}</Notice>}
+      <Agenda items={byTime(items, cloud.items)} me={session.profile.id} showGroup empty={t("empty")} />
     </Page>
   );
 }

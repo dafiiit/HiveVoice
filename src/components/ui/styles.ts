@@ -62,7 +62,7 @@ export const sectionRule = "border-b-2 border-ink pb-2";
 
 /** A search field with the magnifier: the box (md in the top bar and on search pages, sm in tool bars) and its input. */
 export const searchBox = (size: "md" | "sm" = "sm") =>
-  `flex min-w-0 items-center border border-line-strong bg-surface text-muted focus-within:border-ink ${size === "md" ? "h-11 gap-2.5 px-3.5" : "h-9 gap-2 px-2.5"}`;
+  `flex min-w-0 items-center border border-transparent bg-chip text-muted focus-within:border-ink focus-within:bg-surface ${size === "md" ? "h-11 gap-2.5 px-3.5" : "h-9 gap-2 px-2.5"}`;
 export const searchInput = "min-w-0 flex-1 border-0 bg-transparent p-0 text-base text-ink outline-none placeholder:text-muted";
 
 /** A card in a grid (offers, knowledge, references): black frame with the thick top line. */

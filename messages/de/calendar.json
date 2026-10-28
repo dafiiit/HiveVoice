@@ -11,7 +11,11 @@
   "allDay": "ganztägig",
   "more": "Weitere Termine",
   "range": "Zeitraum",
-  "ranges": { "week": "Woche", "month": "4 Wochen", "quarter": "3 Monate" },
+  "ranges": {
+    "week": "Woche",
+    "month": "4 Wochen",
+    "quarter": "3 Monate"
+  },
   "earlier": "Früher",
   "later": "Später",
   "badges": {
@@ -32,7 +36,11 @@
     "yes": "Zusage",
     "maybe": "Vielleicht",
     "no": "Absage",
-    "mine": { "yes": "Du hast zugesagt", "maybe": "Du kommst vielleicht", "no": "Du hast abgesagt" },
+    "mine": {
+      "yes": "Du hast zugesagt",
+      "maybe": "Du kommst vielleicht",
+      "no": "Du hast abgesagt"
+    },
     "undo": "Antwort zurücknehmen",
     "as": "Als",
     "noRole": "ohne Rolle",
@@ -41,7 +49,11 @@
     "capacity": "{yes} von {capacity} Plätzen",
     "who": "Wer kommt",
     "nobody": "Noch keine Antworten.",
-    "groups": { "yes": "Zusagen", "maybe": "Vielleicht", "no": "Absagen" }
+    "groups": {
+      "yes": "Zusagen",
+      "maybe": "Vielleicht",
+      "no": "Absagen"
+    }
   },
   "roles": {
     "title": "Rollen",
@@ -100,7 +112,10 @@
     "titleEdit": "Termin bearbeiten",
     "titleDuty": "Neuer Dienst",
     "kind": "Art",
-    "kinds": { "event": "Termin", "duty": "Dienst" },
+    "kinds": {
+      "event": "Termin",
+      "duty": "Dienst"
+    },
     "name": "Titel",
     "namePlaceholder": "z. B. Probe, Gartentag, Mülltonnen raus",
     "date": "Datum",
@@ -154,5 +169,6 @@
     "renew": "Neue Adresse",
     "renewConfirm": "Neue Adresse erstellen? Die alte hört sofort auf zu funktionieren."
   },
-  "tool": "Kalender"
+  "tool": "Kalender",
+  "nextcloudError": "Deine Nextcloud antwortet gerade nicht; die Termine aus „{name}“ fehlen hier."
 }

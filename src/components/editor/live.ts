@@ -5,6 +5,7 @@ import { EditorSelection, EditorState, Facet, StateEffect, StateField, type Exte
 import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemirror/view";
 import { ensureSyntaxTree } from "@codemirror/language";
 import type { SyntaxNode } from "@lezer/common";
+import { MIN_WIDTH, parseAlt, withWidth } from "./imageSize";
 
 export type LiveConfig = {
   /** Where a photo written as `img:<path>` is served from. */
@@ -13,11 +14,11 @@ export type LiveConfig = {
   here: () => string;
   /** A Mermaid block is converted by the note (draw.io). */
   onMermaid?: (code: string) => void;
-  labels: { externalImage: (alt: string) => string; image: string; drawing: string; drawingOpen: string; drawingClosed: string; diagramLoading: string; diagramError: (e: string) => string; toDrawio: string };
+  labels: { externalImage: (alt: string) => string; image: string; resize: string; drawing: string; drawingOpen: string; drawingClosed: string; diagramLoading: string; diagramError: (e: string) => string; toDrawio: string };
 };
 
 export const liveConfig = Facet.define<LiveConfig, LiveConfig>({
-  combine: (all) => all[0] ?? { imageUrl: () => null, here: () => "/", labels: { externalImage: (a) => a, image: "", drawing: "", drawingOpen: "", drawingClosed: "", diagramLoading: "", diagramError: (e) => e, toDrawio: "" } },
+  combine: (all) => all[0] ?? { imageUrl: () => null, here: () => "/", labels: { externalImage: (a) => a, image: "", resize: "", drawing: "", drawingOpen: "", drawingClosed: "", diagramLoading: "", diagramError: (e) => e, toDrawio: "" } },
 });
 
 const OWN_IMAGE = /^img:([0-9a-f-]{36}\/[0-9a-f]{32}\.jpg)$/;
@@ -67,17 +68,66 @@ class Rule extends WidgetType {
   toDOM() { return el("hr", "cm-rule"); }
 }
 
+/**
+ * A picture drawn in the text, at the width written in its name (`![Name|300](…)`). The square at its lower right corner
+ * changes the width by dragging; letting go writes the new width into the text (a double click on it goes back to the natural size).
+ */
 class Picture extends WidgetType {
   constructor(readonly src: string, readonly alt: string) { super(); }
   eq(o: Picture) { return o.src === this.src && o.alt === this.alt; }
   toDOM(view: EditorView) {
+    const { name, width } = parseAlt(this.alt);
+    const box = el("span", "cm-picture-box");
     const img = el("img", "cm-picture");
-    img.alt = this.alt;
+    img.alt = name;
     img.loading = "lazy";
     img.src = this.src;
+    if (width) img.style.width = `${width}px`;
     img.addEventListener("load", () => view.requestMeasure());
-    return img;
+    box.append(img);
+    if (view.state.facet(EditorState.readOnly)) return box;
+    const grip = el("span", "cm-picture-grip");
+    grip.setAttribute("role", "slider");
+    grip.setAttribute("aria-label", view.state.facet(liveConfig).labels.resize);
+    grip.setAttribute("aria-valuenow", String(width ?? img.naturalWidth ?? 0));
+    grip.tabIndex = 0;
+    const write = (w: number | null) => {
+      const pos = view.posAtDOM(box);
+      const m = /^!\[([^\]]*)\]/.exec(view.state.doc.sliceString(pos, Math.min(view.state.doc.length, pos + 400)));
+      if (!m) return;
+      view.dispatch({ changes: { from: pos + 2, to: pos + 2 + m[1].length, insert: withWidth(m[1], w) } });
+    };
+    grip.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      grip.setPointerCapture(e.pointerId);
+      const startX = e.clientX;
+      const startW = img.getBoundingClientRect().width;
+      const most = view.contentDOM.getBoundingClientRect().width;
+      const move = (m: PointerEvent) => { img.style.width = `${Math.round(Math.min(most, Math.max(MIN_WIDTH, startW + m.clientX - startX)))}px`; };
+      const up = () => {
+        grip.removeEventListener("pointermove", move);
+        grip.removeEventListener("pointerup", up);
+        grip.removeEventListener("pointercancel", up);
+        write(img.getBoundingClientRect().width);
+      };
+      grip.addEventListener("pointermove", move);
+      grip.addEventListener("pointerup", up);
+      grip.addEventListener("pointercancel", up);
+    });
+    grip.addEventListener("dblclick", (e) => { e.preventDefault(); write(null); });
+    // The keyboard: arrows change the width by 10 % of the room, Home goes back to the natural size.
+    grip.addEventListener("keydown", (e) => {
+      const most = view.contentDOM.getBoundingClientRect().width;
+      const now = img.getBoundingClientRect().width;
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") { e.preventDefault(); write(Math.min(most, now + most / 10)); }
+      else if (e.key === "ArrowLeft" || e.key === "ArrowDown") { e.preventDefault(); write(Math.max(MIN_WIDTH, now - most / 10)); }
+      else if (e.key === "Home") { e.preventDefault(); write(null); }
+    });
+    box.append(grip);
+    return box;
   }
+  ignoreEvent() { return true; }
 }
 
 class Drawing extends WidgetType {

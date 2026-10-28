@@ -304,3 +304,11 @@ select {
     animation-range: calc(100% - 28px) 100%;
   }
 }
+
+/* A picture in a note: its width can be dragged at the lower right corner (src/components/editor/live.ts). */
+.cm-host .cm-picture-box { position: relative; display: inline-block; max-width: 100%; vertical-align: top; }
+.cm-host .cm-picture-box .cm-picture { margin: 0.4em 0; }
+.cm-host .cm-picture-grip { position: absolute; right: -6px; bottom: calc(0.4em - 6px); width: 16px; height: 16px; background: var(--ink); border: 2px solid var(--surface); cursor: nwse-resize; touch-action: none; opacity: 0; transition: opacity 120ms; }
+.cm-host .cm-picture-box:hover .cm-picture-grip, .cm-host .cm-picture-grip:focus-visible { opacity: 1; }
+@media (pointer: coarse) { .cm-host .cm-picture-grip { opacity: 1; width: 24px; height: 24px; right: -8px; bottom: calc(0.4em - 8px); } }
+.md-image[width] { height: auto; }

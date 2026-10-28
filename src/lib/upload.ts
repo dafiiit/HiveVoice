@@ -6,7 +6,7 @@ import { EXT_BY_MIME, FILE_BUCKET, FILE_LIMIT, mimeOf, type UploadedFile } from 
 export type UploadResult = { ok: true; path: string } | { ok: false; error: "type" | "decode" | "auth" | "upload" };
 
 /** Draws the photo onto a canvas at the new size and encodes it as JPEG. */
-async function shrinkToJpeg(file: File, maxSide: number): Promise<Blob | null> {
+export async function shrinkToJpeg(file: File, maxSide: number): Promise<Blob | null> {
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });

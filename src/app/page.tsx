@@ -131,7 +131,7 @@ export default async function Welcome() {
 
       <InstallApp release={await desktopRelease()} />
 
-      <footer className="flex flex-wrap gap-x-6 gap-y-2 px-4 pb-6 pt-4 text-sm sm:px-6 md:px-10 md:pb-10 md:pt-6">
+      <footer className="flex flex-wrap items-center gap-x-6 gap-y-1 px-4 pb-6 pt-4 text-sm sm:px-6 md:px-10 md:pb-10 md:pt-6 [&>a]:inline-flex [&>a]:min-h-7 [&>a]:items-center">
         <strong>HiveVoice</strong>
         <span>{t("nonpartisan")}</span>
         <Link href="/principles">{tp("nav")}</Link>

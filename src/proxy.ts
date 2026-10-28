@@ -3,6 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 import { TOUCH_COOKIE, cookieOptions } from "./lib/supabase/options";
 import { touchSession } from "./lib/supabase/touch";
 import { verifiedClaims } from "./lib/supabase/claims";
+import { serverSupabaseUrl, supabaseKey } from "@/lib/supabase/config";
 
 export async function proxy(request: NextRequest) {
   // The request the page sees. It is built from the request as it is right now, so cookies
@@ -14,7 +15,7 @@ export async function proxy(request: NextRequest) {
   let response = forward();
   let refreshed = false;
 
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+  const supabase = createServerClient(serverSupabaseUrl(), supabaseKey(), {
     cookieOptions,
     cookies: {
       getAll: () => request.cookies.getAll(),

@@ -13,9 +13,10 @@ type Section = { href: string; label: string; icon: ComponentType<{ size?: numbe
 
 /**
  * Desktop: one sidebar, which behaves like the one in Chrome. At the top the button that folds it for good (a click, kept in a
- * cookie so the server draws it right away), under it the sections of the area one is in (icon and label), at the bottom
- * the three areas side by side. Folded, only the icons stay and the three areas move under each other; while the pointer
- * is over it (or the keyboard is in it) it opens on top of the page for as long as it is needed and does not push the page aside.
+ * cookie so the server draws it right away) with the name of the area next to it, under it the sections of the area one is in
+ * (icon and label), at the bottom the three areas under each other. Folded, only the icons stay, each where it was; while the
+ * pointer is over it (or the keyboard is in it) it opens for as long as it is needed and moves the page aside just like a click.
+ * Where there is no room for it (below 1100 px) it opens over the page instead.
  */
 export function Sidebar({ folded: initial, signedIn, badges }: { folded: boolean | null; signedIn: boolean; badges: { chats: number; requests: number } }) {
   return (
@@ -116,10 +117,10 @@ function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }:
   const compact = folded && !peek && !pinned;
   // What the button does next: for good where the sidebar has room of its own, for now where it opens over the page.
   const expanded = overlayOnly ? !compact : !folded;
-  const W = compact ? 64 : 248;
-  const cell = compact ? 56 : (W - 16) / 3;
+  // As wide as the longest label needs, no wider.
+  const W = compact ? 64 : 200;
   return (
-    <div ref={root} style={{ width: folded ? 64 : 248 }} data-sidebar={!folded ? "open" : peek || pinned ? "peek" : "folded"}
+    <div ref={root} style={{ width: overlayOnly ? 64 : W }} data-sidebar={!folded ? "open" : peek || pinned ? "peek" : "folded"}
       className="sticky top-16 z-20 hidden h-[calc(100dvh-4rem)] flex-none transition-[width] duration-200 ease-out md:block"
       onPointerEnter={(e) => { if (folded && e.pointerType === "mouse" && !afterToggle.current) later(true, 150); }}
       onPointerLeave={(e) => { afterToggle.current = false; if (e.pointerType === "mouse") later(false, 250); }}
@@ -127,14 +128,17 @@ function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }:
       onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) later(false, 0); }}>
     <nav aria-label={t("main")} style={{ width: W }}
       className="absolute inset-y-0 left-0 flex flex-col border-r border-line bg-surface transition-[width] duration-200 ease-out">
-      <button type="button" onClick={() => {
+      <div className="mx-2 mt-2 flex h-10 flex-none items-center gap-2">
+        <button type="button" onClick={() => {
         if (overlayOnly) { setPinnedAt(pinned ? null : path); return; }
         afterToggle.current = true; if (timer.current) clearTimeout(timer.current); setPeek(false); onToggle?.();
       }} aria-expanded={expanded} aria-label={t(expanded ? "fold" : "unfold")} title={t(expanded ? "fold" : "unfold")}
-        className="mx-2 mt-2 inline-flex h-10 w-10 flex-none items-center justify-center border-0 bg-transparent text-ink hover:bg-chip">
+        className="inline-flex h-10 w-10 flex-none items-center justify-center border-0 bg-transparent text-ink hover:bg-chip">
         <IconSidebar />
       </button>
-      {!compact && <p className="m-0 truncate px-4 pb-1 pt-3 text-[13px] font-bold uppercase tracking-wide text-muted">{t(area)}</p>}
+      {/* The area's name sits next to the button, so opening the sidebar moves nothing up or down. */}
+      {!compact && <span className="min-w-0 truncate text-[13px] font-bold uppercase tracking-wide text-muted">{t(area)}</span>}
+      </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden py-1">
         {list.map((s, i) => {
           const on = i === active;
@@ -152,21 +156,20 @@ function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }:
           );
         })}
       </div>
-      {/* The three areas: side by side when open, under each other when folded; each slides to its place. */}
-      <div className="relative flex-none border-t border-line transition-[height] duration-200 ease-out" style={{ height: compact ? cell * 3 + 16 : cell + 16 }}>
-        {AREAS.map((a, i) => {
+      {/* The three areas, under each other: an icon, and its name to the right of it when the sidebar is open. */}
+      <div className="flex flex-none flex-col border-t border-line py-2">
+        {AREAS.map((a) => {
           const on = a === here;
-          const x = compact ? 4 : 8 + i * cell;
-          const y = compact ? 8 + i * cell : 8;
+          const unread = badges.chats + badges.requests;
           return (
             <Link key={a} href={a === "me" && !signedIn ? "/login?next=/me" : `/${a === "me" ? "me" : a}`} aria-current={on ? "page" : undefined}
-              aria-label={t(a)} title={t(a)}
-              style={{ transform: `translate(${x}px, ${y}px)`, width: compact ? 56 : cell, height: cell }}
-              className={`absolute left-0 top-0 flex flex-col items-center justify-center gap-1 text-[10px] leading-none text-ink no-underline transition-[transform,width,height] duration-200 ease-out ${on ? "bg-paper font-bold outline outline-2 -outline-offset-2 outline-ink" : "hover:bg-chip"}`}>
-              <span className="relative inline-flex"><AreaIcon area={a} size={24} />
-                {a === "friends" && badges.chats + badges.requests > 0 && <span className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center bg-red px-1 text-[10px] font-bold text-on-red">{badges.chats + badges.requests}</span>}
+              aria-label={compact ? t(a) : undefined} title={compact ? t(a) : undefined}
+              className={`flex h-12 flex-none items-center gap-3 px-[18px] text-ink no-underline ${on ? "bg-paper font-bold outline outline-2 -outline-offset-2 outline-ink" : "hover:bg-chip"}`}>
+              <span className="relative inline-flex flex-none"><AreaIcon area={a} size={24} />
+                {a === "friends" && compact && unread > 0 && <span className="absolute -right-2.5 -top-1.5 inline-flex h-4 min-w-4 items-center justify-center bg-red px-1 text-[10px] font-bold text-on-red">{unread}</span>}
               </span>
-              {!compact && <span className="max-w-full px-0.5">{t(a)}</span>}
+              {!compact && <span className="min-w-0 flex-1 truncate">{t(a)}</span>}
+              {a === "friends" && !compact && unread > 0 && <span className="inline-flex h-5 min-w-5 items-center justify-center bg-red px-1 text-xs font-bold text-on-red">{unread}</span>}
             </Link>
           );
         })}

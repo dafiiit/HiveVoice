@@ -133,3 +133,17 @@ describe("the live view", () => {
     expect(look("`$a$` bleibt", 20).some((d) => d.what === "Formula")).toBe(false);
   });
 });
+
+describe("the width of a picture", () => {
+  it("is read from and written into the alt text, like Obsidian", async () => {
+    const { parseAlt, withWidth } = await import("../src/components/editor/imageSize");
+    expect(parseAlt("Hof|300")).toEqual({ name: "Hof", width: 300 });
+    expect(parseAlt("Hof")).toEqual({ name: "Hof", width: null });
+    expect(parseAlt("a|b")).toEqual({ name: "a|b", width: null });
+    expect(parseAlt("Hof|5").width).toBe(null);
+    expect(parseAlt("Hof|9999").width).toBe(2000);
+    expect(withWidth("Hof|300", 420.4)).toBe("Hof|420");
+    expect(withWidth("Hof|300", null)).toBe("Hof");
+    expect(withWidth("Hof", 10)).toBe("Hof|48");
+  });
+});

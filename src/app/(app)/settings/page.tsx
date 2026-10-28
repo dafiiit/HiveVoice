@@ -10,6 +10,9 @@ import { AvatarUpload } from "@/components/ImageUpload";
 import { IconCheck } from "@/components/ui/Icons";
 import { btn } from "@/components/ui/styles";
 import { Notice, Page, Section, Tabs } from "@/components/ui/Page";
+import { NextcloudConnect } from "@/components/nextcloud/NextcloudConnect";
+import { ServerSetup } from "@/components/me/ServerSetup";
+import { links } from "@/lib/nextcloud";
 import { PhaseRail } from "@/components/InitiativeCard";
 import { DisplayToggle, TagEditor } from "@/components/me/ProfileEditor";
 import { Responsibilities, type MyResp } from "@/components/me/Responsibilities";
@@ -36,6 +39,7 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
   const t = await getTranslations("me");
   const tm = await getTranslations("modrights");
   const ta = await getTranslations("admin");
+  const tn = await getTranslations("nextcloud");
   const tgr = await getTranslations("growth");
   const tr = await getTranslations("rights");
   const locale = await getLocale();
@@ -213,7 +217,11 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
         )}
         <PrivacySettings findable={d.privacy?.findable ?? "all"} contactFrom={d.privacy?.contact_from ?? "all"} minor={!!d.privacy?.is_minor} blocked={d.blocked} />
         <AppUpdates />
+        <ServerSetup email={session.email ?? ""} />
         <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} order={s?.feed_order === "suggested" ? "suggested" : "chrono"} places={d.places} interests={interests} suggestions={d.suggestions} />
+        <Section title={tn("title")} id="nextcloud">
+          <NextcloudConnect link={(await links(viewer)).find((l) => !l.group_id && l.owner_id === session.profile.id) ?? null} />
+        </Section>
         </>
       )}
     </Page>

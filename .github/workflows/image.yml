@@ -1,0 +1,45 @@
+# The app as a container image for self-hosting (selfhost/, docs/selbsthosting.md): built for x86 and 64-bit ARM
+# (Raspberry Pi 4 and 5), published to the GitHub Container Registry as ghcr.io/<owner>/hivevoice. The desktop app's
+# "Diesen Rechner als Server" and `selfhost/setup.sh --image …` use it, so nobody has to build the app themselves.
+# Runs for a version tag (v1.2.3 → :1.2.3 and :latest) or by hand (Actions → Container image → Run workflow).
+name: Container image
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/hivevoice
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+      # No NEXT_PUBLIC_SUPABASE_* at build time: a self-hosted instance tells the browser its address when it starts
+      # (src/lib/supabase/config.ts), so the same image runs under any address.
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

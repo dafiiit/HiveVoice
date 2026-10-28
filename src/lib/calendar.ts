@@ -8,7 +8,22 @@ export type Occurrence = {
   listing_id: string | null; region_id: string | null; region_name: string | null; owner_id: string; cancelled: boolean; my_status: RsvpStatus | null;
   yes_count: number; maybe_count: number; capacity: number | null; rsvp: boolean; missing: number;
   assignee_id: string | null; assignee_name: string | null; cover_wanted: boolean; done: boolean;
+  /** A date from a connected Nextcloud calendar: shown, not answered here; `href` opens it in Nextcloud. */
+  external?: { source: "nextcloud"; calendar: string; href: string };
 };
+
+/** Dates of a Nextcloud calendar in the shape of HiveVoice dates, to stand in the same list. */
+export function externalDates(list: { uid: string; start: string; end: string; allDay: boolean; title: string; place: string | null }[], calendar: string, href: string): Occurrence[] {
+  return list.map((d) => ({
+    event_id: `nc:${d.uid}`, occurs_at: d.start, ends_at: d.end, n: 0, kind: "event", title: d.title || "–", place: d.place, online_url: null,
+    all_day: d.allDay, visibility: "private", recur: "none", group_id: null, group_slug: null, group_name: null, listing_id: null, region_id: null,
+    region_name: null, owner_id: "", cancelled: false, my_status: null, yes_count: 0, maybe_count: 0, capacity: null, rsvp: false, missing: 0,
+    assignee_id: null, assignee_name: null, cover_wanted: false, done: false, external: { source: "nextcloud", calendar, href },
+  }));
+}
+
+/** Two lists of dates as one, in time order. */
+export const byTime = (a: Occurrence[], b: Occurrence[]) => [...a, ...b].sort((x, y) => x.occurs_at.localeCompare(y.occurs_at));
 export type Recur = "none" | "daily" | "weekly" | "biweekly" | "monthly";
 export type RsvpStatus = "yes" | "maybe" | "no";
 export type Scope = "mine" | "group" | "listing" | "public";

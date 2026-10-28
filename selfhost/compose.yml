@@ -1,0 +1,167 @@
+# HiveVoice on one's own computer, home server or Raspberry Pi: the app with its database, login and file store, behind one
+# address. Made and started by setup.sh (which also writes .env); see docs/selbsthosting.md.
+#
+#   docker compose up -d                      on this machine (and in the home network)
+#   docker compose --profile tailscale up -d  reachable from everywhere through Tailscale Funnel, no router settings
+#   docker compose --profile cloudflare up -d reachable through a Cloudflare Tunnel (own domain at Cloudflare)
+#   own domain: SITE_ADDRESS=example.org and ports 80/443 forwarded to this machine; Caddy gets the certificate
+#
+# Only three of Supabase's services are needed (database, login, files); the official set has eleven. All images exist for
+# 64-bit ARM too (Raspberry Pi 4 and 5 with a 64-bit system).
+name: hivevoice
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  db:
+    <<: *restart
+    image: supabase/postgres:17.6.1.136
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf", "-c", "log_min_messages=fatal"]
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_EXP: 3600
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:ro
+      - ./db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:ro
+      - db-config:/etc/postgresql-custom
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  auth:
+    <<: *restart
+    image: supabase/gotrue:v2.197.0
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${PUBLIC_URL}/auth/v1
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_SITE_URL: ${PUBLIC_URL}
+      GOTRUE_URI_ALLOW_LIST: ${PUBLIC_URL}/**
+      GOTRUE_DISABLE_SIGNUP: ${DISABLE_SIGNUP:-false}
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_JWT_ISSUER: ${PUBLIC_URL}/auth/v1
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      # Without a mail server new accounts are confirmed at once (a small instance among people who know each other).
+      GOTRUE_MAILER_AUTOCONFIRM: ${MAIL_AUTOCONFIRM:-true}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_FROM:-}
+      GOTRUE_SMTP_HOST: ${SMTP_HOST:-}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT:-587}
+      GOTRUE_SMTP_USER: ${SMTP_USER:-}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS:-}
+      GOTRUE_SMTP_SENDER_NAME: HiveVoice
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  storage:
+    <<: *restart
+    image: supabase/storage-api:v1.81.0
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      ANON_KEY: ${ANON_KEY}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY}
+      AUTH_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      STORAGE_PUBLIC_URL: ${PUBLIC_URL}/storage/v1
+      REQUEST_ALLOW_X_FORWARDED_PATH: "true"
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      GLOBAL_S3_BUCKET: stub
+      TENANT_ID: stub
+      REGION: local
+      ENABLE_IMAGE_TRANSFORMATION: "false"
+    volumes:
+      - ./data/storage:/var/lib/storage
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/status"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    <<: *restart
+    image: ${HIVEVOICE_IMAGE:-hivevoice:local}
+    build: { context: .., dockerfile: Dockerfile }
+    depends_on: { db: { condition: service_healthy }, auth: { condition: service_healthy } }
+    environment:
+      DATABASE_URL: postgres://hivevoice_app:${APP_DB_PASSWORD}@db:5432/postgres?sslmode=disable
+      MIGRATION_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/postgres?sslmode=disable
+      MIGRATION_MODE: direct
+      SUPABASE_PUBLIC_URL: ${PUBLIC_URL}
+      SUPABASE_INTERNAL_URL: http://gateway
+      SUPABASE_ANON_KEY: ${ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
+      APP_URL: ${PUBLIC_URL}
+      BALLOT_SECRET: ${BALLOT_SECRET}
+      CRON_SECRET: ${CRON_SECRET}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      # A Nextcloud in the same home network may be connected.
+      NEXTCLOUD_ALLOW_PRIVATE: "1"
+      DATABASE_POOL_SIZE: 5
+
+  # The one address: login under /auth/v1, files under /storage/v1, the app everywhere else (Caddyfile).
+  gateway:
+    <<: *restart
+    image: caddy:2.10-alpine
+    depends_on: [app, auth, storage]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./data/caddy:/data
+
+  # Reachable from everywhere without touching the router: Tailscale Funnel gives a fixed https address
+  # (https://hivevoice.<your-tailnet>.ts.net). Needs a free Tailscale account and an auth key (TS_AUTHKEY).
+  tailscale:
+    <<: *restart
+    profiles: [tailscale]
+    image: tailscale/tailscale:v1.90.6
+    hostname: ${TS_HOSTNAME:-hivevoice}
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_SERVE_CONFIG: /config/funnel.json
+      TS_USERSPACE: "true"
+    volumes:
+      - ./data/tailscale:/var/lib/tailscale
+      - ./tailscale:/config:ro
+
+  # Or a Cloudflare Tunnel: in Cloudflare (Zero Trust → Networks → Tunnels) a tunnel with a public hostname pointing to
+  # http://gateway:80, its token in CF_TUNNEL_TOKEN.
+  cloudflared:
+    <<: *restart
+    profiles: [cloudflare]
+    image: cloudflare/cloudflared:2025.10.0
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN:-}
+
+volumes:
+  db-config:

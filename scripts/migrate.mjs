@@ -5,16 +5,18 @@
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import postgres from 'postgres';
-import { config } from 'dotenv';
-
-config({ path: '.env.local' });
-config();
+// dotenv is there in a checkout; in the app's Docker image the settings come from the environment.
+try {
+  const { config } = await import('dotenv');
+  config({ path: '.env.local', quiet: true });
+  config({ quiet: true });
+} catch { /* no dotenv */ }
 
 const url = process.env.MIGRATION_DATABASE_URL;
 if (!url) throw new Error('MIGRATION_DATABASE_URL is not set');
 const direct = process.env.MIGRATION_MODE === 'direct';
 const dir = path.join(process.cwd(), 'supabase', 'migrations');
-const sql = postgres(url, { max: 1, ssl: url.includes('localhost') ? false : 'require', onnotice: () => {} });
+const sql = postgres(url, { max: 1, ssl: /localhost|sslmode=disable/.test(url) ? false : 'require', onnotice: () => {} });
 
 try {
   if (direct) {

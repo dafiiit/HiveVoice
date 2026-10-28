@@ -1,0 +1,35 @@
+{
+  "title": "Diesen Rechner als Server",
+  "text": "Läuft dieser Rechner dauerhaft, kann er eine eigene HiveVoice mit allen Daten betreiben: Datenbank, Anmeldung und Dateien liegen dann hier, nicht in der Cloud. Du brauchst Docker.",
+  "noDocker": "Docker fehlt oder läuft nicht. Installiere Docker Desktop (docker.com) und starte es, dann hier noch einmal versuchen.",
+  "windows": "Unter Windows geht das noch nicht mit einem Klick. Anleitung: docs/selbsthosting.md (mit WSL).",
+  "how": "Wie sollen andere ihn erreichen?",
+  "modes": {
+    "local": "Nur im eigenen Netz (WLAN)",
+    "tailscale": "Von überall, ohne Router-Einstellungen (Tailscale)",
+    "cloudflare": "Von überall über einen Cloudflare-Tunnel",
+    "domain": "Eigene Domain (Ports 80 und 443 weitergeleitet)"
+  },
+  "admin": "Deine E-Mail-Adresse (erste Admin-Person)",
+  "tsKey": "Tailscale-Auth-Key",
+  "tsKeyHint": "login.tailscale.com → Settings → Keys → „Generate auth key“ (wiederverwendbar). Im Tailnet muss Funnel erlaubt sein.",
+  "cfToken": "Token des Cloudflare-Tunnels",
+  "publicUrl": "Öffentliche Adresse (https://…)",
+  "domain": "Domain",
+  "start": "Server einrichten und starten",
+  "update": "Aktualisieren und neu starten",
+  "working": "Wird eingerichtet … (beim ersten Mal einige Minuten)",
+  "running": "Dein Server läuft:",
+  "stopped": "Dein Server ist eingerichtet, aber angehalten.",
+  "stop": "Anhalten",
+  "folder": "Daten und Sicherung: {folder}",
+  "log": "Verlauf",
+  "errors": {
+    "docker": "Docker läuft nicht.",
+    "busy": "Die Einrichtung läuft schon.",
+    "invalid": "Bitte Zugang und E-Mail-Adresse angeben.",
+    "windows": "Unter Windows noch nicht mit einem Klick.",
+    "stop": "Anhalten hat nicht geklappt.",
+    "unknown": "Das hat nicht geklappt."
+  }
+}

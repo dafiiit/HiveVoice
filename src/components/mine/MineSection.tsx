@@ -57,7 +57,8 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
   ];
   const shown = items.filter((x) => (kind === "all" || x.kind === kind) && (!tasksOnly || x.tasks)).sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
   const rows: ListRow[] = shown.map((x) => ({
-    key: `${x.kind}:${x.id}`, href: kind === "all" ? `/me?o=${x.kind}:${x.id}` : `${BASE[x.kind]}/${x.id}`, title: x.title, active: x.id === selected,
+    // The filter "with tasks" stays on while one goes through its notes.
+    key: `${x.kind}:${x.id}`, href: kind === "all" ? `/me?o=${x.kind}:${x.id}` : `${BASE[x.kind]}/${x.id}${tasksOnly ? "?f=tasks" : ""}`, title: x.title, active: x.id === selected,
     sub: [kind === "all" ? x.label : null, x.extra, relTime(x.at, locale)].filter(Boolean).join(" · "),
     tag: t(`vis.${x.vis}` as "vis.me"),
   }));
@@ -68,7 +69,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
     : kind === "listings" ? { href: "/me/listings/new", label: t("newListing") }
     : kind === "projects" ? { href: "/new/initiative", label: t("newProject") }
     // The overview: one "+" for everything that can be made here.
-    : <Popover align="right" label={<><IconPlus size={14} /> {t("new")}</>}>
+    : <Popover align="right" primary label={<><IconPlus size={14} /> {t("new")}</>}>
         <div className="flex flex-col" role="group" aria-label={t("new")}>
           {NEW_ITEMS.map((n) => (
             <Link key={n.key} href={n.href} className="flex h-10 items-center border-b border-line text-ink no-underline last:border-b-0">{tn(`tiles.${n.key}.title`)}</Link>

@@ -25,3 +25,16 @@ export async function withRetry<T>(work: (done: () => void) => Promise<T>, wait 
     }
   }
 }
+
+/**
+ * Waits for `work`, and calls `late` once when it takes longer than `ms`. A connection the pooler dropped without telling
+ * this side looks alive and never answers; `late` replaces the pool, which ends the waiting work with a broken connection.
+ */
+export async function withDeadline<T>(work: Promise<T>, ms: number, late: () => void): Promise<T> {
+  const timer = setTimeout(late, ms);
+  try {
+    return await work;
+  } finally {
+    clearTimeout(timer);
+  }
+}

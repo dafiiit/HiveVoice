@@ -5,10 +5,11 @@
     "board": "Pinnwand",
     "listings": "Anliegen",
     "groups": "Gruppen",
-    "people": "Personen"
+    "people": "Personen",
+    "events": "Termine"
   },
   "board": {
-    "lead": "Was Menschen in deiner Gegend gerade bewegt. Stell Ort und Thema selbst ein.",
+    "lead": "Ort und Thema stellst du oben ein.",
     "noPlace": "Wähle einen Ort, dann siehst du die Pinnwand dort.",
     "where": "Ort",
     "reach": "Reichweite",
@@ -31,9 +32,9 @@
     "emptyGuest": "Hier steht noch nichts."
   },
   "groups": {
-    "lead": "Gruppen und Initiativen, denen du beitreten kannst. Eine Initiative ist eine Gruppe mit einem Ziel."
+    "lead": "Eine Initiative ist eine Gruppe mit einem Ziel."
   },
   "people": {
-    "lead": "Menschen auf HiveVoice. Suche nach Namen oder Tags, zum Beispiel „zuständig verkehr“."
+    "lead": "Suche nach Namen oder Tags, zum Beispiel „zuständig verkehr“."
   }
 }

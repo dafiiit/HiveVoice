@@ -5,10 +5,11 @@
     "board": "Pinboard",
     "listings": "Listings",
     "groups": "Groups",
-    "people": "People"
+    "people": "People",
+    "events": "Events"
   },
   "board": {
-    "lead": "What people around you are talking about. Choose the place and topic yourself.",
+    "lead": "Set the place and topic at the top.",
     "noPlace": "Choose a place to see its pinboard.",
     "where": "Place",
     "reach": "Reach",
@@ -31,9 +32,9 @@
     "emptyGuest": "Nothing here yet."
   },
   "groups": {
-    "lead": "Groups and initiatives you can join. An initiative is a group with a goal."
+    "lead": "An initiative is a group with a goal."
   },
   "people": {
-    "lead": "People on HiveVoice. Search by name or tag, for example “responsible traffic”."
+    "lead": "Search by name or tag, for example “responsible traffic”."
   }
 }

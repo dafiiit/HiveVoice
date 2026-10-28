@@ -1654,3 +1654,108 @@ describe("shared expenses", () => {
     expect(await parts(tx, id, a)).toEqual({ [a]: 1200, [b]: 1200 });
   }));
 });
+
+describe("calendar and duties", () => {
+  const group = async (tx: postgres.TransactionSql, a: string, ...others: string[]) => {
+    const [{ gid }] = await as(tx, a, () => tx<{ gid: string }[]>`select app.create_group('{"name":"Kalendergruppe","join_policy":"open"}'::jsonb) as gid`);
+    await as(tx, a, () => tx`update public.groups set tools = tools || '{calendar}' where id = ${gid}`);
+    for (const o of others) await as(tx, o, () => tx`select app.join_group(${gid}, null)`);
+    return gid;
+  };
+  const save = (tx: postgres.TransactionSql, p: object) => tx<{ id: string }[]>`select app.save_event(${tx.json(p as never)}) as id`.then((r) => r[0].id);
+  const items = (tx: postgres.TransactionSql, from: string, to: string, scope: string, target: string | null = null) =>
+    tx<{ event_id: string; occurs_at: Date; n: number; my_status: string | null; yes_count: number; missing: number; assignee_id: string | null; cancelled: boolean; done: boolean; cover_wanted: boolean }[]>`
+      select * from app.calendar(${from}::timestamptz, ${to}::timestamptz, ${scope}, ${target})`;
+
+  it("repeats weekly in local time across summer time and answers per date and role", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const gid = await group(tx, a, b);
+    // 19:00 in Berlin on 2027-03-18 (winter time, UTC+1), weekly until 2027-04-08: three dates before and after the switch.
+    const id = await as(tx, a, () => save(tx, { group_id: gid, title: "Probe", starts_at: "2027-03-18T18:00:00Z", duration_minutes: 120, recur: "weekly", recur_until: "2027-04-08",
+      roles: [{ name: "Geige", needed: 2 }, { name: "Bratsche", needed: 1 }] }));
+    const list = await as(tx, b, () => items(tx, "2027-03-01", "2027-05-01", "mine"));
+    expect(list.map((x) => x.occurs_at.toISOString())).toEqual(["2027-03-18T18:00:00.000Z", "2027-03-25T18:00:00.000Z", "2027-04-01T17:00:00.000Z", "2027-04-08T17:00:00.000Z"]);
+    expect(list.map((x) => x.n)).toEqual([0, 1, 2, 3]);
+    expect(list[0].missing).toBe(3);
+    // Somebody outside the group neither sees it nor can answer.
+    expect(await as(tx, c, () => items(tx, "2027-03-01", "2027-05-01", "group", gid))).toHaveLength(0);
+    await fails(tx, (sp) => as(sp, c, () => sp`select app.rsvp(${id}, '2027-03-25T18:00:00Z', 'yes')`));
+    const [geige] = await as(tx, b, () => tx<{ id: string }[]>`select id from public.event_roles where event_id = ${id} and name = 'Geige'`);
+    await as(tx, b, () => tx`select app.rsvp(${id}, '2027-03-25T18:00:00Z', 'yes', ${geige.id})`);
+    // A time that is not one of the dates is refused.
+    await fails(tx, (sp) => as(sp, b, () => sp`select app.rsvp(${id}, '2027-03-26T18:00:00Z', 'yes')`));
+    const after = await as(tx, a, () => items(tx, "2027-03-20", "2027-03-30", "group", gid));
+    expect(after).toHaveLength(1);
+    expect(after[0]).toMatchObject({ yes_count: 1, missing: 2 });
+    expect((await as(tx, b, () => items(tx, "2027-03-20", "2027-03-30", "group", gid)))[0].my_status).toBe("yes");
+    // A date said no to leaves my own calendar, but stays in the group's.
+    await as(tx, b, () => tx`select app.rsvp(${id}, '2027-04-01T17:00:00Z', 'no')`);
+    expect((await as(tx, b, () => items(tx, "2027-03-30", "2027-04-05", "mine")))).toHaveLength(0);
+    expect((await as(tx, b, () => items(tx, "2027-03-30", "2027-04-05", "group", gid)))).toHaveLength(1);
+    // Only the owner or admins change it; members cannot.
+    await fails(tx, (sp) => as(sp, b, () => save(sp, { id, title: "Meine Probe", starts_at: "2027-03-18T18:00:00Z" })));
+    await as(tx, a, () => tx`select app.cancel_occurrence(${id}, '2027-03-25T18:00:00Z', true)`);
+    expect((await as(tx, b, () => items(tx, "2027-03-20", "2027-03-30", "group", gid)))[0].cancelled).toBe(true);
+    expect((await as(tx, b, () => tx<{ n: number }[]>`select count(*)::int as n from public.notifications where profile_id = ${b} and kind = 'event_cancelled'`))[0].n).toBe(1);
+  }));
+
+  it("keeps personal dates private until shared, and public ones open to everybody", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem");
+    const id = await as(tx, a, () => save(tx, { title: "Arzt", starts_at: "2027-01-10T09:00:00Z" }));
+    expect(await as(tx, b, () => tx`select 1 from public.events where id = ${id}`)).toHaveLength(0);
+    await as(tx, a, () => save(tx, { id, title: "Arzt", starts_at: "2027-01-10T09:00:00Z", guests: [b] }));
+    expect(await as(tx, b, () => tx`select 1 from public.events where id = ${id}`)).toHaveLength(1);
+    expect((await as(tx, b, () => items(tx, "2027-01-01", "2027-02-01", "mine"))).map((x) => x.event_id)).toEqual([id]);
+    expect((await as(tx, b, () => tx<{ n: number }[]>`select count(*)::int as n from public.notifications where profile_id = ${b} and kind = 'event_invite'`))[0].n).toBe(1);
+    expect(await as(tx, c, () => tx`select 1 from public.events where id = ${id}`)).toHaveLength(0);
+    const pub = await as(tx, a, () => save(tx, { title: "Flohmarkt", starts_at: "2027-01-12T09:00:00Z", visibility: "public", capacity: 1 }));
+    expect(await as(tx, null, () => tx`select 1 from public.events where id = ${pub}`)).toHaveLength(1);
+    expect((await as(tx, null, () => items(tx, "2027-01-01", "2027-02-01", "public"))).some((x) => x.event_id === pub)).toBe(true);
+    await as(tx, c, () => tx`select app.rsvp(${pub}, '2027-01-12T09:00:00Z', 'yes')`);
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.rsvp(${pub}, '2027-01-12T09:00:00Z', 'yes')`))).toContain("event_full");
+    // Said yes to: it is in Cem's calendar and feed.
+    expect((await as(tx, c, () => items(tx, "2027-01-01", "2027-02-01", "mine"))).map((x) => x.event_id)).toEqual([pub]);
+  }));
+
+  it("works out who is on duty, lets people take over, look for cover and tick off", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben"), c = await person(tx, "Cem"), d = await person(tx, "Dora");
+    const gid = await group(tx, a, b, c);
+    // Not a member: left out of the order.
+    const id = await as(tx, a, () => save(tx, { group_id: gid, kind: "duty", title: "Müll rausbringen", starts_at: "2027-02-01T18:00:00Z", recur: "weekly", rotation: [b, c, d, a] }));
+    expect((await as(tx, a, () => tx<{ profile_id: string }[]>`select profile_id from public.duty_rotation where event_id = ${id} order by position`)).map((x) => x.profile_id)).toEqual([b, c, a]);
+    const weeks = await as(tx, a, () => items(tx, "2027-02-01", "2027-02-28", "group", gid));
+    expect(weeks.map((x) => x.assignee_id)).toEqual([b, c, a, b]);
+    const second = "2027-02-08T18:00:00Z";
+    // Cem looks for cover: Ben and Ada hear of it; Ben takes it over and Cem hears of that.
+    await as(tx, c, () => tx`select app.duty(${id}, ${second}, 'cover')`);
+    for (const p of [a, b]) expect(await as(tx, p, () => tx`select 1 from public.notifications where kind = 'duty_cover' and profile_id = ${p}`)).toHaveLength(1);
+    // Ben cannot ask for cover of a date that is not his.
+    await fails(tx, (sp) => as(sp, b, () => sp`select app.duty(${id}, '2027-02-15T18:00:00Z', 'cover')`));
+    await as(tx, b, () => tx`select app.duty(${id}, ${second}, 'take')`);
+    expect((await as(tx, c, () => tx<{ n: number }[]>`select count(*)::int as n from public.notifications where kind = 'duty_taken' and profile_id = ${c}`))[0].n).toBe(1);
+    await as(tx, b, () => tx`select app.duty(${id}, ${second}, 'done')`);
+    const [w2] = await as(tx, a, () => items(tx, "2027-02-08", "2027-02-09", "group", gid));
+    expect(w2).toMatchObject({ assignee_id: b, done: true, cover_wanted: false });
+    // Non-members cannot touch a duty.
+    await fails(tx, (sp) => as(sp, d, () => sp`select app.duty(${id}, ${second}, 'take')`));
+  }));
+
+  it("reminds people once a day and an hour before and serves a feed by key", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const gid = await group(tx, a, b);
+    // Made just now, half an hour ahead: no "tomorrow" reminder (it was never a day away), only the one an hour before.
+    const [{ id }] = await as(tx, a, () => tx<{ id: string }[]>`select app.save_event(${tx.json({ group_id: gid, title: "Treffen", starts_at: new Date(Date.now() + 30 * 60e3).toISOString() })}) as id`);
+    const [{ at }] = await as(tx, a, () => tx<{ at: Date }[]>`select starts_at as at from public.events where id = ${id}`);
+    await as(tx, b, () => tx`select app.rsvp(${id}, ${at}, 'yes')`);
+    await tx`select app.calendar_tick()`;
+    await tx`select app.calendar_tick()`;
+    const sent = await as(tx, b, () => tx<{ w: string }[]>`select payload ->> 'when' as w from public.notifications where profile_id = ${b} and kind = 'event_reminder'`);
+    expect(sent.map((s) => s.w)).toEqual(["1h"]);
+    // Ada (owner, no answer) gets none for a group date.
+    expect(await as(tx, a, () => tx`select 1 from public.notifications where profile_id = ${a} and kind = 'event_reminder'`)).toHaveLength(0);
+    const [{ s }] = await as(tx, b, () => tx<{ s: { feed_token: string } }[]>`select app.calendar_settings('{}'::jsonb) as s`);
+    const feed = await tx<{ title: string; my_status: string }[]>`select title, my_status from app.calendar_feed(${s.feed_token})`;
+    expect(feed).toEqual([expect.objectContaining({ title: "Treffen", my_status: "yes" })]);
+    expect(await tx`select 1 from app.calendar_feed('falsch')`).toHaveLength(0);
+  }));
+});

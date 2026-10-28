@@ -48,6 +48,8 @@
     "today": "Heute"
   },
   "actions": {
+    "event": "Termine anlegen",
+    "expense": "Ausgaben eintragen",
     "message": "Nachrichten schicken",
     "post": "Beiträge und Antworten schreiben",
     "contact_request": "Fremden eine Kontaktanfrage schicken",

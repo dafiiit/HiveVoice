@@ -44,3 +44,6 @@ yarn-error.log*
 next-env.d.ts
 test-results/
 playwright-report/
+
+# draw.io, fetched before the build (scripts/drawio.mjs)
+/public/drawio/

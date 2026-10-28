@@ -27,7 +27,7 @@ export function ChatTools({ conversationId, tools }: { conversationId: string; t
         <span className="text-[13px] text-muted">{tc("chatToolsText")}</span>
         {GROUP_TOOLS.map((k) => (
           <label key={k} className="flex cursor-pointer items-start gap-2">
-            <input type="checkbox" checked={on.includes(k)} disabled={pending} onChange={() => toggle(k)} className="mt-0.5 h-5 w-5 flex-none accent-[var(--ink)]" />
+            <input type="checkbox" checked={on.includes(k)} disabled={pending} onChange={() => toggle(k)} className="mt-0.5 h-6 w-6 flex-none accent-[var(--ink)]" />
             <span className="flex flex-col"><span>{t(`items.${k}.name`)}</span><span className="text-xs text-muted">{t(`items.${k}.text`)}</span></span>
           </label>
         ))}

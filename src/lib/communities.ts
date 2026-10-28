@@ -18,8 +18,8 @@ export type CommunityPreset = {
 export const COMMUNITIES: CommunityPreset[] = [
   // Small and private: a chat among a few people (or two), tools switched on when needed.
   { key: "chat", kind: "other", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: [], tools: [] },
-  { key: "couple", kind: "other", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: [], tools: ["tasks", "expenses", "links"] },
-  { key: "flatshare", kind: "community", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: ["wg"], tools: ["tasks", "expenses", "links"] },
+  { key: "couple", kind: "other", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: [], tools: ["tasks", "expenses", "calendar", "links"] },
+  { key: "flatshare", kind: "community", template: "project", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: ["wg"], tools: ["tasks", "calendar", "expenses", "links"] },
   { key: "sports", kind: "club", template: "club", visibility: "public", joinPolicy: "request", adultsOnly: false, modTasks: true, tags: ["sport", "verein", "training"] },
   { key: "school", kind: "community", template: "club", visibility: "secret", joinPolicy: "invite", adultsOnly: false, modTasks: true, tags: ["schule", "eltern"] },
   { key: "daycare", kind: "community", template: "club", visibility: "secret", joinPolicy: "invite", adultsOnly: true, modTasks: true, tags: ["kita", "eltern"] },

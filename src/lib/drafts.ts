@@ -1,4 +1,5 @@
 "use client";
+import { forgetLocal } from "./localdb";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // Unsaved input stays on the device: whoever leaves a form (closes the app, follows a link, loses the connection) finds it
@@ -30,6 +31,7 @@ export function forgetDevice() {
     for (const k of Object.keys(localStorage)) if (k.startsWith(PREFIX)) localStorage.removeItem(k);
     localStorage.removeItem("hv-outbox");
   } catch { /* blocked */ }
+  forgetLocal();
 }
 
 /** `keep`: sending failed after `clear` (for example before a redirect), so what is in the form is kept again. */

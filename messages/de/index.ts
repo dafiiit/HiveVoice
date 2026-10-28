@@ -3,6 +3,7 @@ import ns_admin from "./admin.json";
 import ns_arguments from "./arguments.json";
 import ns_auth from "./auth.json";
 import ns_ballot from "./ballot.json";
+import ns_calendar from "./calendar.json";
 import ns_categories from "./categories.json";
 import ns_common from "./common.json";
 import ns_community from "./community.json";
@@ -55,6 +56,7 @@ const messages = {
   "arguments": ns_arguments,
   "auth": ns_auth,
   "ballot": ns_ballot,
+  "calendar": ns_calendar,
   "categories": ns_categories,
   "common": ns_common,
   "community": ns_community,

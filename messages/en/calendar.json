@@ -1,0 +1,73 @@
+{
+  "title": "Calendar",
+  "publicTitle": "Events",
+  "new": "New event",
+  "newDuty": "New duty",
+  "empty": "Nothing coming up in the next weeks.",
+  "emptyGroup": "No dates yet. Rehearsals, meetings or a cleaning rota: all with yes and no.",
+  "emptyPublic": "No public events near you right now.",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "allDay": "all day",
+  "more": "More dates",
+  "range": "Period",
+  "ranges": { "week": "Week", "month": "4 weeks", "quarter": "3 months" },
+  "earlier": "Earlier",
+  "later": "Later",
+  "badges": { "public": "Public", "cancelled": "Cancelled", "duty": "Duty", "full": "Full", "series": "Repeats" },
+  "recur": { "none": "Once", "daily": "Every day", "weekly": "Every week", "biweekly": "Every two weeks", "monthly": "Every month" },
+  "rsvp": {
+    "yes": "Going", "maybe": "Maybe", "no": "Not going",
+    "mine": { "yes": "You are going", "maybe": "You might come", "no": "You are not going" },
+    "undo": "Take back answer", "as": "As", "noRole": "no role", "note": "Note (optional)",
+    "count": "{yes} going{maybe, plural, =0 {} other { · # maybe}}",
+    "capacity": "{yes} of {capacity} places",
+    "who": "Who is coming", "nobody": "No answers yet.",
+    "groups": { "yes": "Going", "maybe": "Maybe", "no": "Not going" }
+  },
+  "roles": {
+    "title": "Roles",
+    "missing": "{n, plural, one {1 missing} other {# missing}}",
+    "missingRole": "{role}: {n, plural, one {1 missing} other {# missing}}",
+    "complete": "All roles filled",
+    "of": "{have} of {needed}"
+  },
+  "duty": {
+    "on": "{name}'s turn", "onYou": "Your turn", "nobody": "Nobody assigned", "cover": "Cover wanted", "done": "Done", "doneBy": "Done",
+    "take": "I'll do it", "askCover": "Ask for cover", "stopCover": "I'll do it after all", "markDone": "Done", "undone": "Not done",
+    "assign": "Assign", "assignLabel": "Who does it on this date?", "order": "Order",
+    "orderHint": "In turn, then from the start again. Swaps work per date.",
+    "last": "Last: {name}, {when}", "next": "Next: {name}, {when}"
+  },
+  "detail": {
+    "when": "When", "where": "Where", "online": "Online", "group": "Group", "course": "Offer", "by": "Added by", "series": "Series",
+    "until": "until {date}", "otherDates": "More dates of the series", "download": "Add to my calendar (.ics)", "edit": "Edit",
+    "cancelDate": "Cancel this date", "restoreDate": "Put this date back on", "cancelAll": "Cancel", "cancelAllSeries": "Cancel the whole series",
+    "restore": "Put back on", "delete": "Delete", "deleteConfirm": "Delete this event for good? All answers are lost.",
+    "cancelledAll": "This event is cancelled.", "cancelledOne": "This date is off.", "guests": "Invited",
+    "notFound": "This event does not exist or you may not see it.", "back": "Calendar", "past": "Past"
+  },
+  "form": {
+    "titleNew": "New event", "titleEdit": "Edit event", "titleDuty": "New duty", "kind": "Kind", "kinds": { "event": "Event", "duty": "Duty" },
+    "name": "Title", "namePlaceholder": "e.g. rehearsal, garden day, bins out", "date": "Date", "start": "Start", "end": "End",
+    "allDay": "All day", "repeat": "Repeat", "until": "Until (optional)", "place": "Place", "placePlaceholder": "Address or meeting point",
+    "online": "Online link (optional)", "description": "Description (optional)", "who": "Who sees it?",
+    "visibility": { "private": "Only me and invited people", "privateGroup": "Only members of the group", "public": "Public (in Community → Events)" },
+    "guests": "Invite", "guestsPlaceholder": "Search a name", "invite": "Invite", "remove": "Remove",
+    "answers": "Collect yes and no", "capacity": "At most (optional)", "capacityHint": "Places; then the event is full.",
+    "roles": "Roles (optional)", "rolesHint": "E.g. 2 × violin, 1 × viola. The event shows what is missing.", "roleName": "Role", "roleNeeded": "Number",
+    "addRole": "+ Role", "rotation": "Order", "rotationHint": "Who is on when? In turn, then from the start again.", "addPerson": "+ Add", "up": "Move up",
+    "save": "Save", "create": "Add", "cancel": "Cancel", "endBeforeStart": "The end is before the start.",
+    "rotationEmpty": "At least one person has to be in the order."
+  },
+  "settings": {
+    "title": "Reminders and subscription",
+    "remindDay": "Remind me a day before", "remindHour": "Remind me an hour before",
+    "remindHint": "As a notification in the app, for events you said yes to, duties and your own events.",
+    "feed": "Subscribe to the calendar",
+    "feedHint": "Add this address to Google Calendar, Apple Calendar or Outlook as a subscription. Whoever knows it sees your dates: do not pass it on.",
+    "copy": "Copy address", "copied": "Copied", "webcal": "Open in calendar", "renew": "New address",
+    "renewConfirm": "Make a new address? The old one stops working at once."
+  },
+  "tool": "Calendar"
+}

@@ -469,7 +469,7 @@ function ExpenseForm({ slug, groupId, me, members, currency, entry, onClose }: {
               return (
                 <li key={p.id} className="flex min-h-[52px] items-center gap-3 border-b border-line py-1.5">
                   <input type="checkbox" checked={!!on[p.id]} onChange={(e) => setOn({ ...on, [p.id]: e.target.checked })} aria-label={t("form.takesPart", { name: p.name })}
-                    className="h-5 w-5 flex-none accent-[var(--ink)]" />
+                    className="h-6 w-6 flex-none accent-[var(--ink)]" />
                   <Avatar name={p.name} seed={p.seed} path={p.path} size={28} />
                   <span className={`min-w-0 flex-1 truncate ${on[p.id] ? "" : "text-muted"}`}>{p.id === me ? t("you") : p.name}</span>
                   {on[p.id] && split !== "equal" && (

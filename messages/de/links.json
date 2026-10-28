@@ -134,7 +134,7 @@
     "new": "Neu"
   },
   "groupTab": "Links",
-  "groupIntro": "Gemeinsame Sammlung dieser Gruppe: Dokumente, Ordner, Designs, Karten. Gespeichert wird nur der Link.",
+  "groupIntro": "Gespeichert wird nur der Link, nicht die Datei.",
   "groupShare": "Wissen in der Gruppe hinzufügen",
   "report": "Link melden",
   "thanks": "Geteilt.",

@@ -6,6 +6,7 @@ export const NEW_ITEMS = [
   { key: "group", href: "/new/group", shape: "flower" },
   { key: "initiative", href: "/new/initiative", shape: "burst" },
   { key: "voice", href: "/community", shape: "arch" },
+  { key: "event", href: "/me/calendar?new=1", shape: "circle" },
   { key: "note", href: "/me/notes/new", shape: "stairs" },
   { key: "list", href: "/me/notes/new?list=1", shape: "hourglass" },
   { key: "diagram", href: "/me/diagrams/new", shape: "diamond" },

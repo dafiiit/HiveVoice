@@ -1,10 +1,15 @@
+import { existsSync } from "node:fs";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+// draw.io from this site when scripts/drawio.mjs put it in public/drawio (unless NEXT_PUBLIC_DRAWIO_URL says otherwise).
+const drawio = process.env.NEXT_PUBLIC_DRAWIO_URL || (existsSync("public/drawio/.version") ? "/drawio" : "");
+
 const nextConfig: NextConfig = {
   devIndicators: false,
+  env: { NEXT_PUBLIC_DRAWIO_URL: drawio },
   // A second build folder (NEXT_DIST_DIR=.next-prod) lets a production build run next to a dev server.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   // Standalone output lets the app run in a plain Docker container for self-hosting.

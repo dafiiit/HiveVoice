@@ -1,10 +1,11 @@
 "use client";
-import { useOptimistic, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { PostView } from "@/lib/posts";
-import { createPost, deletePost, votePost } from "@/lib/actions/posts";
+import { createPost, deletePost } from "@/lib/actions/posts";
+import { sendOrQueue } from "@/lib/queue";
 import { moderatePost } from "@/lib/actions/safety";
 import { relTime } from "@/lib/format";
 import { Avatar } from "./ui/Avatar";
@@ -28,6 +29,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
   const tc = useTranslations("common");
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [kept, setKept] = useState(false);
   const [pending, start] = useTransition();
   const x = useExtras();
   const reply = !!ctx.parentId;
@@ -40,11 +42,13 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
     e.preventDefault();
     if (!canSend) return;
     start(async () => {
-      const res = await createPost({ ...ctx, body, path, files: x.files, poll: x.poll });
-      if (!res.ok) return setError(tc(`errors.${res.error}` as "errors.unknown"));
+      // Text alone may wait on the device without a connection; photos, files and polls need the server right away.
+      const res = x.has ? await createPost({ ...ctx, body, path, files: x.files, poll: x.poll }) : await sendOrQueue("post", { ...ctx, body, path });
+      if (!res.ok) return setError(tc(`errors.${"error" in res && res.error ? res.error : "unknown"}` as "errors.unknown"));
       setBody("");
       x.clear();
       setError(null);
+      setKept("queued" in res && !!res.queued);
       onPosted?.();
     });
   };
@@ -65,6 +69,7 @@ export function Composer({ ctx, path, placeholder, viewerName, viewerSeed, viewe
         </div>
       )}
       {error && <Notice tone="error" className="text-sm">{error}</Notice>}
+      {kept && <Notice tone="hint">{tc("savedOffline")}</Notice>}
     </form>
   );
 }
@@ -74,7 +79,10 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
   const tc = useTranslations("common");
   const ts = useTranslations("safety");
   const locale = useLocale();
-  const [vote, setVote] = useOptimistic(p.my_vote);
+  // My vote shows at once and stays, also when it waits on the device for the connection.
+  const [vote, setVote] = useState(p.my_vote);
+  const [seenVote, setSeenVote] = useState(p.my_vote);
+  if (p.my_vote !== seenVote) { setSeenVote(p.my_vote); setVote(p.my_vote); }
   const [, start] = useTransition();
   const [pulse, ping] = usePulse();
   const [open, setOpen] = useState(startOpen);
@@ -83,7 +91,8 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
     if (!canWrite) return;
     const next = vote === v ? 0 : v;
     ping(v, next !== 0);
-    start(async () => { setVote(next); await votePost(p.id, next, path); });
+    setVote(next);
+    void sendOrQueue("vote", { postId: p.id, value: next, path });
   };
   const verified = p.author_mode === "real";
   if (p.removed) {

@@ -6,7 +6,7 @@ const PAGES = 'hivevoice-pages-v3';
 const MEDIA = 'hivevoice-media-v3';
 const CONFIG = 'hivevoice-config-v1';
 const OFFLINE = '/offline.html';
-const MAX_PAGES = 120;
+const MAX_PAGES = 400;
 const MAX_STATIC = 3000;
 const KEEP = [STATIC, PAGES, MEDIA, CONFIG];
 const forget = () => Promise.all([caches.delete(PAGES), caches.delete(MEDIA)]).then(() => fetched.clear());
@@ -14,6 +14,7 @@ const forget = () => Promise.all([caches.delete(PAGES), caches.delete(MEDIA)]).t
 // What the person chose under Einstellungen → Offline (the page tells us; kept in a cache entry so it survives a restart of this worker):
 //   mode 'off': nothing is kept; 'text': pages; 'all': pages and pictures. wifiOnly: pictures and files only when the
 //   connection is not a mobile one (and the device is not asked to save data), where the browser tells.
+//   limitMb: at most this much on the device (0: as much as the browser allows); pictures go first, oldest first, then pages.
 let settings = null;
 async function config() {
   if (settings) return settings;
@@ -21,10 +22,11 @@ async function config() {
     const hit = await (await caches.open(CONFIG)).match('/__offline-settings');
     settings = hit ? await hit.json() : null;
   } catch { /* none kept */ }
-  return (settings = settings || { mode: 'all', wifiOnly: true });
+  return (settings = settings || { mode: 'all', wifiOnly: true, limitMb: 500 });
 }
 async function setConfig(next) {
-  settings = { mode: ['off', 'text', 'all'].includes(next.mode) ? next.mode : 'all', wifiOnly: next.wifiOnly !== false };
+  settings = { mode: ['off', 'text', 'all'].includes(next.mode) ? next.mode : 'all', wifiOnly: next.wifiOnly !== false,
+               limitMb: [0, 100, 500, 2000].includes(next.limitMb) ? next.limitMb : 500 };
   if (settings.mode === 'off') await forget();
   try { await (await caches.open(CONFIG)).put('/__offline-settings', new Response(JSON.stringify(settings), { headers: { 'Content-Type': 'application/json' } })); } catch { /* not kept */ }
 }
@@ -53,6 +55,26 @@ async function trim(name, max) {
   for (let i = 0; i < keys.length - max; i++) await cache.delete(keys[i]);
 }
 
+// Above the chosen limit: the oldest pictures and files go, then the oldest pages, a few at a time, until it fits.
+let checking = false;
+async function fit() {
+  const c = await config();
+  if (!c.limitMb || checking || !self.navigator.storage || !self.navigator.storage.estimate) return;
+  checking = true;
+  try {
+    for (const name of [MEDIA, PAGES]) {
+      for (let round = 0; round < 50; round++) {
+        const { usage = 0 } = await self.navigator.storage.estimate();
+        if (usage <= c.limitMb * 1e6) return;
+        const cache = await caches.open(name);
+        const keys = await cache.keys();
+        if (!keys.length) break;
+        for (const k of keys.slice(0, Math.max(5, Math.ceil(keys.length / 10)))) await cache.delete(k);
+      }
+    }
+  } finally { checking = false; }
+}
+
 // Pages tell the browser's HTTP cache not to store them; this copy is different: shown only offline, deleted on sign-out.
 const keepable = (res) => res && res.ok && res.type === 'basic' && !res.redirected;
 const pageKey = (url) => { const u = new URL(url); u.hash = ''; return u.href; };
@@ -64,6 +86,7 @@ async function savePage(key, res) {
   await cache.delete(key);
   await cache.put(key, res);
   await trim(PAGES, MAX_PAGES);
+  await fit();
 }
 
 // Pages opened inside the app arrive as data for the router, not as whole pages, so the page asks
@@ -163,7 +186,7 @@ self.addEventListener('fetch', (event) => {
         const res = await fetch(req);
         if (keepable(res)) {
           const copy = res.clone();
-          event.waitUntil(mayKeep('media').then((ok) => ok && caches.open(MEDIA).then((c) => c.put(req, copy)).then(() => trim(MEDIA, MAX_PAGES * 3))));
+          event.waitUntil(mayKeep('media').then((ok) => ok && caches.open(MEDIA).then((c) => c.put(req, copy)).then(() => trim(MEDIA, MAX_PAGES * 5)).then(fit)));
         }
         return res;
       } catch {

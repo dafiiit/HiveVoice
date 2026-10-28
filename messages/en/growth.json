@@ -1,6 +1,6 @@
 {
   "title": "Invite",
-  "lead": "HiveVoice grows when people take each other along. Here you share the app, invite people and see where somebody is still missing near you.",
+  "lead": "Share the app, invite people and see where someone is still missing near you.",
   "share": {
     "share": "Share",
     "copy": "Copy link",
@@ -64,7 +64,7 @@
   "friends": {
     "button": "Invite",
     "title": "Invite people you know",
-    "lead": "The more people from your area join, the more gets done. Send friends, neighbours or colleagues a link.",
+    "lead": "Send friends, neighbours or colleagues a link.",
     "message": "I am on HiveVoice: people from our area help each other, propose things and vote fairly. Join us:",
     "subject": "Join HiveVoice",
     "whatsapp": "WhatsApp",

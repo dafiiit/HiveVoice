@@ -98,7 +98,10 @@
     "admins_from_config": "Admins are set in ADMIN_EMAILS.",
     "amount_required": "Please enter an amount.",
     "split_people": "Tick at least one person.",
-    "split_mismatch": "The split does not add up to the total."
+    "split_mismatch": "The split does not add up to the total.",
+    "date_required": "Please pick a date.",
+    "rotation_required": "At least one person has to be in the order.",
+    "event_full": "This event is already full."
   },
   "phase": {
     "idea": "Idea",
@@ -140,5 +143,8 @@
   "draft": {
     "restored": "Unsaved draft from {when} restored.",
     "discard": "Discard"
-  }
+  },
+  "queued": "{n, plural, one {1 change waits} other {# changes wait}} for a connection",
+  "queueDropped": "{n, plural, one {1 change} other {# changes}} did not go through (deleted or no longer allowed)",
+  "savedOffline": "Kept on this device. It goes out once you are online again."
 }

@@ -63,12 +63,13 @@
     "team": "Members and rights",
     "about": "About",
     "links": "Knowledge",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "calendar": "Calendar"
   },
   "talkPlaceholder": "Write in “{name}” …",
   "joinToPost": "Join the group to write here.",
   "noPosts": "No posts yet.",
-  "needsIntro": "What the group is missing. Contact only happens when both sides agree.",
+  "needsIntro": "Contact only happens when both sides agree.",
   "noNeeds": "No open needs right now.",
   "forGoal": "for: {goal}",
   "canHelp": "Help",
@@ -134,7 +135,7 @@
   },
   "form": {
     "title": "Start a group",
-    "lead": "A shared purpose, people who share it, and a way there. You decide what the group is for.",
+    "lead": "You decide what the group is for.",
     "leadShort": "What is the group for? You decide.",
     "name": "Name",
     "summary": "In one sentence",
@@ -238,6 +239,10 @@
       "expenses": {
         "name": "Split expenses",
         "text": "Who paid what, who owes whom, with receipts"
+      },
+      "calendar": {
+        "name": "Calendar and duties",
+        "text": "Dates with yes and no, duty rotas in turn"
       }
     }
   }

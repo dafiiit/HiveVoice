@@ -76,7 +76,7 @@ export function Goals({ slug, groupId, goals, members, canPropose, canEdit, canV
                     {canEdit && g.status !== "voting" ? (
                       <button type="button" role="checkbox" aria-checked={s.done} aria-label={s.title} disabled={pending}
                         onClick={() => start(async () => { await toggleSubgoal(slug, s.id, !s.done); })}
-                        className={`h-4 w-4 flex-none border border-ink p-0 ${s.done ? "bg-ink" : "bg-transparent"}`} />
+                        className={`h-6 w-6 flex-none border border-ink p-0 ${s.done ? "bg-ink" : "bg-transparent"}`} />
                     ) : <span aria-hidden="true" className={`h-4 w-4 flex-none ${s.done ? "bg-ink" : "border border-ink"}`} />}
                     <span className={s.done ? "line-through" : ""}>{s.title}</span>
                   </li>

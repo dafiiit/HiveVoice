@@ -27,7 +27,7 @@ Konzerne und ohne zentralen Betreiber laufen kann. Stand: Oktober 2026.
 | **Cloudflare Turnstile** | Bot-Schutz bei Login und Registrierung | proprietär, kostenlos | 0 € | ja: abschaltbar, hCaptcha/ALTCHA möglich |
 | **Google** (OAuth, Fotos-Picker, Safe Browsing) | Google-Login, „Aus Google Fotos“, Link-Prüfung | proprietär | kostenlos mit Kontingent | ja: alles optional |
 | **OpenFreeMap** | Kartenkacheln | offen (OSM), gehostet von Dritten | 0 € | ja: `NEXT_PUBLIC_MAP_STYLE_URL` |
-| **draw.io** (diagrams.net) | Diagramm-Editor in Ich → Diagramme | offen (Apache 2.0), gehostet von JGraph | 0 € | ja: `NEXT_PUBLIC_DRAWIO_URL` (Docker-Image `jgraph/drawio`) |
+| **draw.io** (diagrams.net) | Diagramm-Editor in Ich → Diagramme | offen (Apache 2.0), seit 2026-10-27 selbst ausgeliefert unter `/drawio` | 0 € | ja: `scripts/drawio.mjs` holt vor dem Build eine feste Version (mit Prüfsumme) nach `public/drawio/`; `NEXT_PUBLIC_DRAWIO_URL` kann auf einen anderen Server zeigen, `DRAWIO_SELFHOST=0` schaltet es ab |
 | **Wikidata, OpenPLZ** | Gemeinden, PLZ, Koordinaten | offene Daten (CC0 / ODbL) | 0 € | ja: einmaliger Import, liegt danach in der eigenen DB |
 | **GitHub** | Code, Issues, Auslöser für Deploys | proprietär | 0 € | ja: Git ist dezentral |
 | **npm-Pakete** | Next.js, React, postgres.js, MapLibre, zod … | offen | 0 € | ja, aber Next.js wird vor allem von Vercel entwickelt |
@@ -48,7 +48,7 @@ Konzerne und ohne zentralen Betreiber laufen kann. Stand: Oktober 2026.
 | Google Fotos | normaler Datei-Upload (gibt es); optional Nextcloud-/WebDAV-Import | – | – |
 | Safe Browsing | eigene Sperrlisten (z. B. URLhaus, Phishing.Database) | klein | bei Bedarf |
 | OpenFreeMap | eigene PMTiles-Datei für Deutschland (~1 GB) im eigenen Speicher, MapLibre-Stil zeigt darauf | klein | sobald Karten viel genutzt werden |
-| draw.io | eigener draw.io-Server (Docker `jgraph/drawio`, statische Dateien), `NEXT_PUBLIC_DRAWIO_URL` zeigt darauf. Liegt er unter derselben Adresse im Pfad `/drawio` (`NEXT_PUBLIC_DRAWIO_URL=/drawio`), hält der Service Worker (`public/sw.js`) ihn nach der ersten Benutzung für den Offline-Gebrauch | klein | sobald Diagramme viel genutzt werden oder offline gehen sollen |
+| draw.io | erledigt (2026-10-27): `npm run build` lädt vorher draw.io v32.4.1 (`draw.war`, SHA-256 geprüft, rund 100 MB entpackt, ohne Java-Teile und Quelltexte) nach `public/drawio/`; der Editor läuft dann unter `/drawio` im Modus `stealth=1` (keine Aufrufe zu diagrams.net), der Service Worker hält ihn nach der ersten Benutzung offline. Neue Version: `VERSION` und `SHA256` in `scripts/drawio.mjs` ändern. Schlägt das Herunterladen fehl, läuft der Build weiter und der Editor kommt von embed.diagrams.net | – | – |
 | GitHub | Codeberg/Forgejo als Spiegel, Releases als Container-Images in einer offenen Registry | klein | jederzeit |
 | Next.js | bleibt (offen, MIT); Risiko beobachten. Die Fachlogik in SQL macht einen späteren Wechsel des Frontends möglich | – | – |
 

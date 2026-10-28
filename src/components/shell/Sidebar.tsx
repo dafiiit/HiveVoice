@@ -4,7 +4,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import { useTranslations } from "next-intl";
 import { AreaIcon } from "../ui/Logo";
-import { IconBoard, IconChat, IconDiagram, IconFlag, IconHands, IconHome, IconMail, IconNote, IconSidebar, IconUpload, IconUser, IconUsers, IconInbox } from "../ui/Icons";
+import { IconBoard, IconCalendar, IconChat, IconDiagram, IconFlag, IconHands, IconHome, IconMail, IconNote, IconSidebar, IconUpload, IconUser, IconUsers, IconInbox } from "../ui/Icons";
 import { AREAS, areaOf, type Area } from "./areas";
 
 const watchWidth = (cb: () => void) => { window.addEventListener("resize", cb); return () => window.removeEventListener("resize", cb); };
@@ -58,6 +58,7 @@ function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }:
     community: [
       { href: "/community", label: tc("board"), icon: IconBoard },
       { href: "/community/listings", label: tc("listings"), icon: IconHands },
+      { href: "/community/events", label: tc("events"), icon: IconCalendar },
       { href: "/community/groups", label: tc("groups"), icon: IconUsers },
       { href: "/community/people", label: tc("people"), icon: IconUser },
     ],
@@ -71,6 +72,7 @@ function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }:
     me: [
       { href: "/me", label: tm("all"), icon: IconHome },
       { href: "/me/listings", label: tm("listings"), icon: IconHands },
+      { href: "/me/calendar", label: tm("calendar"), icon: IconCalendar },
       { href: "/me/notes", label: tm("notes"), icon: IconNote },
       { href: "/me/diagrams", label: tm("diagrams"), icon: IconDiagram },
       { href: "/me/uploads", label: tm("uploads"), icon: IconUpload },

@@ -134,7 +134,7 @@
     "new": "New"
   },
   "groupTab": "Links",
-  "groupIntro": "This group’s shared collection: documents, folders, designs, maps. Only the link is stored.",
+  "groupIntro": "Only the link is stored, not the file.",
   "groupShare": "Add knowledge to the group",
   "report": "Report link",
   "thanks": "Shared.",

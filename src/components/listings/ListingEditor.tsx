@@ -167,7 +167,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
             <div className="grid grid-cols-1 gap-3 @lg:grid-cols-2">
               <PlaceInput label={t("location")} value={location} onChange={setLocation} onPlace={(p) => setPlaceId(p?.id ?? null)} hint={t("locationHint")} />
               <label className={field.label}>{t("schedule")}<input value={schedule} onChange={(e) => setSchedule(e.target.value)} placeholder={t("schedulePlaceholder")} className={field.input} /></label>
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={() => setRecurring(!recurring)} className="h-5 w-5 accent-[var(--ink)]" />{t("recurring")}</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={recurring} onChange={() => setRecurring(!recurring)} className="h-6 w-6 accent-[var(--ink)]" />{t("recurring")}</label>
               <label className={field.label}>{t(give ? "seats" : "people")}<input type="number" min={1} value={seats} onChange={(e) => setSeats(e.target.value)} className={field.input} /></label>
             </div>
             <div className="flex flex-col gap-2">
@@ -181,7 +181,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
               {payMode === "swap" && (
                 <div className="flex flex-col gap-3 border-l-4 border-ink bg-paper p-3">
                   <label className="flex items-start gap-2 text-sm">
-                    <input type="checkbox" checked={pairOn} onChange={() => setPairOn(!pairOn)} className="mt-0.5 h-5 w-5 accent-[var(--ink)]" />
+                    <input type="checkbox" checked={pairOn} onChange={() => setPairOn(!pairOn)} className="mt-0.5 h-6 w-6 accent-[var(--ink)]" />
                     <span><strong>{t(give ? "pairOnOffer" : "pairOnNeed")}</strong><br />{t(give ? "pairLead" : "pairLeadNeed")}</span>
                   </label>
                   {pairOn && (
@@ -238,7 +238,7 @@ export function ListingEditor({ kind: initialKind, ideas, regionId, regionName, 
                     {hits.length === 0 && <span className="text-sm text-muted">{t("finderEmpty")}</span>}
                   </div>
                 )}
-                <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={allies} onChange={() => setAllies(!allies)} className="mt-0.5 h-5 w-5 accent-[var(--ink)]" />
+                <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={allies} onChange={() => setAllies(!allies)} className="mt-0.5 h-6 w-6 accent-[var(--ink)]" />
                   <span><strong>{t("allies")}</strong><br />{t("alliesHint")}</span></label>
               </div>
             )}

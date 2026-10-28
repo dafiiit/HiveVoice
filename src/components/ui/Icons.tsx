@@ -27,6 +27,7 @@ export const IconImage = ({ size = 20, className }: P) => <svg {...base(size)} s
 export const IconFolder = ({ size = 22, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 5h7l2 2h9v12H3z" /><path d="M3 10h18" /></svg>;
 // The sections of the three areas (sidebar).
 export const IconSidebar = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="3" y="4" width="18" height="16" /><path d="M10 4v16" /></svg>;
+export const IconCalendar = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="3" y="5" width="18" height="16" /><path d="M3 10h18M8 3v4M16 3v4M7 14h3v3H7z" /></svg>;
 export const IconBoard = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><rect x="3" y="4" width="18" height="16" /><path d="M7 9h6M7 13h10M7 17h4" /></svg>;
 export const IconHands = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><path d="M3 12l5-5 4 3 4-3 5 5-9 8z" /><path d="M8 7l4 4" /></svg>;
 export const IconUsers = ({ size = 20, className }: P) => <svg {...base(size)} strokeWidth={2} className={className}><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.5-4 3-6 6.5-6s6 2 6.5 6" /><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3.2 2.6 3.5 6" /></svg>;

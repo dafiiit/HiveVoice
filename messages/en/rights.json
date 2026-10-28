@@ -48,6 +48,8 @@
     "today": "Today"
   },
   "actions": {
+    "event": "Create dates",
+    "expense": "Write down expenses",
     "message": "Send messages",
     "post": "Write posts and replies",
     "contact_request": "Send a contact request to a stranger",

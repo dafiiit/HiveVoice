@@ -75,6 +75,11 @@ Regeln für den Worker (ab Stufe 3):
   ausgeben lassen (`startTime`, `endTime`, Ort als `Place` mit Adresse und Koordinaten, Zeitzone, Status
   abgesagt/verschoben, Teilnahme als `Accept`/`TentativeAccept`/`Reject`). Dann sind öffentliche Termine mit
   Mobilizon und Gancio kompatibel und das iCal-Abo folgt aus denselben Feldern.
+  Gebaut 2026-10-27 (Migration 065): `public.events` (`title` → `name`, `description` → `content`, `starts_at` und
+  `duration_minutes` → `startTime`/`endTime`, `place`/`region_id` → `location`, `tz`, `cancelled_at` → abgesagt),
+  Antworten in `event_rsvps` (`yes`/`maybe`/`no` → `Accept`/`TentativeAccept`/`Reject`). Eine Serie ist eine Zeile;
+  ihre Termine rechnet `app.event_times` aus (Wiederholung in Ortszeit), Änderungen einzelner Termine hängen an
+  `(event_id, occurs_at)`. Ausgeliefert wird noch nichts, nur iCal (`/api/calendar/<Schlüssel>.ics`).
 - **Löschen ist eine Bitte.** Ein `Delete` an fremde Server lässt sich nicht erzwingen; der Datenschutztext muss
   das sagen, bevor ausgeliefert wird.
 

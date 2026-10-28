@@ -111,6 +111,10 @@
     "upload": {
       "title": "Upload",
       "text": "A file, a photo or a link."
+    },
+    "event": {
+      "title": "Event",
+      "text": "Meeting, rehearsal or course, with yes and no"
     }
   }
 }

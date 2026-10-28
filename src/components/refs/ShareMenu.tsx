@@ -92,7 +92,7 @@ export function ShareMenu({ type, id, title, className, external, access }: {
                 </label>)}
             {targets && where === "market" && <p className="m-0 text-sm">{targets.market ? t("marketPost", { place: targets.market.name }) : t("marketNone")}</p>}
             {where === "group" && options.length > 0 && (
-              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={asPost} onChange={() => setAsPost(!asPost)} className="h-5 w-5 accent-[var(--ink)]" />{t("groupPost")}</label>
+              <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={asPost} onChange={() => setAsPost(!asPost)} className="h-6 w-6 accent-[var(--ink)]" />{t("groupPost")}</label>
             )}
             <label className={field.label}>{t("note")}
               <textarea rows={2} value={note} maxLength={2000} onChange={(e) => setNote(e.target.value)} placeholder={t("notePlaceholder")} className={field.textarea} />

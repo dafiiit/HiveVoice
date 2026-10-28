@@ -138,9 +138,11 @@
       "wifiOnly": "Bilder und Dateien nur im WLAN",
       "used": "Auf diesem Gerät belegt: {size}",
       "usedUnknown": "Der Speicher dieses Geräts lässt sich nicht anzeigen.",
-      "clear": "Gespeicherte Seiten löschen",
+      "clear": "Gespeicherte Seiten und Chats löschen",
       "cleared": "Gelöscht.",
-      "signOutHint": "Notizen und Nachrichten, die noch nicht gesendet sind, bleiben bis zum Senden auf dem Gerät."
+      "signOutHint": "Notizen und Nachrichten, die noch nicht gesendet sind, bleiben bis zum Senden auf dem Gerät.",
+      "limit": "Höchstens",
+      "limitNone": "So viel wie möglich"
     }
   }
 }

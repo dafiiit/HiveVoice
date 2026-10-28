@@ -61,7 +61,7 @@ export function AttrFields({ category, value, onChange }: { category: Category; 
         if (f.type === "bool") {
           return (
             <label key={f.key} className="flex items-center gap-2 self-end text-sm">
-              <input type="checkbox" checked={v === true} onChange={() => set(f.key, v !== true)} className="h-5 w-5 accent-[var(--ink)]" />{label}
+              <input type="checkbox" checked={v === true} onChange={() => set(f.key, v !== true)} className="h-6 w-6 accent-[var(--ink)]" />{label}
             </label>
           );
         }

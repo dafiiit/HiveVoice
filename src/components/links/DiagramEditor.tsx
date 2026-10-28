@@ -9,9 +9,13 @@ import { DraftNotice } from "../ui/DraftNotice";
 import { drawingOf, lightSvg } from "@/lib/drawio";
 import { useDraft } from "@/lib/drafts";
 
-// draw.io runs in a frame and talks to the page by messages (embed mode, JSON protocol). It can run on our own server
-// (the jgraph/drawio Docker image); without NEXT_PUBLIC_DRAWIO_URL the public embed address is used.
+// draw.io runs in a frame and talks to the page by messages (embed mode, JSON protocol). It comes from this site (/drawio,
+// fetched before the build by scripts/drawio.mjs, kept by the service worker for offline use) or from another server
+// (NEXT_PUBLIC_DRAWIO_URL, e.g. the jgraph/drawio Docker image); without either, from the public embed address.
 const DRAWIO = (process.env.NEXT_PUBLIC_DRAWIO_URL || "https://embed.diagrams.net").replace(/\/$/, "");
+const OWN = DRAWIO.startsWith("/");
+/** Where the frame's messages come from (our own origin when draw.io is served from this site). */
+const drawioOrigin = () => (OWN ? window.location.origin : new URL(DRAWIO).origin);
 const MAX = 2_000_000;
 // After the last change: this long until the diagram saves itself.
 const AUTOSAVE_MS = 3000;
@@ -75,7 +79,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
   const draftRef = useRef(draft);
   useEffect(() => { draftRef.current = draft; });
 
-  const post = (msg: object) => frame.current?.contentWindow?.postMessage(JSON.stringify(msg), DRAWIO);
+  const post = (msg: object) => frame.current?.contentWindow?.postMessage(JSON.stringify(msg), drawioOrigin());
   const requestSave = (byHand: boolean) => {
     if (timer.current) { clearTimeout(timer.current); timer.current = null; }
     if (latest.current.title.trim().length < 3 || latest.current.locked) return false;
@@ -136,7 +140,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
       if (closing.current) leave();
     };
     const onMessage = (e: MessageEvent) => {
-      if (e.origin !== new URL(DRAWIO).origin || e.source !== frame.current?.contentWindow || typeof e.data !== "string") return;
+      if (e.origin !== drawioOrigin() || e.source !== frame.current?.contentWindow || typeof e.data !== "string") return;
       let msg: { event?: string; data?: string; xml?: string };
       try { msg = JSON.parse(e.data); } catch { return; }
       // A Mermaid block becomes real draw.io shapes in one group that keeps the Mermaid text (double-click edits it).
@@ -199,7 +203,7 @@ export function DiagramEditor({ id, title: initialTitle, svg, base, back, mermai
   };
 
   const lang = locale === "en" ? "en" : "de";
-  const src = `${DRAWIO}/?embed=1&proto=json&spin=1&libraries=1&noSaveBtn=1&noExitBtn=1&saveAndExit=0&ui=kennedy&lang=${lang}`;
+  const src = `${DRAWIO}/${OWN ? "index.html" : ""}?embed=1&proto=json&spin=1&libraries=1&noSaveBtn=1&noExitBtn=1&saveAndExit=0&ui=kennedy&lang=${lang}${OWN ? "&stealth=1" : ""}`;
   return (
     <div className={`flex flex-col ${onClose ? "h-dvh" : "h-[calc(100dvh-8rem)] md:h-[calc(100dvh-4rem)]"}`}>
       <div className="flex flex-wrap items-end gap-3 border-b border-line bg-surface px-4 py-3">

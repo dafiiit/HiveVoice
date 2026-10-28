@@ -63,12 +63,13 @@
     "team": "Mitglieder und Rechte",
     "about": "Über",
     "links": "Wissen",
-    "expenses": "Ausgaben"
+    "expenses": "Ausgaben",
+    "calendar": "Kalender"
   },
   "talkPlaceholder": "In „{name}“ schreiben …",
   "joinToPost": "Tritt der Gruppe bei, um mitzuschreiben.",
   "noPosts": "Noch kein Beitrag.",
-  "needsIntro": "Was der Gruppe fehlt. Kontakt entsteht nur, wenn beide Seiten zustimmen.",
+  "needsIntro": "Kontakt entsteht nur, wenn beide Seiten zustimmen.",
   "noNeeds": "Gerade kein offener Bedarf.",
   "forGoal": "für: {goal}",
   "canHelp": "Helfen",
@@ -134,7 +135,7 @@
   },
   "form": {
     "title": "Gruppe gründen",
-    "lead": "Ein gemeinsamer Zweck, Menschen, die ihn teilen, und ein Weg dorthin. Du legst fest, wofür die Gruppe da ist.",
+    "lead": "Du legst fest, wofür die Gruppe da ist.",
     "leadShort": "Wofür ist die Gruppe da? Du legst es fest.",
     "name": "Name",
     "summary": "In einem Satz",
@@ -238,6 +239,10 @@
       "expenses": {
         "name": "Ausgaben teilen",
         "text": "Wer hat was bezahlt, wer schuldet wem, mit Belegen"
+      },
+      "calendar": {
+        "name": "Kalender und Dienste",
+        "text": "Termine mit Zu- und Absage, Dienstpläne mit Reihenfolge"
       }
     }
   }

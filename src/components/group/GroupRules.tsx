@@ -38,8 +38,8 @@ export function GroupRules({ slug, groupId, visibility, joinPolicy, adultsOnly, 
         </div>
         <span className="text-sm text-muted">{t(`join.${joinPolicy}Text` as "join.openText")}</span>
       </div>
-      <label className="flex items-center gap-2"><input type="checkbox" checked={adultsOnly} disabled={pending} onChange={() => set({ adultsOnly: !adultsOnly })} className="h-5 w-5 accent-[var(--ink)]" />{t("rules.adults")}</label>
-      <label className="flex items-center gap-2"><input type="checkbox" checked={adminsManageInitiatives} disabled={pending} onChange={() => set({ adminsManageInitiatives: !adminsManageInitiatives })} className="h-5 w-5 accent-[var(--ink)]" />{t("rules.initiatives")}</label>
+      <label className="flex items-center gap-2"><input type="checkbox" checked={adultsOnly} disabled={pending} onChange={() => set({ adultsOnly: !adultsOnly })} className="h-6 w-6 accent-[var(--ink)]" />{t("rules.adults")}</label>
+      <label className="flex items-center gap-2"><input type="checkbox" checked={adminsManageInitiatives} disabled={pending} onChange={() => set({ adminsManageInitiatives: !adminsManageInitiatives })} className="h-6 w-6 accent-[var(--ink)]" />{t("rules.initiatives")}</label>
       <label className="flex flex-wrap items-center gap-3"><span className="font-bold">{t("rules.slow")}</span>
         <select value={slowMode} disabled={pending} onChange={(e) => set({ slowMode: Number(e.target.value) })} className={field.select}>
           <option value={0}>{t("rules.slowOff")}</option><option value={10}>{t("rules.slow10")}</option><option value={60}>{t("rules.slow60")}</option><option value={300}>{t("rules.slow300")}</option>

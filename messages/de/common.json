@@ -98,7 +98,10 @@
     "admins_from_config": "Admins werden in der Einstellung ADMIN_EMAILS festgelegt.",
     "amount_required": "Bitte gib einen Betrag ein.",
     "split_people": "Hake mindestens eine Person an.",
-    "split_mismatch": "Die Aufteilung ergibt nicht die Summe."
+    "split_mismatch": "Die Aufteilung ergibt nicht die Summe.",
+    "date_required": "Bitte wähle ein Datum.",
+    "rotation_required": "Mindestens eine Person muss in der Reihenfolge stehen.",
+    "event_full": "Der Termin ist schon voll."
   },
   "phase": {
     "idea": "Idee",
@@ -140,5 +143,8 @@
   "draft": {
     "restored": "Nicht gespeicherter Entwurf von {when} wiederhergestellt.",
     "discard": "Verwerfen"
-  }
+  },
+  "queued": "{n, plural, one {1 Änderung wartet} other {# Änderungen warten}} auf Verbindung",
+  "queueDropped": "{n, plural, one {1 Änderung} other {# Änderungen}} ging nicht durch (gelöscht oder keine Rechte mehr)",
+  "savedOffline": "Auf dem Gerät gespeichert. Geht raus, sobald du wieder online bist."
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isBroken, withRetry } from "../src/lib/dbRetry";
+import { isBroken, withDeadline, withRetry } from "../src/lib/dbRetry";
 
 const broken = () => Object.assign(new Error("closed"), { code: "CONNECTION_CLOSED" });
 
@@ -30,5 +30,13 @@ describe("a database connection that broke", () => {
     let other = 0;
     await expect(withRetry(async () => { other++; throw Object.assign(new Error("dup"), { code: "23505" }); }, 0)).rejects.toThrow("dup");
     expect(other).toBe(1);
+  });
+  it("notices work that does not answer in time, and leaves quick work alone", async () => {
+    let late = 0;
+    await expect(withDeadline(new Promise((r) => setTimeout(() => r("slow"), 30)), 5, () => late++)).resolves.toBe("slow");
+    expect(late).toBe(1);
+    await expect(withDeadline(Promise.resolve("quick"), 5, () => late++)).resolves.toBe("quick");
+    await new Promise((r) => setTimeout(r, 10));
+    expect(late).toBe(1);
   });
 });

@@ -1,11 +1,11 @@
 import "server-only";
 import postgres from "postgres";
-import { withRetry } from "./dbRetry";
+import { withDeadline, withRetry } from "./dbRetry";
 
 // One pooled connection set per server instance. The login role is only a
 // member of hivevoice_server: it can call trusted functions and switch to the
 // API roles, but owns no tables.
-const globalForDb = globalThis as unknown as { sql?: postgres.Sql };
+const globalForDb = globalThis as unknown as { pool?: postgres.Sql };
 
 function connect() {
   const url = process.env.DATABASE_URL;
@@ -22,8 +22,29 @@ function connect() {
   });
 }
 
-export const sql = globalForDb.sql ?? connect();
-if (process.env.NODE_ENV !== "production") globalForDb.sql = sql;
+let pool = globalForDb.pool ?? connect();
+if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
+
+/** Throws the pool away and starts a new one: the old connections are closed at once, work still waiting on them fails. */
+function renewPool() {
+  const old = pool;
+  pool = connect();
+  if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
+  console.warn("database did not answer for 30 s, starting new connections");
+  old.end({ timeout: 0 }).catch(() => {});
+}
+
+/** The pool of the moment (it is replaced when its connections stop answering). */
+export const sql = new Proxy(function () {} as unknown as postgres.Sql, {
+  apply: (_t, self, args) => Reflect.apply(pool as unknown as (...a: unknown[]) => unknown, self, args),
+  get: (_t, key) => {
+    const v = (pool as unknown as Record<PropertyKey, unknown>)[key];
+    return typeof v === "function" ? v.bind(pool) : v;
+  },
+});
+
+/** Longer than any statement may take (20 s), so only connections that stopped answering reach it. */
+const DEADLINE_MS = 30_000;
 
 export type Tx = postgres.TransactionSql;
 
@@ -37,10 +58,11 @@ export type Viewer = { authId: string; profileId: string } | null;
  *
  * No page waits for a database that does not answer: a statement takes 20 s at most, waiting for a lock 10 s. A connection
  * that broke before the work was done (so nothing was committed) is replaced and the work is tried once more; one that broke
- * during the commit is not, because it may have gone through.
+ * during the commit is not, because it may have gone through. A transaction that has not finished after 30 s is waiting on a
+ * connection that is gone: the pool is replaced and the work tried once more on a new connection.
  */
 export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, opts?: { linkToken?: string | null }): Promise<T> {
-  return withRetry((done) => sql.begin(async (tx) => {
+  return withRetry((done) => withDeadline(pool.begin(async (tx) => {
     const role = viewer ? "authenticated" : "anon";
     const claims = viewer ? JSON.stringify({ sub: viewer.authId, profile_id: viewer.profileId, role }) : "{}";
     // A link key opens a document that is shared "with everybody who has the link"; without it that document stays closed.
@@ -49,7 +71,7 @@ export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, op
     const result = await fn(tx);
     done();
     return result;
-  }) as Promise<T>);
+  }) as Promise<T>, DEADLINE_MS, renewPool));
 }
 
 /** Maps database exceptions raised by app.* functions to stable error codes. */

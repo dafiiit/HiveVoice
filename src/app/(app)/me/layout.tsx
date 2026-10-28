@@ -8,6 +8,7 @@ export default async function MeLayout({ children }: LayoutProps<"/me">) {
     <AreaFrame title={t("area")} label={t("sections")} items={[
       { href: "/me", label: t("filters.all") },
       { href: "/me/listings", label: t("filters.listings"), match: ["/me/listings*"] },
+      { href: "/me/calendar", label: t("filters.calendar"), match: ["/me/calendar*"] },
       { href: "/me/notes", label: t("filters.notes"), match: ["/me/notes*"] },
       { href: "/me/diagrams", label: t("filters.diagrams"), match: ["/me/diagrams*"] },
       { href: "/me/uploads", label: t("filters.uploads"), match: ["/me/uploads*"] },

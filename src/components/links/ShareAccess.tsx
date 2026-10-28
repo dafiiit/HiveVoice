@@ -57,7 +57,7 @@ export function ShareAccess({ id, origin, visibility, editMode, allowDownload, l
           </label>
         )}
         {origin !== "link" && (
-          <label className="flex items-center gap-2"><input type="checkbox" checked={download} onChange={() => { setDownload(!download); setSaved(false); }} className="h-5 w-5 accent-[var(--ink)]" />{t("access.download")}</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={download} onChange={() => { setDownload(!download); setSaved(false); }} className="h-6 w-6 accent-[var(--ink)]" />{t("access.download")}</label>
         )}
         {origin !== "link" && <span className={field.hint}>{t("access.downloadHint")}</span>}
         {origin !== "link" && (vis === "public" || license) && (

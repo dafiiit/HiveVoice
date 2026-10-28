@@ -228,16 +228,16 @@ test.describe("signed in", () => {
     await page.waitForURL(/\/me\/uploads$/);
   });
 
-  test("Neu has one list of nine tiles, the same wherever it opens; group and initiative have their own forms", async ({ page }) => {
+  test("Neu has one list of ten tiles, the same wherever it opens; group and initiative have their own forms", async ({ page }) => {
     await login(page);
     await page.goto("/new");
     const tiles = page.locator("main a").filter({ has: page.locator("strong") });
-    await expect(tiles).toHaveCount(9);
-    for (const name of ["Anliegen", "Chat", "Gruppe", "Initiative", "Pinnwand-Beitrag", "Notiz", "Liste", "Diagramm", "Hochladen"]) await expect(tiles.filter({ hasText: new RegExp(`^${name}`) })).toHaveCount(1);
+    await expect(tiles).toHaveCount(10);
+    for (const name of ["Anliegen", "Chat", "Gruppe", "Initiative", "Pinnwand-Beitrag", "Notiz", "Liste", "Diagramm", "Hochladen", "Termin"]) await expect(tiles.filter({ hasText: new RegExp(`^${name}`) })).toHaveCount(1);
     // In Ich the "Neu" menu offers exactly these.
     await page.goto("/me");
     await page.getByRole("button", { name: "Neu" }).first().click();
-    await expect(page.getByRole("group", { name: "Neu" }).getByRole("link")).toHaveCount(9);
+    await expect(page.getByRole("group", { name: "Neu" }).getByRole("link")).toHaveCount(10);
     // Knowledge has no buttons of its own any more: documents are part of the toolbox.
     await page.goto("/me/listings?as=offer");
     await expect(page.getByRole("radio", { name: "Ich teile Wissen" })).toHaveCount(0);

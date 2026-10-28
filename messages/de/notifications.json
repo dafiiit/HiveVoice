@@ -21,7 +21,8 @@
     "initiative": "Initiative",
     "jury": "Jury",
     "other": "Hinweis",
-    "expenses": "Ausgaben"
+    "expenses": "Ausgaben",
+    "calendar": "Kalender"
   },
   "open": "Öffnen",
   "unreadN": "{n, plural, one {1 neue Nachricht} other {# neue Nachrichten}}",
@@ -385,6 +386,34 @@
     "expense_payment": {
       "title": "Zahlung in „{group}“",
       "body": "{name} hat eine Zahlung über {amount} eingetragen, an der du beteiligt bist."
+    },
+    "event_invite": {
+      "title": "{name} lädt dich ein: „{title}“",
+      "body": "{when}"
+    },
+    "event_cancelled": {
+      "title": "Abgesagt: „{title}“",
+      "body": "{when}"
+    },
+    "event_reminder_1d": {
+      "title": "Morgen: „{title}“",
+      "body": "{when}"
+    },
+    "event_reminder_1h": {
+      "title": "Gleich: „{title}“",
+      "body": "{when}"
+    },
+    "duty_cover": {
+      "title": "Vertretung gesucht: „{title}“",
+      "body": "{name} kann am {when} nicht. Übernimmst du?"
+    },
+    "duty_taken": {
+      "title": "{name} übernimmt „{title}“",
+      "body": "{when}"
+    },
+    "duty_assigned": {
+      "title": "Du bist dran: „{title}“",
+      "body": "{name} hat dich für {when} eingeteilt."
     }
   }
 }

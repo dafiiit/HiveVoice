@@ -55,7 +55,7 @@ test("initiatives and groups show their photographs", async ({ page }) => {
   await page.goto("/community/groups?kind=initiatives&q=Radspur");
   await page.locator("main a[href^='/community/groups/i/']").first().click();
   await expect.poll(async () => (await loaded(page, "main img[src*='/images/demo/']")).filter(Boolean).length).toBeGreaterThan(0);
-  await page.goto("/community/groups?q=Repair");
+  await page.goto("/community/groups?q=Harras");
   await page.locator("main a[href^='/community/groups/']").first().click();
   await expect.poll(async () => (await loaded(page, "img[src$='/demo/repair-cafe.jpg']")).some(Boolean)).toBe(true);
 });

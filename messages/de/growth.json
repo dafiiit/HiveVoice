@@ -1,6 +1,6 @@
 {
   "title": "Einladen",
-  "lead": "HiveVoice wächst, wenn Menschen einander mitnehmen. Hier teilst du die App, lädst Menschen ein und siehst, wo bei dir noch jemand fehlt.",
+  "lead": "Teile die App, lade Menschen ein und sieh, wo bei dir noch jemand fehlt.",
   "share": {
     "share": "Teilen",
     "copy": "Link kopieren",
@@ -64,7 +64,7 @@
   "friends": {
     "button": "Einladen",
     "title": "Bekannte einladen",
-    "lead": "Je mehr Menschen aus deiner Gegend dabei sind, desto mehr bewegt sich. Schick Freundinnen, Nachbarn oder Kolleg:innen einen Link.",
+    "lead": "Schick Freundinnen, Nachbarn oder Kolleg:innen einen Link.",
     "message": "Ich bin auf HiveVoice: Menschen aus unserer Gegend helfen sich, schlagen Dinge vor und stimmen fair ab. Komm dazu:",
     "subject": "Komm zu HiveVoice",
     "whatsapp": "WhatsApp",

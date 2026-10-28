@@ -4,6 +4,7 @@ import { useDraft } from "@/lib/drafts";
 import { useLocale, useTranslations } from "next-intl";
 import { fetchMessages, sendMessage, type Message } from "@/lib/actions/messages";
 import { OUTBOX_EVENT, enqueue, flushOutbox, offline, queued, type OutboxDetail } from "@/lib/outbox";
+import { localGet, localPut } from "@/lib/localdb";
 import { deleteMessage, editMessage } from "@/lib/actions/safety";
 import { cleanPoll, isImage, pollReady } from "@/lib/files";
 import { Avatar } from "../ui/Avatar";
@@ -103,6 +104,25 @@ export function Conversation({ id, initial, viewerId, otherName, otherReadAt: in
     void flushOutbox();
     return () => { clearTimeout(show); window.removeEventListener(OUTBOX_EVENT, onSent); };
   }, [id, viewerId, t]);
+
+  // The chat stays on the device (IndexedDB): without a connection the page may come from an older kept copy, and what
+  // arrived since (kept here) is added. With a connection the server's answer counts, the kept copy is only renewed.
+  useEffect(() => {
+    let live = true;
+    if (offline()) {
+      void localGet<{ messages: Local[] }>("chats", id).then((kept) => {
+        if (live && kept?.messages.length) setMessages((m) => merge(m, kept.messages as Message[]).sort((a, b) => ms(a.created_at) - ms(b.created_at)));
+      });
+    }
+    return () => { live = false; };
+  }, [id]);
+  useEffect(() => {
+    const h = setTimeout(() => {
+      const keep = messages.filter((m) => !m.waiting && !m.sending).slice(-200).map((m) => ({ ...m, fresh: false }));
+      if (keep.length) void localPut("chats", id, { messages: keep, at: new Date().toISOString() });
+    }, 1000);
+    return () => clearTimeout(h);
+  }, [id, messages]);
 
   // The "edit" link disappears 15 minutes after sending.
   useEffect(() => {

@@ -21,7 +21,8 @@
     "initiative": "Initiative",
     "jury": "Jury",
     "other": "Notice",
-    "expenses": "Expenses"
+    "expenses": "Expenses",
+    "calendar": "Calendar"
   },
   "open": "Open",
   "unreadN": "{n, plural, one {1 new message} other {# new messages}}",
@@ -385,6 +386,34 @@
     "expense_payment": {
       "title": "Payment in “{group}”",
       "body": "{name} noted a payment of {amount} that involves you."
+    },
+    "event_invite": {
+      "title": "{name} invites you: “{title}”",
+      "body": "{when}"
+    },
+    "event_cancelled": {
+      "title": "Cancelled: “{title}”",
+      "body": "{when}"
+    },
+    "event_reminder_1d": {
+      "title": "Tomorrow: “{title}”",
+      "body": "{when}"
+    },
+    "event_reminder_1h": {
+      "title": "Soon: “{title}”",
+      "body": "{when}"
+    },
+    "duty_cover": {
+      "title": "Cover wanted: “{title}”",
+      "body": "{name} cannot make it on {when}. Can you?"
+    },
+    "duty_taken": {
+      "title": "{name} takes over “{title}”",
+      "body": "{when}"
+    },
+    "duty_assigned": {
+      "title": "Your turn: “{title}”",
+      "body": "{name} put you on {when}."
     }
   }
 }

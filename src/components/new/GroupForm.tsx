@@ -107,7 +107,7 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
         <div className="grid gap-2 @xl:grid-cols-2">
           {GROUP_TOOLS.map((k) => (
             <label key={k} className="flex cursor-pointer items-start gap-2">
-              <input type="checkbox" checked={tools.includes(k)} onChange={() => setTools(tools.includes(k) ? tools.filter((x) => x !== k) : [...tools, k])} className="mt-0.5 h-5 w-5 flex-none accent-[var(--ink)]" />
+              <input type="checkbox" checked={tools.includes(k)} onChange={() => setTools(tools.includes(k) ? tools.filter((x) => x !== k) : [...tools, k])} className="mt-0.5 h-6 w-6 flex-none accent-[var(--ink)]" />
               <span className="flex flex-col"><span>{tt(`items.${k}.name`)}</span><span className="text-xs text-muted">{tt(`items.${k}.text`)}</span></span>
             </label>
           ))}
@@ -143,8 +143,8 @@ export function GroupForm({ chain, ideas, start: startPreset, invite }: {
             <span className={field.hint}>{tr(`join.${joinPolicy}Text` as "join.openText")}</span>
           </div>
           <label className={field.label}>{t("focus")}<input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder={t("focusPlaceholder")} className={field.input} /></label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={adultsOnly} onChange={() => setAdultsOnly(!adultsOnly)} className="h-5 w-5 accent-[var(--ink)]" />{tr("adultsOnly")}</label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={modTasks} onChange={() => setModTasks(!modTasks)} className="h-5 w-5 accent-[var(--ink)]" />{t("modTasks")}</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={adultsOnly} onChange={() => setAdultsOnly(!adultsOnly)} className="h-6 w-6 accent-[var(--ink)]" />{tr("adultsOnly")}</label>
+          <label className="flex items-center gap-2"><input type="checkbox" checked={modTasks} onChange={() => setModTasks(!modTasks)} className="h-6 w-6 accent-[var(--ink)]" />{t("modTasks")}</label>
         </div>
       </details>
       {error && <Notice tone="error">{error}</Notice>}

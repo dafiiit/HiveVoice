@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer, type Tx } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { money, relTime } from "@/lib/format";
+import { whenShort } from "@/components/calendar/time";
 import { Avatar } from "@/components/ui/Avatar";
 import { Glyph } from "@/components/ui/Glyph";
 import { MarkAllRead } from "@/components/MarkAllRead";
@@ -27,6 +28,7 @@ const GLYPH: Record<string, string> = {
   join_request: "flower", join_accepted: "flower", join_declined: "flower", goal_vote: "flower", goal_adopted: "flower", goal_rejected: "flower", working_group: "flower",
   initiative_vote: "arch", initiative_passed: "arch", initiative_failed: "arch",
   listing_match: "gift", request_answered: "lupe", request_forwarded: "lupe", responsibility_request: "lupe",
+  event_invite: "circle", event_cancelled: "circle", event_reminder: "circle", duty_cover: "circle", duty_taken: "circle", duty_assigned: "circle",
   post_reply: "bubble", jury_invite: "keyhole", expense_added: "split", expense_payment: "split", report_decided: "split", content_hidden: "split",
 };
 
@@ -168,6 +170,12 @@ export default async function Notifications({ searchParams }: PageProps<"/notifi
       href = p.conversation_id ? `/friends?c=d:${p.conversation_id}&t=expenses` : `/groups/${p.slug}?tab=expenses`; label = t("labels.expenses");
       const cur = p.currency ?? "EUR";
       values = { ...values, amount: money(Number(p.amount_cents), cur, locale, { cents: true }), share: money(Number(p.share_cents), cur, locale, { cents: true }) };
+    } else if (kind.startsWith("event_") || kind.startsWith("duty_")) {
+      if (kind === "event_reminder") kind = `event_reminder_${p.when === "1h" ? "1h" : "1d"}`;
+      const at = p.occurs_at ?? p.starts_at;
+      href = `/events/${p.event_id}${p.occurs_at ? `?at=${encodeURIComponent(new Date(p.occurs_at).toISOString())}` : ""}`; label = t("labels.calendar");
+      values = { ...values, when: at ? whenShort(at, locale) : "" };
+      if (kind === "event_invite" || kind === "duty_cover") category = "requests";
     } else if (kind === "report_decided" || kind === "content_hidden") {
       href = "/settings?tab=reports"; label = t("labels.jury");
     }

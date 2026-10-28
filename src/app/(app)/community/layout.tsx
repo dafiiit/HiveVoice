@@ -8,6 +8,7 @@ export default async function CommunityLayout({ children }: LayoutProps<"/commun
     <AreaFrame title={t("title")} label={t("sections")} items={[
       { href: "/community", label: t("nav.board") },
       { href: "/community/listings", label: t("nav.listings"), match: ["/community/listings*"] },
+      { href: "/community/events", label: t("nav.events"), match: ["/community/events*"] },
       { href: "/community/groups", label: t("nav.groups"), match: ["/community/groups*"] },
       { href: "/community/people", label: t("nav.people"), match: ["/community/people*"] },
     ]}>{children}</AreaFrame>

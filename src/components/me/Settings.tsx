@@ -121,7 +121,7 @@ export function Settings({ language, easy, theme, order, places, interests, sugg
           <div role="alertdialog" aria-label={t("leaveConfirm")} className="flex flex-col gap-3 border-2 border-red bg-surface p-4">
             <strong>{t("leaveConfirm")}</strong>
             <span>{t("leaveConfirmText")}</span>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={keepGroupItems} onChange={() => setKeepGroupItems(!keepGroupItems)} className="h-5 w-5 accent-[var(--ink)]" />{td("keep")}</label>
+            <label className="flex items-center gap-2"><input type="checkbox" checked={keepGroupItems} onChange={() => setKeepGroupItems(!keepGroupItems)} className="h-6 w-6 accent-[var(--ink)]" />{td("keep")}</label>
             <span className="text-sm text-muted">{td("keepHint")}</span>
             <div className="flex gap-2">
               <button type="button" onClick={() => setLeave(0)} className={btn.secondary}>{tc("cancel")}</button>

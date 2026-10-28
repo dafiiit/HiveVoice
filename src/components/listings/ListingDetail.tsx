@@ -20,6 +20,10 @@ import { getOrigin } from "@/lib/origin";
 import { attrFacts, customFields } from "@/lib/market";
 import { ListingCardView, reasonLabels } from "./ListingCardView";
 import { BackLink, Notice, Page, Section } from "@/components/ui/Page";
+import { dayStart, loadCalendar } from "@/lib/calendar";
+import { Agenda } from "../calendar/Agenda";
+import { EventForm } from "../calendar/EventForm";
+import { IconPlus } from "../ui/Icons";
 
 type Match = ListingCard & { score: number; reasons: string[]; sent: boolean };
 
@@ -31,6 +35,7 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
   const t = await getTranslations("market");
   const tc = await getTranslations("common");
   const tl = await getTranslations("listings");
+  const tcal = await getTranslations("calendar");
   const locale = await getLocale();
   const data = await asViewer(viewer, async (tx) => {
     const [l] = await tx<ListingCard[]>`select ${listingCardColumns(tx)} from ${listingCardFrom(tx)} where l.id = ${id}`;
@@ -52,7 +57,9 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
       select g.profile_id, p.display_name as name, p.avatar_seed as seed, g.can_write from public.object_grants g join public.profiles p on p.id = g.profile_id
       where g.object_type = 'listing' and g.object_id = ${id} order by p.display_name` : [];
     const canEdit = !!me && l.owner_id !== me && (await tx<{ ok: boolean }[]>`select app.object_access('listing', ${id}, true) as ok`)[0].ok;
-    return { l, details, sent, allied, matches, mine, access, grants, canEdit };
+    // Kurse & Treffen: the dates of the course, each with its own yes and no.
+    const dates = l.category === "event" ? await loadCalendar(tx, dayStart(0), dayStart(120), "listing", id) : [];
+    return { l, details, sent, allied, matches, mine, access, grants, canEdit, dates };
   }, { linkToken });
   if (!data) notFound();
   const { l } = data;
@@ -129,6 +136,14 @@ export async function ListingDetail({ id, linkToken = null, embedded = false }: 
           <strong className="text-sm">{t("privateDetails")}</strong>
           <p className="m-0 whitespace-pre-line">{data.details}</p>
         </section>
+      )}
+      {l.category === "event" && (data.dates.length > 0 || own) && (
+        <Section title={tcal("title")} actions={own && session ? (
+          <EventForm context={{ listingId: l.id, canPublic: true, regionId: l.region_id ?? session.profile.home_region_id }}
+            label={<><IconPlus size={14} /> {tcal("new")}</>} look={btn.primarySm} />
+        ) : undefined}>
+          <Agenda items={data.dates} me={me ?? null} empty={tcal("empty")} />
+        </Section>
       )}
       {fit && (
         <Notice tone="warning" className="font-normal">

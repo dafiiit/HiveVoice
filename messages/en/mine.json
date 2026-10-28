@@ -1,7 +1,7 @@
 {
   "title": "My content",
   "nav": "Content",
-  "lead": "Everything you created. New things are visible only to you until you share them.",
+  "lead": "New things are visible only to you until you share them.",
   "newDoc": "Document",
   "newList": "List",
   "filters": {
@@ -11,7 +11,8 @@
     "listings": "Offers and requests",
     "uploads": "Uploads",
     "diagrams": "Diagrams",
-    "tasks": "With tasks"
+    "tasks": "With tasks",
+    "calendar": "Calendar"
   },
   "filterLabel": "Filter content",
   "kind": {

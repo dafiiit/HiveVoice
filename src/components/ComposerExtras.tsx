@@ -139,7 +139,7 @@ export function ExtrasPreview({ x }: { x: Extras }) {
               <option value={0}>{t("pollNoEnd")}</option><option value={24}>{t("pollDay")}</option><option value={168}>{t("pollWeek")}</option>
             </select>
           </label>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={x.poll.multiple} onChange={(e) => set({ multiple: e.target.checked })} className="h-5 w-5 accent-[var(--ink)]" /> {t("pollMultiple")}</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={x.poll.multiple} onChange={(e) => set({ multiple: e.target.checked })} className="h-6 w-6 accent-[var(--ink)]" /> {t("pollMultiple")}</label>
           <button type="button" onClick={() => x.setPoll(null)} className={`${btn.linkMuted} self-start text-sm`}>{t("pollRemove")}</button>
         </fieldset>
       )}

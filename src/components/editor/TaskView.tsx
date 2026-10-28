@@ -24,7 +24,7 @@ export function TaskView({ body, onChange, readOnly }: { body: string; onChange:
         <span className="text-sm font-bold" aria-live="polite">{total ? t("progress", { done, total }) : t("empty")}</span>
         {done > 0 && (
           <label className="flex min-h-9 items-center gap-2 text-sm">
-            <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} className="h-4 w-4 accent-[var(--ink)]" /> {t("hideDone")}
+            <input type="checkbox" checked={hideDone} onChange={(e) => setHideDone(e.target.checked)} className="h-6 w-6 accent-[var(--ink)]" /> {t("hideDone")}
           </label>
         )}
       </div>

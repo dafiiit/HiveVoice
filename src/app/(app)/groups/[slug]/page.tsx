@@ -34,8 +34,12 @@ import { Collection, type CollectionItem } from "@/components/refs/Collection";
 import { loadRefCards, type RefCard } from "@/lib/refs";
 import { BackLink, Notice, Page, Section, Tabs } from "@/components/ui/Page";
 import { dateLong, dateTime } from "@/lib/format";
+import { dayStart, loadCalendar } from "@/lib/calendar";
+import { Agenda } from "@/components/calendar/Agenda";
+import { EventForm } from "@/components/calendar/EventForm";
+import { IconPlus } from "@/components/ui/Icons";
 
-const TABS = ["goals", "talk", "links", "collection", "needs", "tasks", "expenses", "team", "about"] as const;
+const TABS = ["goals", "talk", "calendar", "links", "collection", "needs", "tasks", "expenses", "team", "about"] as const;
 
 type Group = {
   id: string; slug: string; name: string; summary: string | null; description: string | null; kind: string; visibility: string;
@@ -80,6 +84,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
   const tc = await getTranslations("common");
   const tl = await getTranslations("links");
   const trf = await getTranslations("refs");
+  const tcal = await getTranslations("calendar");
   const locale = await getLocale();
   await sql`select app.tick()`;
 
@@ -141,6 +146,8 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
         coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'name', p.display_name, 'seed', p.avatar_seed)) from public.task_assignees a join public.profiles p on p.id = a.profile_id where a.task_id = tk.id), '[]') as assignees
       from public.tasks tk where tk.group_id = ${g.id} order by tk.position, tk.created_at` : [];
     const book = active === "expenses" ? await loadExpenses(tx, g.id) : null;
+    // The group's dates from yesterday on, eight weeks ahead (duties included).
+    const calendar = active === "calendar" ? await loadCalendar(tx, dayStart(-1), dayStart(56), "group", g.id) : [];
     const requests = active === "team" && can_manage ? await tx<{ id: string; profile_id: string; name: string; seed: number; path: string | null; message: string | null }[]>`
       select r.id, r.profile_id, p.display_name as name, p.avatar_seed as seed, p.avatar_path as path, r.message from public.group_join_requests r join public.profiles p on p.id = r.profile_id
       where r.group_id = ${g.id} and r.status = 'pending' order by r.created_at` : [];
@@ -183,7 +190,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
       return card ? [{ card, note: i.note, byName: i.by_name, mine: i.added_by === me }] : [];
     });
     const partOf = parents.flatMap((p) => cards.get(`group:${p.id}`) ?? []) as RefCard[];
-    return { book, collection, partOf, team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
+    return { book, calendar, collection, partOf, team, invite, canInvite, g, role, can_post, can_propose, can_vote, can_tasks, can_manage, members, tags, requested, following, goals, posts, links, needs, sentTo, tasks, requests, perms, similar, active };
   });
   if (!data) notFound();
   const { g, role, active } = data;
@@ -194,6 +201,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
   const labels: Record<(typeof TABS)[number], string> = {
     goals: voting ? t("tabs.goalsVoting", { n: voting }) : t("tabs.goals"),
     talk: t("tabs.talk"),
+    calendar: t("tabs.calendar"),
     collection: data.collection.length ? `${trf("collection.tab")} · ${data.collection.length}` : trf("collection.tab"),
     links: t("tabs.links"),
     needs: t("tabs.needs", { n: data.needs.length }),
@@ -204,7 +212,7 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
   };
   // Five tabs in front, the rarer ones under "Mehr".
   const has = (k: (typeof TABS)[number]) => (!(GROUP_TOOLS as readonly string[]).includes(k) || g.tools.includes(k as GroupTool)) && (k !== "expenses" || !!role);
-  const front = (["goals", "talk", "collection", "tasks", "expenses", "team"] as const).filter((k) => (k !== "tasks" || g.mod_tasks) && has(k));
+  const front = (["goals", "talk", "calendar", "collection", "tasks", "expenses", "team"] as const).filter((k) => (k !== "tasks" || g.mod_tasks) && has(k));
   const back = (["links", "needs", "about"] as const).filter(has);
   const first = firstTab ?? (g.tools.includes("goals") ? "goals" : "talk");
   const tabHref = (k: (typeof TABS)[number]) => `${path}${k === first ? "" : `?tab=${k}`}`;
@@ -298,6 +306,19 @@ export async function GroupView({ slug, sp, base, embedded = false, first: first
                 </div>
               ))}
             </div>
+          </section>
+        )}
+        {!locked && active === "calendar" && (
+          <section className="flex max-w-[760px] flex-col gap-4">
+            {!!role && role !== "guest" && (
+              <div className="flex flex-wrap gap-2">
+                <EventForm context={{ groupId: g.id, slug, members: data.members.filter((m) => m.role !== "guest").map((m) => ({ id: m.id, name: m.name, seed: m.seed, path: m.path })),
+                  canPublic: role === "admin" || role === "maintainer" || (g.visibility === "public" && data.can_post) }} label={<><IconPlus size={16} /> {tcal("new")}</>} />
+                <EventForm kind="duty" context={{ groupId: g.id, slug, members: data.members.filter((m) => m.role !== "guest").map((m) => ({ id: m.id, name: m.name, seed: m.seed, path: m.path })),
+                  canPublic: false }} label={<><IconPlus size={16} /> {tcal("newDuty")}</>} look={btn.secondary} />
+              </div>
+            )}
+            <Agenda items={data.calendar} me={me ?? null} slug={slug} empty={tcal("emptyGroup")} />
           </section>
         )}
         {!locked && active === "expenses" && data.book && me && <Expenses slug={slug} groupId={g.id} book={data.book} me={me} canWrite={!!role && role !== "guest"} />}

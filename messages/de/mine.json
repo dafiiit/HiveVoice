@@ -1,7 +1,7 @@
 {
   "title": "Meine Inhalte",
   "nav": "Inhalte",
-  "lead": "Alles, was du angelegt hast. Neues ist erst nur für dich sichtbar, bis du es teilst.",
+  "lead": "Neues ist erst nur für dich sichtbar, bis du es teilst.",
   "newDoc": "Dokument",
   "newList": "Liste",
   "filters": {
@@ -11,7 +11,8 @@
     "listings": "Anliegen",
     "uploads": "Uploads",
     "diagrams": "Diagramme",
-    "tasks": "Mit Aufgaben"
+    "tasks": "Mit Aufgaben",
+    "calendar": "Kalender"
   },
   "filterLabel": "Inhalte filtern",
   "kind": {

@@ -111,6 +111,10 @@
     "upload": {
       "title": "Hochladen",
       "text": "Eine Datei, ein Foto oder ein Link."
+    },
+    "event": {
+      "title": "Termin",
+      "text": "Treffen, Probe oder Kurs, mit Zu- und Absage"
     }
   }
 }

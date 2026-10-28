@@ -161,7 +161,7 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
                 </label>
               );
               if (f.type === "bool") return (
-                <label key={f.key} className="flex items-center gap-2 text-sm"><input type="checkbox" name={name} value="1" defaultChecked={!!v} className="h-5 w-5 accent-[var(--ink)]" />{label}</label>
+                <label key={f.key} className="flex items-center gap-2 text-sm"><input type="checkbox" name={name} value="1" defaultChecked={!!v} className="h-6 w-6 accent-[var(--ink)]" />{label}</label>
               );
               if (f.type === "number") return (
                 <label key={f.key} className={field.label}>{tm("minLabel", { label })}<input type="number" name={name} min={0} defaultValue={v} className={`${field.input} w-32`} /></label>
@@ -177,9 +177,9 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
                 {SORTS.map((s) => <option key={s} value={s}>{tm(`sorts.${s}`)}</option>)}
               </select>
             </label>
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="free" value="1" defaultChecked={free} className="h-5 w-5 accent-[var(--ink)]" />{tm("freeOnly")}</label>
+            <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="free" value="1" defaultChecked={free} className="h-6 w-6 accent-[var(--ink)]" />{tm("freeOnly")}</label>
             <label className={field.label}>{tm("maxPrice")}<input type="number" name="max" min={0} defaultValue={max ?? ""} className={`${field.input} w-32`} /></label>
-            {session && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="mine" value="1" defaultChecked={mine} className="h-5 w-5 accent-[var(--ink)]" />{t("nearMe")}</label>}
+            {session && <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="mine" value="1" defaultChecked={mine} className="h-6 w-6 accent-[var(--ink)]" />{t("nearMe")}</label>}
             <div className="flex items-center gap-3">
               <button type="submit" className={`${btn.primarySm}`}>{tm("apply")}</button>
               {active > 0 && <Link href={href({ ...Object.fromEntries(Object.keys(attr).map((k) => [k, ""])), free: "", max: "", mine: "", sort: "" })} className={`${btn.linkMuted} text-sm`}>{tm("reset")}</Link>}

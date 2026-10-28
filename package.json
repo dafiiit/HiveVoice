@@ -15,7 +15,10 @@
     "db:regions": "node --env-file-if-exists=.env.local scripts/import-regions.mjs",
     "messages": "node scripts/messages-index.mjs",
     "db:images": "node --env-file-if-exists=.env.local scripts/upload-demo-images.mjs",
-    "screens": "playwright test -c tools/screens/playwright.config.ts"
+    "screens": "playwright test -c tools/screens/playwright.config.ts",
+    "db:seed:test": "node --env-file-if-exists=.env.local scripts/seed-test.mjs",
+    "drawio": "node scripts/drawio.mjs",
+    "prebuild": "node scripts/drawio.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",

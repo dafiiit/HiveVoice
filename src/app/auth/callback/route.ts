@@ -4,6 +4,7 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 import { getSession } from "@/lib/session";
 import { EASY_COOKIE, LANG_COOKIE, ORDER_COOKIE, THEME_COOKIE } from "@/i18n/config";
 import { LAST_LOGIN_COOKIE } from "@/lib/supabase/options";
+import { getOrigin } from "@/lib/origin";
 
 // Finishes OAuth and email confirmation (PKCE code), creates the profile on
 // first sign-in and restores the person's language and theme.
@@ -16,10 +17,10 @@ export async function GET(request: NextRequest) {
   if (code) {
     const supabase = await createSupabaseServer();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) return NextResponse.redirect(new URL("/login?error=callback", url.origin));
+    if (error) return NextResponse.redirect(new URL("/login?error=callback", await getOrigin()));
   }
   const session = await getSession();
-  if (!session) return NextResponse.redirect(new URL("/login", url.origin));
+  if (!session) return NextResponse.redirect(new URL("/login", await getOrigin()));
 
   const store = await cookies();
   const year = 60 * 60 * 24 * 365;
@@ -38,5 +39,5 @@ export async function GET(request: NextRequest) {
     store.set(ORDER_COOKIE, s.feed_order === "suggested" ? "suggested" : "chrono", { maxAge: year, path: "/" });
   }
   const dest = session.profile.onboarded ? (next === "/onboarding" ? "/friends" : next) : "/onboarding";
-  return NextResponse.redirect(new URL(dest, url.origin));
+  return NextResponse.redirect(new URL(dest, await getOrigin()));
 }

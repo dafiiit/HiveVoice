@@ -24,8 +24,9 @@ export function AreaFrame({ title, label, items, children }: { title: string; la
         {/* The query part (?f=docs) is only known in the browser; the server marks the section by its path alone. */}
         <Suspense fallback={<Live items={items} params={null} />}><WithParams items={items} /></Suspense>
       </nav>
-      {/* Phones: a swipe sideways goes to the next or previous section. */}
-      <Suspense fallback={<div className="min-w-0 flex-1">{children}</div>}><SwipeSections items={items}>{children}</SwipeSections></Suspense>
+      {/* Phones: a swipe sideways goes to the next or previous section. No Suspense around the page: a boundary waiting
+          for the address's query would keep everything below it from becoming interactive. The path is enough here. */}
+      <SwipeSections items={items}>{children}</SwipeSections>
     </div>
   );
 }
@@ -35,7 +36,7 @@ function WithParams({ items }: { items: AreaItem[] }) {
 }
 
 function SwipeSections({ items, children }: { items: AreaItem[]; children: ReactNode }) {
-  const active = useActive(items, useSearchParams());
+  const active = useActive(items, null);
   return <Swipe hrefs={items.map((it) => it.href)} active={active}>{children}</Swipe>;
 }
 

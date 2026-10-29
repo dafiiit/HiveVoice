@@ -8,12 +8,13 @@
 #   ./setup.sh --mode cloudflare --cf-token … --public-url https://hv.example.org
 #   ./setup.sh --mode domain --domain hv.example.org   (ports 80 and 443 forwarded to this computer)
 #
-# Other switches: --image ghcr.io/…/hivevoice:latest (use a built image instead of building here), --regions (import the
-# German municipalities, takes a few minutes), --yes (ask nothing), --status, --stop.
+# Other switches: --image ghcr.io/…/hivevoice:latest (use a built image instead of building here), --no-regions (do not
+# load the German municipalities and postcodes from OpenPLZ; done once by default, about half a minute), --yes (ask
+# nothing), --status, --stop.
 set -euo pipefail
 cd "$(dirname "$0")"
 
-MODE="" DOMAIN="" TS_KEY="" CF_TOKEN="" URL="" ADMIN="" IMAGE="" REGIONS=0 YES=0 ACTION=setup
+MODE="" DOMAIN="" TS_KEY="" CF_TOKEN="" URL="" ADMIN="" IMAGE="" REGIONS=1 YES=0 ACTION=setup
 while [ $# -gt 0 ]; do
   case "$1" in
     --mode) MODE="$2"; shift 2 ;;
@@ -24,6 +25,7 @@ while [ $# -gt 0 ]; do
     --admin) ADMIN="$2"; shift 2 ;;
     --image) IMAGE="$2"; shift 2 ;;
     --regions) REGIONS=1; shift ;;
+    --no-regions) REGIONS=0; shift ;;
     --yes|-y) YES=1; shift ;;
     --status) ACTION=status; shift ;;
     --stop) ACTION=stop; shift ;;
@@ -70,7 +72,7 @@ docker compose version >/dev/null 2>&1 || fail "Docker Compose fehlt (docker com
 docker info >/dev/null 2>&1 || fail "Docker läuft nicht (Docker Desktop starten, oder: sudo systemctl start docker)."
 
 if [ "$ACTION" = status ]; then compose ps; exit 0; fi
-if [ "$ACTION" = stop ]; then compose stop; say "HiveVoice ist angehalten. Die Daten bleiben in selfhost/data/."; exit 0; fi
+if [ "$ACTION" = stop ]; then compose stop; say "HiveVoice ist angehalten. Die Daten bleiben erhalten (selfhost/data und das Docker-Volume für Dateien)."; exit 0; fi
 
 # ── Settings ────────────────────────────────────────────────────────────────────────────────────────────────────────────
 touch .env && chmod 600 .env
@@ -151,8 +153,8 @@ put PUBLIC_URL "${URL%/}"
 say "Starte Datenbank, Anmeldung und Dateien …"
 compose up -d --wait db auth storage
 say "Richte die Datenbank ein …"
-compose run --rm --no-deps app node scripts/migrate.mjs
-# The app's own login, a member of hivevoice_server (supabase/migrations/…000_migrator.sql).
+# The app's own login first (some migrations set its limits), then the schema, then its membership in hivevoice_server,
+# which the migrations make (supabase/migrations/…000_migrator.sql).
 compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d postgres -q <<SQL
 do \$\$ begin
   if not exists (select 1 from pg_roles where rolname = 'hivevoice_app') then
@@ -161,11 +163,13 @@ do \$\$ begin
     alter role hivevoice_app login password '$(setting APP_DB_PASSWORD)';
   end if;
 end \$\$;
-grant hivevoice_server to hivevoice_app with inherit true, set true;
 SQL
-if [ "$REGIONS" = 1 ]; then
-  say "Lade Gemeinden und Postleitzahlen (OpenPLZ) …"
-  compose run --rm --no-deps app node scripts/import-regions.mjs
+compose run --rm --no-deps app node scripts/migrate.mjs
+compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d postgres -q -c "grant hivevoice_server to hivevoice_app with inherit true, set true;"
+# Places: everybody chooses one when starting (onboarding), so an empty list would let nobody in. Loaded once.
+if [ "$REGIONS" = 1 ] && [ "$(compose exec -T db psql -U postgres -d postgres -Atc 'select count(*) from public.regions')" -lt 100 ]; then
+  say "Lade Gemeinden und Postleitzahlen (OpenPLZ, etwa eine halbe Minute) …"
+  compose run --rm --no-deps app node scripts/import-regions.mjs || say "Die Orte ließen sich nicht laden (kein Internet?). Später: ./setup.sh"
 fi
 
 # ── Start ───────────────────────────────────────────────────────────────────────────────────────────────────────────────

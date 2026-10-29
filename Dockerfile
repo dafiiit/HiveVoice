@@ -31,6 +31,8 @@ COPY --from=build --chown=app:app /app/public ./public
 # The database schema and the scripts that set it up, for a self-hosted instance (selfhost/setup.sh).
 COPY --from=build --chown=app:app /app/supabase/migrations ./supabase/migrations
 COPY --from=build --chown=app:app /app/scripts/migrate.mjs /app/scripts/import-regions.mjs /app/scripts/import-region-coords.mjs ./scripts/
+# The scripts load postgres.js by name; the standalone output only keeps the copy bundled into the app.
+COPY --from=deps --chown=app:app /app/node_modules/postgres ./node_modules/postgres
 USER app
 EXPOSE 3000
 CMD ["node", "server.js"]

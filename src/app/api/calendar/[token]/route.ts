@@ -1,6 +1,7 @@
 import { type NextRequest } from "next/server";
 import { sql } from "@/lib/db";
 import { buildIcs } from "@/lib/ics";
+import { getOrigin } from "@/lib/origin";
 
 type Row = {
   event_id: string; occurs_at: Date; duration_minutes: number; all_day: boolean; tz: string; title: string; description: string | null; place: string | null;
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!/^[0-9a-f]{32,80}$/.test(token)) return new Response("not found", { status: 404 });
   const rows = await sql<Row[]>`select * from app.calendar_feed(${token})`;
   // An unknown key gives an empty calendar, like a calendar without dates: from outside the two look the same.
-  const origin = request.nextUrl.origin;
+  const origin = await getOrigin();
   const body = buildIcs("HiveVoice", rows.map((r) => {
     const alarms = [r.remind_day ? 1440 : null, r.remind_hour ? 60 : null].filter((x): x is number => x !== null);
     const who = r.kind === "duty" && r.assignee_name ? ` (${r.assignee_name})` : "";

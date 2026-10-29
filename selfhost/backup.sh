@@ -10,7 +10,9 @@ if [ "${1:-}" = "--restore" ]; then
   tmp="$(mktemp -d)"; tar -xzf "$file" -C "$tmp"
   docker compose up -d --wait db
   docker compose exec -T db psql -q -U postgres -d postgres < "$tmp/db.sql"
-  rm -rf data/storage && cp -R "$tmp/storage" data/storage
+  docker compose up -d --wait storage
+  docker compose exec -T storage sh -c 'rm -rf /var/lib/storage/*'
+  docker compose cp "$tmp/storage/." storage:/var/lib/storage/
   rm -rf "$tmp"
   docker compose up -d
   echo "Wiederhergestellt aus $file."
@@ -19,7 +21,7 @@ fi
 stamp="$(date +%Y-%m-%d-%H%M)"
 tmp="$(mktemp -d)"
 docker compose exec -T db pg_dumpall -U postgres --clean --if-exists > "$tmp/db.sql"
-cp -R data/storage "$tmp/storage"
+docker compose cp storage:/var/lib/storage "$tmp/storage"
 tar -czf "backups/hivevoice-$stamp.tar.gz" -C "$tmp" db.sql storage
 rm -rf "$tmp"
 echo "Gesichert: $(pwd)/backups/hivevoice-$stamp.tar.gz"

@@ -3,6 +3,7 @@ import { asViewer } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { loadEvent } from "@/lib/calendar";
 import { buildIcs } from "@/lib/ics";
+import { getOrigin } from "@/lib/origin";
 
 // One date (or a whole series' coming dates) as a file for one's calendar app, read with the person's rights.
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   });
   if (!data) return new Response("not found", { status: 404 });
   const { e, times } = data;
-  const origin = request.nextUrl.origin;
+  const origin = await getOrigin();
   const body = buildIcs(e.title, times.map((t) => ({
     uid: `${e.id}-${t.getTime()}@hivevoice`, start: t, minutes: e.duration_minutes, allDay: e.all_day, title: e.title,
     description: e.description, place: e.place ?? e.online_url, url: `${origin}/events/${e.id}?at=${encodeURIComponent(t.toISOString())}`,

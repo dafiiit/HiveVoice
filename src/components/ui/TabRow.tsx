@@ -33,8 +33,11 @@ export function TabRow({ label, items, more, moreLabel }: { label: string; items
       setFit(n);
     };
     measure();
+    // Again when the row changes size, and when the tabs themselves do (the font arrives after the first drawing).
     const ro = new ResizeObserver(measure);
     ro.observe(el);
+    ro.observe(r);
+    void document.fonts?.ready.then(measure);
     return () => ro.disconnect();
   }, [keys]);
 

@@ -41,7 +41,7 @@ Ohne Fragen, zum Beispiel für Tailscale:
 ```
 
 Weitere Schalter: `--image ghcr.io/dafiiit/hivevoice:latest` (fertiges Image statt selbst bauen; auf dem Raspberry Pi
-dringend empfohlen), `--regions` (Gemeinden und Postleitzahlen aus OpenPLZ laden, einige Minuten), `--status`, `--stop`.
+dringend empfohlen), `--no-regions` (Gemeinden und Postleitzahlen nicht laden; sonst einmal, etwa eine halbe Minute, weil beim Start jede Person einen Ort wählt), `--status`, `--stop`.
 Noch einmal `./setup.sh` aktualisiert: neues Image, neue Migrationen, Neustart; Daten und Geheimnisse bleiben.
 
 Danach unter der angezeigten Adresse mit der Admin-E-Mail registrieren und unter Einstellungen → Ansicht auf
@@ -64,7 +64,7 @@ auf eine zweite Platte oder einen anderen Rechner; `selfhost/.env` (die Geheimni
 Die Software ist dieselbe, also lassen sich die Daten mitnehmen: mit der direkten Postgres-Verbindung des
 Supabase-Projekts (Einstellungen → Database, als `postgres`) `pg_dump --data-only` der Schemas `public` und `auth`,
 dann auf dem eigenen Server einspielen (`psql` mit `session_replication_role = replica`), die Dateien aus dem Bucket
-`images` mit dem Service-Schlüssel herunterladen und in `selfhost/data/storage` ablegen. Das ist noch Handarbeit und
+`images` mit dem Service-Schlüssel herunterladen und mit `docker compose cp` in den Dienst `storage` legen. Das ist noch Handarbeit und
 nicht gegen die Live-Datenbank geprobt; ein Skript dafür steht in TASKS.md.
 
 ## Bausteine (was das Paket startet)
@@ -75,7 +75,7 @@ nicht gegen die Live-Datenbank geprobt; ein Skript dafür steht in TASKS.md.
 |---|---|---|
 | `db` | `supabase/postgres` | Postgres mit `pg_cron`, Vault und den Rollen, die Supabase Auth und Storage brauchen |
 | `auth` | `supabase/gotrue` | Anmeldung (dieselbe Software wie in der Cloud) |
-| `storage` | `supabase/storage-api` | Fotos und Dateien, auf der Platte unter `selfhost/data/storage` |
+| `storage` | `supabase/storage-api` | Fotos und Dateien, in einem Docker-Volume (ein freigegebener Mac- oder Windows-Ordner kann ihre erweiterten Attribute nicht speichern); `backup.sh` holt sie heraus |
 | `app` | `hivevoice` (dieses Repository, `Dockerfile`) | die App; trägt die Migrationen mit (`node scripts/migrate.mjs`) |
 | `gateway` | `caddy` | eine Adresse für alles: `/auth/v1` → Anmeldung, `/storage/v1` → Dateien, sonst die App; bei `domain` mit Zertifikat |
 | `tailscale` / `cloudflared` | offizielle Images | der Zugang von außen (nur mit `--profile`) |

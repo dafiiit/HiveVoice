@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { sql, errorCode } from "@/lib/db";
+import { getOrigin } from "@/lib/origin";
 
 // Link from the confirmation email for official responsibilities.
 export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token") ?? "";
-  const target = new URL("/settings?tab=resp", request.nextUrl.origin);
+  const target = new URL("/settings?tab=resp", await getOrigin());
   try {
     if (!/^[0-9a-f]{64}$/.test(token)) throw new Error("invalid_token");
     await sql`select app.confirm_official_verification(${token})`;

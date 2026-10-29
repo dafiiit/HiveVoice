@@ -12,7 +12,10 @@ test("guests can explore and read an initiative", async ({ page }) => {
   const first = page.locator("main a[href^='/community/groups/i/']").first();
   await first.click();
   await expect(page.getByRole("tablist", { name: /Bereiche der Initiative/ })).toBeVisible();
-  await page.getByRole("tab", { name: /Argumente/ }).click();
+  // A tab in the row, or on narrow screens in "Mehr" (tabs that do not fit go there whole).
+  const tab = page.getByRole("tab", { name: /Argumente/ });
+  if (await tab.count()) await tab.click();
+  else { await page.locator("summary", { hasText: "Mehr" }).click(); await page.getByRole("link", { name: /Argumente/ }).click(); }
   await expect(page.getByRole("heading", { name: /Pro ·/ })).toBeVisible({ timeout: 15_000 });
 });
 

@@ -5,7 +5,9 @@ import { withDeadline, withRetry } from "./dbRetry";
 // One pooled connection set per server instance. The login role is only a
 // member of hivevoice_server: it can call trusted functions and switch to the
 // API roles, but owns no tables.
-const globalForDb = globalThis as unknown as { pool?: postgres.Sql };
+// The pool lives on globalThis, also in production: the server may hold several copies of this module (one per route
+// bundle, and new ones after a reload in development), and all of them must use, and replace, the same pool.
+const shared = globalThis as unknown as { hvPool?: postgres.Sql };
 
 function connect() {
   const url = process.env.DATABASE_URL;
@@ -24,22 +26,18 @@ function connect() {
 }
 
 // Made on the first query, not on import: building the app (which loads every module) needs no database.
-let pool: postgres.Sql | null = globalForDb.pool ?? null;
-const current = () => {
-  if (!pool) {
-    pool = connect();
-    if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
-  }
-  return pool;
-};
+const current = () => (shared.hvPool ??= connect());
 
-/** Throws the pool away and starts a new one: the old connections are closed at once, work still waiting on them fails. */
-function renewPool() {
-  const old = pool;
-  pool = null;
-  current();
+/**
+ * Throws a pool away whose connections stopped answering and starts a new one: the old connections are closed at once,
+ * work still waiting on them fails (and is tried again). Only if it is still the pool in use (another request may have
+ * replaced it already).
+ */
+function renewPool(stuck: postgres.Sql) {
+  if (shared.hvPool !== stuck) return;
+  shared.hvPool = connect();
   console.warn("database did not answer for 30 s, starting new connections");
-  old?.end({ timeout: 0 }).catch(() => {});
+  stuck.end({ timeout: 0 }).catch(() => {});
 }
 
 /** The pool of the moment (it is replaced when its connections stop answering). */
@@ -71,7 +69,7 @@ export type Viewer = { authId: string; profileId: string } | null;
  * connection that is gone: the pool is replaced and the work tried once more on a new connection.
  */
 export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, opts?: { linkToken?: string | null }): Promise<T> {
-  return withRetry((done) => withDeadline(current().begin(async (tx) => {
+  return withRetry((done) => { const pool = current(); return withDeadline(pool.begin(async (tx) => {
     const role = viewer ? "authenticated" : "anon";
     const claims = viewer ? JSON.stringify({ sub: viewer.authId, profile_id: viewer.profileId, role }) : "{}";
     // A link key opens a document that is shared "with everybody who has the link"; without it that document stays closed.
@@ -80,7 +78,7 @@ export async function asViewer<T>(viewer: Viewer, fn: (tx: Tx) => Promise<T>, op
     const result = await fn(tx);
     done();
     return result;
-  }) as Promise<T>, DEADLINE_MS, renewPool));
+  }) as Promise<T>, DEADLINE_MS, () => renewPool(pool)); });
 }
 
 /** Maps database exceptions raised by app.* functions to stable error codes. */

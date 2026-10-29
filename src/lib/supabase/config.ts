@@ -7,9 +7,21 @@ declare global {
   interface Window { __hvSupabase?: { url: string; key: string } }
 }
 
-/** For the browser: the address people's devices use. */
+/** Login and files under the page's own address (selfhost/: one gateway for everything), whatever address it was opened under. */
+const sameOrigin = () => process.env.SUPABASE_SAME_ORIGIN === "1";
+
+/**
+ * For the browser: the address people's devices use. On a self-hosted instance that is the page's own address, so it
+ * works the same through the home network address, localhost or a tunnel (another address would be a cross-origin call).
+ */
 export function publicSupabaseUrl(): string {
-  if (typeof window !== "undefined") return window.__hvSupabase?.url || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  if (typeof window !== "undefined") {
+    const cfg = window.__hvSupabase;
+    if (cfg && !cfg.url) return window.location.origin;
+    return cfg?.url || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  }
+  // In pages drawn on the server (picture addresses): a path, which the browser reads against the page's address.
+  if (sameOrigin()) return "";
   return process.env.SUPABASE_PUBLIC_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
 }
 
@@ -26,5 +38,6 @@ export function supabaseKey(): string {
 
 /** What the root layout hands to the browser, when the instance sets it at start (null on the cloud setup). */
 export function runtimeSupabase(): { url: string; key: string } | null {
-  return process.env.SUPABASE_PUBLIC_URL && process.env.SUPABASE_ANON_KEY ? { url: process.env.SUPABASE_PUBLIC_URL, key: process.env.SUPABASE_ANON_KEY } : null;
+  if (!process.env.SUPABASE_ANON_KEY || !(process.env.SUPABASE_PUBLIC_URL || sameOrigin())) return null;
+  return { url: sameOrigin() ? "" : process.env.SUPABASE_PUBLIC_URL!, key: process.env.SUPABASE_ANON_KEY };
 }

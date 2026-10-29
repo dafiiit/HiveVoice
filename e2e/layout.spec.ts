@@ -83,6 +83,8 @@ test.describe("the layout like Teams", () => {
     await login(page);
     await context.addCookies([{ name: "hv_sidebar", value: "folded", url: baseURL! }]);
     await page.goto("/friends");
+    // React puts the streamed sidebar in place a moment after the page arrives (until then a stand-in shows): one at the end.
+    await expect(page.locator("[data-sidebar]")).toHaveCount(1);
     const bar = page.locator("[data-sidebar]");
     const widths = () => bar.evaluate((el) => ({ page: Math.round(el.getBoundingClientRect().width), bar: Math.round(el.querySelector("nav")!.getBoundingClientRect().width), main: Math.round(document.querySelector("main")!.getBoundingClientRect().x) }));
     await expect(bar).toHaveAttribute("data-sidebar", "folded");

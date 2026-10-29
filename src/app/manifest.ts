@@ -8,7 +8,9 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/friends",
     display: "standalone",
     background_color: "#f4f4f4",
-    theme_color: "#111111",
+    // The colour Android gives its own bars around the installed app (the navigation bar at the bottom too): the white of
+    // the app's bottom bar, not black. The status bar follows the page's theme-color (src/app/layout.tsx), also in dark.
+    theme_color: "#ffffff",
     lang: "de",
     icons: [
       { src: "/icons/192", sizes: "192x192", type: "image/png" },

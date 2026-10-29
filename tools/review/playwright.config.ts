@@ -15,7 +15,8 @@ export default defineConfig({
   reporter: "list",
   outputDir: "../../test-results/review-run",
   globalSetup: "../../e2e/global-setup.ts",
-  use: { baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000", locale: "de-DE", actionTimeout: 5_000, navigationTimeout: 30_000 },
+  // REVIEW_DARK=1: everything once more with the device set to dark (the app follows it unless someone chose a look).
+  use: { baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000", locale: "de-DE", actionTimeout: 5_000, navigationTimeout: 30_000, colorScheme: process.env.REVIEW_DARK ? "dark" : "light" },
   projects: [
     { name: "desktop-1440", use: { ...devices["Desktop Chrome"], ...size(1440, 900) } },
     { name: "ipad-quer-1180", use: { ...devices["Desktop Chrome"], ...size(1180, 820) } },

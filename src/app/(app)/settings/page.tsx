@@ -218,7 +218,7 @@ export default async function Me({ searchParams }: PageProps<"/settings">) {
         <PrivacySettings findable={d.privacy?.findable ?? "all"} contactFrom={d.privacy?.contact_from ?? "all"} minor={!!d.privacy?.is_minor} blocked={d.blocked} />
         <AppUpdates />
         <ServerSetup email={session.email ?? ""} />
-        <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "light"} order={s?.feed_order === "suggested" ? "suggested" : "chrono"} places={d.places} interests={interests} suggestions={d.suggestions} />
+        <Settings language={s?.language ?? locale} easy={!!s?.easy_language} theme={s?.theme ?? "system"} order={s?.feed_order === "suggested" ? "suggested" : "chrono"} places={d.places} interests={interests} suggestions={d.suggestions} />
         <Section title={tn("title")} id="nextcloud">
           <NextcloudConnect link={(await links(viewer)).find((l) => !l.group_id && l.owner_id === session.profile.id) ?? null} />
         </Section>

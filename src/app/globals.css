@@ -16,7 +16,7 @@
   color-scheme: light;
 }
 
-/* Light is the default. Dark only when chosen, or when "system" follows the device. */
+/* The device decides ("system", the default), unless someone chose light or dark (Einstellungen → Darstellung). */
 @media (prefers-color-scheme: dark) {
   :root[data-theme="system"] {
     --paper: #111111;
@@ -312,3 +312,9 @@ select {
 .cm-host .cm-picture-box:hover .cm-picture-grip, .cm-host .cm-picture-grip:focus-visible { opacity: 1; }
 @media (pointer: coarse) { .cm-host .cm-picture-grip { opacity: 1; width: 24px; height: 24px; right: -8px; bottom: calc(0.4em - 8px); } }
 .md-image[width] { height: auto; }
+
+/* The page never scrolls sideways: a section sliding out while swiped (src/components/shell/Swipe.tsx) or anything too wide
+   must not let a finger move the whole page, with the bar at the bottom, to the side or down. `clip` (unlike `hidden`)
+   makes no scroll box, so the sticky header still sticks. */
+[data-shell] { overflow-x: clip; }
+html, body { overscroll-behavior-x: none; }

@@ -7,11 +7,13 @@ const signedIn = !!process.env.TEST_USER_EMAIL;
 // A 1x1 PNG, enough to exercise the upload path.
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
-test("the design is light unless someone picks dark", async ({ page }) => {
+test("the look follows the device: light on a light one, dark on a dark one", async ({ page }) => {
   await page.goto("/community");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-  expect(bg).toBe("rgb(244, 244, 244)");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "system");
+  await page.emulateMedia({ colorScheme: "light" });
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(244, 244, 244)");
+  await page.emulateMedia({ colorScheme: "dark" });
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(17, 17, 17)");
 });
 
 test.describe("signed in", () => {

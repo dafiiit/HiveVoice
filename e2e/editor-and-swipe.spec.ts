@@ -96,11 +96,31 @@ test.describe("phones: swiping between the sections of an area", () => {
     await page.goto("/me/listings");
     await page.waitForLoadState("networkidle");
     const { width, height } = page.viewportSize()!;
+    // Halfway through a swipe, slanting down: the page does not get wider than the screen, the bar at the bottom stays put.
+    const bar = page.getByRole("navigation", { name: "Bereiche" }).filter({ visible: true }).last();
+    const barBefore = await bar.boundingBox();
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: width * 0.8, y: height * 0.4 }] });
+    for (let i = 1; i <= 6; i++) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: width * 0.8 - i * 25, y: height * 0.4 + i * 12 }] });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth && window.scrollX === 0)).toBe(true);
+    expect((await bar.boundingBox())!.y).toBeCloseTo(barBefore!.y, 0);
+    // The finger goes back and lets go: the page settles where it was.
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: width * 0.8, y: height * 0.4 + 72 }] });
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect(page).toHaveURL(/\/me\/listings/);
+    await page.waitForTimeout(300);
     await swipe(page, { x: width * 0.8, y: height * 0.6 }, -width * 0.6);
     await expect(page).toHaveURL(/\/me\/calendar/);
     await page.waitForLoadState("networkidle");
     await swipe(page, { x: width * 0.2, y: height * 0.6 }, width * 0.6);
     await expect(page).toHaveURL(/\/me\/listings/);
+    // In Freunde the sections are filters (?f=): the list slides in too and is visible right after.
+    await page.goto("/friends");
+    await page.waitForLoadState("networkidle");
+    await swipe(page, { x: width * 0.8, y: height * 0.5 }, -width * 0.6);
+    await expect(page).toHaveURL(/f=chats/);
+    await expect.poll(() => page.locator("#chat-list").evaluate((el) => getComputedStyle(el).opacity), { timeout: 1500 }).toBe("1");
+    await page.goto("/me/listings");
     // A short or mostly vertical move stays a scroll.
     await swipe(page, { x: width * 0.5, y: height * 0.6 }, -30);
     await expect(page).toHaveURL(/\/me\/listings/);

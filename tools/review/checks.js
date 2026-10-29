@@ -207,5 +207,31 @@
     if (!label && !el.querySelector("img[alt]:not([alt=''])")) add("no-name", "error", "Bedienelement ohne Namen (weder Text noch aria-label).", el);
   }
 
+  // 10. Text that is hard to read on its background (WCAG: 4.5:1, large and bold text 3:1). Catches colours fixed for the
+  // light look that stay when the page is dark.
+  const rgb = (c) => { const m = /rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)/.exec(c); return m ? [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]] : null; };
+  const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+  const behind = (el) => {
+    for (let e = el; e; e = e.parentElement) {
+      const s = getComputedStyle(e);
+      if (s.backgroundImage !== "none" && !s.backgroundImage.startsWith("linear-gradient")) return null; // a picture: cannot tell
+      const c = rgb(s.backgroundColor);
+      if (c && c[3] > 0.9) return c;
+    }
+    return rgb(getComputedStyle(document.documentElement).backgroundColor) ?? [255, 255, 255, 1];
+  };
+  let looked = 0;
+  for (const t of texts) {
+    if (looked++ > 600) break;
+    const s = getComputedStyle(t.el);
+    const fg = rgb(s.color), bg = behind(t.el);
+    if (!fg || !bg || fg[3] < 0.5 || t.el.closest("[aria-disabled=true], :disabled, .cm-editor")) continue;
+    const [a, b] = [lum(fg), lum(bg)].sort((x, y) => y - x);
+    const ratio = (a + 0.05) / (b + 0.05);
+    const size = parseFloat(s.fontSize), bold = Number(s.fontWeight) >= 700;
+    const need = size >= 24 || (bold && size >= 18.66) ? 3 : 4.5;
+    if (ratio < need) add("contrast", ratio < 3 ? "error" : "warn", `Kontrast ${ratio.toFixed(1)}:1 (nötig ${need}:1).`, t.el);
+  }
+
   return out;
 })();

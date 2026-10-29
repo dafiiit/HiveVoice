@@ -17,7 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const themeOf = (value?: string) => (value === "dark" || value === "system" ? value : "light");
+// Without a choice the look follows the device (light or dark).
+const themeOf = (value?: string) => (value === "dark" || value === "light" ? value : "system");
 
 export async function generateViewport(): Promise<Viewport> {
   const theme = themeOf((await cookies()).get(THEME_COOKIE)?.value);

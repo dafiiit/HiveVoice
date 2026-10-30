@@ -55,7 +55,7 @@
         findings.push({ kind: "menu-covered", level: "error", text: `Wird abgeschnitten von ${this.name(clip).slice(0, 60)}.`, where: this.name(el), box: { x: Math.round(c.x), y: Math.round(c.y + scrollY), w: Math.round(c.width), h: Math.round(c.height) } });
         continue;
       }
-      el.scrollIntoView({ block: "nearest", inline: "nearest" });
+      el.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" }); // a smooth scroll would still be at its start
       const r = el.getBoundingClientRect();
       const inside = r.bottom > 0 && r.right > 0 && r.top < innerHeight && r.left < innerWidth;
       const fully = r.top >= -1 && r.left >= -1 && r.bottom <= innerHeight + 1 && r.right <= innerWidth + 1;

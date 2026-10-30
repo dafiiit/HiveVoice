@@ -50,6 +50,11 @@ test("Menüprüfung: findet ein Menü unter der unteren Leiste", async ({ page }
   expect(r.findings.map((f) => f.kind)).toContain("menu-covered");
 });
 
+test("Menüprüfung: was eine Spalte mit weichem Scrollen erreicht, ist erreichbar", async ({ page }) => {
+  const r = await menuFindings(page, menu("#col{height:120px;overflow:auto;scroll-behavior:smooth}#panel{position:static;margin-top:600px}", "").replace("<div id=panel>", "<div id=col><div id=panel>").replace("</a></div>", "</a></div></div>"));
+  expect(r.findings).toEqual([]);
+});
+
 test("Menüprüfung: findet ein Menü außerhalb des Fensters", async ({ page }) => {
   const r = await menuFindings(page, menu("#panel{position:fixed;left:-300px;top:10px}"));
   expect(r.findings.map((f) => f.kind)).toContain("menu-unreachable");

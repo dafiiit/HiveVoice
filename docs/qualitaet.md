@@ -11,7 +11,7 @@ Vor jedem Push mit Änderungen an der Oberfläche, am Service Worker oder an Tex
 npm run check
 ```
 
-Das dauert rund 30 Minuten und endet rot, sobald etwas nicht stimmt. Die drei häufigsten Fehler dieses Projekts haben je eine eigene
+Das dauert rund 15 Minuten und endet rot, sobald etwas nicht stimmt. Die drei häufigsten Fehler dieses Projekts haben je eine eigene
 Prüfung:
 
 | Fehler | Prüfung | Rot, wenn |
@@ -22,7 +22,7 @@ Prüfung:
 
 Alle Grenzwerte stehen in `tools/quality/limits.ts`. Ein Grenzwert wird nur mit Begründung im Commit angehoben.
 
-`npm run check -- --quick` lässt die fünf Größen weg (rund 10 Minuten). Für eine Seite: `REVIEW_PAGES=/me,/friends npm run review`.
+`npm run check -- --quick` lässt die fünf Größen weg (rund 5 Minuten). Für eine Seite: `REVIEW_PAGES=/me,/friends npm run review`.
 
 Einzeln, gegen einen laufenden Produktions-Build:
 

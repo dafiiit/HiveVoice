@@ -1,6 +1,6 @@
 # Fehler finden
 
-Was es gibt, um Probleme zu sehen, auch solche, die nur auf einem echten Handy auftreten.
+Was es gibt, um Probleme zu sehen, auch solche, die nur auf einem echten Handy auftreten. Die Prüfung vor dem Push (`npm run check`) steht in `docs/qualitaet.md`.
 
 ## Was auf echten Geräten passiert
 

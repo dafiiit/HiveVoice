@@ -10,7 +10,7 @@ const LEVEL = { error: 0, warn: 1, info: 2 };
 const NAMES = {
   "overflow-x": "Seitliches Scrollen", offscreen: "Ragt aus dem Fenster", overlap: "Überlappt", "text-overlap": "Text überlagert Text",
   clipped: "Abgeschnitten", target: "Zu klein", "target-touch": "Klein für Touch", lookalike: "Sieht gleich aus", radius: "Runde Ecken",
-  "menu-covered": "Menü überdeckt", "menu-unreachable": "Menü nicht erreichbar", height: "Ungewöhnliche Höhe", contrast: "Wenig Kontrast", "no-name": "Ohne Namen", error: "Fehler",
+  "menu-covered": "Menü überdeckt", "menu-unreachable": "Menü nicht erreichbar", "menu-see-through": "Menü durchsichtig", height: "Ungewöhnliche Höhe", contrast: "Wenig Kontrast", "no-name": "Ohne Namen", error: "Fehler",
 };
 
 const groups = new Map();

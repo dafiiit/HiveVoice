@@ -15,4 +15,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - UI text comes from `messages/<lang>/<namespace>.json` (de, en, ls = Leichte Sprache overrides). Run `npm run messages` after adding a namespace.
 - Design: Swiss style tokens in `src/app/globals.css` (paper, ink, red, line); square corners, no shadows. Shared classes in `src/components/ui/styles.ts`.
 - Tests: `npm run test:local` (own database in Docker, preferred), `npm run test` (live DB, rolled back) and `npm run test:e2e`.
+- Before pushing anything people see: `npm run check` (docs/qualitaet.md), and look at every sheet in test-results/review/_sheets by eye. What the eye finds becomes a rule with a self-test.
 - Debugging: docs/debugging.md (`npm run reports` for errors and speed on real devices, `npm run phone` for gestures and animation).

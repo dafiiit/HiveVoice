@@ -40,6 +40,16 @@
     }
     return null;
   },
+  /** Text of the page shining through: nothing opaque lies between this item and what is under it. */
+  seeThrough(el, x, y) {
+    for (const e of document.elementsFromPoint(x, y)) {
+      const c = getComputedStyle(e).backgroundColor.match(/[\d.]+/g)?.map(Number) ?? [];
+      const opaque = (c.length === 3 || (c.length === 4 && c[3] > 0.9)) && !(c.length === 4 && c[3] === 0);
+      if (opaque) return null;
+      if (!e.contains(el) && !el.contains(e) && [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())) return e;
+    }
+    return null;
+  },
   check() {
     const before = window.__menuBefore ?? new Set();
     const fresh = [...document.querySelectorAll(this.ITEMS)].filter((el) => !before.has(el) && this.visible(el));
@@ -72,6 +82,8 @@
         blockers.add(hit);
       }
       if (blockers.size) add("menu-covered", `Wird überdeckt von ${[...blockers].slice(0, 2).map((b) => this.name(b)).join(", ")}.`);
+      const under = this.seeThrough(el, r.left + r.width / 2, r.top + r.height / 2);
+      if (under) add("menu-see-through", `Das Menü ist durchsichtig: ${this.name(under).slice(0, 60)} scheint durch.`);
     }
     style.remove();
     return { findings, newItems: leaves.length };

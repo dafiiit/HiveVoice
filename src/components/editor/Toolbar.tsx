@@ -66,7 +66,7 @@ function ToolButton({ tool }: { tool: Tool }) {
   const [open, setOpen] = useState(false);
   if (tool.panel) {
     return (
-      <Popover icon label={tool.icon} ariaLabel={tool.label} open={open} onOpenChange={setOpen} className="flex-none" panelClassName="w-[320px]">
+      <Popover icon label={tool.icon} ariaLabel={tool.label} open={open} onOpenChange={setOpen} className="flex-none">
         {tool.panel(() => setOpen(false))}
       </Popover>
     );

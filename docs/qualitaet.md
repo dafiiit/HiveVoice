@@ -55,7 +55,8 @@ bewirkt haben (`done` in `motion.spec.ts`): Eine Geste, die nichts tut, wäre so
 was etwas aufklappt. Geprüft wird:
 
 - **Menüs**: Jeder neue Eintrag muss an fünf Punkten selbst zuoberst liegen, auch gegen Ebenen, die Klicks durchlassen, darf von keiner
-  Box mit `overflow: hidden` abgeschnitten werden und muss im Fenster liegen oder hineinscrollen.
+  Box mit `overflow: hidden` abgeschnitten werden, muss im Fenster liegen oder hineinscrollen, und das Menü darf nicht durchsichtig
+  über Text liegen.
 - **Seiten**: seitliches Scrollen, Herausragen, Überlappen, abgeschnittener Text, zu kleine Ziele, gleich aussehende verschiedene
   Bedienelemente, Kontrast, Bedienelemente ohne Namen, Konsolen- und Netzwerkfehler.
 
@@ -66,6 +67,10 @@ Ergebnisse: `test-results/review/report.md` und `test-results/review/menus.json`
 **Bilder von Auge ansehen, das ist Pflicht.** Regeln finden Überdeckung, aber kein Menü, das nur falsch aussieht. Von jedem geöffneten
 Menü entsteht ein Bild, gefunden oder nicht. `tools/review/sheets.mjs` legt sie auf Bögen, `test-results/review/_sheets/sheet-001.png`
 usw., und `index.md` sagt, was jede Zelle zeigt. Jeden Bogen ansehen, bei Verdacht das Einzelbild in `test-results/review/_menus/`.
+Das ist keine Formsache: Das durchsichtige Menü „Diagramm einfügen“ fand 2026 zuerst das Auge, die Regel dafür kam danach. So soll es
+immer laufen: Was das Auge findet, wird eine Regel mit Selbsttest.
+
+`Popover` nie mit `panelClassName` ohne Position und Hintergrund benutzen: Der Wert ersetzt die Standardklassen.
 
 Wer ein neues Aufklapp-Element baut, benutzt `Popover`, ein `summary` oder `aria-expanded`, sonst findet die Durchsicht es nicht.
 
@@ -97,7 +102,7 @@ Echte Geräte melden außerdem Frames ab 200 ms als `long-frame` an `npm run rep
 ## Ladezeiten
 
 `tools/quality/speed.spec.ts` lädt die wichtigsten Seiten ohne Cache und ohne Service Worker auf langsamem 4G (150 ms Latenz, 1,6 MBit/s)
-mit vierfach gedrosselter CPU:
+mit vierfach gedrosselter CPU (so misst auch Lighthouse):
 
 | Wert | Grenze |
 |---|---|

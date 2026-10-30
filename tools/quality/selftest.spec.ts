@@ -65,6 +65,16 @@ test("Menüprüfung: sieht die Einträge eines echten details-Menüs, und was si
   expect(r.findings.map((f) => f.kind)).toContain("menu-covered");
 });
 
+test("Menüprüfung: findet ein durchsichtiges Menü über Text", async ({ page }) => {
+  const r = await menuFindings(page, menu("#panel{background:transparent}#text{position:absolute;top:60px;left:10px;width:200px;font-size:30px}", "<p id=text>Text darunter Text darunter Text darunter</p>"));
+  expect(r.findings.map((f) => f.kind)).toContain("menu-see-through");
+});
+
+test("Menüprüfung: ein Menü mit Hintergrund über Text ist in Ordnung", async ({ page }) => {
+  const r = await menuFindings(page, menu("#panel{z-index:2}#text{position:absolute;top:60px;left:10px;width:200px;font-size:30px}", "<p id=text>Text darunter Text darunter Text darunter</p>"));
+  expect(r.findings).toEqual([]);
+});
+
 test("Menüprüfung: findet ein Menü außerhalb des Fensters", async ({ page }) => {
   const r = await menuFindings(page, menu("#panel{position:fixed;left:-300px;top:10px}"));
   expect(r.findings.map((f) => f.kind)).toContain("menu-unreachable");

@@ -105,6 +105,8 @@ Durchsicht 2026-10-26, ohne Befund: 77 interne Links von 30 Seiten öffnen fehle
   - **Handy**: `npm run phone` (Touch-Gesten, Bildraten, Video, gedrosselte CPU, echtes Android über adb), `npm run phone:ios` (Simulator filmen), `npm run phone:frames` (Video in Einzelbilder)
   - **Tests**: `npm run test:local` auf eigener Datenbank in Docker, in Sekunden und ohne Live-Daten; der Jury-Test brauchte bisher echte Konten
   - **CI**: `.github/workflows/ci.yml` prüft jeden Push
+  - **`npm run check`** (docs/qualitaet.md): Menüs auf Überdeckung, Abschneiden, Durchsichtigkeit und Erreichbarkeit, Bögen aller Menü-Bilder zum Durchsehen, Grenzen für Animation, Ladezeit und Offline, Selbsttests für jede Prüfung
+  - **Gefunden und behoben**: Bei hängendem Netz wartete eine gesehene Seite 281 s, jetzt 1,5 s (`public/sw.js`); Antwortfeld der Pinnwand lag am Handy unter der unteren Leiste; Menü „Diagramm einfügen“ war durchsichtig; Download-Links 22 px hoch
 - [x] **~~Wischen, untere Leiste, Navigationsleiste, Dunkelmodus (2026-10-29)~~**
   - **Wischen am Handy flüssig**: die Nachbarteile werden vorab geladen, die Seite folgt dem Finger 1:1, gleitet beim Loslassen (oder bei einem schnellen Wisch) ganz hinaus, und der neue Teil gleitet von der anderen Seite herein; auch bei Freunde (Filter `?f=`)
   - **Untere Leiste rutschte weg**: beim schrägen Ziehen wurde die Seite durch das Verschieben breiter als der Bildschirm und ließ sich samt Leiste verschieben. Jetzt kann der App-Rahmen nie seitlich scrollen (`[data-shell] { overflow-x: clip }`), und solange ein Wisch läuft, bewegt der Browser die Seite nicht (e2e prüft beides mitten im Wischen)

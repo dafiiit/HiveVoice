@@ -32,7 +32,6 @@ const WATCH = `(() => {
 })()`;
 
 async function connectAndroid() {
-  execFileSync("adb", ["wait-for-device"], { timeout: 5000 });
   execFileSync("adb", ["forward", "tcp:9222", "localabstract:chrome_devtools_remote"]);
   const browser = await chromium.connectOverCDP("http://localhost:9222");
   const context = browser.contexts()[0];

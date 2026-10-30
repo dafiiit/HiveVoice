@@ -12,6 +12,8 @@ export default defineConfig({
   testMatch: "review.spec.ts",
   timeout: 20 * 60_000,
   workers: 2,
+  // The test account signs in over the real network, which stalls now and then. Findings are not failures, so a retry hides none.
+  retries: 1,
   reporter: "list",
   outputDir: "../../test-results/review-run",
   globalSetup: "../../e2e/global-setup.ts",

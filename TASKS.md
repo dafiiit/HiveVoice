@@ -22,6 +22,7 @@ Durchsicht 2026-10-26, ohne Befund: 77 interne Links von 30 Seiten öffnen fehle
   - Umfang laut Antwort vom 2026-10-27: alles (Chats, ein paar Pinnwand-Beiträge, die bei Netz durch neue ersetzt werden, Anliegen, Notizen, Listen, Bilder)
 
 ### Offen aus der Runde vom 2026-10-28
+- [ ] **Migration 069 anwenden** - `npm run db:migrate`, vor oder nach dem Push; bis dahin gehen Fehlerberichte ins Leere
 - [ ] **Selbst-Hosting: Rest prüfen** - am 2026-10-29 auf diesem Mac im Modus `local` ganz durchgelaufen: Image bauen, Datenbank, Login, Dateispeicher, Migrationen, Orte, Registrieren, angemeldet bleiben, Onboarding, Notiz, Foto-Upload, Sicherung und Wiederherstellung. Offen: Tailscale mit einem echten Auth-Key (braucht dein Konto), Cloudflare und eigene Domain, ein Raspberry Pi, die Desktop-App einmal bauen und „Diesen Rechner als Server“ durchklicken. Vorher einmal den Workflow „Container image“ starten (Actions → Run workflow) und das Paket `hivevoice` in GitHub auf „Public“ stellen, sonst kann die Desktop-App das Image nicht laden
 - [ ] **Daten aus der Cloud mitnehmen (Skript)** - heute Handarbeit (docs/selbsthosting.md, „Aus der Cloud herausziehen“): `pg_dump` der Schemas `public` und `auth`, Dateien aus dem Bucket `images`. Braucht die direkte Postgres-Verbindung als `postgres` (nicht die Migrations-Rolle)
 - [ ] **Design: zweite Knopfart mit runden Ecken** - eigene Session (Wunsch vom 2026-10-28): wofür runde Knöpfe stehen (z. B. Filter und Umschalter gegenüber Aktionen), Entwürfe nebeneinander, dann einheitlich umsetzen. Die Suchfelder sind seit 2026-10-28 grau gefüllt, damit sie nicht wie Knöpfe oder Eingabezeilen aussehen
@@ -100,6 +101,11 @@ Durchsicht 2026-10-26, ohne Befund: 77 interne Links von 30 Seiten öffnen fehle
 - [ ] **Oberfläche für Notfallzugriff auf Chats** - DB-Funktionen (Antrag, zweite Freigabe, Protokoll) sind da, Lese-Oberfläche bewusst noch nicht gebaut
 
 ## Erledigt
+- [x] **~~Entwicklungsprozess und Fehlersuche (2026-10-30)~~** (docs/debugging.md)
+  - **Fehlerberichte**: Browser und Server zählen Fehler und Ladezeiten in unserer Datenbank (Migration 069, `npm run reports`), ohne Fremddienst und ohne Personenbezug, 30 Tage
+  - **Handy**: `npm run phone` (Touch-Gesten, Bildraten, Video, gedrosselte CPU, echtes Android über adb), `npm run phone:ios` (Simulator filmen), `npm run phone:frames` (Video in Einzelbilder)
+  - **Tests**: `npm run test:local` auf eigener Datenbank in Docker, in Sekunden und ohne Live-Daten; der Jury-Test brauchte bisher echte Konten
+  - **CI**: `.github/workflows/ci.yml` prüft jeden Push
 - [x] **~~Wischen, untere Leiste, Navigationsleiste, Dunkelmodus (2026-10-29)~~**
   - **Wischen am Handy flüssig**: die Nachbarteile werden vorab geladen, die Seite folgt dem Finger 1:1, gleitet beim Loslassen (oder bei einem schnellen Wisch) ganz hinaus, und der neue Teil gleitet von der anderen Seite herein; auch bei Freunde (Filter `?f=`)
   - **Untere Leiste rutschte weg**: beim schrägen Ziehen wurde die Seite durch das Verschieben breiter als der Bildschirm und ließ sich samt Leiste verschieben. Jetzt kann der App-Rahmen nie seitlich scrollen (`[data-shell] { overflow-x: clip }`), und solange ein Wisch läuft, bewegt der Browser die Seite nicht (e2e prüft beides mitten im Wischen)

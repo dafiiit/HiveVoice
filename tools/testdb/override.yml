@@ -1,0 +1,13 @@
+# The self-hosting stack as a test database: own volumes instead of selfhost/data, nothing restarts by itself, Postgres on localhost.
+services:
+  db:
+    restart: "no"
+    ports: ["127.0.0.1:54329:5432"]
+    volumes:
+      - test-db:/var/lib/postgresql/data
+  auth:
+    restart: "no"
+  storage:
+    restart: "no"
+volumes:
+  test-db:

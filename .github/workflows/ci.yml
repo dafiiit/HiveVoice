@@ -1,0 +1,26 @@
+# Every push and pull request: lint, types, all tests on a database of their own (tools/testdb) and a production build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx eslint src e2e tests scripts
+      - run: npm run typecheck
+      - run: npm run test:local
+      - run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54330
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: hivevoice-test-anon

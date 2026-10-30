@@ -14,4 +14,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Server code queries Postgres with `postgres.js` through `asViewer()` (src/lib/db.ts) so row level security applies. Trusted calls (`app.cast_vote`, admin) use `sql` directly.
 - UI text comes from `messages/<lang>/<namespace>.json` (de, en, ls = Leichte Sprache overrides). Run `npm run messages` after adding a namespace.
 - Design: Swiss style tokens in `src/app/globals.css` (paper, ink, red, line); square corners, no shadows. Shared classes in `src/components/ui/styles.ts`.
-- Tests: `npm run test` (DB, rolled back) and `npm run test:e2e`.
+- Tests: `npm run test:local` (own database in Docker, preferred), `npm run test` (live DB, rolled back) and `npm run test:e2e`.
+- Debugging: docs/debugging.md (`npm run reports` for errors and speed on real devices, `npm run phone` for gestures and animation).

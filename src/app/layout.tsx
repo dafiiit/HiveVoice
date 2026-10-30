@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EASY_COOKIE, LANG_COOKIE, THEME_COOKIE } from "@/i18n/config";
 import { I18nProvider } from "@/components/I18nProvider";
+import { Reporter } from "@/components/Reporter";
 import { ServiceWorker } from "@/components/ServiceWorker";
 import { runtimeSupabase } from "@/lib/supabase/config";
 import "./globals.css";
@@ -47,6 +48,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <I18nProvider lang={lang} easy={lang === "de" && jar.get(EASY_COOKIE)?.value === "1"}>
           {children}
           <ServiceWorker />
+          <Reporter />
         </I18nProvider>
       </body>
     </html>

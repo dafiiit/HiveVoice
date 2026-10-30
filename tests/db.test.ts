@@ -153,6 +153,7 @@ describe("bridge score", () => {
 describe("citizen jury", () => {
   it("draws jurors and hides a post once the majority sees a violation", () => scenario(async (tx) => {
     const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    for (let i = 0; i < 9; i++) await person(tx, `Juror ${i}`); // the draw needs people, on an empty database too
     const [{ pid }] = await as(tx, b, () => tx<{ pid: string }[]>`insert into public.posts (author_id, body) values (${b}, 'Du hast keine Ahnung.') returning id as pid`);
     const [{ caseNo }] = await as(tx, a, () => tx<{ caseNo: string }[]>`select app.create_report('post', ${pid}, 'insult', 'bitte prüfen') as "caseNo"`);
     expect(caseNo).toMatch(/^\d{4}-\d{4}$/);
@@ -1800,4 +1801,29 @@ describe("nextcloud", () => {
     await as(tx, a, () => tx`select app.nextcloud_remove(${own})`);
     expect(await as(tx, a, () => list(tx))).toHaveLength(1);
   }));
+});
+
+describe("client reports", () => {
+  const report = (tx: postgres.TransactionSql, value: number, poor: boolean, name = "INP") =>
+    tx`select app.client_report('vital', ${name}, '/me', 'ios', 'abc1234', null, ${value}, ${poor})`;
+
+  it("counts one row per day and keeps the worst value, the bad ones and an average", async () => {
+    await scenario(async (tx) => {
+      await report(tx, 100, false);
+      await report(tx, 700, true);
+      await tx`select app.client_report('browser-error', 'boom', '/me', 'ios', 'abc1234', 'at x', 0, false)`;
+      const rows = await tx<{ kind: string; hits: string; average: number; worst: number; poor: string; detail: string | null }[]>`select * from app.client_report_summary(1)`;
+      expect(rows.map((r) => r.kind)).toEqual(["browser-error", "vital"]);
+      const vital = rows[1];
+      expect([Number(vital.hits), vital.average, vital.worst, Number(vital.poor)]).toEqual([2, 400, 700, 1]);
+      expect(rows[0].detail).toBe("at x");
+    });
+  });
+
+  it("is closed to everybody but the server", async () => {
+    await scenario(async (tx) => {
+      const a = await person(tx, "Ada");
+      await expect(as(tx, a, () => tx`select app.client_report_summary(1)`)).rejects.toThrow(/permission denied/);
+    });
+  });
 });

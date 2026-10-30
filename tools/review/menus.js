@@ -6,9 +6,10 @@
   visible(el) {
     const r = el.getBoundingClientRect();
     if (r.width <= 1 || r.height <= 1) return false;
-    for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
-      const s = getComputedStyle(e);
-      if (s.display === "none" || s.visibility === "hidden" || Number(s.opacity) === 0) return false;
+    // A closed <details> keeps its contents laid out, with a size, so only this tells they cannot be seen.
+    if (!el.checkVisibility({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })) return false;
+    for (let e = el.parentElement; e; e = e.parentElement) {
+      if (e.tagName === "DETAILS" && !e.open && !el.closest("summary")) return false;
     }
     return true;
   },

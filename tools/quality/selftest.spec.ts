@@ -55,6 +55,16 @@ test("Menüprüfung: was eine Spalte mit weichem Scrollen erreicht, ist erreichb
   expect(r.findings).toEqual([]);
 });
 
+test("Menüprüfung: sieht die Einträge eines echten details-Menüs, und was sie überdeckt", async ({ page }) => {
+  await page.setContent(`<!doctype html><style>body{margin:0}#bar{position:fixed;top:60px;left:0;right:0;height:50px;background:red;z-index:9}ul{margin:0;padding:0}li{height:40px;display:block}</style>
+    <details><summary id=open>Menü</summary><ul><li><a href=#>Eins</a></li><li><a href=#>Zwei</a></li><li><a href=#>Drei</a></li></ul></details><div id=bar></div>`);
+  await page.evaluate(`${MENUS}.remember()`);
+  await page.click("#open");
+  const r = (await page.evaluate(`${MENUS}.check()`)) as { findings: { kind: string }[]; newItems: number };
+  expect(r.newItems).toBe(3);
+  expect(r.findings.map((f) => f.kind)).toContain("menu-covered");
+});
+
 test("Menüprüfung: findet ein Menü außerhalb des Fensters", async ({ page }) => {
   const r = await menuFindings(page, menu("#panel{position:fixed;left:-300px;top:10px}"));
   expect(r.findings.map((f) => f.kind)).toContain("menu-unreachable");

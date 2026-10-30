@@ -125,7 +125,7 @@ export function InstallApp({ release }: { release: DesktopRelease | null }) {
                 {s === system && <span className="ml-2 text-[13px] text-red">{t("thisDevice")}</span>}
               </strong>
               {files(s).map((f) => (
-                <a key={f.kind} href={f.url} className="inline-flex items-center gap-2 font-bold text-on-ink">
+                <a key={f.kind} href={f.url} className="inline-flex min-h-6 items-center gap-2 font-bold text-on-ink">
                   <IconDownload size={16} />{f.kind}<span className="font-normal opacity-60">{mb(f.size)}</span>
                 </a>
               ))}

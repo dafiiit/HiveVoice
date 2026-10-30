@@ -10,15 +10,17 @@ const LEVEL = { error: 0, warn: 1, info: 2 };
 const NAMES = {
   "overflow-x": "Seitliches Scrollen", offscreen: "Ragt aus dem Fenster", overlap: "Überlappt", "text-overlap": "Text überlagert Text",
   clipped: "Abgeschnitten", target: "Zu klein", "target-touch": "Klein für Touch", lookalike: "Sieht gleich aus", radius: "Runde Ecken",
-  height: "Ungewöhnliche Höhe", contrast: "Wenig Kontrast", "no-name": "Ohne Namen", error: "Fehler",
+  "menu-covered": "Menü überdeckt", "menu-unreachable": "Menü nicht erreichbar", height: "Ungewöhnliche Höhe", contrast: "Wenig Kontrast", "no-name": "Ohne Namen", error: "Fehler",
 };
 
 const groups = new Map();
 let pages = 0;
+const menus = [];
 for (const page of readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory())) {
   for (const file of readdirSync(path.join(root, page.name)).filter((f) => f.endsWith(".json"))) {
     pages++;
     const run = JSON.parse(readFileSync(path.join(root, page.name, file), "utf8"));
+    for (const m of run.menus ?? []) menus.push({ ...m, page: run.page, project: run.project });
     for (const f of run.findings) {
       const key = [run.page, f.kind, f.where, f.text, f.after ?? ""].join("|");
       const g = groups.get(key) ?? { ...f, page: run.page, url: run.url, sizes: [] };
@@ -46,4 +48,8 @@ for (const level of ["error", "warn", "info"]) {
   lines.push("");
 }
 writeFileSync(path.join(root, "report.md"), lines.join("\n"));
-console.log(`${root}/report.md: ${count("error")} Fehler, ${count("warn")} Warnungen, ${count("info")} Hinweise`);
+writeFileSync(path.join(root, "menus.json"), JSON.stringify(menus, null, 1));
+console.log(`${root}/report.md: ${count("error")} Fehler, ${count("warn")} Warnungen, ${count("info")} Hinweise, ${menus.length} Menüs geöffnet`);
+for (const f of all.filter((x) => x.level === "error").slice(0, 40)) console.log(`  ${NAMES[f.kind] ?? f.kind} · ${f.page} · ${f.where} ${f.text}`.slice(0, 200));
+// Part of `npm run check`: an error stops the push. No menu opened means the run itself is broken.
+process.exit(count("error") || !menus.length ? 1 : 0);

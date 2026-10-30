@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useDraft } from "@/lib/drafts";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
@@ -86,6 +86,8 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
   const [, start] = useTransition();
   const [pulse, ping] = usePulse();
   const [open, setOpen] = useState(startOpen);
+  // Opened by hand: what unfolds comes into view, or the reply field stays under the bottom bar.
+  const unfolding = useRef(false);
   const score = p.score - p.my_vote + vote;
   const cast = (v: 1 | -1) => {
     if (!canWrite) return;
@@ -146,7 +148,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
               className={`${press} min-w-9 justify-center ${vote === -1 ? "text-ink" : "text-muted"}`}>
               <Pop arrow={-1} pulse={pulse}><IconDown /></Pop>
             </button>
-            <button type="button" aria-expanded={open} onClick={() => setOpen(!open)}
+            <button type="button" aria-expanded={open} onClick={() => { unfolding.current = !open; setOpen(!open); }}
               className={`inline-flex h-9 items-center gap-1.5 border-0 bg-transparent p-0 ${open ? "text-ink" : "text-muted"}`}>
               <IconReply /> {tc("replies", { n: p.replies.length })}
             </button>
@@ -158,7 +160,7 @@ function Post({ p, path, canWrite, viewerId, compact, canModerate, startOpen = f
           </div>
         )}
         {open && (
-          <div className="flex flex-col">
+          <div className="flex flex-col" ref={(el) => { if (el && unfolding.current) { unfolding.current = false; el.scrollIntoView({ block: "nearest" }); } }}>
             {p.replies.map((r) => <Post key={r.id} p={r} path={path} canWrite={canWrite} viewerId={viewerId} compact canModerate={canModerate} />)}
             {canWrite && (!p.locked || canModerate) && <Composer ctx={{ parentId: p.id }} path={path} placeholder={t("replyTo", { name: p.author_name })} />}
           </div>

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# A push is a release (Vercel deploys main). Anything that changes what people see needs a green `npm run check` of exactly this state.
+# Off by default; switch it on with: git config core.hooksPath .githooks
+set -euo pipefail
+base="$(git merge-base origin/main HEAD 2>/dev/null || echo HEAD)"
+if ! git diff --name-only "$base" HEAD | grep -qE '^(src|public|messages|next\.config|package(-lock)?\.json)'; then exit 0; fi
+tree="$(git rev-parse 'HEAD^{tree}')"
+if [ "$(cat .git/hivevoice-check 2>/dev/null || true)" = "$tree" ]; then exit 0; fi
+echo "Push gestoppt: für diesen Stand gibt es keinen grünen Lauf von 'npm run check'." >&2
+echo "Erst committen, dann 'npm run check' (docs/qualitaet.md)." >&2
+exit 1

@@ -9,6 +9,14 @@ const OFFLINE = '/offline.html';
 const MAX_PAGES = 400;
 const MAX_STATIC = 3000;
 const KEEP = [STATIC, PAGES, MEDIA, CONFIG];
+// How long the network may take before what is kept is shown instead (tools/quality/limits.ts holds the limits these must meet).
+const PATIENCE = 1500;
+const PATIENCE_NO_COPY = 10000;
+const PATIENCE_ROUTER = 3000;
+const within = (promise, ms) => new Promise((done) => {
+  const timer = setTimeout(() => done(null), ms);
+  promise.then((value) => { clearTimeout(timer); done(value); }, () => { clearTimeout(timer); done(null); });
+});
 const forget = () => Promise.all([caches.delete(PAGES), caches.delete(MEDIA)]).then(() => fetched.clear());
 
 // What the person chose under Einstellungen → Offline (the page tells us; kept in a cache entry so it survives a restart of this worker):
@@ -124,21 +132,23 @@ self.addEventListener('fetch', (event) => {
   }
   if (req.method !== 'GET' || skip(url)) return;
 
-  // Whole pages: network first, the kept copy when offline, else the offline page.
+  // Whole pages: the network when it answers soon. A bad connection is not an error, it just never answers, so a kept copy
+  // is shown after a moment and the network goes on in the background to renew it for next time. Without a copy: the offline page.
   if (req.mode === 'navigate') {
     event.respondWith((async () => {
-      try {
-        const res = await fetch(req);
+      const kept = await caches.match(pageKey(req.url), { cacheName: PAGES, ignoreVary: true });
+      const network = fetch(req).then((res) => {
         if (keepable(res)) {
           fetched.set(pageKey(req.url), Date.now());
           event.waitUntil(savePage(pageKey(req.url), res.clone()));
         }
         return res;
-      } catch {
-        return (await caches.match(pageKey(req.url), { cacheName: PAGES, ignoreVary: true }))
-          || (await caches.match(OFFLINE, { cacheName: STATIC }))
-          || Response.error();
-      }
+      });
+      event.waitUntil(network.catch(() => {}));
+      return (await within(network, kept ? PATIENCE : PATIENCE_NO_COPY))
+        || kept
+        || (await caches.match(OFFLINE, { cacheName: STATIC }))
+        || Response.error();
     })());
     return;
   }
@@ -147,7 +157,7 @@ self.addEventListener('fetch', (event) => {
   // opens the address as a whole page, which then comes from the kept copies above.
   if (req.headers.get('RSC') === '1') {
     if (req.headers.get('Next-Router-Prefetch')) return;
-    event.respondWith(fetch(req).catch(() => new Response('', { status: 503, headers: { 'Content-Type': 'text/plain' } })));
+    event.respondWith(within(fetch(req), PATIENCE_ROUTER).then((res) => res || new Response('', { status: 503, headers: { 'Content-Type': 'text/plain' } })));
     return;
   }
 
@@ -182,16 +192,16 @@ self.addEventListener('fetch', (event) => {
   // Pictures and files: network first, the kept copy offline.
   if (req.destination === 'image' || url.pathname.startsWith('/api/files/') || url.pathname.startsWith('/_next/image')) {
     event.respondWith((async () => {
-      try {
-        const res = await fetch(req);
+      const kept = await caches.match(req, { cacheName: MEDIA });
+      const network = fetch(req).then((res) => {
         if (keepable(res)) {
           const copy = res.clone();
           event.waitUntil(mayKeep('media').then((ok) => ok && caches.open(MEDIA).then((c) => c.put(req, copy)).then(() => trim(MEDIA, MAX_PAGES * 5)).then(fit)));
         }
         return res;
-      } catch {
-        return (await caches.match(req, { cacheName: MEDIA })) || Response.error();
-      }
+      });
+      event.waitUntil(network.catch(() => {}));
+      return (kept ? await within(network, PATIENCE) : await network.catch(() => null)) || kept || Response.error();
     })());
   }
 });

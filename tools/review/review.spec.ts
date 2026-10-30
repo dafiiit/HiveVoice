@@ -7,6 +7,8 @@ import path from "node:path";
 import { login } from "../../e2e/auth";
 
 const CHECKS = readFileSync(path.join(__dirname, "checks.js"), "utf8");
+const MENUS = readFileSync(path.join(__dirname, "menus.js"), "utf8");
+const MENU_SHOTS = "test-results/review/_menus";
 
 type Finding = { kind: string; level: string; text: string; where: string; box: { x: number; y: number; w: number; h: number } | null; after?: string };
 type Visit = { name: string; url: string; guest?: boolean; open?: (p: Page) => Promise<void>; sidebar?: "open" | "folded" | "peek" };
@@ -48,24 +50,36 @@ async function check(page: Page, after?: string): Promise<Finding[]> {
   return after ? found.map((f) => ({ ...f, after })) : found;
 }
 
-/** Everything on the page that unfolds: menus (details), switches that say they open something (aria-expanded). */
-async function unfold(page: Page, before: Finding[], shots: string, project: string): Promise<Finding[]> {
+type Menu = { label: string; shot: string; newItems: number; covered: number };
+
+/**
+ * Everything on the page that unfolds: menus (details), switches that say they open something. Each one gets a picture, whether
+ * something was found or not (the pictures are looked at by eye), and each new item in it must be on top and reachable (menus.js).
+ */
+async function unfold(page: Page, before: Finding[], shots: string, project: string, visit: string, menus: Menu[]): Promise<Finding[]> {
   const seen = new Set(before.map((f) => `${f.kind}|${f.where}|${f.text}`));
   const out: Finding[] = [];
   const start = page.url();
-  const handles = await page.locator("main summary, nav summary, header summary, main [aria-expanded=false], header [aria-expanded=false]").all();
+  mkdirSync(MENU_SHOTS, { recursive: true });
+  const handles = await page.locator("summary, [aria-expanded=false], [aria-haspopup]:not([aria-expanded=true])").all();
   let n = 0;
-  for (const h of handles.slice(0, 14)) {
+  for (const h of handles.slice(0, 40)) {
     if (!(await h.isVisible().catch(() => false))) continue;
     const label = ((await h.getAttribute("aria-label")) || (await h.innerText().catch(() => "")) || "").trim().replace(/\s+/g, " ").slice(0, 40);
     try {
+      await page.evaluate(`${MENUS}.remember()`);
       await h.click({ timeout: 2_000 });
       await page.waitForTimeout(350);
+      if (page.url() !== start) throw new Error("left the page");
+      const items = (await page.evaluate(`${MENUS}.check()`)) as { findings: Finding[]; newItems: number };
       const now = await check(page, label);
-      const fresh = now.filter((f) => !seen.has(`${f.kind}|${f.where}|${f.text}`) && f.level !== "info");
+      const fresh = [...items.findings.map((f) => ({ ...f, after: label })), ...now.filter((f) => !seen.has(`${f.kind}|${f.where}|${f.text}`) && f.level !== "info")];
+      const shot = path.join(MENU_SHOTS, `${visit}__${project}__${String(n++).padStart(2, "0")}.png`);
+      await page.screenshot({ path: shot });
+      menus.push({ label, shot, newItems: items.newItems, covered: items.findings.length });
       if (fresh.length) {
         out.push(...fresh);
-        await page.screenshot({ path: path.join(shots, `${project}-auf-${n++}.png`) });
+        await page.screenshot({ path: path.join(shots, `${project}-auf-${n}.png`) });
       }
       await page.keyboard.press("Escape");
       if (await h.getAttribute("aria-expanded") === "true") await h.click({ timeout: 2_000 }).catch(() => {});
@@ -100,8 +114,9 @@ for (const v of visits) {
     await page.screenshot({ path: path.join(dir, `${project}.png`), fullPage: true });
 
     const first = await check(page);
-    const later = v.sidebar === "peek" ? [] : await unfold(page, first, dir, project);
+    const menus: Menu[] = [];
+    const later = v.sidebar === "peek" ? [] : await unfold(page, first, dir, project, v.name, menus);
     const findings = [...first, ...later, ...errors.map((text) => ({ kind: "error", level: "error", text, where: "", box: null }))];
-    writeFileSync(path.join(dir, `${project}.json`), JSON.stringify({ page: v.name, url: v.url, project, findings }, null, 1));
+    writeFileSync(path.join(dir, `${project}.json`), JSON.stringify({ page: v.name, url: v.url, project, findings, menus }, null, 1));
   });
 }

@@ -12,6 +12,7 @@
     "test:e2e": "playwright test",
     "test:local": "tools/testdb/run.sh",
     "testdb:down": "tools/testdb/run.sh --down",
+    "check": "node tools/quality/check.mjs",
     "phone": "node tools/phone/measure.mjs",
     "phone:frames": "node tools/phone/frames.mjs",
     "phone:ios": "node tools/phone/ios.mjs",
@@ -23,7 +24,7 @@
     "messages": "node scripts/messages-index.mjs",
     "db:images": "node --env-file-if-exists=.env.local scripts/upload-demo-images.mjs",
     "screens": "playwright test -c tools/screens/playwright.config.ts",
-    "review": "node -e \"require('fs').rmSync('test-results/review',{recursive:true,force:true})\" && playwright test -c tools/review/playwright.config.ts; node tools/review/report.mjs",
+    "review": "node -e \"require('fs').rmSync('test-results/review',{recursive:true,force:true})\" && playwright test -c tools/review/playwright.config.ts; node tools/review/report.mjs && node tools/review/sheets.mjs",
     "db:seed:test": "node --env-file-if-exists=.env.local scripts/seed-test.mjs",
     "drawio": "node scripts/drawio.mjs",
     "prebuild": "node scripts/drawio.mjs"

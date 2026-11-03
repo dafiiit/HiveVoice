@@ -17,7 +17,7 @@ type Section = { href: string; label: string; icon: ComponentType<{ size?: numbe
  * (icon and label), at the bottom the three areas under each other. Folded, only the icons stay, each where it was; while the
  * pointer is over it (or the keyboard is in it) it opens for as long as it is needed and moves the page aside just like a click.
  * Where there is no room for it (below 1100 px) it opens over the page instead.
- * The button folds the list in the middle too (to a strip of icons, see ListColumn), which opens the same way under the pointer.
+ * The button folds the list in the middle too (to a strip of icons, see ListColumn); the pointer does not open that one.
  */
 export function Sidebar({ folded: initial, signedIn, badges }: { folded: boolean | null; signedIn: boolean; badges: { chats: number; requests: number } }) {
   return (

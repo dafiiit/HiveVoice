@@ -1,14 +1,14 @@
 "use client";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { LIST_COOKIE, LIST_MAX, LIST_MIN, clampList as clamp } from "./listWidth";
+import { LIST_COOKIE, LIST_ICONS, LIST_MAX, LIST_MIN, clampList as clamp } from "./listWidth";
 
 /**
  * The line between the list and the opened item: drag it (or use the arrow keys) to make the list wider or narrower,
  * a double click goes back to the standard width. The width is a CSS variable on the shell, kept in a cookie
- * so the next page is drawn at once in the same width (all areas share it). It is the width of the open list only:
- * folded, the list stays a strip of icons and opens to this width while the pointer is over it.
- * Sits inside the list column (ListColumn), at its right edge, so dragging keeps the pointer over a folded list.
+ * so the next page is drawn at once in the same width (all areas share it). Dragged to its narrowest the list becomes
+ * a strip of icons; folded with the sidebar's button it is that strip whatever the width.
+ * Sits inside the list column (ListColumn), at its right edge.
  */
 export function ListResizer() {
   const t = useTranslations("connect");
@@ -64,7 +64,9 @@ export function ListResizer() {
   const key = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const step = e.shiftKey ? 64 : 16;
     const w = current();
-    const next = e.key === "ArrowLeft" ? w - step : e.key === "ArrowRight" ? w + step : e.key === "Home" ? LIST_MIN : e.key === "End" ? LIST_MAX : null;
+    // Between the strip of icons and the narrowest list there is nothing: one step crosses it.
+    const next = e.key === "ArrowLeft" ? (w <= LIST_MIN ? LIST_ICONS : w - step) : e.key === "ArrowRight" ? Math.max(LIST_MIN, w + step)
+      : e.key === "Home" ? LIST_ICONS : e.key === "End" ? LIST_MAX : null;
     if (next === null) return;
     e.preventDefault();
     apply(clamp(next));
@@ -73,7 +75,7 @@ export function ListResizer() {
   return (
     <div className="absolute inset-y-0 right-0 z-20 w-0 max-md:hidden">
       <div ref={handle} role="separator" aria-orientation="vertical" tabIndex={0} aria-label={t("listWidth")} title={t("listWidthHint")}
-        aria-valuemin={LIST_MIN} aria-valuemax={LIST_MAX} aria-valuenow={now ?? undefined}
+        aria-valuemin={LIST_ICONS} aria-valuemax={LIST_MAX} aria-valuenow={now ?? undefined}
         onPointerDown={down} onKeyDown={key} onDoubleClick={() => apply(null)}
         className="group absolute inset-y-0 -left-1.5 flex w-3 cursor-col-resize touch-none justify-center outline-none">
         <span className="h-full w-0.5 bg-transparent transition-colors group-hover:bg-ink group-focus-visible:bg-ink group-active:bg-ink" />

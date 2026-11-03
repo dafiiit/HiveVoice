@@ -106,7 +106,7 @@ test.describe("the layout like Teams", () => {
     await expect.poll(widths).toEqual({ page: 64, bar: 64, main: 64 });
   });
 
-  test("the sidebar's button folds the list in the middle to icons too; the pointer opens it to the open width", async ({ page, context, baseURL }, info) => {
+  test("the sidebar's button folds the list in the middle to icons too; the pointer does not open it", async ({ page, context, baseURL }, info) => {
     test.skip(info.project.name === "mobile", "the list sits next to the item on wide screens only");
     await login(page);
     await context.addCookies([{ name: "hv_sidebar", value: "open", url: baseURL! }]);
@@ -114,8 +114,11 @@ test.describe("the layout like Teams", () => {
     const column = page.locator("[data-list-col]");
     const width = () => column.evaluate((el) => Math.round(el.getBoundingClientRect().width));
     await expect.poll(width).toBe(380);
-    await page.locator("[data-sidebar]").getByRole("button", { name: /einklappen/ }).click();
-    await page.mouse.move(1200, 500);
+    // Clicked again until the page is hydrated (before that the button has nothing to do).
+    await expect(async () => {
+      await page.locator("[data-sidebar]").getByRole("button", { name: /einklappen/ }).click({ timeout: 2000 });
+      await expect(page.locator("[data-sidebar]")).toHaveAttribute("data-sidebar", "folded", { timeout: 1000 });
+    }).toPass();
     await expect.poll(width).toBe(64);
     // Folded: the "+" and both filters are icons under each other, each note an icon (the search is the one at the top).
     const create = (await column.getByRole("link", { name: "Notiz", exact: true }).boundingBox())!;
@@ -124,16 +127,47 @@ test.describe("the layout like Teams", () => {
     expect(create.width).toBeLessThanOrEqual(40);
     expect(create.y).toBeLessThan((await tasks.boundingBox())!.y);
     await expect(column.getByRole("search")).toHaveCount(0);
-    // The pointer over it opens it to the open width, and it folds again once the pointer left.
+    // The pointer over it leaves it as it is.
     const box = (await column.boundingBox())!;
     await page.mouse.move(box.x + 30, box.y + 400);
-    await expect.poll(width).toBe(380);
-    await page.mouse.move(1300, 500);
-    await expect.poll(width).toBe(64);
+    await page.waitForTimeout(600);
+    expect(await width()).toBe(64);
     // The choice is kept, and the button opens both again.
     await page.reload();
     await expect.poll(width).toBe(64);
     await page.locator("[data-sidebar]").getByRole("button", { name: /ausklappen/ }).click();
+    await expect.poll(width).toBe(380);
+  });
+
+  test("dragged to its narrowest the list becomes the strip of icons", async ({ page, context, baseURL }, info) => {
+    test.skip(info.project.name === "mobile", "the list sits next to the item on wide screens only");
+    await login(page);
+    await context.addCookies([{ name: "hv_sidebar", value: "open", url: baseURL! }]);
+    await page.goto("/me/notes");
+    const column = page.locator("[data-list-col]");
+    const width = () => column.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    const line = page.getByRole("separator", { name: "Breite der Liste" });
+    const box = (await line.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + 300);
+    await page.mouse.down();
+    await page.mouse.move(box.x - 600, box.y + 300, { steps: 8 });
+    await page.mouse.up();
+    await expect.poll(width).toBe(64);
+    const create = (await column.getByRole("link", { name: "Notiz", exact: true }).boundingBox())!;
+    const tasks = column.getByRole("link", { name: "Notizen mit Aufgaben" });
+    expect(create.width).toBeLessThanOrEqual(40);
+    expect(create.y).toBeLessThan((await tasks.boundingBox())!.y);
+    await expect(column.getByRole("search")).toHaveCount(0);
+    // The pointer does not open it, the width is kept, and the keyboard steps back to the narrowest list.
+    await page.mouse.move(box.x - 300, box.y + 400);
+    await page.waitForTimeout(600);
+    expect(await width()).toBe(64);
+    await page.reload();
+    await expect.poll(width).toBe(64);
+    await line.focus();
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(width).toBe(200);
+    await line.dblclick();
     await expect.poll(width).toBe(380);
   });
 
@@ -243,7 +277,7 @@ test.describe("on a phone", () => {
 
   });
 
-  test("the line between list and opened item can be dragged; narrow, the \"+\" and the search stay full width under each other", async ({ page }, info) => {
+  test("the line between list and opened item can be dragged; narrow, the list shows names", async ({ page }, info) => {
     test.skip(info.project.name === "mobile", "the list sits next to the item on wide screens only");
     await page.setViewportSize({ width: 1600, height: 1000 });
     await login(page);
@@ -253,13 +287,12 @@ test.describe("on a phone", () => {
     const box = (await line.boundingBox())!;
     await page.mouse.move(box.x + box.width / 2, box.y + 300);
     await page.mouse.down();
-    await page.mouse.move(box.x - 500, box.y + 300, { steps: 8 });
+    await page.mouse.move(box.x - 200, box.y + 300, { steps: 8 });
     await page.mouse.up();
     await expect.poll(() => column.evaluate((el) => Math.round(el.getBoundingClientRect().width))).toBe(200);
-    const search = (await column.getByRole("search").boundingBox())!;
+    // Narrow, the list shows names, not icons: the "+" keeps its label width (the search is the one at the top).
     const create = (await column.getByRole("link", { name: "Notiz", exact: true }).boundingBox())!;
-    expect(Math.round(create.width), "the \"+\" is as wide as the search").toBe(Math.round(search.width));
-    expect(create.y, "the search sits under the \"+\"").toBeLessThan(search.y);
+    expect(create.width).toBeGreaterThan(100);
     await page.reload();
     expect(await column.evaluate((el) => Math.round(el.getBoundingClientRect().width)), "the width is kept").toBe(200);
     await line.dblclick();

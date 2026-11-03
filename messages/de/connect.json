@@ -129,6 +129,6 @@
     "listings": "Anliegen durchsuchen"
   },
   "listWidth": "Breite der Liste",
-  "listWidthHint": "Ziehen, um die Liste breiter oder schmaler zu machen (eingeklappt bleibt sie schmal). Doppelklick: Standardbreite.",
+  "listWidthHint": "Ziehen, um die Liste breiter oder schmaler zu machen (ganz schmal: nur Icons). Doppelklick: Standardbreite.",
   "emptyStart": "Fang mit einem Chat an."
 }

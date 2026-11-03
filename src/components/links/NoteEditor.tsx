@@ -1,9 +1,10 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { lockResource, readableDiagrams, releaseResource, saveNote, suggestChange } from "@/lib/actions/links";
+import { lockResource, readableDiagrams, releaseResource, saveNote, setResourceIcon, suggestChange } from "@/lib/actions/links";
+import { IconPicker, type NoteIconValue } from "./IconPicker";
 import { uploadImage } from "@/lib/upload";
 import type { EditorApi } from "../editor/LiveEditor";
 import { TaskView } from "../editor/TaskView";
@@ -24,7 +25,7 @@ const LiveEditor = dynamic(() => import("../editor/LiveEditor"), {
   loading: () => <div className="min-h-[320px] border border-line-strong bg-surface lg:min-h-[480px]" aria-busy="true" />,
 });
 
-export type NoteDraft = { id?: string; title: string; description: string; body: string; tags: string[] };
+export type NoteDraft = { id?: string; title: string; description: string; body: string; tags: string[]; icon?: string | null; iconImage?: string | null };
 
 const MAX = 100_000;
 const TABLE = "| Spalte A | Spalte B |\n| --- | --- |\n| Wert | Wert |";
@@ -68,12 +69,13 @@ type Status = "idle" | "saving" | "saved" | "failed" | "offline";
  * every change is saved a moment later (into one version per sitting). Sharing is a separate step on the note's page.
  * `suggest`: for those who may only propose a change, the text is sent with a button instead.
  */
-export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock = false, unsaved = false, startView, autoFocus = false }: {
+export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock = false, unsaved = false, startView, autoFocus = false, actions }: {
   initial: NoteDraft; ideas: string[]; mode?: "edit" | "suggest";
   /** A new note made for this group (otherwise it is private). */ groupId?: string | null;
   /** Others may write too: take the editing lock while the page is open. */ lock?: boolean;
   /** The starting text is not kept yet (an imported file): save it at once. */ unsaved?: boolean;
   startView?: View; autoFocus?: boolean;
+  /** At the right end of the title row: sharing and the "⋯" with everything about the note (its page passes them). */ actions?: ReactNode;
 }) {
   const t = useTranslations("knowledge");
   const td = useTranslations("docrights.page");
@@ -85,6 +87,7 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
   const docHref = (id: string) => (here.startsWith("/me/") ? `/me/notes/${id}` : `/links/${id}`);
   const suggesting = !!initial.id && mode === "suggest";
   const [title, setTitle] = useState(initial.title);
+  const [icon, setIcon] = useState<NoteIconValue>({ icon: initial.icon ?? null, image: initial.iconImage ?? null });
   const [description, setDescription] = useState(initial.description);
   const [body, setBody] = useState(initial.body);
   const [tags, setTags] = useState<string[]>(initial.tags);
@@ -162,6 +165,7 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
           // The address stays the one of the new note's page: another address would draw another page and start the editor
           // anew in the middle of typing. The note now exists, shows up in the list next to the editor, and is found there.
           noteId.current = res.data;
+          if (iconRef.current.icon || iconRef.current.image) void setResourceIcon(res.data, iconRef.current);
         }
         // Only what is saved may leave the device: text typed meanwhile stays kept until the next save.
         if (JSON.stringify([now.current.title, now.current.description, now.current.body, now.current.tags]) === snapshot) draftRef.current.clear();
@@ -180,6 +184,13 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
       sending.current = false;
       if (again.current) { again.current = false; void save(); }
     }
+  };
+  // The icon is not part of the text: it is kept at once (a new note keeps it with its first save).
+  const iconRef = useRef(icon);
+  const chooseIcon = (next: NoteIconValue) => {
+    setIcon(next);
+    iconRef.current = next;
+    if (noteId.current) void setResourceIcon(noteId.current, next);
   };
   const saveRef = useRef(save);
   useEffect(() => { saveRef.current = save; });
@@ -252,11 +263,17 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <DraftNotice draft={draft} />
-      <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} readOnly={readOnly} aria-label={t("noteTitle")}
-        placeholder={titleFrom("", body, t("titlePlaceholder"))}
-        className="m-0 min-h-12 w-full border-0 border-b-2 border-line-strong bg-transparent px-0 pb-2 text-[28px] font-bold leading-tight tracking-tight text-ink placeholder:text-muted focus:border-ink focus:outline-none" />
+      {/* One row: icon, title, and what the page puts at its end (sharing, "⋯"). The content gets the room. */}
+      <div className="flex items-center gap-2.5">
+        {!suggesting && <IconPicker value={icon} onChange={chooseIcon} disabled={readOnly} />}
+        <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} readOnly={readOnly} aria-label={t("noteTitle")}
+          placeholder={titleFrom("", body, t("titlePlaceholder"))}
+          className="m-0 h-10 w-full min-w-0 flex-1 border-0 border-b border-transparent bg-transparent px-0 text-[22px] font-bold leading-tight tracking-tight text-ink placeholder:text-muted hover:border-line focus:border-ink focus:outline-none" />
+        {autosaving && shown !== "idle" && <span aria-live="polite" className={`flex-none text-xs ${shown === "failed" ? "font-bold text-red" : "text-muted"}`}>{shown === "offline" ? t("offline") : t(`autosave.${shown}`)}</span>}
+        {actions && <div className="flex flex-none items-center gap-1">{actions}</div>}
+      </div>
 
       <div className="flex flex-col gap-2">
         <Toolbar label={t("toolbar")} moreLabel={t("moreTools")} backLabel={t("back")} tools={view === "list" || readOnly ? [] : [
@@ -272,9 +289,10 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
           { key: "code", label: t("code"), icon: <IconCode />, run: () => api.current?.wrap("`", "`", "code") },
           { key: "formula", label: t("formula"), icon: <IconFormula />, run: () => api.current?.block("$$\n", FORMULA, "\n$$") },
         ]} side={
-          <div role="radiogroup" aria-label={t("viewLabel")} className={segments}>
+          <div role="radiogroup" aria-label={t("viewLabel")} className="inline-flex border border-line">
             {([["live", t("viewLive"), <IconEye key="i" size={18} />], ["source", t("viewSource"), <IconMarkdown key="i" />], ["list", t("viewList"), <IconChecklist key="i" />]] as const).map(([v, name, icon]) => (
-              <button key={v} type="button" role="radio" aria-checked={view === v} aria-label={name} title={name} onClick={() => choose(v)} className={`${segment(view === v)} w-10 px-0`}>
+              <button key={v} type="button" role="radio" aria-checked={view === v} aria-label={name} title={name} onClick={() => choose(v)}
+                className={`inline-flex h-8 w-8 items-center justify-center border-0 pointer-coarse:h-10 pointer-coarse:w-10 ${view === v ? "bg-ink text-on-ink" : "bg-transparent text-ink hover:bg-chip"}`}>
                 {icon}
               </button>
             ))}
@@ -297,13 +315,11 @@ export function NoteEditor({ initial, ideas, mode = "edit", groupId = null, lock
               onClose={() => setConverting(null)} />
           </div>
         )}
-        <span className="flex flex-wrap justify-between gap-2 text-xs text-muted" aria-live="polite">
-          {view !== "list" && <span>{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>}
-          {autosaving && shown !== "idle" && <span className={shown === "failed" ? "font-bold text-red" : ""}>{shown === "offline" ? t("offline") : t(`autosave.${shown}`)}</span>}
-        </span>
+        {/* The length only matters near the limit. */}
+        {view !== "list" && body.length > MAX * 0.9 && <span className="text-xs font-bold text-muted" aria-live="polite">{body.length.toLocaleString("de-DE")} / {MAX.toLocaleString("de-DE")}</span>}
       </div>
 
-      <Optional label={t("details")}>
+      <Optional quiet label={t("detailsShort")}>
         <label className={field.label}>{tl("descriptionLabel")}
           <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} maxLength={1000} readOnly={readOnly} className={field.textarea} />
         </label>

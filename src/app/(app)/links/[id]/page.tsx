@@ -25,6 +25,9 @@ import { RestoreResource } from "@/components/links/RestoreResource";
 import { WhyNot } from "@/components/WhyNot";
 import { BackLink, Notice, Page } from "@/components/ui/Page";
 import { CopyField } from "@/components/ui/Copy";
+import { Popover } from "@/components/ui/Popover";
+import { NoteIcon } from "@/components/ui/NoteIcon";
+import { IconMore } from "@/components/ui/Icons";
 import { lightSvg } from "@/lib/drawio";
 
 export async function generateMetadata({ params }: PageProps<"/links/[id]">) {
@@ -35,6 +38,7 @@ export async function generateMetadata({ params }: PageProps<"/links/[id]">) {
 }
 
 type Meta = {
+  icon: string | null; icon_image: string | null;
   visibility: string; edit_mode: string; allow_download: boolean; license: string | null; link_token: string | null; version_no: number;
   trashed_at: string | null; copied_from: string | null; copied_title: string | null; level: number; lock: { holder: string; mine: boolean } | null;
 };
@@ -78,7 +82,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
     const [r] = await tx<ResourceRow[]>`select ${resourceColumns(tx, me)} from ${resourceFrom(tx)} where r.id = ${id}`;
     if (!r) return null;
     const [meta] = await tx<Meta[]>`
-      select r2.visibility, r2.edit_mode, r2.allow_download, r2.license, r2.link_token, r2.version_no, r2.trashed_at, r2.copied_from, orig.title as copied_title,
+      select r2.icon, r2.icon_image, r2.visibility, r2.edit_mode, r2.allow_download, r2.license, r2.link_token, r2.version_no, r2.trashed_at, r2.copied_from, orig.title as copied_title,
              app.resource_level(r2.id) as level, app.resource_lock_status(r2.id) as lock
       from public.resources r2 left join public.resources orig on orig.id = r2.copied_from where r2.id = ${id}`;
     const body = r.origin === "note" || r.origin === "diagram" ? (await tx<{ body_md: string | null }[]>`select body_md from public.resources where id = ${id}`)[0]?.body_md ?? "" : "";
@@ -130,8 +134,48 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
   if (isDiagram && editing) return <DiagramEditor id={id} title={r.title} svg={data.body} base={base.replace(/\/[^/]+$/, "")} back={typeof sp.back === "string" && /^\/(?!\/)/.test(sp.back) ? sp.back : undefined} />;
   const picture = isDiagram ? `data:image/svg+xml;base64,${Buffer.from(lightSvg(data.body)).toString("base64")}` : null;
   const home = SECTION[r.origin] ?? "/me/uploads";
+  // Writing a note: one row with icon, title, sharing and a "⋯" with everything else, so the note dominates the pane.
+  const compact = isNote && (writing || suggesting);
+  const metaLine = (
+    <span className="flex flex-wrap items-center gap-2 text-sm">
+      <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={28} />
+      <Link href={`/profile/${r.owner_id}`} className="inline-flex min-h-7 items-center font-bold text-ink no-underline">{r.owner_name}</Link>
+      {r.group_name && <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink underline">{t("inGroupName", { name: r.group_name })}</Link>}
+      <span className="text-muted">{[dateLong(r.created_at, locale),
+        isNote || isDiagram ? td("page.version", { n: meta.version_no }) : null,
+        meta.license && meta.license !== "all_rights" ? td("license.shown", { name: td(`license.${meta.license}` as "license.cc_by") }) : null,
+        meta.visibility === "me" ? td("page.private") : null,
+        meta.visibility === "link" && level < 4 ? td("page.viaLink") : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
+      {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink underline">· {td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
+    </span>
+  );
+  const share = (icon: boolean) => session && !meta.trashed_at && (
+    <ShareMenu type="resource" id={id} title={r.title} icon={icon} className={icon ? "inline-flex h-9 w-9 items-center justify-center border-0 bg-transparent text-ink hover:bg-chip" : btn.secondarySm}
+      external={meta.visibility === "public" ? { url: `${origin}/links/${id}`, text: r.title } : undefined}
+      access={level >= 4 && !editing && !suggesting ? (
+        <ShareAccess bare id={id} origin={r.origin} visibility={meta.visibility} editMode={meta.edit_mode} allowDownload={meta.allow_download} license={meta.license}
+          linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
+      ) : undefined} />
+  );
+  const noteActions = compact ? (
+    <>
+      {share(true)}
+      <Popover icon align="right" ariaLabel={tk("noteInfo")} label={<IconMore />} className="[&>summary]:border-transparent [&>summary]:bg-transparent">
+        <div className="flex flex-col gap-3 text-sm">
+          {metaLine}
+          <span className="flex items-center gap-3 border-t border-line pt-3">
+            <VoteButtons id={r.id} score={r.score} mine={r.my_vote} canVote={!!me} />
+            <span className="ml-auto flex items-center gap-3">
+              {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
+              {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} home={home} />}
+            </span>
+          </span>
+        </div>
+      </Popover>
+    </>
+  ) : undefined;
   return (
-    <Page width="narrow">
+    <Page width="narrow" dense={compact}>
       {!embedded && <BackLink href={home} label={tm(isNote ? "filters.notes" : isDiagram ? "filters.diagrams" : "filters.uploads")} />}
       {meta.trashed_at && level >= 4 && <RestoreResource id={id} />}
       {isLink && <PreviewImage src={r.preview.image} label={t(`kindShort.${r.kind}` as "kindShort.page")} sub={host} ratio="21 / 9" />}
@@ -141,28 +185,11 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           {isLink && <span className="ml-auto"><TrustBadge trust={r.safety} /></span>}
         </div>
       )}
-      {!writing && !suggesting && <h1 className="display m-0 break-words">{r.title}</h1>}
-      <span className="flex flex-wrap items-center gap-2 text-sm">
-        <Avatar name={r.owner_name} seed={r.owner_seed} path={r.owner_path} size={28} />
-        <Link href={`/profile/${r.owner_id}`} className="inline-flex min-h-7 items-center font-bold text-ink no-underline">{r.owner_name}</Link>
-        {r.group_name && <Link href={`/groups/${r.group_slug}?tab=links`} className="text-ink underline">{t("inGroupName", { name: r.group_name })}</Link>}
-        <span className="text-muted">{[dateLong(r.created_at, locale),
-          isNote || isDiagram ? td("page.version", { n: meta.version_no }) : null,
-          meta.license && meta.license !== "all_rights" ? td("license.shown", { name: td(`license.${meta.license}` as "license.cc_by") }) : null,
-          meta.visibility === "me" ? td("page.private") : null,
-          meta.visibility === "link" && level < 4 ? td("page.viaLink") : null].filter(Boolean).map((x) => ` · ${x}`).join("")}</span>
-        {meta.copied_from && <Link href={`/links/${meta.copied_from}`} className="text-ink underline">· {td("page.copyOf", { title: meta.copied_title ?? "…" })}</Link>}
-      </span>
+      {!writing && !suggesting && <h1 className="display m-0 break-words">{isNote && (meta.icon || meta.icon_image) && <span className="mr-3 inline-flex align-middle"><NoteIcon icon={meta.icon} image={meta.icon_image} size={44} /></span>}{r.title}</h1>}
+      {!compact && metaLine}
       {r.description && !writing && !suggesting && <p className="m-0 whitespace-pre-line text-lg">{r.description}</p>}
-      <div className="flex flex-wrap items-center gap-2">
-        {session && !meta.trashed_at && (
-          <ShareMenu type="resource" id={id} title={r.title} className={btn.secondarySm}
-            external={meta.visibility === "public" ? { url: `${origin}/links/${id}`, text: r.title } : undefined}
-            access={level >= 4 && !editing && !suggesting ? (
-              <ShareAccess bare id={id} origin={r.origin} visibility={meta.visibility} editMode={meta.edit_mode} allowDownload={meta.allow_download} license={meta.license}
-                linkUrl={linkUrl} grants={data.grants} myGroups={data.myGroups} hasGroup={!!r.group_id} groupId={r.group_id} transferTo={data.transfer?.to_name ?? null} />
-            ) : undefined} />
-        )}
+      {compact ? (meta.lock && !meta.lock.mine && <span className="text-sm font-bold text-red">{td("page.locked")}</span>) : <div className="flex flex-wrap items-center gap-2">
+        {share(false)}
         {isDiagram && !editing && !meta.trashed_at && level >= 3 && <Link href={`${base}?edit=1`} className={btn.secondarySm}>{tk("edit")}</Link>}
         {isNote && !suggesting && !meta.trashed_at && level === 2 && <Link href={`${base}?suggest=1`} className={btn.secondarySm}>{td("page.suggest")}</Link>}
         {meta.lock && !meta.lock.mine && <span className="text-sm font-bold text-red">{td("page.locked")}</span>}
@@ -172,7 +199,7 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
           {me && r.owner_id !== me && <ReportButton type="resource" id={r.id} className={`${btn.linkMuted} text-sm`} />}
           {level >= 4 && !meta.trashed_at && <DeleteLink id={r.id} groupSlug={r.group_slug} home={home} />}
         </span>
-      </div>
+      </div>}
       {r.tags.length > 0 && !writing && !suggesting && <div className="flex flex-wrap gap-2">{r.tags.map((x) => <Link key={x} href={`/community?tag=${x}`} className={`${tag} text-ink no-underline`}>#{x}</Link>)}</div>}
       {sp.suggested === "1" && <Notice tone="status">{td("page.suggestSent")}</Notice>}
 
@@ -229,8 +256,8 @@ export async function LinkView({ id, sp, base, embedded = false }: { id: string;
         </section>
       )}
       {(writing || suggesting) && (
-        <NoteEditor mode={writing ? "edit" : "suggest"} initial={{ id: r.id, title: r.title, description: r.description ?? "", body: data.body, tags: r.tags }} ideas={data.ideas}
-          lock={writing && (meta.visibility !== "me" || data.grants.length > 0 || r.owner_id !== me || !!r.group_id || meta.edit_mode !== "me")} />
+        <NoteEditor mode={writing ? "edit" : "suggest"} initial={{ id: r.id, title: r.title, description: r.description ?? "", body: data.body, tags: r.tags, icon: meta.icon, iconImage: meta.icon_image }} ideas={data.ideas}
+          lock={writing && (meta.visibility !== "me" || data.grants.length > 0 || r.owner_id !== me || !!r.group_id || meta.edit_mode !== "me")} actions={noteActions} />
       )}
 
       {data.canCopy && !meta.trashed_at && <CopyButton id={id} groups={data.myGroups} linkKey={key} />}

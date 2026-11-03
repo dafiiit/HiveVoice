@@ -5,6 +5,8 @@ import { sectionRule, sectionTitle } from "./styles";
 import { TabRow } from "./TabRow";
 
 const frame = "px-4 pb-6 pt-4 md:px-10 md:pb-20 md:pt-10";
+// A page that is mostly one thing to work on (a note): little room above it, the content starts at once.
+const denseFrame = "px-4 pb-6 pt-3 md:px-8 md:pb-20 md:pt-4";
 // Next to a list (Split) the pane is already the limit: there "narrow" fills it (globals.css, .page-narrow).
 const narrow = "page-narrow max-w-[720px]";
 
@@ -12,7 +14,7 @@ const narrow = "page-narrow max-w-[720px]";
  * The frame of every page. Two widths only: "narrow" (720 px, the whole pane next to a list) for text and forms, "wide" for lists and grids.
  * With an `aside`, the content gets a column on the right on wide screens.
  */
-export function Page({ width = "wide", aside, children, className = "" }: { width?: "narrow" | "wide"; aside?: ReactNode; children: ReactNode; className?: string }) {
+export function Page({ width = "wide", aside, dense = false, children, className = "" }: { width?: "narrow" | "wide"; aside?: ReactNode; dense?: boolean; children: ReactNode; className?: string }) {
   // Every page is a container: grids inside follow the room the page has (a pane next to a list is narrower than the screen).
   if (aside) {
     return (
@@ -24,7 +26,7 @@ export function Page({ width = "wide", aside, children, className = "" }: { widt
       </div>
     );
   }
-  return <div className="@container"><div className={`flex min-w-0 flex-col gap-5 md:gap-8 ${frame} ${width === "narrow" ? narrow : ""} ${className}`}>{children}</div></div>;
+  return <div className="@container"><div className={`flex min-w-0 flex-col ${dense ? `gap-3 ${denseFrame}` : `gap-5 md:gap-8 ${frame}`} ${width === "narrow" ? narrow : ""} ${className}`}>{children}</div></div>;
 }
 
 /** "← Area" above a detail page: one link back to the area the thing belongs to. */
@@ -81,9 +83,9 @@ export function Tabs({ label, items, more = [], moreLabel = "Mehr" }: { label: s
 }
 
 /** The row above a list: filter, sorting, a create button, and how many there are on the right. Always in this order. */
-export function Toolbar({ children, count }: { children?: ReactNode; count?: ReactNode }) {
+export function Toolbar({ children, count, className = "" }: { children?: ReactNode; count?: ReactNode; className?: string }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm">
+    <div className={`flex flex-wrap items-center gap-2 text-sm ${className}`}>
       {children}
       {count != null && <span className="ml-auto text-muted">{count}</span>}
     </div>

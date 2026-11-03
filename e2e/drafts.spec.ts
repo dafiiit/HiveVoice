@@ -58,6 +58,7 @@ test.describe("nothing typed is lost", () => {
       // Leaving the page without saving: the text is there, and both pauses went into the note's first version.
       await page.goto(view);
       await expect(page.getByText("Dritte Fassung, ohne auf Speichern zu drücken")).toBeVisible();
+      await page.getByRole("button", { name: "Mehr zur Notiz" }).click();
       await expect(page.getByText("Version 1", { exact: false })).toBeVisible();
     } finally {
       await exec(`delete from public.resources where title = '${marker}'`);

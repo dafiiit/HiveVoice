@@ -127,6 +127,21 @@ select {
 /* A narrow page inside such a pane uses the room it gets when the sidebar is folded (no 720 px cap there). */
 .pane-titles .page-narrow { max-width: 1400px; }
 
+/* The list in the middle (ListColumn in src/components/shell/Split.tsx) on wide screens: as wide as dragged (--list-w) or
+   340/380 px, never more than half the window. Folded together with the sidebar (its button sets data-fold on the shell) it is a
+   strip of icons as wide as the folded sidebar; the pointer over it, or the keyboard in it, opens it like the sidebar: after a
+   short wait, moving the page aside, and it closes again a moment after the pointer left. Plain CSS: hover and focus decide. */
+@media (min-width: 768px) {
+  [data-list-col] { --list-open: min(var(--list-w, 340px), 50vw); width: var(--list-open); transition: width 200ms ease-out; }
+  [data-shell][data-fold="folded"] [data-list-col] { width: 64px; transition-delay: 250ms; }
+  [data-shell][data-fold="folded"] [data-list-col]:has(:focus-visible) { width: var(--list-open); transition-delay: 0ms; }
+  [data-shell][data-resizing] [data-list-col] { transition: none; }
+}
+@media (min-width: 1024px) { [data-list-col] { --list-open: min(var(--list-w, 380px), 50vw); } }
+@media (min-width: 768px) and (hover: hover) {
+  [data-shell][data-fold="folded"] [data-list-col]:hover { width: var(--list-open); transition-delay: 150ms; }
+}
+
 .tabular {
   font-variant-numeric: tabular-nums;
 }

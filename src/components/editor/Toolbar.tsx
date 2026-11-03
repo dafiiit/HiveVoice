@@ -12,8 +12,10 @@ export type Tool = {
   run?: () => void; panel?: (close: () => void) => ReactNode;
 };
 
-const W = 36; // every tool is a 36 px square
-const GAP = 4;
+const W = 32; // every tool is a 32 px square without a frame (40 px on touch screens, measured)
+const GAP = 2;
+/** The same look for a tool that opens a menu (a Popover's summary). */
+const POPOVER_TOOL = "flex-none [&>summary]:h-8 [&>summary]:w-8 [&>summary]:border-transparent [&>summary]:bg-transparent [&>summary:hover]:bg-chip pointer-coarse:[&>summary]:h-10 pointer-coarse:[&>summary]:w-10";
 
 /**
  * The tools in one row, like a word processor, with `side` (the views) at its right end. What does not fit moves, from the
@@ -31,7 +33,8 @@ export function Toolbar({ label, tools, side, moreLabel, backLabel }: { label: s
     if (!el) return;
     const measure = () => {
       const free = el.clientWidth - (sideRef.current?.offsetWidth ?? 0) - 2 * GAP;
-      const n = Math.floor((free + GAP) / (W + GAP));
+      const w = (el.firstElementChild as HTMLElement | null)?.offsetWidth || W;
+      const n = Math.floor((free + GAP) / (w + GAP));
       setFit(n >= count ? count : Math.max(0, n - 1));
     };
     measure();
@@ -43,7 +46,7 @@ export function Toolbar({ label, tools, side, moreLabel, backLabel }: { label: s
   const shown = tools.slice(0, fit);
   const rest = tools.slice(fit);
   return (
-    <div ref={row} role="toolbar" aria-label={label} className="flex min-w-0 items-center gap-1">
+    <div ref={row} role="toolbar" aria-label={label} className="flex min-w-0 items-center gap-0.5">
       {shown.map((tool) => <ToolButton key={tool.key} tool={tool} />)}
       {rest.length > 0 && <More tools={rest} label={moreLabel} backLabel={backLabel} />}
       <div ref={sideRef} className="ml-auto flex flex-none items-center">{side}</div>
@@ -66,14 +69,14 @@ function ToolButton({ tool }: { tool: Tool }) {
   const [open, setOpen] = useState(false);
   if (tool.panel) {
     return (
-      <Popover icon label={tool.icon} ariaLabel={tool.label} open={open} onOpenChange={setOpen} className="flex-none">
+      <Popover icon label={tool.icon} ariaLabel={tool.label} open={open} onOpenChange={setOpen} className={POPOVER_TOOL}>
         {tool.panel(() => setOpen(false))}
       </Popover>
     );
   }
   return (
     <button type="button" onClick={tool.run} disabled={tool.disabled} aria-label={tool.label} title={tip(tool, mac)}
-      className="inline-flex h-9 w-9 flex-none items-center justify-center border border-line bg-surface text-ink hover:border-ink disabled:opacity-60">
+      className="inline-flex h-8 w-8 flex-none items-center justify-center border-0 bg-transparent text-ink hover:bg-chip disabled:opacity-60 pointer-coarse:h-10 pointer-coarse:w-10">
       {tool.icon}
     </button>
   );
@@ -87,7 +90,7 @@ function More({ tools, label, backLabel }: { tools: Tool[]; label: string; backL
   const toggle = (now: boolean) => { setOpen(now); if (!now) setInner(null); };
   const close = () => toggle(false);
   return (
-    <Popover icon label={<IconMore />} ariaLabel={label} align="right" open={open} onOpenChange={toggle} className="flex-none">
+    <Popover icon label={<IconMore />} ariaLabel={label} align="right" open={open} onOpenChange={toggle} className={POPOVER_TOOL}>
       {inner?.panel ? (
         <div className="flex flex-col gap-2">
           <button type="button" onClick={() => setInner(null)} className="inline-flex h-9 items-center gap-2 self-start border-0 bg-transparent px-0 text-sm font-bold text-ink">

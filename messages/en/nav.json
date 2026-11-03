@@ -41,6 +41,23 @@
     "partOf": "Part of"
   },
   "searchPlaceholderShort": "Search …",
+  "searchScoped": "Search {what}",
+  "searchEverywhere": "Search everywhere: “{q}”",
+  "scope": {
+    "people": "people",
+    "groups": "groups",
+    "initiatives": "initiatives",
+    "offers": "offers",
+    "needs": "requests",
+    "posts": "posts",
+    "chats": "chats",
+    "requests": "contact requests",
+    "listings": "listings",
+    "notes": "notes",
+    "diagrams": "diagrams",
+    "uploads": "uploads",
+    "mine": "my things"
+  },
   "anliegen": "Matters",
   "community": "Community",
   "friends": "Friends",
@@ -55,8 +72,8 @@
     "signOut": "Sign out",
     "admin": "Admin view"
   },
-  "fold": "Fold the sidebar",
-  "unfold": "Unfold the sidebar",
+  "fold": "Fold the sidebar and the list",
+  "unfold": "Unfold the sidebar and the list",
   "notifications": "Notifications",
   "settings": "Settings"
 }

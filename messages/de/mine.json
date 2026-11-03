@@ -84,5 +84,7 @@
   "new": "Neu",
   "newDiagram": "Diagramm",
   "myDiagrams": "Meine Diagramme",
-  "emptyDiagrams": "Noch kein Diagramm."
+  "emptyDiagrams": "Noch kein Diagramm.",
+  "filterNotes": "Alle Notizen",
+  "filterTasks": "Notizen mit Aufgaben"
 }

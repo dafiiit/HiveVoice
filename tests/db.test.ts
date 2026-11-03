@@ -1506,6 +1506,28 @@ describe("notes and lists", () => {
     const [{ id: other }] = await as(tx, a, () => tx<{ id: string }[]>`insert into public.todo_lists (title) values ('Privat') returning id`);
     expect((await as(tx, c, () => tx<{ n: string | null }[]>`select app.my_list_note(${other}) as n`))[0].n).toBeNull();
   }));
+
+  it("a note's icon is set and cleared by whoever may edit it, one short emoji, no new version", () => scenario(async (tx) => {
+    const a = await person(tx, "Ada"), b = await person(tx, "Ben");
+    const [{ id }] = await as(tx, a, () => tx<{ id: string }[]>`select app.save_note(${tx.json({ title: "Garten", body: "Beete" })}) as id`);
+    const icon = async () => (await as(tx, a, () => tx<{ icon: string | null; version_no: number }[]>`select icon, version_no from public.resources where id = ${id}`))[0];
+    const before = (await icon()).version_no;
+    await as(tx, a, () => tx`select app.set_resource_icon(${id}, '🌱')`);
+    expect(await icon()).toEqual({ icon: "🌱", version_no: before });
+    expect(await fails(tx, (sp) => as(sp, b, () => sp`select app.set_resource_icon(${id}, '🐞')`))).toMatch(/forbidden/);
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.set_resource_icon(${id}, '<b>x</b>')`))).toMatch(/invalid/);
+    await as(tx, a, () => tx`select app.set_resource_icon(${id}, '')`);
+    expect((await icon()).icon).toBeNull();
+    // A picture instead: only one from one's own folder, and it replaces the emoji (and the other way round).
+    const folder = authIds.get(a)!;
+    await as(tx, a, () => tx`select app.set_resource_icon(${id}, '🌱')`);
+    await as(tx, a, () => tx`select app.set_resource_icon_image(${id}, ${`${folder}/${"a".repeat(32)}.jpg`})`);
+    const pic = async () => (await as(tx, a, () => tx<{ icon: string | null; icon_image: string | null }[]>`select icon, icon_image from public.resources where id = ${id}`))[0];
+    expect(await pic()).toEqual({ icon: null, icon_image: `${folder}/${"a".repeat(32)}.jpg` });
+    expect(await fails(tx, (sp) => as(sp, a, () => sp`select app.set_resource_icon_image(${id}, ${`00000000-0000-0000-0000-000000000000/${"b".repeat(32)}.jpg`})`))).toMatch(/invalid/);
+    await as(tx, a, () => tx`select app.set_resource_icon(${id}, '🐞')`);
+    expect(await pic()).toEqual({ icon: "🐞", icon_image: null });
+  }));
 });
 
 describe("examples", () => {

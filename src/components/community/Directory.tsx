@@ -5,10 +5,11 @@ import { getSession } from "@/lib/session";
 import { initiativeCardColumns, initiativeCardFrom, myRegionIds, regionTree, type InitiativeCard as Card } from "@/lib/queries";
 import { getPlace } from "@/lib/place";
 import { Avatar } from "@/components/ui/Avatar";
+import { FOLDED_HIDE, FOLDED_ROW } from "@/components/shell/Split";
 import { IconCheck, IconPlus } from "@/components/ui/Icons";
 import { chip, tab } from "@/components/ui/styles";
 import { Toolbar, Notice } from "@/components/ui/Page";
-import { SearchField } from "@/components/ui/SearchField";
+import { SearchScope } from "@/components/shell/SearchScope";
 import { btn } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 import { AutoOpen } from "@/components/shell/AutoOpen";
@@ -47,6 +48,7 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const t = await getTranslations("explore");
   const tl = await getTranslations("levels");
+  const tnav = await getTranslations("nav.scope");
 
   const [filterPlace] = placeId ? await asViewer(null, (tx) => tx<{ id: string; name: string }[]>`select id, name from public.regions where id = ${placeId}`) : [];
   const data = await asViewer(viewer, async (tx) => {
@@ -131,9 +133,9 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
   const keep = (() => { const p = new URLSearchParams(href({}).split("?")[1] ?? ""); return p.size ? `?${p}` : ""; })();
   const row = (to: string, key: string, title: string, sub: string, avatar: { name: string; seed?: number; path?: string | null; group?: boolean }) => (
     <Link key={key} href={`${to}${keep}`} aria-current={key === selected ? "true" : undefined}
-      className={`flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline ${key === selected ? "bg-paper shadow-[inset_4px_0_0_var(--ink)]" : "hover:bg-paper"}`}>
+      title={title} className={`flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline ${FOLDED_ROW} ${key === selected ? "bg-paper shadow-[inset_4px_0_0_var(--ink)]" : "hover:bg-paper"}`}>
       <Avatar name={avatar.name} seed={avatar.seed} path={avatar.path} size={40} group={avatar.group} />
-      <span className="flex min-w-0 flex-col"><strong className="truncate">{title}</strong><span className="truncate text-sm text-muted">{sub}</span></span>
+      <span className={`flex min-w-0 flex-col ${FOLDED_HIDE}`}><strong className="truncate">{title}</strong><span className="truncate text-sm text-muted">{sub}</span></span>
     </Link>
   );
   const first = data.initiatives?.[0] ? `/community/groups/i/${data.initiatives[0].id}` : data.groups?.[0] ? `/community/groups/${data.groups[0].slug}` : data.people?.[0] ? `/community/people/${data.people[0].id}` : null;
@@ -141,24 +143,22 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
     : kind === "groups" ? { href: "/new/group", label: t("create.groups"), short: t("kinds.group") } : null;
   return (
     <>
-      <div className="flex items-center justify-between gap-2">
-        <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{title}</h1>
-        {invite && <InviteFriends origin={invite.origin} codesLeft={invite.codesLeft} />}
-        {create && <Link href={session ? create.href : `/login?next=${create.href}`} title={create.label} className={`${btn.primarySm} ml-auto`}><IconPlus size={14} /> {create.short}</Link>}
+      <div className="flex items-center justify-between gap-2 @max-[6rem]:flex-col">
+        <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only @max-[6rem]:sr-only">{title}</h1>
+        {invite && <span className={FOLDED_HIDE}><InviteFriends origin={invite.origin} codesLeft={invite.codesLeft} /></span>}
+        {create && <Link href={session ? create.href : `/login?next=${create.href}`} title={create.label} aria-label={create.label} className={`${btn.primarySm} ml-auto @max-[6rem]:ml-0 @max-[6rem]:w-10 @max-[6rem]:justify-center @max-[6rem]:px-0`}><IconPlus size={14} /> <span className={FOLDED_HIDE}>{create.short}</span></Link>}
       </div>
       {area === "groups" && (
         // An initiative is a group with a goal: one section, two views, as tabs like Angebote / Gesuche.
-        <div role="tablist" aria-label={t("what")} className="flex border-b border-line">
+        <div role="tablist" aria-label={t("what")} className={`flex border-b border-line ${FOLDED_HIDE}`}>
           {(["groups", "initiatives"] as const).map((k) => (
             <Link key={k} role="tab" aria-selected={kind === k} href={href({ kind: k, level: "all" })} className={tab(kind === k)}>{t(`kinds.${k}`)}</Link>
           ))}
         </div>
       )}
-      <Toolbar count={t(`count.${kind}`, { n: count })}>
-        <form action={`/community/${area}`} className="flex min-w-[200px] flex-1 gap-2" role="search">
-          {kind === "initiatives" && <input type="hidden" name="kind" value="initiatives" />}
-          <SearchField className="flex-1" name="q" defaultValue={q} label={t(area === "people" ? "searchPeople" : kind === "initiatives" ? "searchInitiatives" : "searchGroups")} placeholder={t(area === "people" ? "searchPeople" : kind === "initiatives" ? "searchInitiatives" : "searchGroups")} />
-        </form>
+      <Toolbar count={t(`count.${kind}`, { n: count })} className={FOLDED_HIDE}>
+        <SearchScope mode="query" action={`/community/${area}`} value={q} keep={Object.fromEntries(new URLSearchParams(href({ q: "" }).split("?")[1] ?? ""))}
+          what={tnav(area === "people" ? "people" : kind === "initiatives" ? "initiatives" : "groups")} />
         {(kind === "initiatives" || session) && (
           <Popover align="right" label={t("filter")} badge={(level !== "all" ? 1 : 0) + (mine ? 1 : 0)}>
             {kind === "initiatives" && (
@@ -184,10 +184,10 @@ export async function Directory({ sp, area, selected, title }: { sp: Record<stri
         {mine && <Link href={href({ mine: "" })} className={`${chip(true)} gap-1.5`} aria-label={t("removeFilter", { what: kind === "initiatives" ? t("canVote") : t("nearMe") })}>{kind === "initiatives" ? t("canVote") : t("nearMe")} <span aria-hidden="true">✕</span></Link>}
       </Toolbar>
 
-      {count === 0 && <Notice tone="hint" className="border-t border-line pt-6 text-base">{t("nothing")}</Notice>}
+      {count === 0 && <Notice tone="hint" className={`border-t border-line pt-6 text-base ${FOLDED_HIDE}`}>{t("nothing")}</Notice>}
 
       {/* Each row opens next to the list and keeps the filters. */}
-      <div className="-mx-4 flex flex-col">
+      <div className="-mx-4 flex flex-col @max-[6rem]:-mx-3">
         {!selected && first && <AutoOpen href={`${first}${keep}`} />}
         {(data.initiatives ?? []).map((it) => row(`/community/groups/i/${it.id}`, it.id, it.title, [it.region_name, t("supporters", { n: it.support_count })].filter(Boolean).join(" · "), { name: it.title, group: true }))}
         {(data.groups ?? []).map((g) => row(`/community/groups/${g.slug}`, g.slug, g.name, `${t("groupMeta", { n: g.member_count, place: g.region_name ?? "–" })}`, { name: g.name, group: true }))}

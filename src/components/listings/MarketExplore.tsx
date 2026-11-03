@@ -9,8 +9,9 @@ import { IconCheck } from "../ui/Icons";
 import { Popover } from "../ui/Popover";
 import { btn, chip, field, segment, segments } from "../ui/styles";
 import { Toolbar } from "../ui/Page";
+import { FOLDED_HIDE, FOLDED_ROW } from "../shell/Split";
 import { feedOrder } from "@/lib/order";
-import { SearchField } from "../ui/SearchField";
+import { SearchScope } from "../shell/SearchScope";
 import { ListingCardView } from "./ListingCardView";
 import { priceLabel } from "./price";
 import { MarketMap, type MapPoint } from "./MarketMap";
@@ -38,6 +39,7 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
   const tm = await getTranslations("explore.market");
   const tcat = await getTranslations("categories");
   const tc = await getTranslations("common");
+  const tnav = await getTranslations("nav.scope");
   const locale = await getLocale();
   const cat = isCategory(str("cat")) ? str("cat") as (typeof CATEGORIES)[number] : null;
   const q = str("q").trim();
@@ -126,12 +128,9 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
 
   return (
     <div className="flex flex-col gap-4">
-      <form action={path} className="flex gap-2">
-        {hidden.map(([k, v]) => v && <input key={k} type="hidden" name={k} value={v} />)}
-        <SearchField name="q" defaultValue={q} label={tm("search")} placeholder={tm("searchPlaceholder")} className="flex-1" />
-      </form>
+      <SearchScope mode="query" action={path} value={q} keep={Object.fromEntries(hidden.filter(([, v]) => v))} what={tnav(side === "offer" ? "offers" : "needs")} />
 
-      <Toolbar count={t("count.market", { n: data.total })}>
+      <Toolbar count={t("count.market", { n: data.total })} className={FOLDED_HIDE}>
         <Popover label={<>{tcat("category")} <span className="font-normal">{cat ? tcat(`names.${cat}`) : tcat("all")}</span></>}>
           <nav aria-label={tcat("label")} className="flex flex-col">
             {[null, ...CATEGORIES].map((c) => {
@@ -196,13 +195,13 @@ export async function MarketExplore({ sp, session, homeRegions, side, base: path
       </Toolbar>
 
       {layout === "rows" && (data.cards.length === 0
-        ? <p className="m-0 border-t border-line pt-6 text-muted">{t("nothing")}</p>
-        : <div className="-mx-4 flex flex-col border-t border-line">
+        ? <p className={`m-0 border-t border-line pt-6 text-muted ${FOLDED_HIDE}`}>{t("nothing")}</p>
+        : <div className="-mx-4 flex flex-col border-t border-line @max-[6rem]:-mx-3">
             {data.cards.map((c) => (
-              <Link key={c.id} href={`/community/listings/${c.id}${keep}`} aria-current={c.id === selected ? "true" : undefined}
-                className={`flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline ${c.id === selected ? "bg-paper shadow-[inset_4px_0_0_var(--ink)]" : "hover:bg-paper"}`}>
+              <Link key={c.id} href={`/community/listings/${c.id}${keep}`} aria-current={c.id === selected ? "true" : undefined} title={c.title}
+                className={`flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline ${FOLDED_ROW} ${c.id === selected ? "bg-paper shadow-[inset_4px_0_0_var(--ink)]" : "hover:bg-paper"}`}>
                 <Avatar name={c.owner_name} seed={c.owner_seed} path={c.owner_path} size={36} />
-                <span className="flex min-w-0 flex-col">
+                <span className={`flex min-w-0 flex-col ${FOLDED_HIDE}`}>
                   <strong className="truncate">{c.title}</strong>
                   <span className="truncate text-sm text-muted">{[c.owner_name, priceLabel(c, tc, locale), c.region_name].filter(Boolean).join(" · ")}</span>
                 </span>

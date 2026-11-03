@@ -28,7 +28,10 @@ test.describe("documents: who sees what", () => {
       const href = await page.getByRole("link", { name: new RegExp(marker) }).first().getAttribute("href");
       expect(href).toMatch(/^\/(links|me\/(notes|uploads))\/[0-9a-f-]{36}$/);
       await page.goto(href!);
+      // Writing a note, who wrote it and who sees it sit behind the "⋯" in the title row.
+      await page.getByRole("button", { name: "Mehr zur Notiz" }).click();
       await expect(page.getByText("Nur du siehst dieses Dokument.")).toBeVisible();
+      await page.getByRole("button", { name: "Mehr zur Notiz" }).click();
       // Who may read and edit lives in the share window, tab "Zugriff".
       await page.getByRole("button", { name: "Teilen", exact: true }).click();
       await page.getByRole("tab", { name: "Zugriff" }).click();
@@ -50,6 +53,7 @@ test.describe("documents: who sees what", () => {
 
       // Into the trash: closed for everybody else, restorable.
       await page.keyboard.press("Escape");
+      await page.getByRole("button", { name: "Mehr zur Notiz" }).click();
       await page.getByRole("button", { name: "In den Papierkorb" }).click();
       await page.getByRole("button", { name: "Ja", exact: true }).click();
       await expect(page).toHaveURL(/\/me\/notes$/, { timeout: 60_000 });

@@ -5,7 +5,7 @@ import { getSession } from "@/lib/session";
 import { getPlace } from "@/lib/place";
 import { MarketExplore } from "@/components/listings/MarketExplore";
 import { ListingDetail } from "@/components/listings/ListingDetail";
-import { BackToList, Split } from "@/components/shell/Split";
+import { BackToList, FOLDED_HIDE, Split } from "@/components/shell/Split";
 import { IconPlus } from "@/components/ui/Icons";
 import { btn, tab } from "@/components/ui/styles";
 
@@ -30,15 +30,15 @@ export async function ListingsSection({ sp, id }: { sp: SP; id?: string }) {
   return (
     <Split open={!!id || mapOpen}
       list={
-        <div className="flex flex-col gap-3 px-4 pt-4">
-          <div className="flex items-center justify-end gap-2 md:justify-between">
-            <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only">{t("communityTitle")}</h1>
+        <div className="flex flex-col gap-3 px-4 pt-4 @max-[6rem]:px-3">
+          <div className="flex items-center justify-end gap-2 md:justify-between @max-[6rem]:justify-center">
+            <h1 className="m-0 text-[22px] font-bold leading-tight max-md:sr-only @max-[6rem]:sr-only">{t("communityTitle")}</h1>
             <span className="flex items-center gap-2">
             <Link href={mapHref} className={`${btn.secondarySm} md:hidden`}>{t("map")}</Link>
-            <Link href={session ? "/me/listings/new" : "/login?next=/me/listings/new"} className={btn.primarySm} title={t("create")}><IconPlus size={14} /> {t("create")}</Link>
+            <Link href={session ? "/me/listings/new" : "/login?next=/me/listings/new"} className={`${btn.primarySm} @max-[6rem]:w-10 @max-[6rem]:justify-center @max-[6rem]:px-0`} title={t("create")} aria-label={t("create")}><IconPlus size={14} /> <span className={FOLDED_HIDE}>{t("create")}</span></Link>
             </span>
           </div>
-          <div role="tablist" aria-label={t("view")} className="flex border-b border-line">
+          <div role="tablist" aria-label={t("view")} className={`flex border-b border-line ${FOLDED_HIDE}`}>
             {(["offers", "needs"] as const).map((k) => (
               <Link key={k} role="tab" aria-selected={(side === "need") === (k === "needs")} href={tabHref(k)} className={tab((side === "need") === (k === "needs"))}>{t(`tabs.${k}`)}</Link>
             ))}

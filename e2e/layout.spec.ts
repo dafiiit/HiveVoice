@@ -106,6 +106,37 @@ test.describe("the layout like Teams", () => {
     await expect.poll(widths).toEqual({ page: 64, bar: 64, main: 64 });
   });
 
+  test("the sidebar's button folds the list in the middle to icons too; the pointer opens it to the open width", async ({ page, context, baseURL }, info) => {
+    test.skip(info.project.name === "mobile", "the list sits next to the item on wide screens only");
+    await login(page);
+    await context.addCookies([{ name: "hv_sidebar", value: "open", url: baseURL! }]);
+    await page.goto("/me/notes");
+    const column = page.locator("[data-list-col]");
+    const width = () => column.evaluate((el) => Math.round(el.getBoundingClientRect().width));
+    await expect.poll(width).toBe(380);
+    await page.locator("[data-sidebar]").getByRole("button", { name: /einklappen/ }).click();
+    await page.mouse.move(1200, 500);
+    await expect.poll(width).toBe(64);
+    // Folded: the "+" and both filters are icons under each other, each note an icon (the search is the one at the top).
+    const create = (await column.getByRole("link", { name: "Notiz", exact: true }).boundingBox())!;
+    const tasks = column.getByRole("link", { name: "Notizen mit Aufgaben" });
+    await expect(tasks).toBeVisible();
+    expect(create.width).toBeLessThanOrEqual(40);
+    expect(create.y).toBeLessThan((await tasks.boundingBox())!.y);
+    await expect(column.getByRole("search")).toHaveCount(0);
+    // The pointer over it opens it to the open width, and it folds again once the pointer left.
+    const box = (await column.boundingBox())!;
+    await page.mouse.move(box.x + 30, box.y + 400);
+    await expect.poll(width).toBe(380);
+    await page.mouse.move(1300, 500);
+    await expect.poll(width).toBe(64);
+    // The choice is kept, and the button opens both again.
+    await page.reload();
+    await expect.poll(width).toBe(64);
+    await page.locator("[data-sidebar]").getByRole("button", { name: /ausklappen/ }).click();
+    await expect.poll(width).toBe(380);
+  });
+
   test("Freunde fills the screen: the list scrolls, the page does not", async ({ page }, info) => {
     test.skip(info.project.name === "mobile", "wide screens");
     await login(page);
@@ -184,16 +215,17 @@ test.describe("on a phone", () => {
     expect((await field.boundingBox())!.y + (await field.boundingBox())!.height).toBeLessThanOrEqual(bottom.y);
   });
 
-  test("search and order sit above the list, rows are all as tall", async ({ page }, info) => {
+  test("the search at the top searches the list, rows are all as tall", async ({ page }, info) => {
     test.skip(info.project.name !== "mobile", "phones only");
     await login(page);
     await page.goto("/friends");
     const list = page.getByRole("region", { name: "Chats" });
-    const search = list.getByRole("searchbox", { name: "Durchsuchen" });
+    // One search field: the one at the top says what it searches here; the list has none of its own.
+    const search = page.locator("header").first().getByRole("combobox", { name: "Chats suchen" });
+    await expect(search).toHaveAttribute("placeholder", "Chats suchen …");
+    await expect(list.getByRole("search")).toHaveCount(0);
     // The order (newest first or suggested) is one setting in the settings, not a menu on every list.
     await expect(list.locator("summary", { hasText: "Chronologisch" })).toHaveCount(0);
-    const sb = (await search.boundingBox())!;
-    expect(sb.width, "the search uses the whole width of the list").toBeGreaterThan(250);
 
     const rows = list.locator("a[data-search]");
     const heights = await rows.evaluateAll((els) => els.slice(0, 4).map((e) => Math.round(e.getBoundingClientRect().height)));
@@ -202,8 +234,11 @@ test.describe("on a phone", () => {
     await search.fill("zzzz-nichts");
     await expect(rows.first()).toBeHidden();
     await expect(list.getByText("Nichts gefunden.")).toBeVisible();
-    await search.fill("");
+    // "Überall suchen" leaves the list: the list is whole again, the field searches everything.
+    await page.getByRole("option", { name: /Überall suchen/ }).click();
     await expect(rows.first()).toBeVisible();
+    await expect(search).toHaveCount(0);
+    await expect(page.locator("header").first().getByRole("combobox", { name: "Suche" })).toHaveValue("zzzz-nichts");
 
 
   });

@@ -6,14 +6,16 @@ import { LIST_COOKIE, LIST_MAX, LIST_MIN, clampList as clamp } from "./listWidth
 /**
  * The line between the list and the opened item: drag it (or use the arrow keys) to make the list wider or narrower,
  * a double click goes back to the standard width. The width is a CSS variable on the shell, kept in a cookie
- * so the next page is drawn at once in the same width (all areas share it).
+ * so the next page is drawn at once in the same width (all areas share it). It is the width of the open list only:
+ * folded, the list stays a strip of icons and opens to this width while the pointer is over it.
+ * Sits inside the list column (ListColumn), at its right edge, so dragging keeps the pointer over a folded list.
  */
 export function ListResizer() {
   const t = useTranslations("connect");
   const handle = useRef<HTMLDivElement>(null);
   const [now, setNow] = useState<number | null>(null);
 
-  const list = () => handle.current?.parentElement?.previousElementSibling as HTMLElement | null;
+  const list = () => handle.current?.closest<HTMLElement>("[data-list-col]") ?? null;
   const shell = () => handle.current?.closest<HTMLElement>("[data-shell]") ?? null;
   const apply = (w: number | null) => {
     const root = shell();
@@ -36,6 +38,8 @@ export function ListResizer() {
     const startW = current();
     const root = shell();
     e.currentTarget.setPointerCapture(e.pointerId);
+    // No easing while dragging: the list follows the pointer.
+    if (root) root.dataset.resizing = "";
     document.body.style.cursor = "col-resize";
     document.body.style.userSelect = "none";
     let w = startW;
@@ -49,6 +53,7 @@ export function ListResizer() {
       window.removeEventListener("pointercancel", up);
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
+      if (root) delete root.dataset.resizing;
       apply(w);
     };
     window.addEventListener("pointermove", move);
@@ -66,7 +71,7 @@ export function ListResizer() {
   };
 
   return (
-    <div className="relative z-20 w-0 flex-none max-md:hidden">
+    <div className="absolute inset-y-0 right-0 z-20 w-0 max-md:hidden">
       <div ref={handle} role="separator" aria-orientation="vertical" tabIndex={0} aria-label={t("listWidth")} title={t("listWidthHint")}
         aria-valuemin={LIST_MIN} aria-valuemax={LIST_MAX} aria-valuenow={now ?? undefined}
         onPointerDown={down} onKeyDown={key} onDoubleClick={() => apply(null)}

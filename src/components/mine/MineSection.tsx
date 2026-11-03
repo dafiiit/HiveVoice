@@ -3,9 +3,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { asViewer } from "@/lib/db";
 import { requireSession } from "@/lib/session";
 import { relTime } from "@/lib/format";
-import { BackToList, ListPane, Pick, Split, type ListRow } from "@/components/shell/Split";
+import { BackToList, FOLDED_HIDE, FOLDED_SQUARE, ListPane, Pick, Split, type ListRow } from "@/components/shell/Split";
 import Link from "next/link";
-import { IconPlus } from "@/components/ui/Icons";
+import { IconChecklist, IconDiagram, IconFlag, IconHands, IconNote, IconPlus, IconUpload } from "@/components/ui/Icons";
 import { btn, chip } from "@/components/ui/styles";
 import { Popover } from "@/components/ui/Popover";
 import { NEW_ITEMS } from "@/components/new/items";
@@ -15,7 +15,10 @@ export type MineKind = "all" | "notes" | "diagrams" | "uploads" | "projects" | "
 // Where each kind of my things lives inside Ich.
 const BASE: Record<Exclude<MineKind, "all">, string> = { notes: "/me/notes", diagrams: "/me/diagrams", uploads: "/me/uploads", projects: "/me/initiatives", listings: "/me/listings" };
 
-type Item = { kind: Exclude<MineKind, "all">; id: string; title: string; label: string; vis: string; at: string; extra?: string; tasks?: number };
+type Item = { kind: Exclude<MineKind, "all">; id: string; title: string; label: string; vis: string; at: string; extra?: string; tasks?: number; icon?: string | null; iconImage?: string | null };
+
+// The standard icon of each kind, where a row has no emoji of its own (also in the list folded to icons).
+const ICONS = { notes: IconNote, diagrams: IconDiagram, uploads: IconUpload, projects: IconFlag, listings: IconHands };
 
 /**
  * Ich: one section of my own things as a list in the middle and the opened one on the right.
@@ -28,11 +31,12 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
   const me = session.profile.id;
   const t = await getTranslations("mine");
   const tn = await getTranslations("new");
+  const tnav = await getTranslations("nav.scope");
   const locale = await getLocale();
 
   const d = await asViewer({ authId: session.authId, profileId: me }, async (tx) => ({
-    docs: await tx<{ id: string; title: string; origin: string; visibility: string; updated_at: string; tasks: number | null; done: number | null }[]>`
-      select id, title, origin, visibility, updated_at,
+    docs: await tx<{ id: string; title: string; icon: string | null; icon_image: string | null; origin: string; visibility: string; updated_at: string; tasks: number | null; done: number | null }[]>`
+      select id, title, icon, icon_image, origin, visibility, updated_at,
              case when origin = 'note' then (select count(*)::int from regexp_matches(body_md, '(^|\\n)\\s*([-*+]|[0-9]+[.)])\\s+\\[[ xX]\\]', 'g')) end as tasks,
              case when origin = 'note' then (select count(*)::int from regexp_matches(body_md, '(^|\\n)\\s*([-*+]|[0-9]+[.)])\\s+\\[[xX]\\]', 'g')) end as done
       from public.resources where owner_id = ${me} and trashed_at is null order by updated_at desc limit 300`,
@@ -50,7 +54,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
     ...d.docs.map((x): Item => ({
       kind: x.origin === "note" ? "notes" : x.origin === "diagram" ? "diagrams" : "uploads", id: x.id, title: x.title,
       label: t(`kind.${x.origin === "note" || x.origin === "file" || x.origin === "diagram" ? x.origin : "link"}`), vis: x.visibility, at: x.updated_at,
-      tasks: x.tasks ?? 0, extra: x.tasks ? t("listCount", { done: x.done ?? 0, total: x.tasks }) : undefined,
+      tasks: x.tasks ?? 0, extra: x.tasks ? t("listCount", { done: x.done ?? 0, total: x.tasks }) : undefined, icon: x.icon, iconImage: x.icon_image,
     })),
     ...d.projects.map((x): Item => ({ kind: "projects", id: x.id, title: x.title, label: t("kind.project"), vis: "public", at: x.updated_at })),
     ...d.listings.map((x): Item => ({ kind: "listings", id: x.id, title: x.title, label: t(`kind.${x.kind === "need" ? "need" : "offer"}`), vis: x.read_scope, at: x.created_at, extra: x.status === "paused" ? t("paused") : undefined })),
@@ -60,7 +64,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
     // The filter "with tasks" stays on while one goes through its notes.
     key: `${x.kind}:${x.id}`, href: kind === "all" ? `/me?o=${x.kind}:${x.id}` : `${BASE[x.kind]}/${x.id}${tasksOnly ? "?f=tasks" : ""}`, title: x.title, active: x.id === selected,
     sub: [kind === "all" ? x.label : null, x.extra, relTime(x.at, locale)].filter(Boolean).join(" · "),
-    tag: t(`vis.${x.vis}` as "vis.me"),
+    tag: t(`vis.${x.vis}` as "vis.me"), icon: x.icon, iconImage: x.iconImage, kindIcon: ICONS[x.kind],
   }));
 
   const create = kind === "notes" ? { href: "/me/notes/new", label: t("newNote") }
@@ -69,7 +73,7 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
     : kind === "listings" ? { href: "/me/listings/new", label: t("newListing") }
     : kind === "projects" ? { href: "/new/initiative", label: t("newProject") }
     // The overview: one "+" for everything that can be made here.
-    : <Popover align="right" primary label={<><IconPlus size={14} /> {t("new")}</>}>
+    : <Popover align="right" primary ariaLabel={t("new")} label={<><IconPlus size={14} /> <span className={FOLDED_HIDE}>{t("new")}</span></>}>
         <div className="flex flex-col" role="group" aria-label={t("new")}>
           {NEW_ITEMS.map((n) => (
             <Link key={n.key} href={n.href} className="flex h-10 items-center border-b border-line text-ink no-underline last:border-b-0">{tn(`tiles.${n.key}.title`)}</Link>
@@ -83,11 +87,14 @@ export async function MineSection({ kind, selected, detail, open, auto = true, t
   return (
     <Split open={open}
       list={
-        <ListPane id={`mine-${kind}`} title={title} create={create} searchLabel={t("search")} rows={rows}
+        <ListPane id={`mine-${kind}`} title={title} create={create} search={tnav(kind === "all" ? "mine" : kind === "projects" ? "initiatives" : kind)} rows={rows}
           top={kind === "notes" ? (
-            <div role="group" aria-label={t("filterLabel")} className="flex gap-1">
-              <Link href="/me/notes" aria-current={!tasksOnly ? "true" : undefined} className={chip(!tasksOnly)}>{t("filters.notes")}</Link>
-              <Link href="/me/notes?f=tasks" aria-current={tasksOnly ? "true" : undefined} className={chip(tasksOnly)}>{t("filters.tasks")}</Link>
+            // Folded to icons, the two filters stand under each other as icons.
+            <div role="group" aria-label={t("filterLabel")} className="flex gap-1 @max-[6rem]:flex-col">
+              <Link href="/me/notes" aria-current={!tasksOnly ? "true" : undefined} aria-label={t("filterNotes")} title={t("filterNotes")} className={`${chip(!tasksOnly)} ${FOLDED_SQUARE}`}>
+                <span className="hidden @max-[6rem]:inline-flex"><IconNote size={18} /></span><span className={FOLDED_HIDE}>{t("filters.notes")}</span></Link>
+              <Link href="/me/notes?f=tasks" aria-current={tasksOnly ? "true" : undefined} aria-label={t("filterTasks")} title={t("filterTasks")} className={`${chip(tasksOnly)} ${FOLDED_SQUARE}`}>
+                <span className="hidden @max-[6rem]:inline-flex"><IconChecklist size={18} /></span><span className={FOLDED_HIDE}>{t("filters.tasks")}</span></Link>
             </div>
           ) : undefined}
           empty={t(kind === "all" ? "empty" : kind === "notes" ? "emptyNotes" : kind === "diagrams" ? "emptyDiagrams" : kind === "uploads" ? "emptyUploads" : "emptyFilter")}

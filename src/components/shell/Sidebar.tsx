@@ -17,6 +17,7 @@ type Section = { href: string; label: string; icon: ComponentType<{ size?: numbe
  * (icon and label), at the bottom the three areas under each other. Folded, only the icons stay, each where it was; while the
  * pointer is over it (or the keyboard is in it) it opens for as long as it is needed and moves the page aside just like a click.
  * Where there is no room for it (below 1100 px) it opens over the page instead.
+ * The button folds the list in the middle too (to a strip of icons, see ListColumn), which opens the same way under the pointer.
  */
 export function Sidebar({ folded: initial, signedIn, badges }: { folded: boolean | null; signedIn: boolean; badges: { chats: number; requests: number } }) {
   return (
@@ -33,16 +34,18 @@ function WithQuery({ initial, signedIn, badges }: { initial: boolean | null; sig
   // of icons, and the button opens it over the page for a while instead of for good.
   const wide = useSyncExternalStore(watchWidth, () => window.innerWidth >= 1100, () => true);
   const folded = !wide || (choice ?? false);
-  const toggle = () => {
-    const next = !folded;
+  // The button folds or opens the sidebar and the list in the middle together, for good (the list follows data-fold on the shell).
+  const toggle = (next = !(choice ?? false)) => {
     setChoice(next);
     document.cookie = `hv_sidebar=${next ? "folded" : "open"}; path=/; max-age=31536000; samesite=lax`;
+    const shell = document.querySelector<HTMLElement>("[data-shell]");
+    if (shell) shell.dataset.fold = next ? "folded" : "open";
   };
   return <Bar folded={folded} overlayOnly={!wide} signedIn={signedIn} badges={badges} query={query} onToggle={toggle} />;
 }
 
 function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }: {
-  folded: boolean; overlayOnly?: boolean; signedIn: boolean; badges: { chats: number; requests: number }; query: URLSearchParams | ReturnType<typeof useSearchParams> | null; onToggle?: () => void;
+  folded: boolean; overlayOnly?: boolean; signedIn: boolean; badges: { chats: number; requests: number }; query: URLSearchParams | ReturnType<typeof useSearchParams> | null; onToggle?: (folded?: boolean) => void;
 }) {
   const t = useTranslations("nav");
   const tc = useTranslations("community.nav");
@@ -130,8 +133,9 @@ function Bar({ folded, overlayOnly = false, signedIn, badges, query, onToggle }:
       className="absolute inset-y-0 left-0 flex flex-col border-r border-line bg-surface transition-[width] duration-200 ease-out">
       <div className="mx-2 mt-2 flex h-10 flex-none items-center gap-2">
         <button type="button" onClick={() => {
-        if (overlayOnly) { setPinnedAt(pinned ? null : path); return; }
-        afterToggle.current = true; if (timer.current) clearTimeout(timer.current); setPeek(false); onToggle?.();
+        // No room for the sidebar of its own: it opens over the page until one goes elsewhere, the list opens for good.
+        if (overlayOnly) { setPinnedAt(pinned ? null : path); onToggle?.(pinned); return; }
+        afterToggle.current = true; if (timer.current) clearTimeout(timer.current); setPeek(false); onToggle?.(!folded);
       }} aria-expanded={expanded} aria-label={t(expanded ? "fold" : "unfold")} title={t(expanded ? "fold" : "unfold")}
         className="inline-flex h-10 w-10 flex-none items-center justify-center border-0 bg-transparent text-ink hover:bg-chip">
         <IconSidebar />

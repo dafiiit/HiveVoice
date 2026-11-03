@@ -41,6 +41,23 @@
     "partOf": "Gehört zu"
   },
   "searchPlaceholderShort": "Suchen …",
+  "searchScoped": "{what} suchen",
+  "searchEverywhere": "Überall suchen: „{q}“",
+  "scope": {
+    "people": "Personen",
+    "groups": "Gruppen",
+    "initiatives": "Initiativen",
+    "offers": "Angebote",
+    "needs": "Gesuche",
+    "posts": "Beiträge",
+    "chats": "Chats",
+    "requests": "Anfragen",
+    "listings": "Anliegen",
+    "notes": "Notizen",
+    "diagrams": "Diagramme",
+    "uploads": "Uploads",
+    "mine": "Meine Inhalte"
+  },
   "anliegen": "Anliegen",
   "community": "Gemeinschaft",
   "friends": "Freunde",
@@ -55,8 +72,8 @@
     "signOut": "Abmelden",
     "admin": "Verwaltung (Admin)"
   },
-  "fold": "Seitenleiste einklappen",
-  "unfold": "Seitenleiste ausklappen",
+  "fold": "Seitenleiste und Liste einklappen",
+  "unfold": "Seitenleiste und Liste ausklappen",
   "notifications": "Mitteilungen",
   "settings": "Einstellungen"
 }

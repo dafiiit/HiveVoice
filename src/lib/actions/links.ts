@@ -134,6 +134,17 @@ export async function saveNote(input: NoteInput) {
   return res;
 }
 
+/** The icon of a note: one emoji, an own uploaded picture, or neither (the standard icon). It stands for the note in the folded list. */
+export async function setResourceIcon(id: string, icon: { icon: string | null; image: string | null }) {
+  const res = await run(async (tx) => {
+    if (icon.image) await tx`select app.set_resource_icon_image(${id}, ${icon.image})`;
+    else await tx`select app.set_resource_icon(${id}, ${(icon.icon ?? "").trim().slice(0, 16)})`;
+    return null;
+  });
+  revalidatePath("/me", "layout");
+  return res;
+}
+
 /** A draw.io diagram (the SVG with the drawing inside): new, or a new version of one I may edit. */
 export async function saveDiagram(input: { id?: string; title: string; svg: string; autosave?: boolean }) {
   const res = await run(async (tx) => {

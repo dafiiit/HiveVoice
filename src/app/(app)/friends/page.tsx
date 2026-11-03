@@ -8,7 +8,7 @@ import { relTime } from "@/lib/format";
 import { feedOrder } from "@/lib/order";
 import type { Message } from "@/lib/actions/messages";
 import { Avatar } from "@/components/ui/Avatar";
-import { BackToList, CREATE_SLOT, PANE_TITLES } from "@/components/shell/Split";
+import { BackToList, CREATE_SLOT, FOLDED_HIDE, FOLDED_ROW, FOLDED_SQUARE, ListColumn, PANE_TITLES } from "@/components/shell/Split";
 import { AutoOpen } from "@/components/shell/AutoOpen";
 import { GroupView } from "@/app/(app)/groups/[slug]/page";
 import { ListingDetail } from "@/components/listings/ListingDetail";
@@ -19,9 +19,7 @@ import { ChatTools } from "@/components/connect/ChatTools";
 import { GROUP_TOOLS, type GroupTool } from "@/lib/group-tools";
 import { RequestPane, type RequestView } from "@/components/connect/RequestPane";
 import { AutoRefresh } from "@/components/AutoRefresh";
-import { ListSearch } from "@/components/connect/ListSearch";
-import { ListResizer } from "@/components/shell/ListResizer";
-import { LIST_COLUMN } from "@/components/shell/listWidth";
+import { SearchScope } from "@/components/shell/SearchScope";
 import { IconBack, IconPlus } from "@/components/ui/Icons";
 import { btn, tab } from "@/components/ui/styles";
 import { Notice } from "@/components/ui/Page";
@@ -53,6 +51,7 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
   const t = await getTranslations("connect");
   const ts = await getTranslations("safety");
   const tg = await getTranslations("group");
+  const tnav = await getTranslations("nav.scope");
   const locale = await getLocale();
   const mode = await feedOrder();
   const filter: Filter = (FILTERS as readonly string[]).includes(String(sp.f)) ? (sp.f as Filter) : "all";
@@ -222,10 +221,10 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
       <AutoRefresh seconds={pane?.kind === "direct" ? 60 : 20} scope="friends" />
       {!session && <Notice tone="status" className="m-3 text-sm font-normal md:text-base"><strong>{t("guestTitle")}</strong> <span className="md:hidden">{t("guestTextShort")}</span><span className="max-md:hidden">{t("guestText")}</span> <Link href="/login?next=/friends" className="font-bold text-ink underline">{t("signIn")}</Link></Notice>}
       <div className="flex min-h-0 flex-1 flex-col bg-surface md:flex-row">
-        <section id="chat-list" aria-label={t("conversations")} className={`${paneOpen ? "hidden md:flex" : "flex"} min-h-0 w-full flex-1 flex-col overflow-y-auto border-line md:flex-none md:border-r ${LIST_COLUMN}`}>
-          <div className={`flex flex-none flex-col gap-2 px-4 pb-1 pt-4 ${CREATE_SLOT.replace("flex flex-col ", "")}`}>
-            <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
-            {session && <Link href={make.href} title={make.label} className={btn.primarySm}><IconPlus size={14} /> {make.short}</Link>}
+        <ListColumn id="chat-list" label={t("conversations")} hidden={paneOpen} className="min-h-0 overflow-y-auto">
+          <div className={`flex flex-none flex-col gap-2 px-4 pb-1 pt-4 @max-[6rem]:items-center @max-[6rem]:px-3 ${CREATE_SLOT.replace("flex flex-col ", "")}`}>
+            <h1 className="m-0 min-w-0 truncate text-[22px] font-bold leading-tight max-md:sr-only @max-[6rem]:sr-only">{filter === "all" ? t("title") : t(`filter.${filter}`)}</h1>
+            {session && <Link href={make.href} title={make.label} aria-label={make.label} className={`${btn.primarySm} ${FOLDED_SQUARE}`}><IconPlus size={14} /> <span className={FOLDED_HIDE}>{make.short}</span></Link>}
           </div>
           {session && <SwipeOn id="chat-list" hrefs={FILTERS.map((f) => href({ f, c: "" }))} active={FILTERS.indexOf(filter)} />}
           {session && (
@@ -240,30 +239,32 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
               ))}
             </div>
           )}
-          <div className="flex flex-none items-center border-b border-line px-3 py-2 md:px-4">
-            <ListSearch listId="chat-list" value={s} label={t(`searchIn.${filter}`)} keep={filter !== "all" ? { f: filter } : {}} />
-          </div>
+          <SearchScope mode="filter" list="chat-list" value={s} what={tnav(filter === "all" ? "chats" : filter)} />
           {!paneOpen && !s && first && <AutoOpen href={rowHref(first)} />}
           {shown.map((r) => (
             // Two lines like the marketplace: name and time, then the latest message (or what it is about).
             <Link key={r.key} href={rowHref(r)} aria-current={sel === r.key ? "true" : undefined} data-search={[r.name, r.sub, r.preview ?? ""].join(" ").toLowerCase()}
-              className={`flex min-h-[60px] items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:min-h-[68px] md:px-4 md:py-3 ${sel === r.key ? "bg-paper" : ""}`}>
-              <Avatar name={r.name} seed={r.seed} path={r.path} size={40} group={r.groupAvatar ?? r.kind === "group"} />
-              <span className="flex min-w-0 flex-1 flex-col">
+              title={r.name} className={`flex min-h-[60px] items-center gap-3 border-b border-line px-3 py-2 text-ink no-underline md:min-h-[68px] md:px-4 md:py-3 ${FOLDED_ROW} ${sel === r.key ? "bg-paper" : ""}`}>
+              <span className="relative inline-flex flex-none">
+                <Avatar name={r.name} seed={r.seed} path={r.path} size={40} group={r.groupAvatar ?? r.kind === "group"} />
+                {/* Folded to icons, unread shows as a dot on the avatar. */}
+                {r.unread > 0 && <span aria-hidden="true" className="absolute -right-1 -top-1 hidden h-3 w-3 bg-red @max-[6rem]:block" />}
+              </span>
+              <span className={`flex min-w-0 flex-1 flex-col ${FOLDED_HIDE}`}>
                 <span className="flex items-baseline justify-between gap-2"><strong className="truncate">{r.name}</strong>{r.at && <span className="flex-none text-xs text-muted">{relTime(r.at, locale)}</span>}</span>
                 {(r.kind === "direct" || r.kind === "group") && r.preview ? <span className={`truncate text-sm ${r.unread ? "font-bold" : "text-muted"}`}>{r.preview}</span>
                   : <span className="truncate text-sm text-muted">{r.sub}</span>}
               </span>
-              {r.unread > 0 && <span className="inline-flex h-5 min-w-5 items-center justify-center self-center bg-ink px-1 text-xs font-bold text-on-ink" aria-label={t("unread", { n: r.unread })}>{r.unread}</span>}
+              {r.unread > 0 && <span className="inline-flex h-5 min-w-5 items-center justify-center self-center @max-[6rem]:hidden bg-ink px-1 text-xs font-bold text-on-ink" aria-label={t("unread", { n: r.unread })}>{r.unread}</span>}
               {r.tag && <span className={`self-center whitespace-nowrap @max-[17rem]:hidden px-1.5 py-0.5 text-xs font-bold ${r.tag === t("req.newTag") ? "bg-red text-on-red" : "border border-line-strong"}`}>{r.tag}</span>}
             </Link>
           ))}
-          <p data-search-none hidden={!(s && shown.length === 0)} className="m-0 px-4 py-6 text-sm text-muted">{t("listNone")}</p>
+          <p data-search-none hidden={!(s && shown.length === 0)} className={`m-0 px-4 py-6 text-sm text-muted ${FOLDED_HIDE}`}>{t("listNone")}</p>
           {!s && session && shown.length === 0 && (
-            <p className="m-0 px-4 py-6 text-sm text-muted">{hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyList")}</p>
+            <p className={`m-0 px-4 py-6 text-sm text-muted ${FOLDED_HIDE}`}>{hasAnything || filter !== "all" ? t("emptyFilter") : t("emptyList")}</p>
           )}
           {data.suggestions.length > 0 && (
-            <>
+            <div className={`flex flex-col ${FOLDED_HIDE}`}>
               <span className="px-4 pb-1 pt-4 text-sm font-bold">{t("suggestions")}</span>
               {data.suggestions.map((s) => (
                 <Link key={s.slug} href={`/groups/${s.slug}`} className="flex items-center gap-3 border-b border-line px-4 py-3 text-ink no-underline">
@@ -272,10 +273,9 @@ export async function FriendsView({ sp, group }: { sp: Record<string, string | s
                     <span className="text-xs text-muted">{s.why ? t("because", { tag: s.why }) : t("popular")} · {t("groupSub", { n: s.member_count })}</span></span>
                 </Link>
               ))}
-            </>
+            </div>
           )}
-        </section>
-        <ListResizer />
+        </ListColumn>
         <section aria-label={t("pane")} className={`${paneOpen ? "flex" : "hidden md:flex"} min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-paper px-3 py-2 md:px-6 md:py-4`}>
           {(!pane || pane.kind === "request") && <Link href={href({ c: "" })} className="mb-2 inline-flex items-center gap-1 text-sm text-ink md:hidden"><IconBack size={14} /> {t("back")}</Link>}
           {(pane?.kind === "group" || pane?.kind === "listing") && (

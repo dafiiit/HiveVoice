@@ -84,5 +84,7 @@
   "new": "New",
   "newDiagram": "Diagram",
   "myDiagrams": "My diagrams",
-  "emptyDiagrams": "No diagrams yet."
+  "emptyDiagrams": "No diagrams yet.",
+  "filterNotes": "All notes",
+  "filterTasks": "Notes with tasks"
 }

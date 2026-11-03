@@ -3,6 +3,7 @@ import postgres from "postgres";
 import { login } from "./auth";
 
 const signedIn = !!process.env.TEST_USER_EMAIL;
+const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 const migrator = process.env.MIGRATION_DATABASE_URL;
 
 async function exec(statement: string) {
@@ -84,6 +85,49 @@ test.describe("the note editor's tool bar", () => {
       await expect(page).toHaveURL(/f=tasks/);
       await expect(filter.getByRole("link", { name: "Mit Aufgaben" })).toHaveAttribute("aria-current", "true");
     }
+  });
+
+  test("a note gets an icon of its own in front of its title, and the list shows it @writes", async ({ page }, info) => {
+    test.skip(info.project.name === "mobile", "one run is enough");
+    await login(page);
+    await page.goto("/me/notes");
+    const first = page.locator("main a[data-search]").first();
+    test.skip(!(await first.count()), "the test account has no notes");
+    await first.click();
+    await page.getByRole("button", { name: "Icon der Notiz" }).click();
+    await page.getByRole("button", { name: "🌱", exact: true }).click();
+    await expect(page.locator("main a[data-search][aria-current]")).toContainText("🌱", { timeout: 20_000 });
+    // An own picture instead of an emoji.
+    await page.getByRole("button", { name: "Icon der Notiz" }).click();
+    await page.locator("details[open] input[type=file]").setInputFiles({ name: "icon.png", mimeType: "image/png", buffer: PNG });
+    await expect(page.locator("main a[data-search][aria-current] img")).toHaveCount(1, { timeout: 20_000 });
+    await expect(page.locator("main a[data-search][aria-current]")).not.toContainText("🌱");
+    // Back to the standard icon.
+    await page.getByRole("button", { name: "Icon der Notiz" }).click();
+    await page.getByRole("button", { name: "Standard-Icon" }).click();
+    await expect(page.locator("main a[data-search][aria-current] img")).toHaveCount(0, { timeout: 20_000 });
+  });
+
+  test("writing a note, the title row holds icon, sharing and a ⋯ with the details; the note starts right under the tools", async ({ page }, info) => {
+    test.skip(info.project.name === "mobile", "one run is enough");
+    await login(page);
+    await page.goto("/me/notes");
+    const first = page.locator("main a[data-search]").first();
+    test.skip(!(await first.count()), "the test account has no notes");
+    await first.click();
+    const title = page.getByRole("textbox", { name: "Titel" });
+    const share = page.getByRole("button", { name: "Teilen" });
+    const more = page.getByRole("button", { name: "Mehr zur Notiz" });
+    const [t, s, m] = await Promise.all([title.boundingBox(), share.boundingBox(), more.boundingBox()]);
+    expect(Math.abs(t!.y + t!.height / 2 - (s!.y + s!.height / 2)), "sharing sits in the title row").toBeLessThan(8);
+    expect(Math.abs(t!.y + t!.height / 2 - (m!.y + m!.height / 2)), "the ⋯ sits in the title row").toBeLessThan(8);
+    // Title row and tool bar together take little room above the text.
+    const tools = (await page.getByRole("toolbar", { name: "Formatierung" }).boundingBox())!;
+    expect(tools.y + tools.height - t!.y, "the text starts close under the title").toBeLessThan(90);
+    await expect(page.getByRole("button", { name: "In den Papierkorb" })).toBeHidden();
+    await more.click();
+    await expect(page.getByRole("button", { name: "In den Papierkorb" })).toBeVisible();
+
   });
 });
 

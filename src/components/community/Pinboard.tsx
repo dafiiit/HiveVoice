@@ -7,7 +7,7 @@ import { getPlace } from "@/lib/place";
 import { Composer, PostList } from "@/components/PostList";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { PlaceMenu } from "@/components/shell/PlaceMenu";
-import { SearchField } from "@/components/ui/SearchField";
+import { SearchScope } from "@/components/shell/SearchScope";
 import { chip, segment, segments } from "@/components/ui/styles";
 
 // From near to far. "Nachbarschaft" is the borough, where a town has them.
@@ -23,6 +23,7 @@ export async function Pinboard({ sp, openId }: { sp: Record<string, string | str
   const viewer = session ? { authId: session.authId, profileId: session.profile.id } : null;
   const me = session?.profile.id ?? null;
   const t = await getTranslations("community.board");
+  const tnav = await getTranslations("nav.scope");
   const place = await getPlace();
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string).trim().slice(0, 80) : "");
   const tagParam = str("tag").replace(/^#/, "").toLowerCase();
@@ -86,14 +87,8 @@ export async function Pinboard({ sp, openId }: { sp: Record<string, string | str
           )}
         </div>
       )}
-      {/* Search and writing are the two fields of the board: same height (44 px), same width. */}
-      {area && (
-        <form action="/community" role="search" className="flex">
-          {area.level !== "municipality" && <input type="hidden" name="r" value={area.level} />}
-          {tagParam && <input type="hidden" name="tag" value={tagParam} />}
-          <SearchField box="md" className="flex-1" name="q" defaultValue={q} label={t("search")} placeholder={t("search")} />
-        </form>
-      )}
+      {area && <SearchScope mode="query" action="/community" value={q} what={tnav("posts")}
+        keep={{ ...(area.level !== "municipality" ? { r: area.level } : {}), ...(tagParam ? { tag: tagParam } : {}) }} />}
       {session && home ? (
         <Composer ctx={{ regionId: home.id }} path="/community" placeholder={t("placeholder", { place: area?.region?.name ?? home.name })} />
       ) : !session && <p className="m-0 text-sm text-muted">{t("readOnly")} <Link href="/login?next=/community" className="font-bold text-ink underline">{t("signIn")}</Link></p>}

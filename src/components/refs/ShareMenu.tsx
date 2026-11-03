@@ -3,7 +3,7 @@ import { useState, useTransition, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { shareTargets, shareToChat, shareToGroup, shareToMarket, type ShareTargets } from "@/lib/actions/share";
 import type { RefType } from "@/lib/refs";
-import { IconCheck } from "../ui/Icons";
+import { IconCheck, IconShare } from "../ui/Icons";
 import { ShareButtons } from "../ShareButtons";
 import { Dialog } from "../ui/Dialog";
 import { btn, chip, field, segment, segments } from "../ui/styles";
@@ -18,8 +18,9 @@ type Tab = "app" | "out" | "access";
  * "Link / QR" for public things (share sheet, link, QR code) and "Zugriff" (who may read and edit) for
  * the people who manage it.
  */
-export function ShareMenu({ type, id, title, className, external, access }: {
+export function ShareMenu({ type, id, title, className, external, access, icon = false }: {
   type: RefType; id: string; title: string; className?: string; external?: { url: string; text: string }; access?: ReactNode;
+  /** Only the share icon (its name as tooltip), for a compact header. */ icon?: boolean;
 }) {
   const t = useTranslations("refs.share");
   const tc = useTranslations("common");
@@ -65,7 +66,7 @@ export function ShareMenu({ type, id, title, className, external, access }: {
 
   return (
     <>
-      <button type="button" onClick={show} className={className ?? btn.secondary}>{t("button")}</button>
+      <button type="button" onClick={show} aria-label={icon ? t("button") : undefined} title={icon ? t("button") : undefined} className={className ?? btn.secondary}>{icon ? <IconShare size={18} /> : t("button")}</button>
       {open && (
         <Dialog title={t("title", { title })} onClose={() => setOpen(false)} wide>
             {(external || access) && (

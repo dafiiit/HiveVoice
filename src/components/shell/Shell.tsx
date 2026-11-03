@@ -41,7 +41,8 @@ export async function Shell({ session, children }: { session: Session | null; ch
   ];
 
   return (
-    <div data-shell className="flex min-h-dvh flex-col" style={listW ? ({ "--list-w": `${listW}px` } as CSSProperties) : undefined}>
+    // data-fold: the sidebar's button folds the sidebar and the list in the middle together (the list in CSS, src/app/globals.css).
+    <div data-shell data-fold={fold === "folded" ? "folded" : "open"} className="flex min-h-dvh flex-col" style={listW ? ({ "--list-w": `${listW}px` } as CSSProperties) : undefined}>
       <header className="sticky top-0 z-30 flex h-16 flex-none items-center gap-3 border-b border-line bg-paper px-3 md:grid md:grid-cols-[auto_minmax(0,1fr)_auto] md:px-5">
         <Link href={session ? "/friends" : "/"} className="flex flex-none items-center text-ink no-underline" aria-label="HiveVoice">
           <span className="md:hidden"><LogoMark size={34} /></span>
